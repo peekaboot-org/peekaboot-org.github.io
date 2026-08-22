@@ -8,9 +8,22 @@ permalink: /docs/requirements/
 
 - **Java 25 or newer**
 - **Spring Boot 4.0 or newer**
-- **A servlet web application** &mdash; the dashboard is served through Spring MVC; it is not
-  usable in a reactive (WebFlux) or non-web application (see
-  [Graceful degradation](#graceful-degradation) below)
+- **A servlet web application** &mdash; the dashboard is served through Spring MVC
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+**This isn't a "quietly stays off" case.** `PeekabootAutoConfiguration` &mdash; the
+configuration that component-scans Peekaboot's dashboard and, with it,
+`PeekabootWebConfig` (a `WebMvcConfigurer`, a servlet-only Spring MVC type) &mdash; carries no
+`@ConditionalOnWebApplication` guard, unlike `DevToolbarAutoConfiguration` and
+`TracingInterceptorAutoConfiguration`, which both do. If `peekaboot.enabled` resolves to
+`true` (the local-development default) and Spring MVC (`spring-webmvc`) isn't on your
+classpath &mdash; the normal case for a WebFlux application, and for a non-web application
+that doesn't happen to carry it too &mdash; expect application startup to fail while loading
+that class, not for Peekaboot to simply stay inactive. This is read from the annotations and
+the component scan, not from a reproduced failure. If your application isn't a servlet web
+application, set `peekaboot.enabled=false` explicitly, or keep the starter out of it
+entirely.
+</div>
 
 ## What the starter brings
 
@@ -29,8 +42,10 @@ autoconfigure module.
 
 ## Graceful degradation
 
-Peekaboot's features are conditional individually, so a missing piece disables that piece
-rather than the whole starter.
+The pieces below degrade gracefully when something they depend on is missing &mdash; each is
+gated by its own `@ConditionalOn*` annotation that simply skips it. This assumes you're
+already running a servlet web application; if you're not, see the warning above, which is a
+different situation entirely.
 
 **No `Tracer` bean.** The dev toolbar's two filters &mdash; the one that captures
 request/response detail and the one that injects the toolbar into HTML &mdash; both require a
@@ -45,11 +60,3 @@ bridge.
 being present. Without it, the trace store itself is still created
 (`PeekabootTracingAutoConfiguration` carries no such condition), but nothing populates it
 &mdash; the Traces tab stays empty.
-
-**A reactive (WebFlux) application.** The dashboard's static assets are registered through
-Spring MVC's servlet-based `WebMvcConfigurer` (`PeekabootWebConfig`), so the UI does not serve
-under WebFlux. The dev toolbar filters and the tracing interceptor are additionally guarded by
-`@ConditionalOnWebApplication(Type.SERVLET)`. Peekaboot is not usable on a reactive stack.
-
-**A non-web application.** With no embedded server there is nothing for a browser or `curl`
-to reach, regardless of which Peekaboot beans register.
