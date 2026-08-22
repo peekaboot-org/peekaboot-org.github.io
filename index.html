@@ -1,0 +1,123 @@
+---
+layout: home
+---
+
+<section class="hero is-medium">
+  <div class="hero-body">
+    <div class="container has-text-centered">
+      <figure class="image is-96x96 mx-auto mb-4">
+        <img src="{{ '/assets/img/logo-full.png' | relative_url }}" alt="The Peekaboot logo mark">
+      </figure>
+      <h1 class="title is-1">Peekaboot</h1>
+      <p class="subtitle is-4">{{ site.tagline }}</p>
+      <p class="subtitle is-6">
+        Peekaboot adds a local dashboard to your Spring Boot app &mdash; health, config,
+        environment, scheduled tasks, metrics, Flyway migrations, and full request traces with
+        span trees, SQL queries and correlated logs. Everything lives in memory inside your own
+        process: no collector, no agent, no external service &mdash; and it defaults to off
+        outside local development.
+      </p>
+      <div class="buttons is-centered mt-5">
+        <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Quick start</a>
+        <a class="button is-medium" href="{{ site.repository_url }}">GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="title is-3 has-text-centered">Add the dependency</h2>
+    <p class="subtitle is-6 has-text-centered">One starter. Nothing else to install or run.</p>
+    <div class="columns">
+      <div class="column">
+        <p class="heading">Maven</p>
+        <pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.peekaboot&lt;/groupId&gt;
+    &lt;artifactId&gt;peekaboot-spring-boot-starter&lt;/artifactId&gt;
+    &lt;version&gt;{{ site.peekaboot_version }}&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+      </div>
+      <div class="column">
+        <p class="heading">Gradle</p>
+        <pre><code>implementation("org.peekaboot:peekaboot-spring-boot-starter:{{ site.peekaboot_version }}")</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-multiline">
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">See inside a request</p>
+            <p class="content">
+              Every request Peekaboot captures becomes a trace: the full span tree, the SQL
+              each span ran, and the log lines emitted while it executed &mdash; correlated
+              automatically, no manual instrumentation.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">No infrastructure</p>
+            <p class="content">
+              Traces, config and everything else live in an in-memory store inside your own
+              process. No collector, no agent, nothing to stand up before you can see the
+              first request.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">Off in production by default</p>
+            <p class="content">
+              <code>peekaboot.enabled</code> defaults to <code>true</code> only for a local
+              launch &mdash; an IDE run or <code>spring-boot:run</code>/<code>bootRun</code>
+              &mdash; and to <code>false</code> for every packaged jar, container, and test run.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">Nothing new to expose</p>
+            <p class="content">
+              Peekaboot invokes Actuator's endpoints in-process and serves the result through
+              its own API &mdash; it never needs
+              <code>management.endpoints.web.exposure.include</code>, so nothing new becomes
+              reachable over HTTP.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <figure class="image">
+      <img src="{{ '/assets/img/screenshots/dashboard-dashboard-light.png' | relative_url }}"
+           alt="The Peekaboot dashboard's Dashboard tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards for a running application"
+           loading="lazy">
+    </figure>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container has-text-centered">
+    <h2 class="title is-3">Add it, run your app, open the dashboard.</h2>
+    <div class="buttons is-centered">
+      <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Get started</a>
+      <a class="button is-medium" href="{{ site.repository_url }}">View on GitHub</a>
+    </div>
+  </div>
+</section>
