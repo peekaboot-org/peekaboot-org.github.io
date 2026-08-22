@@ -1,0 +1,32 @@
+<nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="{{ '/' | relative_url }}">
+      <span class="pk-logo" role="img" aria-label="Peekaboot"></span>
+      <strong class="ml-2">Peekaboot</strong>
+    </a>
+    <button class="navbar-burger" data-target="navbar-menu"
+            aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <div id="navbar-menu" class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="{{ '/docs/quick-start/' | relative_url }}">Quick start</a>
+      <a class="navbar-item" href="{{ '/docs/dashboard/' | relative_url }}">Features</a>
+      <a class="navbar-item" href="{{ '/docs/configuration/' | relative_url }}">Reference</a>
+      <a class="navbar-item" href="{{ '/docs/security/' | relative_url }}">Security</a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <button id="theme-toggle" class="button is-small" type="button"
+                aria-label="Switch theme">Theme</button>
+      </div>
+      <div class="navbar-item">
+        <a class="button is-small" href="{{ site.repository_url }}">GitHub</a>
+      </div>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,17 @@
+<aside class="pk-sidebar" aria-label="Documentation">
+  {% for section in site.data.nav %}
+  <div class="pk-sidebar__section">
+    <p class="pk-sidebar__heading">{{ section.title }}</p>
+    <ul>
+      {% for item in section.pages %}
+      {% assign target = item.url | relative_url %}
+      <li>
+        <a class="pk-sidebar__link{% if page.url == item.url %} is-current{% endif %}"
+           href="{{ target }}"
+           {% if page.url == item.url %}aria-current="page"{% endif %}>{{ item.title }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</aside>

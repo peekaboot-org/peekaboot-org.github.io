@@ -1,0 +1,155 @@
+/* Peekaboot brand mapping over Bulma 1.0.4.
+   Bulma derives its whole colour system from HSL components, so re-branding is a matter
+   of three numbers: the mark's green, hsl(93 64% 43%) - the same value
+   peekaboot-frontend's tokens.css documents as "straight off the artwork". */
+:root {
+    --bulma-primary-h: 93;
+    --bulma-primary-s: 64%;
+    --bulma-primary-l: 43%;
+
+    --bulma-family-primary: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                            Roboto, sans-serif;
+    --bulma-family-code: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+    --bulma-radius: 6px;
+    --bulma-radius-large: 8px;
+
+    /* The brand green is a FILL colour: white on it is 2.6:1 and it is 2.6:1 on white.
+       Anything drawn as text on the page background uses these instead - the same split
+       tokens.css makes between --pk-primary and --pk-primary-text. */
+    --pk-link: #487e1b;         /* 4.91:1 on white */
+    --pk-link-hover: #3a6516;
+    --pk-sidebar-active: #487e1b;
+}
+
+[data-theme="dark"] {
+    /* On the dark surface the green clears AA outright, so fill and text tone converge -
+       again mirroring tokens.css. */
+    --pk-link: #84cf3d;         /* 9.89:1 on #0d1117 */
+    --pk-link-hover: #9bdb5e;
+    --pk-sidebar-active: #84cf3d;
+}
+
+a,
+.content a {
+    color: var(--pk-link);
+}
+
+a:hover,
+.content a:hover {
+    color: var(--pk-link-hover);
+}
+
+/* Layout: fixed navbar, sticky sidebar, readable measure for prose. */
+.pk-layout {
+    display: flex;
+    gap: 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+}
+
+.pk-sidebar {
+    flex: 0 0 15rem;
+    position: sticky;
+    top: 5rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+}
+
+.pk-sidebar__section {
+    margin-bottom: 1.5rem;
+}
+
+.pk-sidebar__heading {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bulma-text-weak);
+    margin-bottom: 0.5rem;
+}
+
+.pk-sidebar__link {
+    display: block;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--bulma-radius);
+    color: var(--bulma-text);
+}
+
+.pk-sidebar__link:hover {
+    background: var(--bulma-background);
+    color: var(--pk-link);
+}
+
+.pk-sidebar__link.is-current {
+    background: var(--bulma-background);
+    color: var(--pk-sidebar-active);
+    font-weight: 600;
+}
+
+.pk-content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Wide content must scroll inside its own box, never the page body. */
+.pk-content .highlight,
+.pk-content pre,
+.pk-content .table-container {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.pk-content img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--bulma-border);
+    border-radius: var(--bulma-radius-large);
+}
+
+/* Callouts. Coloured left rule plus a tinted ground - never coloured body text. */
+.pk-callout {
+    border-left: 4px solid var(--bulma-primary);
+    background: var(--bulma-background);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--bulma-radius) var(--bulma-radius) 0;
+    margin: 1.5rem 0;
+}
+
+.pk-callout--warning {
+    border-left-color: var(--bulma-warning);
+}
+
+.pk-callout--danger {
+    border-left-color: var(--bulma-danger);
+}
+
+.pk-callout > :last-child {
+    margin-bottom: 0;
+}
+
+/* The mark is two-tone: its slate magnifier is 1.4:1 on the dark ground and vanishes.
+   Same swap peekaboot-frontend does, same reason. */
+.pk-logo {
+    height: 28px;
+    width: 28px;
+    background-image: url('/assets/img/logo-mark.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+[data-theme="dark"] .pk-logo {
+    background-image: url('/assets/img/logo-mark-dark.png');
+}
+
+@media screen and (max-width: 768px) {
+    .pk-layout {
+        flex-direction: column;
+    }
+
+    .pk-sidebar {
+        position: static;
+        flex-basis: auto;
+        max-height: none;
+    }
+}

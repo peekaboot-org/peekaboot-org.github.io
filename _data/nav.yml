@@ -1,0 +1,37 @@
+- title: Getting started
+  pages:
+    - title: Quick start
+      url: /docs/quick-start/
+    - title: Requirements
+      url: /docs/requirements/
+    - title: How activation works
+      url: /docs/how-activation-works/
+
+- title: Features
+  pages:
+    - title: The dashboard
+      url: /docs/dashboard/
+    - title: Dev toolbar
+      url: /docs/dev-toolbar/
+    - title: Tracing
+      url: /docs/tracing/
+    - title: Concepts
+      url: /docs/concepts/
+
+- title: Reference
+  pages:
+    - title: Configuration
+      url: /docs/configuration/
+    - title: Auto-configured defaults
+      url: /docs/auto-configured-defaults/
+    - title: HTTP API
+      url: /docs/api/
+    - title: Theming
+      url: /docs/theming/
+
+- title: Operations
+  pages:
+    - title: Security
+      url: /docs/security/
+    - title: Troubleshooting
+      url: /docs/troubleshooting/

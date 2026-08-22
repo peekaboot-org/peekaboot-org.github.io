@@ -1,0 +1,35 @@
+title: Peekaboot
+tagline: Embedded application introspection for Spring Boot
+description: >-
+  A Spring Boot starter that gives you health, config, traces, queries and logs
+  in a local dashboard - with no collector, no agent and no external service.
+url: https://peekaboot.org
+baseurl: ""
+
+# GitHub Pages defaults an unset theme to jekyll-theme-primer (a remote theme fetched
+# at build time) and ships its assets/css/style.css alongside ours. This site supplies
+# its own full Bulma-based theme, so the implicit default must be turned off explicitly.
+theme: null
+
+repository_url: https://github.com/peekaboot-org/peekaboot
+maven_group: org.peekaboot
+maven_artifact: peekaboot-spring-boot-starter
+peekaboot_version: 0.0.4-SNAPSHOT
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  toc_levels: 2..3
+
+defaults:
+  - scope:
+      path: "docs"
+    values:
+      layout: doc
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
