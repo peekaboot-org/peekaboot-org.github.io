@@ -23,8 +23,12 @@
 
 [data-theme="dark"] {
     /* On the dark surface the green clears AA outright, so fill and text tone converge -
-       again mirroring tokens.css. */
-    --pk-link: #84cf3d;         /* 9.89:1 on #0d1117 */
+       again mirroring tokens.css. This site renders on Bulma's own dark scheme background
+       (hsl(221 14% 9%) = #14161a), not the product's #0d1117 - overriding
+       --bulma-scheme-h/s/main-l to chase that four-hex-value difference would re-tune every
+       grey Bulma derives in dark mode (borders, alt backgrounds, muted text) and risk its
+       internal contrast guarantees, for a difference that is imperceptible side by side. */
+    --pk-link: #84cf3d;         /* 9.46:1 on Bulma's dark scheme background, hsl(221 14% 9%) */
     --pk-link-hover: #9bdb5e;
     --pk-sidebar-active: #84cf3d;
 }
