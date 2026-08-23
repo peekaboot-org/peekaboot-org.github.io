@@ -109,4 +109,4 @@ background, and silently wrong (or silently unreadable) everywhere it's used as 
 `tokens.css` defines the complete set &mdash; colour, spacing, typography and radius
 tokens, plus the exact contrast ratio behind every colour pairing, as inline comments.
 Rather than reproduce all of it here, read it directly:
-[`tokens.css`]({{ site.repository_url }}/blob/dev/peekaboot-frontend/src/main/resources/static/peekaboot/ui/assets/tokens.css).
+[`tokens.css`]({{ site.repository_url }}/blob/HEAD/peekaboot-frontend/src/main/resources/static/peekaboot/ui/assets/tokens.css).

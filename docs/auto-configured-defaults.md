@@ -131,6 +131,9 @@ would do:**
   `management.endpoint.configprops.show-values: always` &mdash; property *values* are
   readable through both endpoints, not masked. Spring's sanitizer still redacts keys that
   look like secrets, but everything else that used to render as `******` is now plain text.
+- `management.info.env.enabled: true` &mdash; publishes environment variables through
+  `/actuator/info`, a separate exposure from the `show-values` masking above.
+  Environment variables are a common place for credentials to live.
 - `management.tracing.sampling.probability: 1.0` &mdash; every request is sampled, not a
   10% slice, which has cost and volume implications of its own.
 - `spring.jpa.properties.[hibernate.generate_statistics]: true` &mdash; Hibernate

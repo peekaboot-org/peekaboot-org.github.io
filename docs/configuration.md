@@ -88,11 +88,15 @@ how each issue type is used.
 
 ### Memory-constrained
 
-The All bucket's footprint scales with `max-traces` &times; `max-spans-per-trace` &times;
-`max-logs-per-trace` in the worst case &mdash; a Caffeine cache sized by trace count, each
-holding up to the per-trace caps below. Turning all three down shrinks that ceiling
-proportionally; the Errors and Slow buckets are independent, smaller collections, so scale
-those down too rather than leaving them at their own defaults:
+`TraceDataBundle` holds spans and logs in two independent lists, each bounded by its own
+cap &mdash; logs are not nested inside spans, so the two caps add rather than multiply. The
+All bucket's worst-case entry count is `max-traces` &times; (`max-spans-per-trace` +
+`max-logs-per-trace`) &mdash; a Caffeine cache sized by trace count, each trace holding up
+to its own span cap plus its own log cap. At the documented defaults (1000 / 100 / 500)
+that's 1000 &times; 600 = 600,000 entries, not the 50,000,000 a naive triple product would
+suggest. Turning all three down shrinks that ceiling proportionally; the Errors and Slow
+buckets are independent, smaller collections, so scale those down too rather than leaving
+them at their own defaults:
 
 ```yaml
 peekaboot:
