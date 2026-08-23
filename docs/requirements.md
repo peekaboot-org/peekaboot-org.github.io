@@ -7,7 +7,7 @@ permalink: /docs/requirements/
 ## What your application needs
 
 - **Java 25 or newer**
-- **Spring Boot 4.0 or newer**
+- **Spring Boot 4.1** &mdash; built and tested against this version; earlier 4.x releases are untested
 - **A servlet web application** &mdash; the dashboard is served through Spring MVC
 
 <div class="pk-callout pk-callout--warning" markdown="1">
@@ -33,7 +33,7 @@ Adding `peekaboot-spring-boot-starter` pulls in exactly four dependencies:
 |---|---|
 | `org.peekaboot:peekaboot-spring-boot-autoconfigure` | Peekaboot's own auto-configuration, backend services and dashboard frontend |
 | `spring-boot-starter` | the base Spring Boot starter |
-| `spring-boot-starter-actuator` | the Health, Info, Env, Loggers, Flyway, Scheduled Tasks and Metrics endpoints Peekaboot reads in-process |
+| `spring-boot-starter-actuator` | the Health, Info, Env, Loggers, Flyway, Config and Scheduled Tasks endpoints Peekaboot reads in-process &mdash; Metrics is read directly from Micrometer's `MeterRegistry`, not from an actuator endpoint |
 | `spring-boot-starter-opentelemetry` | the OpenTelemetry SDK and the Micrometer Tracing bridge that feed the in-memory trace store |
 
 Caffeine, which backs the in-memory trace store's bounded caches, is not declared by the
