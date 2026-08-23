@@ -37,21 +37,23 @@ below is reachable while it doesn't.
 
 | Feature | Switch | Additional requirement |
 |---|---|---|
-| Dashboard UI & API | `peekaboot.enabled=true` | A servlet web application (unguarded &mdash; see note below); Actuator's `HealthEndpoint`/`InfoEndpoint` on the classpath (present via the starter) |
+| Dashboard UI & API | `peekaboot.enabled=true` | A servlet web application (guarded by `@ConditionalOnWebApplication(Type.SERVLET)` &mdash; see note below); Actuator's `HealthEndpoint`/`InfoEndpoint` on the classpath (present via the starter) |
 | Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (off by default) | A servlet web application; a Micrometer `Tracer` bean (present by default via `spring-boot-starter-opentelemetry`); also needs `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar bar has no trace data to show |
 | In-Memory Tracing | `peekaboot.enabled=true` **and** `peekaboot.tracing.enabled=true` (on by default) | The OpenTelemetry SDK on the classpath, to actually feed spans into the store (present via the starter) |
 | Startup Summary | `peekaboot.enabled=true` **and** `peekaboot.lifecycle.enabled=true` (on by default) | None |
 | Observability Defaults | `peekaboot.enabled` resolves to `true` (detection or override) | None &mdash; applied as a lowest-precedence property source, skipped entirely while disabled |
 
-Only the Debug Toolbar and Tracing Interceptor auto-configurations carry an explicit
-`@ConditionalOnWebApplication(Type.SERVLET)` guard. `PeekabootAutoConfiguration` &mdash; the
-configuration the Dashboard UI & API row depends on &mdash; does not: it component-scans
-`PeekabootWebConfig`, a servlet-only `WebMvcConfigurer`, with no guard of its own. If
-`peekaboot.enabled` resolves to `true` and Spring MVC isn't on your classpath, expect
-application startup to fail while loading that class, not for the dashboard to stay quietly
-inactive like the Debug Toolbar row above does when its own condition isn't met. This is read
-from the annotations and the component scan, not from a reproduced failure; see
-[Requirements]({{ '/docs/requirements/' | relative_url }}) for the full picture and the fix.
+`PeekabootAutoConfiguration` &mdash; the configuration the Dashboard UI & API row depends
+on &mdash; carries the same `@ConditionalOnWebApplication(Type.SERVLET)` guard as the
+Debug Toolbar and Tracing Interceptor auto-configurations. It component-scans
+`PeekabootWebConfig`, a servlet-only `WebMvcConfigurer`; without the guard, that bean
+would still get created (constructing a `WebMvcConfigurer` needs nothing servlet-specific
+&mdash; only Spring MVC's own machinery, absent on a non-servlet application, ever calls
+back into it) and simply never do anything, alongside the controllers and actuator wiring
+component-scanned with it. With the guard, none of that registers at all on a non-servlet
+application: application startup is unaffected, and the dashboard stays inactive the same
+way the Debug Toolbar row above does when its own condition isn't met. See
+[Requirements]({{ '/docs/requirements/' | relative_url }}) for the full picture.
 
 `peekaboot.lifecycle.enabled` is a real switch (`@ConditionalOnProperty` on
 `PeekabootLifecycleAutoConfiguration`), but there is no `@ConfigurationProperties` class behind

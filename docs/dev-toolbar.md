@@ -56,13 +56,6 @@ have their own targets &mdash; opens the full trace detail overlay for that requ
        loading="lazy">
 </figure>
 
-<div class="pk-callout" markdown="1">
-This trace was captured with `peekaboot.tracing.max-spans-per-trace: 500`. At the
-default of 100, it would have been truncated during capture and its 26-query count
-under-reported &mdash; see [Tracing]({{ '/docs/tracing/' | relative_url }}#span-deduplication)
-for why truncation runs before deduplication and what that does to query counts.
-</div>
-
 The overlay is the same trace-detail view the dashboard's Traces tab uses, with four
 tabs: **Spans** (the full tree, each node's kind, tags and duration), **Queries** (SQL
 text, duration, and row counts where the instrumentation on your classpath provides them),
@@ -71,6 +64,16 @@ path, headers, and the resolved controller/handler method). See
 [Tracing]({{ '/docs/tracing/' | relative_url }}) for what's actually captured and how span
 deduplication works, and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a
 span, a root span and a trace status mean.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+**The Queries tab only shows real SQL text when your JDBC instrumentation tags spans with
+`db.statement` or `jdbc.query[N]`.** A stack built on `datasource-micrometer-opentelemetry`
+&mdash; the OpenTelemetry-native alternative, and what `peekaboot-testing-app` itself uses
+&mdash; tags query spans with `db.query.text` instead, which Peekaboot doesn't currently
+recognize; affected queries fall back to showing the span's own abbreviated name (e.g.
+`SELECT person`) rather than the statement. This is a known, unfixed gap in
+`QueryExtractor.findSql`.
+</div>
 
 ## Shadow DOM isolation
 

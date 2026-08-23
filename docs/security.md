@@ -20,12 +20,15 @@ This is everything, not a curated subset. If you're deciding whether Peekaboot i
 enable somewhere, read all of it.
 
 - **Environment values.** Every property source Spring resolved, key and value, sourced
-  from Actuator's `env` endpoint. See [Masking](#masking) below &mdash; by default,
-  **nothing is redacted**.
+  from Actuator's `env` endpoint. See [Masking](#masking) below &mdash; by default, a
+  value whose key or shape looks like a secret is replaced with `******`; everything else
+  is shown verbatim.
 - **Config property values.** Every value bound to a `@ConfigurationProperties` bean,
-  from Actuator's `configprops` endpoint. Same masking caveat.
+  from Actuator's `configprops` endpoint. Same masking, same caveat: it catches the
+  common shapes, not everything.
 - **Health detail.** Per-component status &mdash; datasource, disk space, custom
-  indicators &mdash; not just an aggregate UP/DOWN.
+  indicators &mdash; not just an aggregate UP/DOWN. A custom `HealthIndicator`'s detail
+  map is masked the same way as everything else &mdash; see [Masking](#masking).
 - **Logger levels.** Every logger's configured and effective level, from Actuator's
   `loggers` endpoint. Peekaboot's own dashboard and API are read-only here &mdash;
   `PeekabootController` exposes no endpoint that writes a level, only
@@ -46,15 +49,17 @@ enable somewhere, read all of it.
   applies to every request that reaches
   [`RequestCaptureFilter`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/filter/RequestCaptureFilter.java),
   not only the HTML pages the toolbar UI injects into &mdash; a JSON API call is captured
-  the same way. See [Masking](#masking) for exactly what's redacted in this data and what
-  isn't.
+  the same way. Headers, query and form parameters are masked by key, the same as a
+  property value; SQL text and span tags are masked only where a value-pattern rule
+  recognises a credential shape inside them &mdash; see [Masking](#masking) for exactly
+  what that does and doesn't catch.
 - **Log message content**, once the dev toolbar is on (`peekaboot.dev-toolbar: true`).
   `PeekabootLogbackAppender` copies every log event your application emits, tagged with
   its trace/span id, into the trace's Logs tab &mdash; not just levels or logger names,
-  the actual message content, unmodified. A log statement that happens to include a
-  secret or PII is captured exactly as written.
+  the actual message content, unmodified, and **not masked at all**. A log statement that
+  happens to include a secret or PII is captured exactly as written.
 - **Metrics.** Every Micrometer meter's name, tags and measurements, read directly from
-  the `MeterRegistry`.
+  the `MeterRegistry`. Tag values are masked the same way as everything else.
 
 ### The raw actuator surface goes further than the dashboard tabs
 
@@ -68,8 +73,11 @@ invokes **every** Actuator endpoint bean present in your application except `hea
 every request, not because they're sensitive). If your application has the `beans`,
 `mappings`, `conditions`, `caches` or any other standard Actuator endpoint active, calling
 that URL directly &mdash; nothing in the dashboard UI does, but nothing stops anyone else
-&mdash; returns all of it. See [HTTP API]({{ '/docs/api/' | relative_url }}) for the full
-endpoint list.
+&mdash; returns all of it. This response is masked too, but generically: rather than the
+seven typed mappers behind `/insights`, `GET /peekaboot/api/actuator/all/raw` walks
+whatever shape each endpoint's own JSON happens to have and applies the same key/value
+rules to it wherever they appear in the tree &mdash; see [Masking](#masking). See [HTTP
+API]({{ '/docs/api/' | relative_url }}) for the full endpoint list.
 
 ## What Peekaboot does not do
 
@@ -104,52 +112,118 @@ Actuator HTTP endpoint exposes.
 
 ## Masking
 
-Spring Boot's `env` and `configprops` endpoints mask values through a `Sanitizer`, which
-runs whatever `SanitizingFunction` beans are present in the application context. As of
-the Spring Boot version Peekaboot builds and ships against (4.1), **Spring Boot itself
-does not register a default one.** `SanitizingFunction` ships convenience methods &mdash;
-`ifLikelySensitive()`, `ifLikelyCredential()`, and friends &mdash; that build a sensible
-key-pattern-based function (keys ending in `password`, `secret`, `key`, `token`,
-containing `credentials`, and a few other patterns), but nothing wires one of these up
-automatically; an application has to declare its own `@Bean SanitizingFunction` for any
-of it to run. This was confirmed by constructing `EnvironmentEndpoint` directly with an
-empty `SanitizingFunction` list and `Show.ALWAYS` (Peekaboot's own default for
-`show-values`): every property, including one named `spring.datasource.password`, came
-back in plain text. Peekaboot registers no `SanitizingFunction` bean of its own.
+Spring Boot's `env` and `configprops` endpoints normally mask values through a
+`Sanitizer`, which runs whatever `SanitizingFunction` beans are present in the
+application context. As of the Spring Boot version Peekaboot builds and ships against
+(4.1), **Spring Boot itself does not register a default one** &mdash; an application has
+to declare its own `@Bean SanitizingFunction` for any of that machinery to run at all.
+
+Peekaboot doesn't rely on it. It ships its own masking engine
+([`MaskingEngine`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/masking/MaskingEngine.java),
+package `org.peekaboot.backend.masking`) and applies it, on by default, everywhere a
+value could carry a secret: `@ConfigurationProperties` values (Config tab), environment
+property values (Environment tab), health indicator details, datasource connection
+parameters, Micrometer meter tags, request and response headers, query and form
+parameters on a captured trace, span tags, and SQL text. There's nothing to configure to
+get this &mdash; it's the default, and it runs whether or not your application declares a
+`SanitizingFunction` of its own.
+
+### What gets masked, and how
+
+Two independent rule sets, evaluated together, matching Spring's own masked-value literal
+(`******`):
+
+- **By key name.** A key is sensitive if it contains, as a whole separator- or
+  camelCase-delimited token, one of: `password`, `passwd`, `pwd`, `passphrase`,
+  `secret`, `client-secret`, `token`, `access-token`, `refresh-token`, `id-token`,
+  `auth-token`, `bearer`, `credential`, `credentials`, `api-key`, `apikey`,
+  `private-key`, `secret-key`, `signing-key`, `encryption-key`, `authorization`, `auth`,
+  `cookie`, `set-cookie`, `session-id`, `salt`, `signature`, `certificate` &mdash; plus a
+  handful of Spring Boot 2.x's own removed `Sanitizer` defaults (`vcap_services`,
+  `sun.java.command`, and others), matched as whole-key patterns. A sensitive key masks
+  its **entire** value. Deliberately absent: bare `key` &mdash; it would catch
+  `spring.jpa.key-generator` and `server.ssl.key-store` (a filesystem path, not a
+  secret), which is exactly the kind of over-masking that makes a dashboard useless.
+- **By value shape**, for a credential sitting inside a value under an otherwise
+  innocuous key &mdash; a JDBC URL's `password=` parameter is the canonical case. A
+  small set of high-precision, provider-prefixed patterns catches a JWT, a PEM private
+  key block, an AWS/GitHub/GCP/Slack/Stripe/OpenAI/Anthropic key, and credentials
+  embedded in a URL's userinfo (`user:pass@host`) or query string (`?password=...`).
+  Only the matched span is masked, not the whole value, so a JDBC URL keeps its host and
+  database name visible with just the credential blacked out.
+
+Both rule sets are the full, exact list &mdash;
+[`MaskingRules`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/masking/MaskingRules.java)
+is the single source of truth if you need to check whether a specific key or shape is
+covered.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**With Peekaboot's defaults (`show-values: always`) and no `SanitizingFunction` bean of
-your own, the Environment and Config tabs mask nothing.** Not "keys that don't look like
-your custom secret" &mdash; nothing, including `password`- and `secret`-suffixed keys.
+**This is not exhaustive, and there is no entropy detection.** Key-name rules plus a
+bounded set of value-shape patterns catch the common, recognisable cases; they cannot
+catch a credential that has no recognisable shape sitting under a key that isn't listed
+above &mdash; a literal in an ordinary-looking column (`INSERT INTO users (password)
+VALUES ('hunter2')`) is not masked, because "hunter2" matches no provider pattern and the
+SQL-text masking is value-shape-only, not column-aware. Entropy-based detection (flagging
+any high-randomness string) was considered and deliberately rejected: it would destroy
+legitimate values on screen &mdash; a git SHA, a UUID, a base64-encoded asset &mdash; and
+documenting it as "secret detection" would recreate the exact overclaim this design
+exists to avoid. Assume every captured trace can still contain plaintext SQL and
+plaintext request data that this doesn't catch.
 </div>
 
-If you add a `SanitizingFunction` bean to your own application, Peekaboot's in-process
-invocation honors it: `PeekabootActuatorService` discovers and calls the same endpoint
-bean instances Spring Boot created for your application, it doesn't build its own copies,
-so whatever sanitizer your beans assemble applies identically:
+### Two independent opt-ins before a real value is ever shown
 
-```java
-@Bean
-SanitizingFunction sanitizingFunction() {
-    return SanitizingFunction.sanitizeValue().ifLikelySensitive();
-}
-```
+By default, masking cannot be turned off from the browser. Two things must both be true:
 
-The one thing Peekaboot masks on its own is a short, hardcoded list of HTTP headers in
-captured request traces &mdash;
-[`authorization`, `cookie`, `set-cookie`, `x-auth-token`, `x-api-key`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/filter/RequestCaptureFilter.java),
-replaced with `********`. This list is not configurable and has nothing to do with
-Spring's `Sanitizer`.
+1. **`peekaboot.enable-unmasking`** (new property, default `false`). While `false`,
+   there is no way &mdash; dashboard, API, or otherwise &mdash; to get an unmasked value
+   out of Peekaboot.
+2. **An `unmask=true` query parameter** on `GET /peekaboot/api/actuator/all/insights` or
+   `GET /peekaboot/api/actuator/all/raw`. Without it, both endpoints mask, regardless of
+   the property. With it, and *only* while the property above is also `true`, both
+   return real values. The parameter alone does nothing &mdash; it cannot be used as a
+   bypass by itself.
 
-Everything else is not masked, anywhere, under any configuration:
+The dashboard's Environment and Config tabs carry a "Show secrets" toggle that drives
+the parameter, but only when `GET /peekaboot/api/features` reports `unmaskingEnabled:
+true` &mdash; the control is absent from the page entirely, not merely disabled, when the
+property is off, so the UI never offers a switch that can't work. See [The
+dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config) for what
+toggling it does. Its state isn't persisted: reloading the page, or opening a new tab,
+starts masked again.
 
-- Query and form parameters in a captured trace &mdash; a password submitted as a login
-  form field, or an API key passed as a query parameter, is stored and shown verbatim.
-- SQL text and the literal values bound into it, in the Queries tab.
-- Any request or response header not in the five-item list above &mdash; a custom
-  `X-Internal-Token` header, for instance, is not redacted.
-- Log messages, wherever they're captured &mdash; Peekaboot's Logback appender copies
-  whatever your logging statements produced, unmodified.
+### `show-values: always` is still set, deliberately
+
+Peekaboot's own defaults set `management.endpoint.env.show-values` and
+`.configprops.show-values` to `always`, overriding Spring's own default of `never`. This
+looks like exactly the setting that caused the original problem, and an earlier version
+of this design called for removing it. It's kept, for a structural reason: Spring Boot
+4.1 registers no default `SanitizingFunction` regardless of `show-values`, so falling
+back to Spring's own default would not hand masking over to Spring &mdash; it would
+return `******` for *every* property unconditionally, including harmless ones like
+`server.port`, and would leave Peekaboot's own masking engine with no real value to ever
+inspect or, later, reveal. Controlled unmasking would then have nothing to unmask either.
+`show-values: always` is what lets Peekaboot's own engine see real values and decide,
+correctly, what to show.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+**The accepted cost:** `show-values: always` also widens your own application's
+`/actuator/env` and `/actuator/configprops` endpoints, if you expose them over HTTP
+yourself, independently of Peekaboot &mdash; Peekaboot's masking has no part in that
+path at all; it only ever runs inside Peekaboot's own `/peekaboot/**` surface. If you
+expose those actuator endpoints yourself and want them to stay masked, set
+`management.endpoint.env.show-values` (and `.configprops.show-values`) to `never`
+explicitly in your own configuration &mdash; that overrides Peekaboot's lowest-precedence
+default.
+</div>
+
+### What's left unmasked entirely
+
+- **Log message content**, wherever it's captured. Peekaboot's Logback appender copies
+  whatever your logging statements produced, unmodified &mdash; there is no masking pass
+  over log messages, by key or by shape.
+- Anything a value-shape rule doesn't recognise and no key name catches &mdash; see the
+  callout above.
 
 ## Securing the dashboard
 
@@ -232,10 +306,15 @@ for the full Maven `excludes` and Gradle `developmentOnly` examples.
       `/peekaboot/**` first &mdash; not after.
 - [ ] Don't reach for `management.endpoints.web.exposure` as a protection here; it
       governs `/actuator/**`, a mapping Peekaboot doesn't use or widen.
-- [ ] Register your own `SanitizingFunction` bean if you need environment and config
-      values masked. Peekaboot doesn't add one, and Spring Boot no longer does either.
-- [ ] Assume every captured trace contains plaintext SQL &mdash; and, with the dev
-      toolbar on, headers and query/form parameters too. Don't point Peekaboot at
+- [ ] Leave `peekaboot.enable-unmasking` at its default (`false`) unless you specifically
+      need to reveal real values from the dashboard &mdash; it's a server-side gate, not
+      something a request parameter alone can bypass, but turning it on means anyone who
+      can reach `/peekaboot/**` and add `?unmask=true` can too.
+- [ ] Don't treat masking as complete. It catches known key names and known secret
+      shapes (JWT, PEM, common cloud-provider key prefixes, credentials in a URL) &mdash;
+      not an arbitrary secret with no recognisable shape, and not log message content at
+      all. Assume every captured trace can still contain plaintext SQL and, with the dev
+      toolbar on, plaintext headers and query/form parameters. Don't point Peekaboot at
       traffic carrying secrets you can't afford to have stored in memory and displayed.
 - [ ] Leave `peekaboot.dev-toolbar` at its default (`false`) unless you specifically need
       request/response capture &mdash; it's the setting that turns trace data from a

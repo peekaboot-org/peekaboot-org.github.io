@@ -103,22 +103,24 @@ wrapping the other with the same name and the same tags apart from which service
 datasource issued it. Peekaboot collapses a child span into its parent when they share a
 name and their tags match once `peer.service` and `jdbc.datasource.name` are ignored; the
 removed span's own children are re-parented onto the nearest surviving ancestor so the
-tree stays connected. This runs once, when a trace is read (list or detail), not when
-spans are recorded.
+tree stays connected.
+
+Deduplication runs **on write**, as each span arrives at the trace store, not when a trace
+is later read. `peekaboot.tracing.max-spans-per-trace` (default **500**) then caps the
+already-deduplicated span count, so the cap counts real, distinct work rather than
+counting a double-instrumented JDBC call as two spans against it. If a trace's
+deduplicated span count still exceeds the cap, its **oldest** spans are dropped to make
+room for new ones, exactly as before &mdash; the difference is what the cap is counting,
+not whether it's enforced.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**Deduplication runs after truncation, not before.** `peekaboot.tracing.max-spans-per-trace`
-(default 100) caps how many spans a single trace can hold; once a trace crosses that cap,
-its *oldest* spans are dropped to make room for new ones. That truncation happens as spans
-arrive, before deduplication ever sees the trace. On a query-heavy endpoint that emits more
-than 100 spans, some spans &mdash; possibly one half of a duplicate pair, possibly whole
-queries &mdash; are already gone by the time deduplication runs, which means query counts
-can be undercounted and the `HIGH_QUERY_COUNT` issue (see
-[Concepts]({{ '/docs/concepts/' | relative_url }})) may fail to fire on a trace that
-genuinely ran an excessive number of queries. The 26-query `GET /orders` trace shown in
-[the dev toolbar's expanded overlay screenshot]({{ '/docs/dev-toolbar/' | relative_url }})
-was captured with `max-spans-per-trace: 500`; at the default of 100 it would have been
-truncated during capture and its query count under-reported.
+**When the cap is genuinely hit, it's no longer silent.** The trace is flagged
+`truncated: true`, exposed on both `GET /peekaboot/api/traces/insights` and `GET
+/peekaboot/api/traces/{traceId}/insights`, and shown as a `TRUNCATED` badge in the trace
+list and the trace-detail overlay &mdash; so a shortened trace is never mistaken for a
+complete one. See [Configuration &mdash;
+`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row)
+for raising the cap on a genuinely query-heavy endpoint.
 </div>
 
 ## The `Server-Timing` header

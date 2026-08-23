@@ -97,14 +97,17 @@ tabs]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs) and [HTT
 API]({{ '/docs/api/' | relative_url }})); if it's `false`, something on your classpath or
 in your configuration is excluding Actuator's metrics auto-configuration.
 
-## The Traces tab shows fewer queries than my endpoint actually issues
+## The Traces tab shows fewer queries than my endpoint actually issues, and carries a TRUNCATED badge
 
-**Cause:** `peekaboot.tracing.max-spans-per-trace` (default `100`) truncates a trace's
-**oldest** spans as new ones arrive, at write time &mdash; before span deduplication or
-issue detection ever run. A query-heavy endpoint that emits more than 100 spans in one
-request can lose whole queries before they're ever counted, which both undercounts query
-totals and can suppress the `HIGH_QUERY_COUNT` warning on a trace that genuinely deserves
-it.
+**Cause:** `peekaboot.tracing.max-spans-per-trace` (default `500`) caps the
+already-deduplicated span count for a trace; once a trace's real, distinct span count
+crosses that cap, its **oldest** spans are dropped to make room for new ones, at write
+time. An endpoint that genuinely runs more than 500 distinct queries in one request can
+still lose whole queries before they're ever counted, which both undercounts query totals
+and can suppress the `HIGH_QUERY_COUNT` warning on a trace that genuinely deserves it. The
+trace is flagged `truncated` when this happens, shown as a `TRUNCATED` badge &mdash; if
+you don't see that badge, the query count you're looking at isn't truncated, and a low
+count reflects the endpoint's real behaviour, not the cap.
 
 **Fix:** Raise `peekaboot.tracing.max-spans-per-trace`, not the query-count thresholds
 below it &mdash; lowering those doesn't fix an undercount, it just makes the (still wrong)
@@ -112,6 +115,27 @@ number trigger a warning sooner. See [Configuration &mdash; `max-spans-per-trace
 deserves more than a table
 row]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row)
 for the full mechanics and a worked example.
+
+## Values show as `******` and I need to see them
+
+**Cause:** this is the default. Peekaboot masks a value whose key or shape looks like a
+secret on the Environment, Config, Dashboard (health detail) and Metrics tabs, and in
+captured trace headers, query/form parameters, span tags and SQL text &mdash; see
+[Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for the full
+list of what's covered.
+
+**Fix:** Set `peekaboot.enable-unmasking: true` on the server, then use the "Show
+secrets" toggle that appears on the Environment and Config tabs once that property is set
+(it's absent otherwise), or add `?unmask=true` to `GET
+/peekaboot/api/actuator/all/insights` or `.../raw` directly. Both are required &mdash;
+the property alone changes nothing, and the request parameter alone is silently ignored
+while the property is `false`. This only affects the two endpoints above; headers, query
+parameters, span tags and SQL stay masked unconditionally regardless of either setting.
+If a value you expected to be masked isn't hidden at all, or a value you expected to be
+visible is masked and you don't want it to be, check it against the exact key-name and
+value-shape rules in [Security &mdash; what gets masked, and
+how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) &mdash; masking is
+rule-based, not exhaustive, in both directions.
 
 ## A trace has no logs
 

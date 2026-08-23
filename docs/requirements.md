@@ -10,20 +10,13 @@ permalink: /docs/requirements/
 - **Spring Boot 4.1** &mdash; built and tested against this version; earlier 4.x releases are untested
 - **A servlet web application** &mdash; the dashboard is served through Spring MVC
 
-<div class="pk-callout pk-callout--warning" markdown="1">
-**This isn't a "quietly stays off" case.** `PeekabootAutoConfiguration` &mdash; the
-configuration that component-scans Peekaboot's dashboard and, with it,
-`PeekabootWebConfig` (a `WebMvcConfigurer`, a servlet-only Spring MVC type) &mdash; carries no
-`@ConditionalOnWebApplication` guard, unlike `DevToolbarAutoConfiguration` and
-`TracingInterceptorAutoConfiguration`, which both do. If `peekaboot.enabled` resolves to
-`true` (the local-development default) and Spring MVC (`spring-webmvc`) isn't on your
-classpath &mdash; the normal case for a WebFlux application, and for a non-web application
-that doesn't happen to carry it too &mdash; expect application startup to fail while loading
-that class, not for Peekaboot to simply stay inactive. This is read from the annotations and
-the component scan, not from a reproduced failure. If your application isn't a servlet web
-application, set `peekaboot.enabled=false` explicitly, or keep the starter out of it
-entirely.
-</div>
+`PeekabootAutoConfiguration` &mdash; the configuration that component-scans Peekaboot's
+dashboard and, with it, `PeekabootWebConfig` (a `WebMvcConfigurer`, a servlet-only Spring
+MVC type) &mdash; carries `@ConditionalOnWebApplication(Type.SERVLET)`, the same guard
+`DevToolbarAutoConfiguration` and `TracingInterceptorAutoConfiguration` also carry. On a
+non-servlet application (WebFlux, or no web application at all), the condition simply
+doesn't match: the dashboard, its controllers and its actuator wiring never register,
+application startup is unaffected, and nothing further needs to be done on your side.
 
 ## What the starter brings
 
@@ -44,8 +37,9 @@ autoconfigure module.
 
 The pieces below degrade gracefully when something they depend on is missing &mdash; each is
 gated by its own `@ConditionalOn*` annotation that simply skips it. This assumes you're
-already running a servlet web application; if you're not, see the warning above, which is a
-different situation entirely.
+already running a servlet web application; if you're not, see above &mdash; that's a
+different situation entirely (the dashboard itself doesn't register, rather than
+registering and then finding something missing).
 
 **No `Tracer` bean.** The dev toolbar's two filters &mdash; the one that captures
 request/response detail and the one that injects the toolbar into HTML &mdash; both require a

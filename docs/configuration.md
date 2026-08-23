@@ -19,6 +19,7 @@ Bound by `PeekabootProperties`.
 |---|---|---|---|
 | `enabled` | boolean | auto-detected | The master switch for the dashboard, its API, and Peekaboot's own defaults. There is no fixed default: an `EnvironmentPostProcessor` computes one from the launch context and adds it at the lowest property-source precedence, so any value you set &mdash; `application.yml`, an environment variable, a system property &mdash; always wins. See [How activation works]({{ '/docs/how-activation-works/' | relative_url }}). |
 | `dev-toolbar` | boolean | `false` | Injects the dev toolbar into HTML responses, and turns on correlated-log capture and full request/response detail capture (headers, query/form parameters, resolved controller &mdash; not body content or uploaded file names, which the trace data model reserves fields for but the capture filter doesn't populate). See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}). |
+| `enable-unmasking` | boolean | `false` | Server-side gate for revealing real, unmasked values from the dashboard/API. On its own it changes nothing &mdash; it only makes an `unmask=true` request parameter *possible*, on `GET /peekaboot/api/actuator/all/insights` and `.../raw`, and it's what makes the Environment/Config tabs' "Show secrets" toggle appear at all. See [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking). |
 
 ## `peekaboot.lifecycle`
 
@@ -43,7 +44,7 @@ Bound by `PeekabootTracingProperties`.
 |---|---|---|---|
 | `enabled` | boolean | `true` | Whether the in-memory trace store is created at all. Off, and the Traces tab has nothing to show regardless of what's on the classpath. |
 | `max-traces` | int | `1000` | Maximum number of traces held in the **All** bucket (a Caffeine cache sized by entry count). Oldest-evicted once full; also evicted after a fixed 30-minute time-to-live that isn't configurable &mdash; see [Tracing]({{ '/docs/tracing/' | relative_url }}). |
-| `max-spans-per-trace` | int | `100` | Maximum spans retained per trace. See below &mdash; this one has real consequences past its default. |
+| `max-spans-per-trace` | int | `500` | Maximum (deduplicated) spans retained per trace. See below &mdash; this one has real consequences past its default. |
 | `max-error-traces` | int | `100` | Maximum traces held in the **Errors** bucket, a separate bounded collection from All. |
 | `max-slow-traces` | int | `100` | Maximum traces held in the **Slow** bucket, a separate bounded collection from All. |
 | `slow-trace-threshold-ms` | long | `1000` | Total end-to-end duration at or above which a trace qualifies for the Slow bucket. |
@@ -51,21 +52,20 @@ Bound by `PeekabootTracingProperties`.
 
 ### `max-spans-per-trace` deserves more than a table row
 
-The default of 100 spans per trace is a *sliding window*: once a trace's span count
-crosses the cap, `TraceDataBundle.addSpan` drops the **oldest** spans to make room for new
-ones, as each new span arrives. This happens at write time, in the trace store, before the
-trace is ever read.
+`max-spans-per-trace` is a *sliding window* over **deduplicated** spans: `TraceDataBundle`
+folds a duplicate span (the same operation double-instrumented by two layers, most
+commonly a JDBC driver-level span and a `datasource-proxy`/Micrometer span for the same
+query) into its surviving parent as each span is written, before the cap is ever checked.
+Only once that folding is done does the cap apply &mdash; if the deduplicated count still
+exceeds it, the **oldest** real spans are dropped to make room for new ones. Both happen
+at write time, in the trace store, before the trace is ever read.
 
-Span deduplication and issue detection &mdash; including the `HIGH_QUERY_COUNT` check,
-which is exactly the warning a query-heavy endpoint should trigger &mdash; run later, only
-when a trace is fetched for the list or detail view. By then, truncation has already
-happened. An endpoint that emits more than 100 spans in one request &mdash; a query-heavy
-one is the obvious case, since every query is its own span &mdash; can lose whole queries
-before deduplication or issue detection ever sees them, undercounting query totals and
-potentially suppressing the very warning meant to catch it.
-
-Raising `max-spans-per-trace` is the fix, not lowering the query-count thresholds below.
-See [Tracing &mdash; Span
+This means the cap now counts real, distinct work rather than counting a double-tagged
+JDBC call as two spans against it &mdash; the previous defect (fixed) let truncation run
+*before* deduplication, so the cap bit roughly twice as early as its number suggested.
+When the cap genuinely is hit, that's no longer silent: the trace is flagged `truncated`,
+surfaced through the API and shown as a badge in the dashboard, so a shortened trace is
+never mistaken for a complete one. See [Tracing &mdash; Span
 deduplication]({{ '/docs/tracing/' | relative_url }}#span-deduplication) for the full
 mechanics, and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what
 `HIGH_QUERY_COUNT` actually checks.
@@ -92,9 +92,9 @@ how each issue type is used.
 cap &mdash; logs are not nested inside spans, so the two caps add rather than multiply. The
 All bucket's worst-case entry count is `max-traces` &times; (`max-spans-per-trace` +
 `max-logs-per-trace`) &mdash; a Caffeine cache sized by trace count, each trace holding up
-to its own span cap plus its own log cap. At the documented defaults (1000 / 100 / 500)
-that's 1000 &times; 600 = 600,000 entries, not the 50,000,000 a naive triple product would
-suggest. Turning all three down shrinks that ceiling proportionally; the Errors and Slow
+to its own span cap plus its own log cap. At the documented defaults (1000 / 500 / 500)
+that's 1000 &times; 1000 = 1,000,000 entries, not the 250,000,000 a naive triple product
+would suggest. Turning all three down shrinks that ceiling proportionally; the Errors and Slow
 buckets are independent, smaller collections, so scale those down too rather than leaving
 them at their own defaults:
 
@@ -114,23 +114,26 @@ combining it with a query-heavy workload.
 
 ### Query-heavy application
 
-An endpoint that legitimately issues dozens of queries by design (a report, a bulk export,
-an N+1-shaped-but-intentional fan-out) needs headroom on two axes: enough span capacity
-that its queries survive truncation, and thresholds that don't flag its normal behaviour
-as an issue on every single request.
+An endpoint that legitimately issues dozens, or a few hundred, queries by design (a
+report, a bulk export, an N+1-shaped-but-intentional fan-out) needs headroom on two axes:
+enough span capacity that its queries survive truncation, and thresholds that don't flag
+its normal behaviour as an issue on every single request. The default cap (500,
+post-deduplication) already covers most such endpoints; if the trace list shows a
+`TRUNCATED` badge on this endpoint's traces, raise it further:
 
 ```yaml
 peekaboot:
   tracing:
-    max-spans-per-trace: 500
+    max-spans-per-trace: 1500
   ui:
     tracing:
       high-query-count-threshold: 15
       high-trace-query-count-threshold: 60
 ```
 
-Raise `max-spans-per-trace` first, so the endpoint's queries aren't silently dropped
-before deduplication and issue detection ever run &mdash; see above. Only then raise the
-UI thresholds, and only as far as reflects what's actually normal for this endpoint; set
-them too high and a genuine regression (a query count that grows well past what's normal)
-stops triggering HIGH_QUERY_COUNT at all.
+Raise `max-spans-per-trace` first if truncation is actually happening &mdash; check the
+`TRUNCATED` badge before assuming it is, since dedup already keeps the cap from biting on
+double-instrumented artifacts. Only then raise the UI thresholds, and only as far as
+reflects what's actually normal for this endpoint; set them too high and a genuine
+regression (a query count that grows well past what's normal) stops triggering
+HIGH_QUERY_COUNT at all.

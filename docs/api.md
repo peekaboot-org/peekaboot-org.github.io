@@ -19,8 +19,8 @@ your own machine.
 
 | Endpoint | Query parameters |
 |---|---|
-| `GET /peekaboot/api/actuator/all/raw` | &mdash; |
-| `GET /peekaboot/api/actuator/all/insights` | `locale` |
+| `GET /peekaboot/api/actuator/all/raw` | `unmask` (default `false`) |
+| `GET /peekaboot/api/actuator/all/insights` | `locale`, `unmask` (default `false`) |
 | `GET /peekaboot/api/features` | &mdash; |
 | `GET /peekaboot/api/metrics` | &mdash; |
 | `GET /peekaboot/api/traces/raw` | `limit` (default `100`, clamped to 0&ndash;10000), `bucket` |
@@ -28,9 +28,15 @@ your own machine.
 | `GET /peekaboot/api/traces/{traceId}/raw` | &mdash; |
 | `GET /peekaboot/api/traces/{traceId}/insights` | &mdash; |
 
-`/api/features` returns `{tracing, metrics, devToolbar}` &mdash; the same call the
-dashboard uses to decide whether to show its Metrics and Traces tabs at all. See [The
+`/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled}` &mdash; the
+same call the dashboard uses to decide whether to show its Metrics and Traces tabs, and
+whether the Environment/Config tabs' "Show secrets" toggle can appear at all. See [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}) for what drives each flag.
+
+`unmask=true` only has an effect while `peekaboot.enable-unmasking=true` is also set on
+the server; without that property, the parameter is silently ignored and the response
+stays masked. See [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking)
+for the full two-opt-in design and what gets masked in the first place.
 
 `rootActionType` accepts a comma-separated list of root action types (case-insensitive;
 unrecognized tokens are silently dropped rather than rejected). `rootOperation` matches
@@ -50,7 +56,12 @@ of processing:
   deduplication]({{ '/docs/tracing/' | relative_url }}#span-deduplication)), issues like
   `SLOW` or `HIGH_QUERY_COUNT` are detected and attached (see
   [Concepts]({{ '/docs/concepts/' | relative_url }})), and correlated logs are attached to
-  the spans that emitted them.
+  the spans that emitted them. Both `GET /peekaboot/api/traces/insights` (the list) and
+  `GET /peekaboot/api/traces/{traceId}/insights` (the detail) carry a `truncated` boolean
+  &mdash; `true` only when `max-spans-per-trace` actually dropped real, already-deduplicated
+  spans for that trace, never merely because duplicate artifacts were folded away. The
+  dashboard shows this as a `TRUNCATED` badge; see [Configuration &mdash;
+  `max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row).
 
 For the actuator surface, `raw` and `insights` are not the same data at two levels of
 processing &mdash; they cover different sets of endpoints. `GET
@@ -60,8 +71,10 @@ tabs are built on (`health`, `info`, `env`, `loggers`, `flyway`, `configprops`,
 if omitted or blank). `GET /peekaboot/api/actuator/all/raw` invokes **every** actuator
 endpoint bean present in your application except `heapdump`, `threaddump` and `logfile`
 (skipped only because they're expensive to run on every call, not because they're
-sensitive) &mdash; a strictly broader set than the seven the dashboard shows, and the
-Actuator responses largely as Spring Boot returns them. See
+sensitive) &mdash; a strictly broader set than the seven the dashboard shows. Both
+endpoints mask by default and honour `unmask` identically; `raw`'s masking is a generic
+walk over whatever shape each endpoint's own JSON happens to have, rather than the typed,
+per-field masking `insights` gets from its seven mappers. See
 [Security &mdash; the raw actuator surface goes further than the dashboard
 tabs]({{ '/docs/security/' | relative_url }}#the-raw-actuator-surface-goes-further-than-the-dashboard-tabs)
 for what that can mean in practice.

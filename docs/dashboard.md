@@ -109,16 +109,25 @@ only under Environment. (`@Value` injections aren't covered by Config &mdash; lo
 up under Environment.) The same split exists in Spring Boot Actuator itself, as `/env`
 versus `/configprops`, which back these two tabs.
 
-Peekaboot's defaults turn `show-values` on for both endpoints (Spring leaves it off by
-default, which would otherwise render every entry as `******`). Spring Boot 4.1
-registers no default masking function of its own, so with `show-values: always` and no
-`SanitizingFunction` bean supplied by your application, both tabs render every value
-verbatim &mdash; datasource passwords and API keys included.
+Both tabs mask sensitive values by default &mdash; a `password`-, `secret`-, `token`- or
+similarly-named key renders as `******`, and a handful of high-precision value patterns
+(a JWT, a PEM key block, a JDBC URL's embedded credential, and similar) catch a secret
+hiding inside an otherwise innocuous value. This isn't Spring Boot's own `Sanitizer` (as
+of the Spring Boot version Peekaboot ships against, 4.1, it registers no default
+`SanitizingFunction` at all) &mdash; it's Peekaboot's own masking engine, on by default,
+independent of anything your application configures.
+
+Both tabs also carry a "Show secrets" toggle, visible only when
+`GET /peekaboot/api/features` reports `unmaskingEnabled: true` &mdash; itself gated
+behind the server-side `peekaboot.enable-unmasking` property, off by default. Toggling it
+reveals real values for both tabs at once (they share one fetch of the same underlying
+data), and the state isn't persisted across a reload.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Neither tab masks anything by default. See
+Masking here isn't exhaustive: it catches known key names and known secret shapes, not an
+arbitrary secret with no recognizable pattern. See
 [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for exactly
-what's exposed and how to add your own masking.
+what's covered, what isn't, and the two-opt-in design behind the toggle.
 </div>
 
 ## Scheduled Tasks
@@ -172,8 +181,10 @@ actually contains data for them &mdash; an app with no Flyway migrations simply 
 Flyway tab, for instance. Dashboard and Environment are always shown.
 
 Metrics and Traces are different: they're gated on a separate call, `GET
-/peekaboot/api/features`, which returns `{tracing, metrics, devToolbar}`. Metrics needs a
-`MeterRegistry` bean, which Spring Boot Actuator provides automatically; Traces needs
-tracing to be active (`peekaboot.tracing.enabled`, on by default, plus an OpenTelemetry
-`SpanExporter` on the classpath). See [Requirements]({{ '/docs/requirements/' | relative_url }})
-for the full dependency picture.
+/peekaboot/api/features`, which returns `{tracing, metrics, devToolbar,
+unmaskingEnabled}`. Metrics needs a `MeterRegistry` bean, which Spring Boot Actuator
+provides automatically; Traces needs tracing to be active (`peekaboot.tracing.enabled`, on
+by default, plus an OpenTelemetry `SpanExporter` on the classpath). `unmaskingEnabled`
+gates a control, not a tab &mdash; see [Environment vs Config](#environment-vs-config)
+above. See [Requirements]({{ '/docs/requirements/' | relative_url }}) for the full
+dependency picture.
