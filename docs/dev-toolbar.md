@@ -56,6 +56,13 @@ have their own targets &mdash; opens the full trace detail overlay for that requ
        loading="lazy">
 </figure>
 
+<div class="pk-callout" markdown="1">
+This trace was captured with `peekaboot.tracing.max-spans-per-trace: 500`. At the
+default of 100, it would have been truncated during capture and its 26-query count
+under-reported &mdash; see [Tracing]({{ '/docs/tracing/' | relative_url }}#span-deduplication)
+for why truncation runs before deduplication and what that does to query counts.
+</div>
+
 The overlay is the same trace-detail view the dashboard's Traces tab uses, with four
 tabs: **Spans** (the full tree, each node's kind, tags and duration), **Queries** (SQL
 text, duration, and row counts where the instrumentation on your classpath provides them),
