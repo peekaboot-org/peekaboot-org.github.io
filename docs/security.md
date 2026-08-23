@@ -44,6 +44,11 @@ enable somewhere, read all of it.
   not only the HTML pages the toolbar UI injects into &mdash; a JSON API call is captured
   the same way. See [Masking](#masking) for exactly what's redacted in this data and what
   isn't.
+- **Log message content**, once the dev toolbar is on (`peekaboot.dev-toolbar: true`).
+  `PeekabootLogbackAppender` copies every log event your application emits, tagged with
+  its trace/span id, into the trace's Logs tab &mdash; not just levels or logger names,
+  the actual message content, unmodified. A log statement that happens to include a
+  secret or PII is captured exactly as written.
 - **Metrics.** Every Micrometer meter's name, tags and measurements, read directly from
   the `MeterRegistry`.
 
@@ -151,6 +156,8 @@ lambda DSL:
 ```java
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -159,6 +166,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class PeekabootSecurityConfig {
 
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain peekabootSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
             .securityMatcher("/peekaboot/**")
@@ -172,13 +180,19 @@ public class PeekabootSecurityConfig {
 ```
 
 `securityMatcher("/peekaboot/**")` scopes this whole filter chain to Peekaboot's own
-paths, so it composes with whatever `SecurityFilterChain` already protects the rest of
-your application &mdash; declare that one with a lower `@Order` (or none, letting it
-fall through as the catch-all) rather than folding a `/peekaboot/**` rule into it, so
-Peekaboot's paths always resolve through this chain first. Swap `httpBasic` for whatever
-your application already uses (form login, OAuth2, a gateway-issued header) &mdash; the
-part that matters is `.hasRole(...)` (or `.authenticated()`, if any logged-in user should
-be trusted with this data) actually gating `/peekaboot/**`.
+paths. When multiple `SecurityFilterChain` beans exist, Spring Security evaluates them in
+ascending `@Order` order and uses the first whose `securityMatcher` matches &mdash;
+**lower values are evaluated first**, the opposite of "falls through as a catch-all".
+`@Order(Ordered.HIGHEST_PRECEDENCE)` above guarantees this chain is checked before any
+other, so `/peekaboot/**` can't accidentally reach your application's general chain
+first. Leave that general chain unordered (no `@Order` at all) so it defaults to
+`Ordered.LOWEST_PRECEDENCE` and is evaluated last, as the catch-all &mdash; don't fold a
+`/peekaboot/**` rule into it instead of using this one, and don't give it an `@Order`
+lower than this chain's; either would let it match `/peekaboot/**` first and silently
+bypass the restriction this page just told you to add. Swap `httpBasic` for whatever your
+application already uses (form login, OAuth2, a gateway-issued header) &mdash; the part
+that matters is `.hasRole(...)` (or `.authenticated()`, if any logged-in user should be
+trusted with this data) actually gating `/peekaboot/**`.
 
 ## Running it in a deployed environment
 

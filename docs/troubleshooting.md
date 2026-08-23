@@ -11,11 +11,12 @@ jar, a war, a native image, an AOT-processed build, or a test &mdash; see [How a
 works]({{ '/docs/how-activation-works/' | relative_url }}) for exactly which of those
 applies and why.
 
-**Fix:** Check the startup log for Peekaboot's application-ready summary (build, Git,
-server and datasource info) &mdash; its absence confirms Peekaboot never activated; its
-presence means the 404 has a different cause (a context path prefix, for instance). If
-Peekaboot should be active here, set `peekaboot.enabled=true` explicitly &mdash; as an
-`application.yml` entry, an environment variable, or a system property.
+**Fix:** Check the startup log for Peekaboot's application-ready summary (application
+name, build info, server and datasource info) &mdash; its absence confirms Peekaboot
+never activated; its presence means the 404 has a different cause (a context path
+prefix, for instance). If Peekaboot should be active here, set `peekaboot.enabled=true`
+explicitly &mdash; as an `application.yml` entry, an environment variable, or a system
+property.
 
 ## The dashboard loads, but the Traces tab is empty
 

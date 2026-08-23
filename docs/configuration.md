@@ -33,7 +33,7 @@ property on this page.
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
-| `enabled` | boolean | `true` | Enables `PeekabootLifecycleAutoConfiguration` &mdash; the application-ready startup summary (build, Git, server and datasource info logged once the app is up). |
+| `enabled` | boolean | `true` | Enables `PeekabootLifecycleAutoConfiguration` &mdash; the application-ready startup summary (application name, build info, server and datasource info logged once the app is up &mdash; no Git info; that reaches the dashboard separately, through the actuator `info` endpoint under `management.info.git.enabled`). |
 
 ## `peekaboot.tracing`
 
