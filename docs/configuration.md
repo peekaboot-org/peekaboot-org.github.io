@@ -18,7 +18,7 @@ Bound by `PeekabootProperties`.
 | Property | Type | Default | Controls |
 |---|---|---|---|
 | `enabled` | boolean | auto-detected | The master switch for the dashboard, its API, and Peekaboot's own defaults. There is no fixed default: an `EnvironmentPostProcessor` computes one from the launch context and adds it at the lowest property-source precedence, so any value you set &mdash; `application.yml`, an environment variable, a system property &mdash; always wins. See [How activation works]({{ '/docs/how-activation-works/' | relative_url }}). |
-| `dev-toolbar` | boolean | `false` | Injects the dev toolbar into HTML responses, and turns on correlated-log capture and full request/response detail capture (headers, body, resolved controller). See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}). |
+| `dev-toolbar` | boolean | `false` | Injects the dev toolbar into HTML responses, and turns on correlated-log capture and full request/response detail capture (headers, query/form parameters, resolved controller &mdash; not body content or uploaded file names, which the trace data model reserves fields for but the capture filter doesn't populate). See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}). |
 
 ## `peekaboot.lifecycle`
 

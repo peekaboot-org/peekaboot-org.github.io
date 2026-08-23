@@ -84,7 +84,7 @@ logbook:
 |---|---|---|---|
 | `spring.jpa.properties.[hibernate.generate_statistics]` | `false` | `true` | Exposes query counts, cache stats and slow queries through Hibernate's own statistics collector, which the dashboard reads for JPA-backed apps. |
 | `management.endpoint.health.show-details` | `never` | `always` | Shows per-component health detail (datasource, disk space, custom indicators) in the Dashboard tab's health banner instead of a bare UP/DOWN. |
-| `management.endpoint.env.show-values` | `never` | `always` | Left at Spring's default, the Environment tab would render `******` for every entry &mdash; `os.name` and `server.port` included &mdash; making the tab useless. Spring's sanitizer still masks keys that look secret (`password`, `secret`, `token`, `key`, `credential`, and close variants); this only stops masking everything else. |
+| `management.endpoint.env.show-values` | `never` | `always` | Left at Spring's default, the Environment tab would render `******` for every entry &mdash; `os.name` and `server.port` included &mdash; making the tab useless. Spring Boot 4.1 registers no default masking function, so this doesn't just stop masking everything &mdash; with no `SanitizingFunction` bean of your own, nothing is masked at all, password- and secret-suffixed keys included. See [Security]({{ '/docs/security/' | relative_url }}#masking). |
 | `management.endpoint.configprops.show-values` | `never` | `always` | Same reasoning, for the Config tab's bound `@ConfigurationProperties` values. |
 | `management.info.env.enabled` | `false` | `true` | Exposes environment variables via `/actuator/info`, feeding the Dashboard tab. |
 | `management.info.java.enabled` | `false` | `true` | Exposes JVM vendor, version and runtime info in the Dashboard tab. |
@@ -129,8 +129,11 @@ would do:**
   (datasource, disk, custom indicators) is always readable, not just the aggregate status.
 - `management.endpoint.env.show-values: always` and
   `management.endpoint.configprops.show-values: always` &mdash; property *values* are
-  readable through both endpoints, not masked. Spring's sanitizer still redacts keys that
-  look like secrets, but everything else that used to render as `******` is now plain text.
+  readable through both endpoints. Spring Boot 4.1 registers no default masking function
+  of its own, so unless your application supplies a `SanitizingFunction` bean, this isn't
+  a partial loss of masking &mdash; nothing is masked, including keys named `password` or
+  `secret`. See [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking)
+  for the full detail and the remedy.
 - `management.info.env.enabled: true` &mdash; publishes environment variables through
   `/actuator/info`, a separate exposure from the `show-values` masking above.
   Environment variables are a common place for credentials to live.

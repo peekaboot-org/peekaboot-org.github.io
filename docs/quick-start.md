@@ -53,8 +53,8 @@ Open the dashboard at
 The toolbar you may have heard about isn't part of this: it's opt-in. Set
 `peekaboot.dev-toolbar: true` in `application.yml` to inject it into your HTML responses
 &mdash; and, on the same flag, to start correlating log messages to each trace and
-capturing full request/response detail (headers, body, resolved controller), neither of
-which is captured without it.
+capturing full request/response detail (headers, query/form parameters, resolved
+controller), neither of which is captured without it.
 </div>
 
 ## Next

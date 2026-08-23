@@ -33,11 +33,13 @@ is enabled (`peekaboot.dev-toolbar: true`, plus a `Tracer` bean):
 - **Correlated logs.** Peekaboot's Logback appender, which tags each log event with the
   active trace/span id and feeds it into the same store, is registered as part of the dev
   toolbar's auto-configuration. Without the toolbar on, a trace's Logs tab stays empty.
-- **Full request/response detail.** Headers, query and form parameters, uploaded file
-  names, body content, and the resolved controller class/method all come from a filter
-  that's likewise dev-toolbar-only. Without it, a trace still carries a basic method/path/
-  status summary &mdash; read directly off the root span's own HTTP tags &mdash; but not
-  headers or body.
+- **Full request/response detail.** Headers, query and form parameters, and the
+  resolved controller class/method all come from a filter that's likewise
+  dev-toolbar-only. Without it, a trace still carries a basic method/path/status summary
+  &mdash; read directly off the root span's own HTTP tags &mdash; but not headers or
+  parameters. Request/response body content and uploaded file names have fields reserved
+  for them in the trace data model but aren't populated by that filter yet &mdash; they
+  aren't captured, regardless of dev-toolbar.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 This means correlated logs and full request detail aren't a baseline tracing feature:

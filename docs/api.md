@@ -40,20 +40,31 @@ operation are.
 
 ## Raw vs insights
 
-Every area with both a `raw` and an `insights` variant returns the same underlying data at
-two different levels of processing:
+For traces, `raw` and `insights` return the same underlying spans at two different levels
+of processing:
 
-- **Raw** is what was captured &mdash; close to the source data (the actuator responses as
-  Spring Boot returns them, or a trace's spans in the order they arrived), with minimal
-  reshaping.
-- **Insights** is enriched: for traces, spans are assembled into a tree, duplicate spans
-  from double-instrumented layers are collapsed (see [Tracing &mdash; Span
+- **Raw** is what was captured &mdash; a trace's spans in the order they arrived, with
+  minimal reshaping.
+- **Insights** is enriched: spans are assembled into a tree, duplicate spans from
+  double-instrumented layers are collapsed (see [Tracing &mdash; Span
   deduplication]({{ '/docs/tracing/' | relative_url }}#span-deduplication)), issues like
   `SLOW` or `HIGH_QUERY_COUNT` are detected and attached (see
   [Concepts]({{ '/docs/concepts/' | relative_url }})), and correlated logs are attached to
-  the spans that emitted them. For the actuator surface, insights localizes and
-  human-readably summarizes the raw actuator data for the given `locale`
-  (`Locale.ENGLISH` if omitted or blank).
+  the spans that emitted them.
+
+For the actuator surface, `raw` and `insights` are not the same data at two levels of
+processing &mdash; they cover different sets of endpoints. `GET
+/peekaboot/api/actuator/all/insights` invokes exactly the seven endpoints the dashboard's
+tabs are built on (`health`, `info`, `env`, `loggers`, `flyway`, `configprops`,
+`scheduledtasks`) and localizes/summarizes them for the given `locale` (`Locale.ENGLISH`
+if omitted or blank). `GET /peekaboot/api/actuator/all/raw` invokes **every** actuator
+endpoint bean present in your application except `heapdump`, `threaddump` and `logfile`
+(skipped only because they're expensive to run on every call, not because they're
+sensitive) &mdash; a strictly broader set than the seven the dashboard shows, and the
+Actuator responses largely as Spring Boot returns them. See
+[Security &mdash; the raw actuator surface goes further than the dashboard
+tabs]({{ '/docs/security/' | relative_url }}#the-raw-actuator-surface-goes-further-than-the-dashboard-tabs)
+for what that can mean in practice.
 
 The dashboard itself only ever calls the insights endpoints; raw exists for tooling that
 wants the less-processed shape, or that wants to do its own analysis on spans Peekaboot

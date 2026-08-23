@@ -109,11 +109,17 @@ only under Environment. (`@Value` injections aren't covered by Config &mdash; lo
 up under Environment.) The same split exists in Spring Boot Actuator itself, as `/env`
 versus `/configprops`, which back these two tabs.
 
-Both tabs mask values for keys that look sensitive &mdash; `password`, `secret`, `key`,
-`token`, `credential`, and close variants &mdash; the same pattern Spring Boot's Actuator
-sanitizer applies. Peekaboot's defaults turn on `show-values` for both endpoints (Spring
-leaves it off by default, which would otherwise render every entry as `******`); the
-sanitizer itself still runs and still redacts anything key-shaped like a secret.
+Peekaboot's defaults turn `show-values` on for both endpoints (Spring leaves it off by
+default, which would otherwise render every entry as `******`). Spring Boot 4.1
+registers no default masking function of its own, so with `show-values: always` and no
+`SanitizingFunction` bean supplied by your application, both tabs render every value
+verbatim &mdash; datasource passwords and API keys included.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+Neither tab masks anything by default. See
+[Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for exactly
+what's exposed and how to add your own masking.
+</div>
 
 ## Scheduled Tasks
 
