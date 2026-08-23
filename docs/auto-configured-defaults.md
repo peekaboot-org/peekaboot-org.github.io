@@ -84,9 +84,9 @@ logbook:
 |---|---|---|---|
 | `spring.jpa.properties.[hibernate.generate_statistics]` | `false` | `true` | Exposes query counts, cache stats and slow queries through Hibernate's own statistics collector, which the dashboard reads for JPA-backed apps. |
 | `management.endpoint.health.show-details` | `never` | `always` | Shows per-component health detail (datasource, disk space, custom indicators) in the Dashboard tab's health banner instead of a bare UP/DOWN. |
-| `management.endpoint.env.show-values` | `never` | `always` | Left at Spring's default, the Environment tab would render `******` for every entry &mdash; `os.name` and `server.port` included &mdash; making the tab useless. Spring Boot 4.1 registers no default masking function, so `always` doesn't mean unmasked: Peekaboot's own masking engine runs over every value regardless of this setting, replacing what looks like a secret with `******` and leaving the rest readable. See [Security]({{ '/docs/security/' | relative_url }}#masking). |
+| `management.endpoint.env.show-values` | `never` | `always` | Left at Spring's default, the Environment tab would render `******` for every entry &mdash; `os.name` and `server.port` included &mdash; making the tab useless. Spring Boot 4.1 registers no default masking function, so `always` doesn't mean unmasked on Peekaboot's own dashboard/API surface (`/peekaboot/**`): Peekaboot's own masking engine runs over every value it hands back there, replacing what looks like a secret with `******` and leaving the rest readable. It does **not** reach Spring's own `/actuator/env` if your application exposes that endpoint itself. See [Security]({{ '/docs/security/' | relative_url }}#masking). |
 | `management.endpoint.configprops.show-values` | `never` | `always` | Same reasoning, for the Config tab's bound `@ConfigurationProperties` values. |
-| `management.info.env.enabled` | `false` | `true` | Exposes environment variables via `/actuator/info`, feeding the Dashboard tab. |
+| `management.info.env.enabled` | `false` | `true` | Publishes `info.*` properties (e.g. `info.app.*` set in your own `application.yml`) via `/actuator/info`, feeding the Dashboard tab &mdash; not OS/system environment variables, which the Environment tab already covers. |
 | `management.info.java.enabled` | `false` | `true` | Exposes JVM vendor, version and runtime info in the Dashboard tab. |
 | `management.info.os.enabled` | `false` | `true` | Exposes OS name, version and architecture in the Dashboard tab. |
 | `management.info.process.enabled` | `false` | `true` | Exposes PID, uptime, CPU count and memory usage in the Dashboard tab. |
@@ -130,15 +130,20 @@ would do:**
 - `management.endpoint.env.show-values: always` and
   `management.endpoint.configprops.show-values: always` &mdash; property *values* are
   readable through both endpoints, kept at `always` deliberately even though Spring Boot
-  4.1 registers no default masking function of its own. This doesn't leave those values
-  unmasked: Peekaboot runs its own masking engine over every value these endpoints hand
-  back, on by default, independent of the `show-values` setting or any `SanitizingFunction`
-  your application may or may not supply. It isn't exhaustive &mdash; see
-  [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for exactly
-  what it catches and why `show-values` stays `always` regardless.
-- `management.info.env.enabled: true` &mdash; publishes environment variables through
-  `/actuator/info`, a separate exposure from the `show-values` masking above.
-  Environment variables are a common place for credentials to live.
+  4.1 registers no default masking function of its own. On Peekaboot's own dashboard/API
+  surface (`/peekaboot/**`) this doesn't leave those values unmasked: Peekaboot runs its
+  own masking engine over every value it hands back there, on by default, independent of
+  the `show-values` setting or any `SanitizingFunction` your application may or may not
+  supply. Peekaboot registers no `SanitizingFunction` of its own, though, so if your
+  application also exposes `/actuator/env` or `/actuator/configprops` over HTTP itself,
+  *that* path is widened with no masking of any kind &mdash; Peekaboot's masking engine
+  never runs there. See [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking)
+  for exactly what it catches, where it runs, and why `show-values` stays `always`
+  regardless.
+- `management.info.env.enabled: true` &mdash; publishes `info.*` properties through
+  `/actuator/info`, a separate exposure from the `show-values` masking above. This is
+  not OS/system environment variables &mdash; those are what the Environment tab
+  (`show-values` above) already covers.
 - `management.tracing.sampling.probability: 1.0` &mdash; every request is sampled, not a
   10% slice, which has cost and volume implications of its own.
 - `spring.jpa.properties.[hibernate.generate_statistics]: true` &mdash; Hibernate

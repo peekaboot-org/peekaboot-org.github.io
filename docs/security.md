@@ -138,12 +138,25 @@ Two independent rule sets, evaluated together, matching Spring's own masked-valu
   `secret`, `client-secret`, `token`, `access-token`, `refresh-token`, `id-token`,
   `auth-token`, `bearer`, `credential`, `credentials`, `api-key`, `apikey`,
   `private-key`, `secret-key`, `signing-key`, `encryption-key`, `authorization`, `auth`,
-  `cookie`, `set-cookie`, `session-id`, `salt`, `signature`, `certificate` &mdash; plus a
-  handful of Spring Boot 2.x's own removed `Sanitizer` defaults (`vcap_services`,
-  `sun.java.command`, and others), matched as whole-key patterns. A sensitive key masks
-  its **entire** value. Deliberately absent: bare `key` &mdash; it would catch
-  `spring.jpa.key-generator` and `server.ssl.key-store` (a filesystem path, not a
-  secret), which is exactly the kind of over-masking that makes a dashboard useless.
+  `session-id`, `salt`, `signature`, `certificate-password`, `certificate-private-key`
+  &mdash; plus a handful of Spring Boot 2.x's own removed `Sanitizer` defaults
+  (`vcap_services`, `^vcap\.services.*$`, `sun.java.command`,
+  `^spring[._]application[._]json$`), matched as whole-key patterns. A sensitive key
+  masks its **entire** value. Two narrower rules match only when they're the *entire*
+  key, not merely a token inside it: `cookie` and `set-cookie` &mdash; they exist for
+  the HTTP headers of the same name, not for the token "cookie" appearing anywhere in a
+  compound key (a session-cookie configuration property like
+  `server.servlet.session.cookie.same-site` is not a secret). One exact-key spelling is
+  excluded outright despite matching a rule word: bare `PWD`/`pwd`, the POSIX shell's
+  current-working-directory variable, which would otherwise collide with the `pwd`
+  password abbreviation on every developer's environment-variables property source;
+  `password`/`passwd` already cover the real password case in practice, and a compound
+  key like `db.pwd` is unaffected by this exclusion. Deliberately absent: bare `key`
+  and bare `certificate` &mdash; they would catch `spring.jpa.key-generator` and
+  `server.ssl.key-store`/`server.ssl.certificate` (filesystem paths, not secrets), which
+  is exactly the kind of over-masking that makes a dashboard useless. Actual certificate
+  key material is still caught by the PEM value-shape pattern below regardless of the
+  key it's stored under.
 - **By value shape**, for a credential sitting inside a value under an otherwise
   innocuous key &mdash; a JDBC URL's `password=` parameter is the canonical case. A
   small set of high-precision, provider-prefixed patterns catches a JWT, a PEM private

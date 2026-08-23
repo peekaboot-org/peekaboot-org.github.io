@@ -130,7 +130,8 @@ secrets" toggle that appears on the Environment and Config tabs once that proper
 /peekaboot/api/actuator/all/insights` or `.../raw` directly. Both are required &mdash;
 the property alone changes nothing, and the request parameter alone is silently ignored
 while the property is `false`. This only affects the two endpoints above; headers, query
-parameters, span tags and SQL stay masked unconditionally regardless of either setting.
+parameters, span tags, SQL and Micrometer meter tags (`/api/metrics`, which takes no
+`unmask` parameter at all) stay masked unconditionally regardless of either setting.
 If a value you expected to be masked isn't hidden at all, or a value you expected to be
 visible is masked and you don't want it to be, check it against the exact key-name and
 value-shape rules in [Security &mdash; what gets masked, and
