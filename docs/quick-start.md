@@ -46,12 +46,15 @@ Open the dashboard at
   `@ConfigurationProperties` bean's effective values
 - Flyway migration history, runtime logger levels, and scheduled task listings
 - Metrics from Micrometer's registry
-- Full request traces &mdash; spans, SQL queries and correlated logs &mdash; for every request
-  your app has served since it started
+- Full request traces &mdash; spans and SQL queries &mdash; for every request your app
+  has served since it started
 
 <div class="pk-callout" markdown="1">
 The toolbar you may have heard about isn't part of this: it's opt-in. Set
-`peekaboot.dev-toolbar: true` in `application.yml` to inject it into your HTML responses too.
+`peekaboot.dev-toolbar: true` in `application.yml` to inject it into your HTML responses
+&mdash; and, on the same flag, to start correlating log messages to each trace and
+capturing full request/response detail (headers, body, resolved controller), neither of
+which is captured without it.
 </div>
 
 ## Next

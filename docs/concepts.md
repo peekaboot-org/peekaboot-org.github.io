@@ -35,28 +35,39 @@ span's name, shown in the trace list &mdash; typically an HTTP method and path (
 
 The root action type classifies what kind of thing started the trace, used for the icon
 next to each row and for filtering the trace list. Peekaboot works this out from the root
-span alone, checking in this order until one matches:
+span alone, checking a fixed list of rules **in priority order** and stopping at the
+first match &mdash; a span that could plausibly fit more than one row always gets the
+one checked first, not the most specific-sounding one:
 
-| Value | Icon | Means | Recognized by |
-|---|---|---|---|
-| HTTP Request | 🌐 | An inbound web request | The root span is a server-side span carrying HTTP details &mdash; or, if nothing more specific below matched, any other server-side root span |
-| Scheduled Job | 🕐 | A `@Scheduled` method or other timed/cron work | The root span's *name* contains "schedule", "cron", "timer" or "job" (case-insensitive) |
-| Message Consumer | 📩 | A message picked off a queue or topic | The root span is a consumer-side span, or carries messaging details |
-| RPC Call | 🔗 | An inbound remote-procedure call (e.g. gRPC) | The root span is a server-side span carrying RPC details |
-| Database | 🗂 | A database call with nothing above it in the trace | Rare &mdash; means something queried a database with no request, job or message context around it that Peekaboot could see |
-| Internal | ⚙ | The trace has no inbound/outbound direction at all | The root span carries none of the roles above |
-| Unknown | ❓ | Nothing above matched | Fallback |
+| Priority | Value | Icon | Means | Recognized by |
+|---|---|---|---|---|
+| 1 | Message Consumer | 📩 | A message picked off a queue or topic | The root span is a consumer-side span, **or** carries messaging details &mdash; checked first, so a consumer-side span whose name happens to contain "job" or "cron" is still Message Consumer, never Scheduled Job |
+| 2 | HTTP Request | 🌐 | An inbound web request, recognized from its own tags | The root span is a server-side span **and** carries HTTP details |
+| 3 | RPC Call | 🔗 | An inbound remote-procedure call (e.g. gRPC) | The root span is a server-side span **and** carries RPC details |
+| 4 | Scheduled Job | 🕐 | A `@Scheduled` method or other timed/cron work | The root span's *name* contains "schedule", "cron", "timer" or "job" (case-insensitive) &mdash; checked only after rows 1&ndash;3 have already ruled themselves out |
+| 5 | Database | 🗂 | A database call with nothing above it in the trace | Rare &mdash; means something queried a database with no request, job or message context around it that Peekaboot could see. The root span is a client-side span **and** carries database details |
+| 6 | HTTP Request (fallback) | 🌐 | Any other inbound web request that didn't carry HTTP-specific tags | The root span is a server-side span, full stop &mdash; checked last among the server-side rules, after Scheduled Job and Database have both already failed to match |
+| 7 | Internal | ⚙ | The trace has no inbound/outbound direction at all | The root span carries none of the roles above (client, server or consumer) |
+| 8 | Unknown | ❓ | Nothing above matched | Fallback |
+
+HTTP Request appears twice on purpose: the strict, tag-based check (priority 2) fires
+before Scheduled Job and Database are even considered, while the loose fallback (priority
+6) only fires after every other rule &mdash; including Scheduled Job's name check &mdash;
+has already failed. Both rows produce the same value and the same icon; only the
+condition and its position in the list differ.
 
 <div class="pk-callout" markdown="1">
-**Scheduled Job is a name match, not a tag.** Everything above it in the table is decided
-from span kind and structured tags; Scheduled Job is the one exception, decided purely by
-whether the root span's name contains one of those four substrings. In practice this
-means two jobs that look equally "scheduled" can classify differently: a job named `task
-scheduler.fixedDelay` gets the Scheduled Job icon (its name contains "schedule"), while a
-job named `task orderReconciler.reconcileOrders` does not &mdash; nothing in that name
-matches, and with no HTTP/RPC/messaging/database tags on its root span either, it falls
-through to Internal instead. Both are real `@Scheduled` methods; only the name decides
-which icon they get.
+**Scheduled Job is a name match, not a tag, and it's checked in the middle of the list,
+not first.** Rows 1&ndash;3 are decided from the root span's own kind and structured
+tags and are checked before Scheduled Job ever runs; only once none of them match does
+the name-substring check get a turn. In practice this means two jobs that look equally
+"scheduled" can classify differently: a job named `task scheduler.fixedDelay` gets the
+Scheduled Job icon (its name contains "schedule", and nothing earlier in the list already
+matched it), while a job named `task orderReconciler.reconcileOrders` does not &mdash;
+nothing in that name matches, and with no HTTP/RPC/messaging/database tags on its root
+span either, it falls through all the way to Internal instead. Both are real `@Scheduled`
+methods; only the name, and where the check for it sits in the list, decides which icon
+they get.
 </div>
 
 ## Trace status
