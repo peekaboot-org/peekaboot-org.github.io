@@ -4,6 +4,12 @@ lead: One dependency, no configuration, a dashboard on your next run.
 permalink: /docs/quick-start/
 ---
 
+<div class="pk-callout pk-callout--warning" markdown="1">
+Peekaboot is pre-release: no version has been published yet, and `{{ site.peekaboot_version }}`
+is a snapshot coordinate Maven Central can't serve. Until a release goes out, build it
+yourself from the [source repo]({{ site.repository_url }}) with `mvn clean install`.
+</div>
+
 ## Add the dependency
 
 **Maven**

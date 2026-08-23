@@ -13,9 +13,9 @@ layout: home
       <p class="subtitle is-6">
         Peekaboot adds a local dashboard to your Spring Boot app &mdash; health, config,
         environment, scheduled tasks, metrics, Flyway migrations, and full request traces with
-        span trees, SQL queries and correlated logs. Everything lives in memory inside your own
-        process: no collector, no agent, no external service &mdash; and it defaults to off
-        outside local development.
+        span trees and SQL queries, plus correlated logs when the opt-in dev toolbar is enabled.
+        Everything lives in memory inside your own process: no collector, no agent, no external
+        service &mdash; and it defaults to off outside local development.
       </p>
       <div class="buttons is-centered mt-5">
         <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Quick start</a>
@@ -54,9 +54,9 @@ layout: home
           <div class="card-content">
             <p class="title is-5">See inside a request</p>
             <p class="content">
-              Every request Peekaboot captures becomes a trace: the full span tree, the SQL
-              each span ran, and the log lines emitted while it executed &mdash; correlated
-              automatically, no manual instrumentation.
+              Every request Peekaboot captures becomes a trace: the full span tree and the
+              SQL each span ran. Turn on the opt-in dev toolbar and the log lines emitted while
+              it executed are correlated automatically too, no manual instrumentation.
             </p>
           </div>
         </div>

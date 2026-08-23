@@ -28,8 +28,10 @@ in the trace detail overlay's Spans tab.
 The root span is the span at the top of that tree &mdash; the one nothing else is nested
 under. It's what makes the trace a trace: an HTTP request's root span is the request
 itself; a scheduled job's root span is the job invocation. The **root operation** is that
-span's name, shown in the trace list &mdash; typically an HTTP method and path (`GET
-/api/orders`) or a job's fully-qualified method name.
+span's raw name (`rootSpanData.name()`), shown in the trace list exactly as the
+instrumentation that created the span wrote it &mdash; lowercase, and not reformatted by
+Peekaboot: `http get /orders`, `http get /api/orders/{id}/report`, or, for a `@Scheduled`
+method, `task orderReconciler.reconcileOrders`.
 
 ## Root action type
 
@@ -81,15 +83,15 @@ tracked separately, as an issue (below) and as the Slow bucket, not as a trace s
 An issue is a problem Peekaboot detected on a specific span, shown as a coloured marker
 in the span tree. Each type has a default threshold you can change &mdash; see
 [Configuration]({{ '/docs/configuration/' | relative_url }}) for the exact property
-names:
+names and current default values:
 
-| Type | Fires when | Default threshold |
-|---|---|---|
-| SLOW | A span's own duration reaches the slow-span threshold | 100ms |
-| VERY_SLOW | A span's own duration reaches the very-slow threshold (checked first &mdash; a span gets this or SLOW, never both) | 500ms |
-| ERROR | A span ended with an error | &mdash; |
-| SLOW_QUERY | A database query span's duration reaches the slow-query threshold | 50ms |
-| HIGH_QUERY_COUNT | Either: one span has more direct database-query children than the per-span threshold, or the whole trace ran more database queries in total than the per-trace threshold | 5 queries (per span) / 20 queries (per trace) |
+| Type | Fires when |
+|---|---|
+| SLOW | A span's own duration reaches the slow-span threshold |
+| VERY_SLOW | A span's own duration reaches the very-slow threshold (checked first &mdash; a span gets this or SLOW, never both) |
+| ERROR | A span ended with an error |
+| SLOW_QUERY | A database query span's duration reaches the slow-query threshold |
+| HIGH_QUERY_COUNT | Either: one span has more direct database-query children than the per-span threshold, or the whole trace ran more database queries in total than the per-trace threshold |
 
 See [Tracing]({{ '/docs/tracing/' | relative_url }}) for the SLOW *badge* you'll see on a
 trace row in the list &mdash; it's built from this same SLOW/VERY_SLOW issue check, which

@@ -34,12 +34,16 @@ enable somewhere, read all of it.
   fully visible.
 - **Migration history.** Every Flyway migration's version, description, script name,
   type, duration, install time and status, from Actuator's `flyway` endpoint.
-- **Request traces**, once [the dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }})
-  is on (`peekaboot.dev-toolbar: true`): method, path, status, duration, request and
-  response headers, query and form parameters, the resolved controller/handler, and every
-  database query's SQL text &mdash; including the literal bound parameter values
-  `datasource-proxy` inlines into it, not just the parameterized form. Capture applies to
-  every request that reaches
+- **Request traces**, whenever [tracing]({{ '/docs/tracing/' | relative_url }}) is on
+  (`peekaboot.tracing.enabled: true`, the default): every database query's SQL text
+  &mdash; including the literal bound parameter values `datasource-proxy` inlines into
+  it, not just the parameterized form &mdash; plus a basic method/path/status summary
+  read off the root span. This part isn't gated by the dev toolbar; it's already served
+  on the unauthenticated `/peekaboot/**` surface at stock local defaults. Once [the dev
+  toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) is also on
+  (`peekaboot.dev-toolbar: true`), traces additionally carry request and response
+  headers, query and form parameters, and the resolved controller/handler. Capture
+  applies to every request that reaches
   [`RequestCaptureFilter`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/filter/RequestCaptureFilter.java),
   not only the HTML pages the toolbar UI injects into &mdash; a JSON API call is captured
   the same way. See [Masking](#masking) for exactly what's redacted in this data and what
@@ -230,9 +234,9 @@ for the full Maven `excludes` and Gradle `developmentOnly` examples.
       governs `/actuator/**`, a mapping Peekaboot doesn't use or widen.
 - [ ] Register your own `SanitizingFunction` bean if you need environment and config
       values masked. Peekaboot doesn't add one, and Spring Boot no longer does either.
-- [ ] Assume every captured trace contains plaintext SQL, headers, and query/form
-      parameters. Don't point Peekaboot's dev toolbar at traffic carrying secrets you
-      can't afford to have stored in memory and displayed.
+- [ ] Assume every captured trace contains plaintext SQL &mdash; and, with the dev
+      toolbar on, headers and query/form parameters too. Don't point Peekaboot at
+      traffic carrying secrets you can't afford to have stored in memory and displayed.
 - [ ] Leave `peekaboot.dev-toolbar` at its default (`false`) unless you specifically need
       request/response capture &mdash; it's the setting that turns trace data from a
       method/path/status summary into full header and parameter capture.

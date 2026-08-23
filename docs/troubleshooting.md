@@ -18,6 +18,12 @@ prefix, for instance). If Peekaboot should be active here, set `peekaboot.enable
 explicitly &mdash; as an `application.yml` entry, an environment variable, or a system
 property.
 
+The `/peekaboot` prefix itself is fixed: `PeekabootController` is annotated
+`@RequestMapping("/peekaboot")` with no property to move it. If your `server.servlet.context-path`
+is non-empty, the dashboard is under that context path too (e.g. `/my-app/peekaboot/`),
+which is the most common cause of a 404 when the application-ready summary shows Peekaboot
+is otherwise active.
+
 ## The dashboard loads, but the Traces tab is empty
 
 **Cause:** one of three things: no Micrometer `Tracer` bean is present (the starter

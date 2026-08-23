@@ -38,7 +38,7 @@ below is reachable while it doesn't.
 | Feature | Switch | Additional requirement |
 |---|---|---|
 | Dashboard UI & API | `peekaboot.enabled=true` | A servlet web application (unguarded &mdash; see note below); Actuator's `HealthEndpoint`/`InfoEndpoint` on the classpath (present via the starter) |
-| Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (off by default) | A servlet web application; a Micrometer `Tracer` bean (present by default via `spring-boot-starter-opentelemetry`) |
+| Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (off by default) | A servlet web application; a Micrometer `Tracer` bean (present by default via `spring-boot-starter-opentelemetry`); also needs `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar bar has no trace data to show |
 | In-Memory Tracing | `peekaboot.enabled=true` **and** `peekaboot.tracing.enabled=true` (on by default) | The OpenTelemetry SDK on the classpath, to actually feed spans into the store (present via the starter) |
 | Startup Summary | `peekaboot.enabled=true` **and** `peekaboot.lifecycle.enabled=true` (on by default) | None |
 | Observability Defaults | `peekaboot.enabled` resolves to `true` (detection or override) | None &mdash; applied as a lowest-precedence property source, skipped entirely while disabled |

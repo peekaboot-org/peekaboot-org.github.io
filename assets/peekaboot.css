@@ -133,7 +133,12 @@ a:hover,
 }
 
 /* The mark is two-tone: its slate magnifier is 1.4:1 on the dark ground and vanishes.
-   Same swap peekaboot-frontend does, same reason. */
+   Same swap peekaboot-frontend does, same reason.
+   The url()s below are root-relative, not run through Liquid's relative_url filter like
+   everywhere else on the site — this file has no front matter, so Jekyll doesn't process
+   it and {{ }} would ship as literal text. Correct today only because _config.yml's
+   baseurl is "". If baseurl ever becomes non-empty, these two paths break and must be
+   made front-matter-and-relative_url or otherwise site-root-aware. */
 .pk-logo {
     height: 28px;
     width: 28px;

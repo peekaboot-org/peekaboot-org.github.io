@@ -115,7 +115,10 @@ than 100 spans, some spans &mdash; possibly one half of a duplicate pair, possib
 queries &mdash; are already gone by the time deduplication runs, which means query counts
 can be undercounted and the `HIGH_QUERY_COUNT` issue (see
 [Concepts]({{ '/docs/concepts/' | relative_url }})) may fail to fire on a trace that
-genuinely ran an excessive number of queries.
+genuinely ran an excessive number of queries. The 26-query `GET /orders` trace shown in
+[the dev toolbar's expanded overlay screenshot]({{ '/docs/dev-toolbar/' | relative_url }})
+was captured with `max-spans-per-trace: 500`; at the default of 100 it would have been
+truncated during capture and its query count under-reported.
 </div>
 
 ## The `Server-Timing` header
