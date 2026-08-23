@@ -18,11 +18,12 @@ docker run --rm -v "$PWD":/srv/jekyll -w /srv/jekyll ruby:3.3 \
   sh -c 'bundle config set path vendor/bundle && bundle install --quiet && bundle exec jekyll build --trace'
 ```
 
-`ruby:3.3` is confirmed working — the `github-pages` gem resolves and builds cleanly on it,
-with no warnings other than a cosmetic `faraday-retry` notice from `jekyll-github-metadata`
-(triggered just by loading the gem, unrelated to this site's content — never fired since the
-build never calls the GitHub API). If a future `github-pages` release stops resolving on
-Ruby 3.3, fall back to `ruby:3.1`, which is closer to what Pages itself runs.
+`ruby:3.3` is confirmed working — the `github-pages` gem resolves and builds cleanly on it.
+The build does print a `faraday-retry` notice on stderr, from `jekyll-github-metadata`'s
+Faraday dependency, purely from loading the gem — unrelated to this site's content. What
+never happens is a live GitHub API call: this build makes none, so the notice is cosmetic,
+not a sign anything is broken. If a future `github-pages` release stops resolving on Ruby
+3.3, fall back to `ruby:3.1`, which is closer to what Pages itself runs.
 
 Serve the built output:
 
@@ -116,8 +117,12 @@ Everything in this repo is ready; what's left happens outside it:
 Pages throughout `docs/` link into the product repo with `blob/HEAD/...` (e.g.
 `{{ site.repository_url }}/blob/HEAD/...`), so they always resolve against whatever
 `origin/HEAD` currently is — not a pinned commit. At the time of writing, the product repo's
-local `dev` branch is well ahead of `origin/dev`; until `dev` is pushed, these links will
-show stale source for anything changed only in the unpushed commits.
+local `dev` and `origin/dev` have diverged (`git rev-list --left-right --count
+origin/dev...dev` reports 12 commits only on `origin/dev` and 57 only on local `dev`), so a
+plain `git push` will not fast-forward — it needs a merge, a rebase, or a deliberate
+force-push, whichever the repo owner decides. Until that divergence is resolved and `dev` is
+pushed, these links will show stale source for anything changed only in the unpushed
+commits.
 
 ## License
 
