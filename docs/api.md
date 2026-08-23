@@ -1,0 +1,87 @@
+---
+title: HTTP API
+lead: The /peekaboot/api/** surface the dashboard, toolbar and trace-detail overlay are built on.
+permalink: /docs/api/
+---
+
+Everything the dashboard shows is available as JSON in its own right, from
+`PeekabootController`.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+Every endpoint below is unauthenticated by default. Peekaboot adds no security of its own,
+so anything that can reach `/peekaboot/**` can call these directly and read your
+configuration, environment, and request traces. See
+[Security]({{ '/docs/security/' | relative_url }}) before exposing this anywhere beyond
+your own machine.
+</div>
+
+## Endpoints
+
+| Endpoint | Query parameters |
+|---|---|
+| `GET /peekaboot/api/actuator/all/raw` | &mdash; |
+| `GET /peekaboot/api/actuator/all/insights` | `locale` |
+| `GET /peekaboot/api/features` | &mdash; |
+| `GET /peekaboot/api/metrics` | &mdash; |
+| `GET /peekaboot/api/traces/raw` | `limit` (default `100`, clamped to 0&ndash;10000), `bucket` |
+| `GET /peekaboot/api/traces/insights` | `limit`, `bucket`, `rootActionType`, `rootOperation` |
+| `GET /peekaboot/api/traces/{traceId}/raw` | &mdash; |
+| `GET /peekaboot/api/traces/{traceId}/insights` | &mdash; |
+
+`/api/features` returns `{tracing, metrics, devToolbar}` &mdash; the same call the
+dashboard uses to decide whether to show its Metrics and Traces tabs at all. See [The
+dashboard]({{ '/docs/dashboard/' | relative_url }}) for what drives each flag.
+
+`rootActionType` accepts a comma-separated list of root action types (case-insensitive;
+unrecognized tokens are silently dropped rather than rejected). `rootOperation` matches
+against the trace's root operation name, partially and case-insensitively. See
+[Concepts]({{ '/docs/concepts/' | relative_url }}) for what a root action type and root
+operation are.
+
+## Raw vs insights
+
+Every area with both a `raw` and an `insights` variant returns the same underlying data at
+two different levels of processing:
+
+- **Raw** is what was captured &mdash; close to the source data (the actuator responses as
+  Spring Boot returns them, or a trace's spans in the order they arrived), with minimal
+  reshaping.
+- **Insights** is enriched: for traces, spans are assembled into a tree, duplicate spans
+  from double-instrumented layers are collapsed (see [Tracing &mdash; Span
+  deduplication]({{ '/docs/tracing/' | relative_url }}#span-deduplication)), issues like
+  `SLOW` or `HIGH_QUERY_COUNT` are detected and attached (see
+  [Concepts]({{ '/docs/concepts/' | relative_url }})), and correlated logs are attached to
+  the spans that emitted them. For the actuator surface, insights localizes and
+  human-readably summarizes the raw actuator data for the given `locale`
+  (`Locale.ENGLISH` if omitted or blank).
+
+The dashboard itself only ever calls the insights endpoints; raw exists for tooling that
+wants the less-processed shape, or that wants to do its own analysis on spans Peekaboot
+hasn't deduplicated or truncated an issue list onto.
+
+## The `bucket` parameter
+
+`bucket` accepts `all`, `errors`, or `slow` (case-insensitive), matching the three trace
+buckets described in [Tracing]({{ '/docs/tracing/' | relative_url }}). It defaults to
+`all`, and &mdash; unlike an invalid `rootActionType` token, which is silently dropped
+&mdash; an unrecognized or blank `bucket` value also falls back to `all` rather than
+producing an error response. There's no way to make either trace-listing endpoint 400 on a
+bad `bucket`.
+
+## `limit`
+
+`limit` defaults to `100` and is clamped to the range 0&ndash;10000 before use
+(`Math.clamp`), regardless of what's passed: a negative value is raised to `0` rather than
+throwing from the underlying stream operation, and a very large one is capped at `10000`
+rather than risking downstream arithmetic overflow. A `limit` of `0` returns an empty
+trace list, not an error.
+
+## Single-trace endpoints and 404
+
+`GET /peekaboot/api/traces/{traceId}/raw` and `GET
+/peekaboot/api/traces/{traceId}/insights` both return `404 Not Found` until that trace id
+has at least one span recorded in the store &mdash; that is, until the trace's first span
+has actually been exported into Peekaboot. If you already have a trace id (from a
+`Server-Timing` header, a toolbar bar, or a list endpoint) and query it immediately, a
+brief `404` before the store catches up is expected, not a bug; retry rather than treating
+it as "this trace doesn't exist."
