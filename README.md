@@ -10,26 +10,32 @@ preview, and is excluded from the built site (see `exclude:` in `_config.yml`).
 
 ## Local preview
 
-Building locally with a plain `jekyll` install can drift from what Pages actually renders,
-since Pages builds with its own pinned `github-pages` gem. Preview with Docker instead:
+Run `./serve.sh`. It builds the site and serves it at <http://localhost:4000>, rebuilding
+and reloading the browser as you edit:
 
 ```bash
-docker run --rm -v "$PWD":/srv/jekyll -w /srv/jekyll ruby:3.3 \
-  sh -c 'bundle config set path vendor/bundle && bundle install --quiet && bundle exec jekyll build --trace'
+./serve.sh              # build, serve, watch for edits
+./serve.sh --build      # build into _site/ and exit
+PORT=8080 ./serve.sh    # serve somewhere else
 ```
 
-`ruby:3.3` is confirmed working — the `github-pages` gem resolves and builds cleanly on it.
-The build does print a `faraday-retry` notice on stderr, from `jekyll-github-metadata`'s
-Faraday dependency, purely from loading the gem — unrelated to this site's content. What
-never happens is a live GitHub API call: this build makes none, so the notice is cosmetic,
-not a sign anything is broken. If a future `github-pages` release stops resolving on Ruby
-3.3, fall back to `ruby:3.1`, which is closer to what Pages itself runs.
+Everything runs in Docker, so no Ruby, Bundler or Node is needed on your machine — but
+Docker does have to be running. The first run takes a minute installing gems into
+`vendor/bundle` (gitignored); later runs start in seconds.
 
-Serve the built output:
+The script deliberately builds with the **`github-pages` gem**, the same pinned toolchain
+Pages itself uses, so what you see locally is what Pages will publish. A plain `jekyll`
+install can drift from that. It pins `ruby:3.3`, which is confirmed to resolve the gem; if a
+future `github-pages` release stops working there, fall back to `ruby:3.1`, closer to what
+Pages runs.
 
-```bash
-python3 -m http.server 8099 --directory _site
-```
+Two things you may notice, neither a problem:
+
+- A `faraday-retry` notice on stderr, from `jekyll-github-metadata`'s Faraday dependency,
+  emitted purely by loading the gem. No live GitHub API call is ever made during the build.
+- The container runs as your own user, so nothing it writes is root-owned. If an earlier
+  raw `docker run` left root-owned files behind, the script detects and repairs that on
+  startup rather than failing with a permission error you can't clear without `sudo`.
 
 ## Structure
 
