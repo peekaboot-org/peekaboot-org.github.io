@@ -24,8 +24,8 @@ for them &mdash; the database queries they run.
 
 With the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) also on, a trace
 additionally carries correlated logs and full header and parameter capture for the
-request and response. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) for
-exactly what that adds and what it still doesn't capture.
+request and response &mdash; that page has the detail, including what it still
+doesn't capture.
 
 ## The three buckets
 
