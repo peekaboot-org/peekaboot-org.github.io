@@ -35,6 +35,7 @@ health banner with its per-component breakdown, all sourced from Actuator's `inf
   <img src="{{ '/assets/img/screenshots/dashboard-environment-light.png' | relative_url }}"
        alt="The Environment tab with a config resource property source expanded, its real values shown in full except spring.datasource.password, rendered as ******, with a Show secrets toggle above the property list"
        loading="lazy">
+  <figcaption class="has-text-grey is-size-7">Masked by default.</figcaption>
 </figure>
 
 **Answers:** which property source wins for a given key, and why isn't my property taking
@@ -44,6 +45,17 @@ Every property source Spring resolved &mdash; command-line args, OS environment,
 system properties, `application.yml`, Peekaboot's own defaults, and the rest &mdash;
 listed in resolution order, each expandable to its raw key/value pairs, with a filter and
 the active profiles shown as a banner above them. Backed by Actuator's `env` endpoint.
+
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/dashboard-environment-revealed-light.png' | relative_url }}"
+       alt="The same config resource property source after clicking Show secrets: spring.datasource.password now rendered as sample_app_db_pwd instead of ******"
+       loading="lazy">
+  <figcaption class="has-text-grey is-size-7">Revealed, after
+  <code>peekaboot.enable-unmasking</code> is on <em>and</em> Show secrets is clicked
+  &mdash; see <a href="{{ '/docs/security/#masking' | relative_url }}">Security &mdash;
+  masking</a> for the two-opt-in design and why this particular value is safe to
+  publish.</figcaption>
+</figure>
 
 ## Flyway
 

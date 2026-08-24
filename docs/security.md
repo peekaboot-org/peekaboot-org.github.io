@@ -204,13 +204,25 @@ starts masked again.
   <img src="{{ '/assets/img/screenshots/dashboard-config-light.png' | relative_url }}"
        alt="The Config tab with the spring.datasource group expanded, its password value rendered as ****** alongside real values for its other properties, with a Show secrets toggle above the group list"
        loading="lazy">
+  <figcaption class="has-text-grey is-size-7">Masked &mdash; what every reader gets by
+  default, <code>enable-unmasking</code> on or off.</figcaption>
 </figure>
 
-The toggle stays unclicked here on purpose: this is the masked state every reader gets by
-default, `enable-unmasking` on or off. Clicking it, with both opt-ins above satisfied,
-swaps `******` for the real value in place &mdash; there's no separate revealed screenshot
-to compare against, deliberately; a published page is not the place to demonstrate an
-unmasked secret, real or fixture.
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/dashboard-config-revealed-light.png' | relative_url }}"
+       alt="The same spring.datasource group after clicking Show secrets: its password value now rendered as sample_app_db_pwd instead of ******, everything else on the tab unchanged"
+       loading="lazy">
+  <figcaption class="has-text-grey is-size-7">Revealed &mdash; only after
+  <code>enable-unmasking</code> is on <em>and</em> Show secrets is clicked.</figcaption>
+</figure>
+
+This is a genuine before/after, not a mockup: the same tab, the same run, before and after
+the toggle is clicked. Publishing the revealed one is safe because the value behind it,
+`sample_app_db_pwd`, is a placeholder that already sits in plaintext in this sample app's
+own `compose.yml` and `application-screenshots.yml` &mdash; revealing it here discloses
+nothing that wasn't already public. The point it's making isn't the value; it's the two
+steps it took to get there &mdash; a server-side property Peekaboot ships off by default,
+*and* a click nobody makes by accident.
 
 ### `show-values: always` only on a local run
 
