@@ -1,6 +1,6 @@
 ---
 title: Dev toolbar
-lead: Full request and response capture, the trace view, and logs correlated to the request &mdash; injected into the page you're already looking at.
+lead: Request and response detail, the trace view, and logs correlated to the request &mdash; injected into the page you're already looking at.
 permalink: /docs/dev-toolbar/
 ---
 
@@ -22,7 +22,7 @@ one. Once it's on, a small bar docks to the bottom of every HTML page your app r
 requests &mdash; and if anything goes wrong generating it, the original page goes out
 unmodified rather than a broken one.
 
-## Full request and response capture
+## Request and response detail
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
@@ -96,6 +96,6 @@ app's own API returns is checked for a `Server-Timing` header, and the trace id 
 loads straight into the bar, the same as if that call had been a page navigation. Execute
 any operation through Swagger's "Try it out" and the bar updates in place with that
 call's status, duration and query count; click it and the same trace-detail overlay
-opens, Spans, Queries, Logs and Request tabs included &mdash; full request/response
-capture and correlated logs for an API call, not just a page load. Calls to Peekaboot's
+opens, Spans, Queries, Logs and Request tabs included &mdash; the same request/response
+detail and correlated logs for an API call as for a page load. Calls to Peekaboot's
 own paths, Swagger's own paths, and `/actuator/**` are excluded from that interception.

@@ -41,7 +41,7 @@ and it's already there:
        loading="lazy">
 </figure>
 
-Full request and response capture, the trace view, and logs correlated to the request are
+Request and response detail, the trace view, and logs correlated to the request are
 one click away &mdash; see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) for what
 each part shows.
 
@@ -63,7 +63,7 @@ A dashboard comes with it too, at
 
 ## What you get immediately
 
-- The dev toolbar, on every page: full request and response capture, the trace view, and
+- The dev toolbar, on every page: request and response detail, the trace view, and
   logs correlated to the request &mdash; see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }})
 - The Dashboard tab: build and Git info, Spring Boot and Java versions, system and JVM
   details, and datasource status
