@@ -24,8 +24,10 @@ your own machine.
 | `GET /peekaboot/api/traces/insights` | `limit` (default `100`, clamped to 0&ndash;10000), `bucket`, `rootActionType`, `rootOperation` |
 | `GET /peekaboot/api/traces/{traceId}/insights` | &mdash; |
 
-These are the only five endpoints Peekaboot exposes &mdash; the dashboard and toolbar
-call exactly this set, nothing broader.
+These are the only five JSON endpoints Peekaboot exposes &mdash; the dashboard and
+toolbar call exactly this set, nothing broader. The dashboard UI itself &mdash; its HTML,
+JS and CSS &mdash; is served separately, under `/peekaboot/**` too; see [The
+dashboard]({{ '/docs/dashboard/' | relative_url }}).
 
 `/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled}` &mdash; the
 same call the dashboard uses to decide whether to show its Metrics and Traces tabs, and

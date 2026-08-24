@@ -18,7 +18,7 @@ visibility](#actuator-value-visibility) below.
 |---|---|---|
 | `peekaboot-defaults.yml` | `peekaboot.enabled` resolves to `true` | Full observability &mdash; health/env/info exposure, 100% trace sampling, Hibernate statistics, verbose SQL and HTTP logging |
 | `peekaboot-no-push-defaults.yml` | Always &mdash; even when Peekaboot is disabled | Stops the starter's bundled OTLP metrics registry from silently pushing to `localhost:4318` |
-| `peekaboot-dev-toolbar-defaults.yml` | `peekaboot.dev-toolbar` resolves to `true` | Shortens the span export delay so a trace is readable on the toolbar while the developer is still looking at the page |
+| `peekaboot-dev-toolbar-defaults.yml` | `peekaboot.enabled` **and** `peekaboot.dev-toolbar` both resolve to `true` | Shortens the span export delay so a trace is readable on the toolbar while the developer is still looking at the page |
 
 All three are added via `environment.getPropertySources().addLast(...)`, and the
 post-processor itself reports `Ordered.LOWEST_PRECEDENCE`. That means **any** property you
@@ -32,10 +32,12 @@ otherwise.
 Micrometer's OTLP registry on the classpath regardless of whether Peekaboot itself is on,
 and that registry pushes metrics on its own unless told not to &mdash; a risk that has
 nothing to do with whether you actually want the dashboard. `peekaboot-dev-toolbar-defaults.yml`
-is narrower still: it's only applied once `peekaboot.dev-toolbar` itself resolves to
-`true`, read back after Peekaboot's own defaults are already in place, so an application
-that sets `peekaboot.dev-toolbar` explicitly, in either direction, decides this regardless
-of `peekaboot.enabled`.
+is narrower still: `PeekabootDefaultsEnvironmentPostProcessor` checks `peekaboot.enabled`
+first and returns immediately if it resolves `false`, before it ever looks at
+`peekaboot.dev-toolbar` &mdash; so this file is only applied once *both* properties
+resolve to `true`. An application that sets `peekaboot.dev-toolbar` explicitly, in either
+direction, only decides this while `peekaboot.enabled` is also `true`; with Peekaboot
+itself disabled, an explicit `peekaboot.dev-toolbar: true` has no effect on this file.
 
 ## `peekaboot-defaults.yml`
 
@@ -111,7 +113,7 @@ works]({{ '/docs/how-activation-works/' | relative_url }})), and only on a local
 
 | Property | Spring default | Peekaboot's default | Why |
 |---|---|---|---|
-| `management.endpoint.env.show-values` | `never` | `always`, on a local run only; unset otherwise | Left at Spring's default, the Environment tab would render `******` for every entry &mdash; `os.name` and `server.port` included &mdash; making the tab useless. Spring Boot 4.1 registers no default masking function, so `always` doesn't mean unmasked on Peekaboot's own dashboard/API surface (`/peekaboot/**`): Peekaboot's own masking engine runs over every value it hands back there, replacing what looks like a secret with `******` and leaving the rest readable. Off a local run the property isn't set at all, so Spring's own `never` masks every value &mdash; Peekaboot's masking engine never gets a real one to inspect. It does **not** reach Spring's own `/actuator/env` if your application exposes that endpoint itself, on a local run. See [Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run). |
+| `management.endpoint.env.show-values` | `never` | `always`, on a local run only; unset otherwise | Left at Spring's default, the Environment tab would render `******` for every entry &mdash; `os.name` and `server.port` included &mdash; making the tab useless. Spring Boot 4.1 registers no default masking function, so `always` doesn't mean unmasked on Peekaboot's own dashboard/API surface (`/peekaboot/**`): Peekaboot's own masking engine runs over every value it hands back there, replacing what looks like a secret with `******` and leaving the rest readable. Off a local run the property isn't set at all, so Spring's own `never` masks every value &mdash; Peekaboot's masking engine never gets a real one to inspect. Peekaboot's masking engine does **not** run in front of Spring's own `/actuator/env`, though: if your application exposes that endpoint itself over HTTP, `show-values: always` widens it too, unmasked, on a local run. See [Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run). |
 | `management.endpoint.configprops.show-values` | `never` | `always`, on a local run only; unset otherwise | Same reasoning, for the Config tab's bound `@ConfigurationProperties` values. |
 
 ## `peekaboot-no-push-defaults.yml`

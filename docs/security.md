@@ -42,9 +42,13 @@ enable somewhere, read all of it.
   type, duration, install time and status, from Actuator's `flyway` endpoint.
 - **Request traces**, whenever [tracing]({{ '/docs/tracing/' | relative_url }}) is on
   (`peekaboot.tracing.enabled: true`, the default): every database query's SQL text
-  &mdash; including the literal bound parameter values `datasource-proxy` inlines into
-  it, not just the parameterized form &mdash; plus a basic method/path/status summary
-  read off the root span. This part isn't gated by the dev toolbar; it's already served
+  &mdash; captured verbatim from whichever tag your JDBC instrumentation populates
+  (`db.query.text`, its superseded spelling `db.statement`, or `datasource-proxy`'s
+  `jdbc.query[N]`, in that priority order &mdash; see [Auto-configured
+  defaults]({{ '/docs/auto-configured-defaults/' | relative_url }})), literal values and
+  all wherever the instrumentation or the statement itself carries them, not just the
+  parameterized form &mdash; plus a basic method/path/status summary read off the root
+  span. This part isn't gated by the dev toolbar; it's already served
   on the unauthenticated `/peekaboot/**` surface at stock local defaults. Once [the dev
   toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) is also on
   (`peekaboot.dev-toolbar: true`), traces additionally carry request and response

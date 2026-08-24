@@ -22,6 +22,11 @@ one. Once it's on, a small bar docks to the bottom of every HTML page your app r
 requests &mdash; and if anything goes wrong generating it, the original page goes out
 unmodified rather than a broken one.
 
+It mounts inside its own shadow root, isolated from your page's styles in both
+directions: your CSS can't reach in and restyle it, and its own styles can't leak out and
+affect your page. See [Theming]({{ '/docs/theming/' | relative_url }}) for how to
+override its look via the shared `tokens.css`.
+
 ## Request and response detail
 
 <figure class="image">
@@ -69,10 +74,12 @@ as they nested at runtime. The Queries tab lists the SQL each of those spans ran
 duration and, where your instrumentation provides them, row counts &mdash; recognizing
 OpenTelemetry's `db.query.text`/`db.statement` tags and `datasource-proxy`'s
 `jdbc.query[N]` tags, in that order, and falling back to a span's own name only when none
-of those tags are present and that name already looks like SQL. That fallback is why a
-database span in the tree above can read `SELECT customer_order` rather than the
-statement itself &mdash; that's OpenTelemetry's own summary form for the span, correct
-for a span tree, and a different rendering path than the Queries tab. See
+of those tags are present and that name already looks like SQL. The tree above shows a
+span's *name*, not extracted SQL &mdash; which is why a database span there can read
+`SELECT customer_order` rather than the statement itself: that's OpenTelemetry's own
+summary form for the span, correct for a span tree, and rendered by a completely
+different code path than the Queries tab, independent of what that tab's own fallback
+does. See
 [Tracing]({{ '/docs/tracing/' | relative_url }}) for what's actually captured, and
 [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a span, a root span and a
 trace status mean.
@@ -98,4 +105,5 @@ any operation through Swagger's "Try it out" and the bar updates in place with t
 call's status, duration and query count; click it and the same trace-detail overlay
 opens, Spans, Queries, Logs and Request tabs included &mdash; the same request/response
 detail and correlated logs for an API call as for a page load. Calls to Peekaboot's
-own paths, Swagger's own paths, and `/actuator/**` are excluded from that interception.
+own paths, Swagger's own paths (`/v3/api-docs`, `/swagger-ui/`), `/webjars/`, and
+`/actuator/**` are excluded from that interception.

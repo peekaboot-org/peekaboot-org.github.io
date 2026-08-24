@@ -74,7 +74,12 @@ local"]({{ '/docs/how-activation-works/' | relative_url }}#why-tests-count-as-no
 **Cause:** the OpenTelemetry SDK's `BatchSpanProcessor` batches and delays span export by
 default &mdash; 5 seconds. A test that queries `/peekaboot/api/traces/**` immediately
 after making a request can run before the span has actually reached Peekaboot's trace
-store, independent of whether tracing itself is working.
+store, independent of whether tracing itself is working. This doesn't apply if your test
+profile sets `peekaboot.dev-toolbar: true` explicitly &mdash; detection alone never turns
+it on inside a test JVM, see [Peekaboot is off inside `@SpringBootTest`](#peekaboot-is-off-inside-springboottest)
+above &mdash; since Peekaboot's own dev-toolbar default then shortens the delay to 200ms
+(see [Auto-configured defaults]({{ '/docs/auto-configured-defaults/' | relative_url }})),
+though even that can be too slow for a test that reads the trace store immediately.
 
 **Fix:** Shorten the export delay for the test profile:
 
