@@ -4,8 +4,7 @@ lead: The /peekaboot/api/** surface the dashboard, toolbar and trace-detail over
 permalink: /docs/api/
 ---
 
-Everything the dashboard shows is available as JSON in its own right, from
-`PeekabootController`.
+Everything the dashboard shows is available as JSON in its own right.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 Every endpoint below is unauthenticated by default. Peekaboot adds no security of its own,
@@ -25,8 +24,8 @@ your own machine.
 | `GET /peekaboot/api/traces/insights` | `limit` (default `100`, clamped to 0&ndash;10000), `bucket`, `rootActionType`, `rootOperation` |
 | `GET /peekaboot/api/traces/{traceId}/insights` | &mdash; |
 
-These are the only five endpoints `PeekabootController` exposes &mdash; the dashboard and
-toolbar call exactly this set, nothing broader.
+These are the only five endpoints Peekaboot exposes &mdash; the dashboard and toolbar
+call exactly this set, nothing broader.
 
 `/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled}` &mdash; the
 same call the dashboard uses to decide whether to show its Metrics and Traces tabs, and
@@ -56,9 +55,9 @@ the dashboard's tabs are built on (`health`, `info`, `env`, `loggers`, `flyway`,
 (`Locale.ENGLISH` if omitted or blank).
 
 For traces, `insights` enriches the underlying spans: they're assembled into a tree,
-duplicate spans from double-instrumented layers are collapsed (see [Tracing &mdash; Span
-deduplication]({{ '/docs/tracing/' | relative_url }}#span-deduplication)), issues like
-`SLOW` or `HIGH_QUERY_COUNT` are detected and attached (see
+duplicate spans from double-instrumented layers are collapsed (see [Configuration &mdash;
+`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row)),
+issues like `SLOW` or `HIGH_QUERY_COUNT` are detected and attached (see
 [Concepts]({{ '/docs/concepts/' | relative_url }})), and correlated logs are attached to
 the spans that emitted them. Both `GET /peekaboot/api/traces/insights` (the list) and
 `GET /peekaboot/api/traces/{traceId}/insights` (the detail) carry a `truncated` boolean
@@ -78,11 +77,10 @@ producing an error response. There's no way to make `GET /peekaboot/api/traces/i
 
 ## `limit`
 
-`limit` defaults to `100` and is clamped to the range 0&ndash;10000 before use
-(`Math.clamp`), regardless of what's passed: a negative value is raised to `0` rather than
-throwing from the underlying stream operation, and a very large one is capped at `10000`
-rather than risking downstream arithmetic overflow. A `limit` of `0` returns an empty
-trace list, not an error.
+`limit` defaults to `100` and is clamped to the range 0&ndash;10000 regardless of what's
+passed: a negative value is raised to `0`, and a very large one is capped at `10000`,
+rather than either producing an error. A `limit` of `0` returns an empty trace list, not
+an error.
 
 ## The single-trace endpoint and 404
 

@@ -112,10 +112,10 @@ versus `/configprops`, which back these two tabs.
 On a local run, both tabs mask sensitive values by default &mdash; a `password`-,
 `secret`-, `token`- or similarly-named key renders as `******`, and a handful of
 high-precision value patterns (a JWT, a PEM key block, a JDBC URL's embedded credential,
-and similar) catch a secret hiding inside an otherwise innocuous value. This isn't Spring
-Boot's own `Sanitizer` (as of the Spring Boot version Peekaboot ships against, 4.1, it
-registers no default `SanitizingFunction` at all) &mdash; it's Peekaboot's own masking
-engine, on by default, independent of anything your application configures.
+and similar) catch a secret hiding inside an otherwise innocuous value. This is
+Peekaboot's own masking engine, on by default and independent of anything your
+application configures &mdash; not Spring Boot's own sanitizing, which ships with nothing
+enabled out of the box.
 
 Off a local run, both tabs mask *everything*, not just recognised secrets: value
 visibility (`management.endpoint.env.show-values`/`.configprops.show-values`) is only set

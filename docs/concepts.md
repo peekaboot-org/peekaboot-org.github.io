@@ -28,10 +28,10 @@ in the trace detail overlay's Spans tab.
 The root span is the span at the top of that tree &mdash; the one nothing else is nested
 under. It's what makes the trace a trace: an HTTP request's root span is the request
 itself; a scheduled job's root span is the job invocation. The **root operation** is that
-span's raw name (`rootSpanData.name()`), shown in the trace list exactly as the
-instrumentation that created the span wrote it &mdash; lowercase, and not reformatted by
-Peekaboot: `http get /orders`, `http get /api/orders/{id}/report`, or, for a `@Scheduled`
-method, `task orderReconciler.reconcileOrders`.
+span's raw name, shown in the trace list exactly as the instrumentation that created it
+wrote it &mdash; lowercase, and not reformatted by Peekaboot: `http get /orders`,
+`http get /api/orders/{id}/report`, or, for a `@Scheduled` method,
+`task orderReconciler.reconcileOrders`.
 
 ## Root action type
 
@@ -59,27 +59,20 @@ has already failed. Both rows produce the same value and the same icon; only the
 condition and its position in the list differ.
 
 <div class="pk-callout" markdown="1">
-**Scheduled Job is keyed on Spring's own tag pair, not the trace's own instrumentation
-class, and it only recognizes a `@Scheduled` method Spring's scheduler actually invoked.**
-`code.function`/`code.namespace` are set by
-`DefaultScheduledTaskObservationConvention`, and *only* when Spring's
-`TaskScheduler` dispatches a `@Scheduled` method &mdash; not by name, not by bean type. Two
-consequences follow directly from that:
+**Scheduled Job only recognizes a `@Scheduled` method that Spring's own scheduler
+actually dispatched** &mdash; not by bean name, not by method name. Two consequences
+follow:
 
-- **A scheduler Spring doesn't instrument isn't recognized as Scheduled Job at all.**
-  Quartz, a raw `ScheduledExecutorService`, or any other timer mechanism that doesn't go
-  through Spring's own `@Scheduled` machinery carries neither tag, so its root span falls
-  through to Internal (or whatever else its own tags happen to match) &mdash; the trade-off
-  accepted deliberately in exchange for no false positives from a bean or method that
-  merely has "job", "cron" or "timer" in its name.
-- **A *direct* call to a `@Scheduled` method doesn't count either.** Calling
-  `orderReconciler.reconcileOrders()` directly &mdash; from a test, or from other
-  application code &mdash; never goes through Spring's scheduler, so
-  `DefaultScheduledTaskObservationConvention` never runs and the tag pair is never set. If
-  the method is also `@Observed`, that aspect's own span carries `class`/`method` tags
-  instead, which nothing above recognizes either &mdash; the trace classifies Internal, not
-  Scheduled Job, even though the method genuinely is `@Scheduled`. Only a call Spring's own
-  scheduler dispatches gets the Scheduled Job icon.
+- **A scheduler Spring doesn't manage isn't recognized as Scheduled Job at all.** Quartz,
+  a raw `ScheduledExecutorService`, or any other timer that doesn't go through Spring's
+  own `@Scheduled` machinery falls through to Internal (or whatever else its tags match)
+  instead &mdash; deliberately, rather than guessing from a bean or method name that
+  merely contains "job", "cron" or "timer".
+- **Calling a `@Scheduled` method directly doesn't count either.** Invoke
+  `orderReconciler.reconcileOrders()` yourself &mdash; from a test, or from other
+  application code &mdash; and the trace classifies Internal, even though the method is
+  genuinely `@Scheduled`. Only a call Spring's own scheduler dispatches gets the
+  Scheduled Job icon.
 </div>
 
 ## Trace status

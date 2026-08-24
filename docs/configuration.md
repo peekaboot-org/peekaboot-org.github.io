@@ -35,12 +35,9 @@ run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-r
 ## `peekaboot.lifecycle`
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**No `@ConfigurationProperties` class backs this prefix.** `enabled` exists only as a
-`@ConditionalOnProperty(prefix = "peekaboot.lifecycle", name = "enabled", havingValue =
-"true", matchIfMissing = true)` guard on `PeekabootLifecycleAutoConfiguration`. Setting it
-works exactly like any other Boot property, but because there's no properties bean behind
-it, it will **not** appear on the dashboard's own Config tab &mdash; unlike every other
-property on this page.
+**No `@ConfigurationProperties` class backs this prefix.** Setting it works exactly like
+any other Boot property, but it will **not** appear on the dashboard's own Config tab
+&mdash; unlike every other property on this page.
 </div>
 
 | Property | Type | Default | Controls |
@@ -63,23 +60,20 @@ Bound by `PeekabootTracingProperties`.
 
 ### `max-spans-per-trace` deserves more than a table row
 
-`max-spans-per-trace` is a *sliding window* over **deduplicated** spans: `TraceDataBundle`
-folds a duplicate span (the same operation double-instrumented by two layers, most
-commonly a JDBC driver-level span and a `datasource-proxy`/Micrometer span for the same
-query) into its surviving parent as each span is written, before the cap is ever checked.
-Only once that folding is done does the cap apply &mdash; if the deduplicated count still
-exceeds it, the **oldest** real spans are dropped to make room for new ones. Both happen
-at write time, in the trace store, before the trace is ever read.
+`max-spans-per-trace` is a *sliding window* over **deduplicated** spans. When the same
+operation is double-instrumented by two layers &mdash; most commonly a JDBC driver-level
+span and a `datasource-proxy`/Micrometer span for the same query &mdash; Peekaboot folds
+the duplicate into its surviving parent before the cap is ever checked. Only once that
+folding is done does the cap apply: if the deduplicated count still exceeds it, the
+**oldest** real spans are dropped to make room for new ones.
 
 This means the cap now counts real, distinct work rather than counting a double-tagged
 JDBC call as two spans against it &mdash; the previous defect (fixed) let truncation run
 *before* deduplication, so the cap bit roughly twice as early as its number suggested.
 When the cap genuinely is hit, that's no longer silent: the trace is flagged `truncated`,
 surfaced through the API and shown as a badge in the dashboard, so a shortened trace is
-never mistaken for a complete one. See [Tracing &mdash; Span
-deduplication]({{ '/docs/tracing/' | relative_url }}#span-deduplication) for the full
-mechanics, and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what
-`HIGH_QUERY_COUNT` actually checks.
+never mistaken for a complete one. See [Concepts]({{ '/docs/concepts/' | relative_url }})
+for what `HIGH_QUERY_COUNT` actually checks.
 
 ## `peekaboot.ui.tracing`
 
@@ -99,15 +93,13 @@ how each issue type is used.
 
 ### Memory-constrained
 
-`TraceDataBundle` holds spans and logs in two independent lists, each bounded by its own
-cap &mdash; logs are not nested inside spans, so the two caps add rather than multiply. The
-All bucket's worst-case entry count is `max-traces` &times; (`max-spans-per-trace` +
-`max-logs-per-trace`) &mdash; a Caffeine cache sized by trace count, each trace holding up
-to its own span cap plus its own log cap. At the documented defaults (1000 / 500 / 500)
-that's 1000 &times; 1000 = 1,000,000 entries, not the 250,000,000 a naive triple product
-would suggest. Turning all three down shrinks that ceiling proportionally; the Errors and Slow
-buckets are independent, smaller collections, so scale those down too rather than leaving
-them at their own defaults:
+Spans and logs are capped independently per trace, and the two caps add rather than
+multiply. The All bucket's worst-case entry count is `max-traces` &times;
+(`max-spans-per-trace` + `max-logs-per-trace`). At the documented defaults (1000 / 500 /
+500) that's 1000 &times; 1000 = 1,000,000 entries, not the 250,000,000 a naive triple
+product would suggest. Turning all three down shrinks that ceiling proportionally; the
+Errors and Slow buckets are independent, smaller collections, so scale those down too
+rather than leaving them at their own defaults:
 
 ```yaml
 peekaboot:

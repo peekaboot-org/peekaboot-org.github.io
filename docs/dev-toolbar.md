@@ -73,9 +73,9 @@ of those tags are present and that name already looks like SQL. That fallback is
 database span in the tree above can read `SELECT customer_order` rather than the
 statement itself &mdash; that's OpenTelemetry's own summary form for the span, correct
 for a span tree, and a different rendering path than the Queries tab. See
-[Tracing]({{ '/docs/tracing/' | relative_url }}) for what's actually captured and how
-span deduplication works, and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what
-a span, a root span and a trace status mean.
+[Tracing]({{ '/docs/tracing/' | relative_url }}) for what's actually captured, and
+[Concepts]({{ '/docs/concepts/' | relative_url }}) for what a span, a root span and a
+trace status mean.
 
 ## Logs correlated to the request
 

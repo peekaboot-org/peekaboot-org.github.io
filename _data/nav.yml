@@ -35,3 +35,8 @@
       url: /docs/security/
     - title: Troubleshooting
       url: /docs/troubleshooting/
+
+- title: About
+  pages:
+    - title: Acknowledgements
+      url: /docs/acknowledgements/

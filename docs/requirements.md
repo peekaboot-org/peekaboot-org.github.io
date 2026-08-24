@@ -10,13 +10,10 @@ permalink: /docs/requirements/
 - **Spring Boot 4.1** &mdash; built and tested against this version; earlier 4.x releases are untested
 - **A servlet web application** &mdash; the dashboard is served through Spring MVC
 
-`PeekabootAutoConfiguration` &mdash; the configuration that component-scans Peekaboot's
-dashboard and, with it, `PeekabootWebConfig` (a `WebMvcConfigurer`, a servlet-only Spring
-MVC type) &mdash; carries `@ConditionalOnWebApplication(Type.SERVLET)`, the same guard
-`DevToolbarAutoConfiguration` and `TracingInterceptorAutoConfiguration` also carry. On a
-non-servlet application (WebFlux, or no web application at all), the condition simply
-doesn't match: the dashboard, its controllers and its actuator wiring never register,
-application startup is unaffected, and nothing further needs to be done on your side.
+On a non-servlet application &mdash; WebFlux, or no web application at all &mdash; the
+dashboard and the dev toolbar simply don't register. Startup isn't affected, nothing
+errors, and there's nothing further to do on your side; there's just no `/peekaboot/**`
+to reach.
 
 ## What the starter brings
 
@@ -35,22 +32,15 @@ autoconfigure module.
 
 ## Graceful degradation
 
-The pieces below degrade gracefully when something they depend on is missing &mdash; each is
-gated by its own `@ConditionalOn*` annotation that simply skips it. This assumes you're
-already running a servlet web application; if you're not, see above &mdash; that's a
-different situation entirely (the dashboard itself doesn't register, rather than
-registering and then finding something missing).
+The pieces below degrade gracefully when something they depend on is missing, rather than
+failing to start. This assumes you're already running a servlet web application; if
+you're not, see above &mdash; that's a different situation entirely (the dashboard itself
+doesn't register, rather than registering and then finding something missing).
 
-**No `Tracer` bean.** The dev toolbar's two filters &mdash; the one that captures
-request/response detail and the one that injects the toolbar into HTML &mdash; both require a
-Micrometer `Tracer` bean (`@ConditionalOnBean(Tracer.class)` in `DevToolbarAutoConfiguration`).
-Without one, neither registers: the toolbar produces nothing, though the dashboard's other
-tabs are unaffected. The starter provides a `Tracer` bean by default through
-`spring-boot-starter-opentelemetry`; you would only lose it by explicitly excluding that
-bridge.
+**No `Tracer` bean.** Without a Micrometer `Tracer` bean, the dev toolbar doesn't
+register at all &mdash; it produces nothing, though the rest of the dashboard is
+unaffected. The starter provides a `Tracer` bean by default; you'd only lose it by
+explicitly excluding the OpenTelemetry starter.
 
-**No OpenTelemetry SDK on the classpath.** The bridge that exports spans into the trace store
-(`OtelTracingAutoConfiguration`) is conditional on `io.opentelemetry.sdk.trace.export.SpanExporter`
-being present. Without it, the trace store itself is still created
-(`PeekabootTracingAutoConfiguration` carries no such condition), but nothing populates it
-&mdash; the Traces tab stays empty.
+**No OpenTelemetry SDK on the classpath.** The trace store itself is still created, but
+nothing populates it &mdash; the Traces tab stays empty rather than missing entirely.

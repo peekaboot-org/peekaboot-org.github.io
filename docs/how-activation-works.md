@@ -4,40 +4,25 @@ lead: Whether Peekaboot ends up running somewhere it shouldn't comes down to one
 permalink: /docs/how-activation-works/
 ---
 
-## The heuristic
+## What counts as local
 
-`peekaboot.enabled` is a normal Spring Boot property with one twist: before your own
-configuration is read, an `EnvironmentPostProcessor`
-(`PeekabootDefaultsEnvironmentPostProcessor`) computes a default for it and adds that default
-at the lowest possible precedence &mdash; so any `application.yml` entry, environment
-variable, or system property you set always wins, in either direction.
-
-The same detection, in the same property source, also supplies the default for
-`peekaboot.dev-toolbar` &mdash; a local run turns the dev toolbar on too, not only the
-dashboard, and an explicit `peekaboot.dev-toolbar` setting wins over the detection exactly
-like `peekaboot.enabled` does. It supplies two further defaults besides:
-`management.endpoint.env.show-values` and `.configprops.show-values`, set to `always` only
-on a local run and left unset otherwise. See [Configuration]({{ '/docs/configuration/' | relative_url }})
-and [Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run)
-for what each of those actually controls.
-
-The detection itself (`LocalDevDetector`) mirrors the heuristics Spring Boot DevTools uses:
-
-1. Running as a native image always resolves to `false`, before anything else is checked.
-2. Otherwise, if the current thread's context class loader is DevTools' `RestartClassLoader`
-   (the `restartedMain` thread Boot DevTools relaunches your app on), the result is `true`
-   immediately &mdash; DevTools only relaunches like that for a local launch in the first
-   place, so the class loader alone is proof.
-3. Otherwise, the result is `true` only when *all* of the following hold: the thread is named
-   `main`; its context class loader is the JDK's own `AppClassLoader` &mdash; not Spring
-   Boot's `LaunchedClassLoader` (a packaged, executable jar) and not a servlet container's
-   webapp loader (a deployed war); and the call stack carries no `org.junit.runners.`,
-   `org.junit.platform.`, `org.springframework.boot.test.`, Spring Boot's AOT processor, or
-   `cucumber.runtime.` frames.
+`peekaboot.enabled` has no fixed default. Before your own configuration is read,
+Peekaboot works out whether it's running locally and sets the default from that &mdash;
+at the lowest possible precedence, so any `application.yml` entry, environment variable,
+or system property you set always wins, in either direction.
 
 In practice: an IDE run, `mvn spring-boot:run`, and `gradle bootRun` all default to on. A
-`java -jar` of the packaged artifact, a container, a native image, and an AOT-processed build
-all default to off.
+`java -jar` of the packaged artifact, a container, a native image, an AOT-processed build,
+and a test all default to off.
+
+The same detection also supplies the default for `peekaboot.dev-toolbar` &mdash; on for a
+local run, off elsewhere &mdash; independently of whatever `peekaboot.enabled` itself
+resolves to. Turning Peekaboot on deliberately in a shared environment doesn't also
+inject the toolbar there; set `peekaboot.dev-toolbar` explicitly if you want both. It
+also decides whether the Environment and Config tabs show real values or `******` by
+default. See [Configuration]({{ '/docs/configuration/' | relative_url }}) and
+[Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run)
+for what each of those actually controls.
 
 ## Per-feature switches
 
@@ -46,37 +31,23 @@ below is reachable while it doesn't.
 
 | Feature | Switch | Additional requirement |
 |---|---|---|
-| Dashboard UI & API | `peekaboot.enabled=true` | A servlet web application (guarded by `@ConditionalOnWebApplication(Type.SERVLET)` &mdash; see note below); Actuator's `HealthEndpoint`/`InfoEndpoint` on the classpath (present via the starter) |
-| Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (auto-detected: on for a local run, off elsewhere, same detection as `peekaboot.enabled`, not keyed on it) | A servlet web application; a Micrometer `Tracer` bean (present by default via `spring-boot-starter-opentelemetry`); also needs `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar bar has no trace data to show |
-| In-Memory Tracing | `peekaboot.enabled=true` **and** `peekaboot.tracing.enabled=true` (on by default) | The OpenTelemetry SDK on the classpath, to actually feed spans into the store (present via the starter) |
+| Dashboard UI & API | `peekaboot.enabled=true` | A servlet web application; Actuator's health and info endpoints on the classpath (present via the starter) |
+| Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (auto-detected: on for a local run, off elsewhere, same detection as `peekaboot.enabled`, not keyed on it) | A servlet web application; a Micrometer `Tracer` bean (present by default); `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar has no trace data to show |
+| In-Memory Tracing | `peekaboot.enabled=true` **and** `peekaboot.tracing.enabled=true` (on by default) | The OpenTelemetry SDK on the classpath (present via the starter) |
 | Startup Summary | `peekaboot.enabled=true` **and** `peekaboot.lifecycle.enabled=true` (on by default) | None |
-| Observability Defaults | `peekaboot.enabled` resolves to `true` (detection or override) | None &mdash; applied as a lowest-precedence property source, skipped entirely while disabled |
+| Observability Defaults | `peekaboot.enabled` resolves to `true` (detection or override) | None &mdash; skipped entirely while disabled |
 
-`PeekabootAutoConfiguration` &mdash; the configuration the Dashboard UI & API row depends
-on &mdash; carries the same `@ConditionalOnWebApplication(Type.SERVLET)` guard as the
-Debug Toolbar and Tracing Interceptor auto-configurations. It component-scans
-`PeekabootWebConfig`, a servlet-only `WebMvcConfigurer`; without the guard, that bean
-would still get created (constructing a `WebMvcConfigurer` needs nothing servlet-specific
-&mdash; only Spring MVC's own machinery, absent on a non-servlet application, ever calls
-back into it) and simply never do anything, alongside the controllers and actuator wiring
-component-scanned with it. With the guard, none of that registers at all on a non-servlet
-application: application startup is unaffected, and the dashboard stays inactive the same
-way the Debug Toolbar row above does when its own condition isn't met. See
+If your application isn't a servlet web app &mdash; WebFlux, or no web application at all
+&mdash; the dashboard and toolbar simply don't register: startup isn't affected, nothing
+crashes, there's just nothing to see at `/peekaboot/**`. See
 [Requirements]({{ '/docs/requirements/' | relative_url }}) for the full picture.
-
-`peekaboot.lifecycle.enabled` is a real switch (`@ConditionalOnProperty` on
-`PeekabootLifecycleAutoConfiguration`), but there is no `@ConfigurationProperties` class behind
-it &mdash; it will not show up on the dashboard's own Config tab, even though it controls real
-behaviour.
 
 ## Why tests count as "not local"
 
-A JUnit run under Maven Surefire or Gradle's test task typically ends up on a thread named
-`main` with the plain `AppClassLoader` &mdash; the same shape as a genuine local launch.
-`LocalDevDetector` tells the two apart with the stack-trace check from step 3 above: any frame
-from `org.junit.runners.`, `org.junit.platform.`, `org.springframework.boot.test.`, or
-`cucumber.runtime.` disqualifies the detection, so tests default to `peekaboot.enabled=false`
-even when run from the same IDE as your local launch.
+A JUnit test run can look like a local launch on the surface &mdash; same thread, same
+class loader &mdash; but Peekaboot treats it as not local anyway, specifically so tests
+don't accidentally carry the dashboard, the toolbar, and the observability defaults into
+CI.
 
 If a test needs Peekaboot active, set the property explicitly:
 

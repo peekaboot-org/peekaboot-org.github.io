@@ -18,11 +18,10 @@ prefix, for instance). If Peekaboot should be active here, set `peekaboot.enable
 explicitly &mdash; as an `application.yml` entry, an environment variable, or a system
 property.
 
-The `/peekaboot` prefix itself is fixed: `PeekabootController` is annotated
-`@RequestMapping("/peekaboot")` with no property to move it. If your `server.servlet.context-path`
-is non-empty, the dashboard is under that context path too (e.g. `/my-app/peekaboot/`),
-which is the most common cause of a 404 when the application-ready summary shows Peekaboot
-is otherwise active.
+The `/peekaboot` prefix itself is fixed &mdash; there's no property to move it. If your
+`server.servlet.context-path` is non-empty, the dashboard is under that context path too
+(e.g. `/my-app/peekaboot/`), which is the most common cause of a 404 when the
+application-ready summary shows Peekaboot is otherwise active.
 
 ## The dashboard loads, but the Traces tab is empty
 
@@ -58,11 +57,10 @@ on a page you expect it on, confirm that page's response is genuinely HTML with 
 
 ## Peekaboot is off inside `@SpringBootTest`
 
-**Cause:** this is by design, not a bug. `LocalDevDetector` treats a JUnit run under
-Maven Surefire or Gradle's test task as "not local" even when it otherwise looks like one
-&mdash; same thread name, same class loader &mdash; specifically so tests don't
-accidentally carry the dashboard, the toolbar, and the observability defaults into CI.
-See [How activation works &mdash; why tests count as "not
+**Cause:** this is by design, not a bug. A JUnit run under Maven Surefire or Gradle's test
+task can look like a local launch on the surface, but Peekaboot treats it as not local
+anyway, specifically so tests don't accidentally carry the dashboard, the toolbar, and the
+observability defaults into CI. See [How activation works &mdash; why tests count as "not
 local"]({{ '/docs/how-activation-works/' | relative_url }}#why-tests-count-as-not-local).
 
 **Fix:** If a specific test needs Peekaboot active, set the property on that test:
@@ -159,12 +157,9 @@ tabs to show real values somewhere other than your own machine.
 
 ## A trace has no logs
 
-**Cause:** correlated logs are not a baseline tracing feature. Peekaboot's Logback
-appender, which tags each log event with the active trace/span id and feeds it into the
-trace store, is registered only inside `DevToolbarAutoConfiguration` &mdash; the same
-place that registers the request-capture filter. Both are conditional on
-`peekaboot.dev-toolbar: true`; tracing being on (`peekaboot.tracing.enabled`, on by
-default) is not enough by itself.
+**Cause:** correlated logs are not a baseline tracing feature. They only start flowing
+once the dev toolbar itself is on &mdash; tracing being on (`peekaboot.tracing.enabled`,
+on by default) is not enough by itself.
 
 **Fix:** Set `peekaboot.dev-toolbar: true`. See [Tracing &mdash; what gets
 captured]({{ '/docs/tracing/' | relative_url }}#what-gets-captured) for exactly what

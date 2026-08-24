@@ -7,13 +7,10 @@ permalink: /docs/theming/
 ## One file, three surfaces
 
 The dashboard document, the dev toolbar, and the trace-detail overlay all load the exact
-same `tokens.css` from `/peekaboot/ui/assets/tokens.css`. The dashboard links it directly;
-the toolbar and overlay each mount into their own [shadow
-root]({{ '/docs/dev-toolbar/' | relative_url }}#shadow-dom-isolation) and link the
-identical file into that shadow root themselves (`attachSharedStyles()`, alongside
-`base.css` and `components.css`). Every custom property `tokens.css` defines is doubled
-onto `:root` (for the dashboard document) and `:host` (for the two shadow roots), so the
-same declarations apply in both contexts from one file.
+same `tokens.css` from `/peekaboot/ui/assets/tokens.css`. The toolbar and overlay each
+render inside their own shadow root, isolated from the page's own styles, but they link
+the identical file into it too, so the same set of custom properties reaches all three
+surfaces from one place &mdash; you don't need to override anything twice.
 
 Overriding those `--pk-*` custom properties re-themes all three surfaces at once. There's
 nothing else to override for colour: component styles and layout in `base.css` and
