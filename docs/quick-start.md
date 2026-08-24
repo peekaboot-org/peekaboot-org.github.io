@@ -56,11 +56,14 @@ Open the dashboard at
   has served since it started
 
 <div class="pk-callout" markdown="1">
-The toolbar you may have heard about isn't part of this: it's opt-in. Set
-`peekaboot.dev-toolbar: true` in `application.yml` to inject it into your HTML responses
-&mdash; and, on the same flag, to start correlating log messages to each trace and
-capturing full request/response detail (headers, query/form parameters, resolved
-controller), neither of which is captured without it.
+The toolbar you may have heard about is part of this too: on a local run like the one
+above, `peekaboot.dev-toolbar` defaults on along with everything else, so it's already
+docked at the bottom of your pages. That flag also turns on correlating log messages to
+each trace and capturing full request/response detail (headers, query/form parameters,
+resolved controller), neither of which is captured without it. Set
+`peekaboot.dev-toolbar: false` to turn it off while keeping the rest of the dashboard; see
+[How activation works]({{ '/docs/how-activation-works/' | relative_url }}) for exactly
+what counts as a local run.
 </div>
 
 ## Next

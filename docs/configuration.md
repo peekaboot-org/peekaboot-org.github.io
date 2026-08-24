@@ -18,8 +18,19 @@ Bound by `PeekabootProperties`.
 | Property | Type | Default | Controls |
 |---|---|---|---|
 | `enabled` | boolean | auto-detected | The master switch for the dashboard, its API, and Peekaboot's own defaults. There is no fixed default: an `EnvironmentPostProcessor` computes one from the launch context and adds it at the lowest property-source precedence, so any value you set &mdash; `application.yml`, an environment variable, a system property &mdash; always wins. See [How activation works]({{ '/docs/how-activation-works/' | relative_url }}). |
-| `dev-toolbar` | boolean | `false` | Injects the dev toolbar into HTML responses, and turns on correlated-log capture and full request/response detail capture (headers, query/form parameters, resolved controller &mdash; not body content or uploaded file names, which the trace data model reserves fields for but the capture filter doesn't populate). See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}). |
-| `enable-unmasking` | boolean | `false` | Server-side gate for revealing real, unmasked values from the dashboard/API. On its own it changes nothing &mdash; it only makes an `unmask=true` request parameter *possible*, on `GET /peekaboot/api/actuator/all/insights` and `.../raw`, and it's what makes the Environment/Config tabs' "Show secrets" toggle appear at all. See [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking). |
+| `dev-toolbar` | boolean | auto-detected: on for a local run, off elsewhere | Injects the dev toolbar into HTML responses, and turns on correlated-log capture and full request/response detail capture (headers, query/form parameters, resolved controller &mdash; not body content or uploaded file names, which the trace data model reserves fields for but the capture filter doesn't populate). Computed by the same launch-context detection as `enabled` above, at the same lowest precedence, so any value you set wins either way &mdash; it is **not** keyed on `peekaboot.enabled`, so an application that turns Peekaboot on deliberately in a shared environment does not also get the toolbar. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) and [How activation works]({{ '/docs/how-activation-works/' | relative_url }}). |
+| `enable-unmasking` | boolean | `false` | Server-side gate for revealing real, unmasked values from the dashboard/API. On its own it changes nothing &mdash; it only makes an `unmask=true` request parameter *possible*, on `GET /peekaboot/api/actuator/all/insights`, and it's what makes the Environment/Config tabs' "Show secrets" toggle appear at all. It does not control whether those tabs' values are readable in the first place &mdash; see the actuator-visibility note below. See [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking). |
+
+Actuator value visibility for the Environment and Config tabs follows that same
+launch-context detection, not `enable-unmasking` above: `management.endpoint.env.show-values`
+and `management.endpoint.configprops.show-values` resolve to `always` only on a local run,
+and are left unset otherwise, so Spring's own default (`never`) masks every property
+off-local &mdash; `server.port` included, not just recognisable secrets. `enable-unmasking`
+is a separate, narrower gate that only matters once a value is visible at all: whether it
+can also be *revealed* unmasked. See [Auto-configured
+defaults]({{ '/docs/auto-configured-defaults/' | relative_url }}) and [Security &mdash;
+`show-values: always` only on a local
+run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
 
 ## `peekaboot.lifecycle`
 

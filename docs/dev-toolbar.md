@@ -4,7 +4,11 @@ lead: A collapsed bar on every HTML response, one click away from the full trace
 permalink: /docs/dev-toolbar/
 ---
 
-The dev toolbar is opt-in. Enable it with:
+The dev toolbar defaults on for a local run, off elsewhere &mdash; the same launch-context
+detection as `peekaboot.enabled` itself, computed independently of it, so turning
+Peekaboot on deliberately in a shared environment doesn't also inject the toolbar there.
+See [How activation works]({{ '/docs/how-activation-works/' | relative_url }}) for exactly
+what counts as local. Set it explicitly either direction to override the detection:
 
 ```yaml
 peekaboot:
@@ -41,9 +45,15 @@ toolbar loads in an idle mode there and picks up trace ids from your API calls i
 Docked to the bottom of the page, it shows the response status (colour-coded), method and
 path, the resolved controller method, request duration, database query count and total
 query time, and the trace id (labelled and copyable). The metrics arrive asynchronously:
-the bar polls `/peekaboot/api/traces/{traceId}/insights` with exponential backoff until
-the trace is complete, since the response you're looking at can finish rendering before
-its trace has fully assembled.
+the bar fetches `/peekaboot/api/traces/{traceId}/insights` on a fixed four-attempt
+schedule &mdash; 250ms, 500ms, 1s and 3s after the previous attempt, the last landing
+around 4.75s after the response the bar is reporting on arrived &mdash; and re-renders on
+each response that carries a trace. All four attempts always run, rather than stopping the
+first time the trace looks complete, so a span that ends after the root span (an `@Async`
+continuation, a streamed body) still reaches the bar. Peekaboot's own 200ms span export
+delay when the toolbar is on (see [Auto-configured
+defaults]({{ '/docs/auto-configured-defaults/' | relative_url }})) means a trace is
+normally there well before the last attempt.
 
 Clicking anywhere on the bar &mdash; other than the trace id or the dashboard link, which
 have their own targets &mdash; opens the full trace detail overlay for that request.
@@ -65,14 +75,18 @@ path, headers, and the resolved controller/handler method). See
 deduplication works, and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a
 span, a root span and a trace status mean.
 
-<div class="pk-callout pk-callout--warning" markdown="1">
-**The Queries tab only shows real SQL text when your JDBC instrumentation tags spans with
-`db.statement` or `jdbc.query[N]`.** A stack built on `datasource-micrometer-opentelemetry`
-&mdash; the OpenTelemetry-native alternative, and what `peekaboot-testing-app` itself uses
-&mdash; tags query spans with `db.query.text` instead, which Peekaboot doesn't currently
-recognize; affected queries fall back to showing the span's own abbreviated name (e.g.
-`SELECT person`) rather than the statement. This is a known, unfixed gap in
-`QueryExtractor.findSql`.
+<div class="pk-callout" markdown="1">
+**The Queries tab shows real SQL text as long as your JDBC instrumentation tags spans with
+one of four recognized patterns**, checked in this order by `QueryExtractor.findSql`:
+`db.query.text` (OpenTelemetry's current semantic convention, emitted by
+`datasource-micrometer-opentelemetry` &mdash; the OpenTelemetry-native stack
+`peekaboot-testing-app` itself uses), then `db.statement` (the same convention's
+superseded spelling), then `jdbc.query[N]` (`datasource-proxy`/Micrometer). Only if none
+of those tags are present does the tab fall back to the span's own name, and only when
+that name itself already looks like SQL (starts with `SELECT `, `INSERT `, `UPDATE ` or
+`DELETE `). This is about the Queries tab specifically: the Spans tab shows a span's own
+name regardless &mdash; OpenTelemetry's own summary form (e.g. `SELECT customer_order`),
+which is correct there, not a fallback.
 </div>
 
 ## Shadow DOM isolation

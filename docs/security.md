@@ -19,13 +19,16 @@ on.
 This is everything, not a curated subset. If you're deciding whether Peekaboot is safe to
 enable somewhere, read all of it.
 
-- **Environment values.** Every property source Spring resolved, key and value, sourced
-  from Actuator's `env` endpoint. See [Masking](#masking) below &mdash; by default, a
-  value whose key or shape looks like a secret is replaced with `******`; everything else
-  is shown verbatim.
-- **Config property values.** Every value bound to a `@ConfigurationProperties` bean,
-  from Actuator's `configprops` endpoint. Same masking, same caveat: it catches the
-  common shapes, not everything.
+- **Environment values, on a local run.** Every property source Spring resolved, key and
+  value, sourced from Actuator's `env` endpoint. See [Masking](#masking) below &mdash; by
+  default, a value whose key or shape looks like a secret is replaced with `******`;
+  everything else is shown verbatim. This is what a local run shows; off a local run every
+  value masks, this rule set included &mdash; see [actuator value
+  visibility](#show-values-always-only-on-a-local-run) below.
+- **Config property values, on a local run.** Every value bound to a
+  `@ConfigurationProperties` bean, from Actuator's `configprops` endpoint. Same masking,
+  same caveat: it catches the common shapes, not everything &mdash; and the same
+  local-run condition above applies here too.
 - **Health detail.** Per-component status &mdash; datasource, disk space, custom
   indicators &mdash; not just an aggregate UP/DOWN. A custom `HealthIndicator`'s detail
   map is masked the same way as everything else &mdash; see [Masking](#masking).
@@ -61,22 +64,11 @@ enable somewhere, read all of it.
 - **Metrics.** Every Micrometer meter's name, tags and measurements, read directly from
   the `MeterRegistry`. Tag values are masked the same way as everything else.
 
-### The raw actuator surface goes further than the dashboard tabs
-
 The dashboard's tabs are backed by `GET /peekaboot/api/actuator/all/insights`, which
 invokes exactly seven Actuator endpoints
 (`health`, `info`, `env`, `loggers`, `flyway`, `configprops`, `scheduledtasks` &mdash; see
 [`PeekabootActuatorService`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/service/PeekabootActuatorService.java)).
-A separate, equally unauthenticated endpoint, `GET /peekaboot/api/actuator/all/raw`,
-invokes **every** Actuator endpoint bean present in your application except `heapdump`,
-`threaddump` and `logfile` (excluded there only because they're expensive to run on
-every request, not because they're sensitive). If your application has the `beans`,
-`mappings`, `conditions`, `caches` or any other standard Actuator endpoint active, calling
-that URL directly &mdash; nothing in the dashboard UI does, but nothing stops anyone else
-&mdash; returns all of it. This response is masked too, but generically: rather than the
-seven typed mappers behind `/insights`, `GET /peekaboot/api/actuator/all/raw` walks
-whatever shape each endpoint's own JSON happens to have and applies the same key/value
-rules to it wherever they appear in the tree &mdash; see [Masking](#masking). See [HTTP
+That's the whole actuator surface Peekaboot exposes over HTTP &mdash; see [HTTP
 API]({{ '/docs/api/' | relative_url }}) for the full endpoint list.
 
 ## What Peekaboot does not do
@@ -191,11 +183,10 @@ By default, masking cannot be turned off from the browser. Two things must both 
 1. **`peekaboot.enable-unmasking`** (new property, default `false`). While `false`,
    there is no way &mdash; dashboard, API, or otherwise &mdash; to get an unmasked value
    out of Peekaboot.
-2. **An `unmask=true` query parameter** on `GET /peekaboot/api/actuator/all/insights` or
-   `GET /peekaboot/api/actuator/all/raw`. Without it, both endpoints mask, regardless of
-   the property. With it, and *only* while the property above is also `true`, both
-   return real values. The parameter alone does nothing &mdash; it cannot be used as a
-   bypass by itself.
+2. **An `unmask=true` query parameter** on `GET /peekaboot/api/actuator/all/insights`.
+   Without it, the endpoint masks, regardless of the property. With it, and *only* while
+   the property above is also `true`, it returns real values. The parameter alone does
+   nothing &mdash; it cannot be used as a bypass by itself.
 
 The dashboard's Environment and Config tabs carry a "Show secrets" toggle that drives
 the parameter, but only when `GET /peekaboot/api/features` reports `unmaskingEnabled:
@@ -205,29 +196,49 @@ dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config) for wh
 toggling it does. Its state isn't persisted: reloading the page, or opening a new tab,
 starts masked again.
 
-### `show-values: always` is still set, deliberately
+### `show-values: always` only on a local run
 
-Peekaboot's own defaults set `management.endpoint.env.show-values` and
-`.configprops.show-values` to `always`, overriding Spring's own default of `never`. This
-looks like exactly the setting that caused the original problem, and an earlier version
-of this design called for removing it. It's kept, for a structural reason: Spring Boot
-4.1 registers no default `SanitizingFunction` regardless of `show-values`, so falling
-back to Spring's own default would not hand masking over to Spring &mdash; it would
-return `******` for *every* property unconditionally, including harmless ones like
-`server.port`, and would leave Peekaboot's own masking engine with no real value to ever
-inspect or, later, reveal. Controlled unmasking would then have nothing to unmask either.
-`show-values: always` is what lets Peekaboot's own engine see real values and decide,
-correctly, what to show.
+`management.endpoint.env.show-values` and `.configprops.show-values` are set to `always`
+only on a local run, at the same lowest-precedence, launch-context-detected property
+source that resolves `peekaboot.enabled` and `peekaboot.dev-toolbar` (see [How activation
+works]({{ '/docs/how-activation-works/' | relative_url }})) &mdash; not unconditionally,
+and not from `peekaboot-defaults.yml`. Off a local run, neither property is set at all, so
+Spring's own default (`never`) applies.
+
+On a local run, this looks like exactly the setting that caused the original problem, and
+an earlier version of this design called for removing it there too. It's kept, for a
+structural reason: Spring Boot 4.1 registers no default `SanitizingFunction` regardless of
+`show-values`, so falling back to Spring's own default would not hand masking over to
+Spring &mdash; it would return `******` for *every* property unconditionally, including
+harmless ones like `server.port`, and would leave Peekaboot's own masking engine with no
+real value to ever inspect or, later, reveal. Controlled unmasking would then have nothing
+to unmask either. `show-values: always`, on a local run, is what lets Peekaboot's own
+engine see real values and decide, correctly, what to show.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**The accepted cost:** `show-values: always` also widens your own application's
-`/actuator/env` and `/actuator/configprops` endpoints, if you expose them over HTTP
-yourself, independently of Peekaboot &mdash; Peekaboot's masking has no part in that
-path at all; it only ever runs inside Peekaboot's own `/peekaboot/**` surface. If you
-expose those actuator endpoints yourself and want them to stay masked, set
-`management.endpoint.env.show-values` (and `.configprops.show-values`) to `never`
-explicitly in your own configuration &mdash; that overrides Peekaboot's lowest-precedence
-default.
+**Off a local run, every property masks &mdash; not just the ones that look like
+secrets.** Peekaboot calls the same `env`/`configprops` endpoint beans in-process that
+`show-values` governs (see [What Peekaboot does not do](#what-peekaboot-does-not-do)); with
+the property unset, Spring's own `never` default makes those endpoint beans return
+`******` for every value before Peekaboot's own masking engine ever sees a real one,
+`server.port` included. Turning `peekaboot.enabled` on deliberately in a shared
+environment does not widen what the dashboard's own Environment and Config tabs show: it
+gets a dashboard, but those two tabs are masked outright there, the same as any other
+Spring Boot application with `show-values` left at its default.
+</div>
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+**The accepted cost, confined to a local run:** on a local run, `show-values: always`
+still widens your own application's `/actuator/env` and `/actuator/configprops`
+endpoints, if you expose them over HTTP yourself, independently of Peekaboot &mdash;
+Peekaboot's masking has no part in that path at all; it only ever runs inside Peekaboot's
+own `/peekaboot/**` surface. Off a local run the property isn't set at all, so turning
+`peekaboot.enabled` on in a shared environment does **not** widen those endpoints as a
+side effect &mdash; Spring's own default governs them there, same as if Peekaboot weren't
+installed. If you expose those actuator endpoints yourself and want them to stay masked
+even on your own machine, set `management.endpoint.env.show-values` (and
+`.configprops.show-values`) to `never` explicitly in your own configuration &mdash; that
+overrides Peekaboot's lowest-precedence default.
 </div>
 
 ### What's left unmasked entirely

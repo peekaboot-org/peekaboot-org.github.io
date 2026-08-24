@@ -109,13 +109,22 @@ only under Environment. (`@Value` injections aren't covered by Config &mdash; lo
 up under Environment.) The same split exists in Spring Boot Actuator itself, as `/env`
 versus `/configprops`, which back these two tabs.
 
-Both tabs mask sensitive values by default &mdash; a `password`-, `secret`-, `token`- or
-similarly-named key renders as `******`, and a handful of high-precision value patterns
-(a JWT, a PEM key block, a JDBC URL's embedded credential, and similar) catch a secret
-hiding inside an otherwise innocuous value. This isn't Spring Boot's own `Sanitizer` (as
-of the Spring Boot version Peekaboot ships against, 4.1, it registers no default
-`SanitizingFunction` at all) &mdash; it's Peekaboot's own masking engine, on by default,
-independent of anything your application configures.
+On a local run, both tabs mask sensitive values by default &mdash; a `password`-,
+`secret`-, `token`- or similarly-named key renders as `******`, and a handful of
+high-precision value patterns (a JWT, a PEM key block, a JDBC URL's embedded credential,
+and similar) catch a secret hiding inside an otherwise innocuous value. This isn't Spring
+Boot's own `Sanitizer` (as of the Spring Boot version Peekaboot ships against, 4.1, it
+registers no default `SanitizingFunction` at all) &mdash; it's Peekaboot's own masking
+engine, on by default, independent of anything your application configures.
+
+Off a local run, both tabs mask *everything*, not just recognised secrets: value
+visibility (`management.endpoint.env.show-values`/`.configprops.show-values`) is only set
+to `always` on a local run, so off one, Spring's own `never` default returns `******` for
+every property before Peekaboot's masking engine ever sees a real value &mdash;
+`server.port` included. Turning `peekaboot.enabled` on somewhere other than your own
+machine gets you the dashboard, but not readable values on these two tabs. See [Security
+&mdash; `show-values: always` only on a local
+run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
 
 Both tabs also carry a "Show secrets" toggle, visible only when
 `GET /peekaboot/api/features` reports `unmaskingEnabled: true` &mdash; itself gated

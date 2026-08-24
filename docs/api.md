@@ -19,14 +19,14 @@ your own machine.
 
 | Endpoint | Query parameters |
 |---|---|
-| `GET /peekaboot/api/actuator/all/raw` | `unmask` (default `false`) |
 | `GET /peekaboot/api/actuator/all/insights` | `locale`, `unmask` (default `false`) |
 | `GET /peekaboot/api/features` | &mdash; |
 | `GET /peekaboot/api/metrics` | &mdash; |
-| `GET /peekaboot/api/traces/raw` | `limit` (default `100`, clamped to 0&ndash;10000), `bucket` |
-| `GET /peekaboot/api/traces/insights` | `limit`, `bucket`, `rootActionType`, `rootOperation` |
-| `GET /peekaboot/api/traces/{traceId}/raw` | &mdash; |
+| `GET /peekaboot/api/traces/insights` | `limit` (default `100`, clamped to 0&ndash;10000), `bucket`, `rootActionType`, `rootOperation` |
 | `GET /peekaboot/api/traces/{traceId}/insights` | &mdash; |
+
+These are the only five endpoints `PeekabootController` exposes &mdash; the dashboard and
+toolbar call exactly this set, nothing broader.
 
 `/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled}` &mdash; the
 same call the dashboard uses to decide whether to show its Metrics and Traces tabs, and
@@ -36,7 +36,11 @@ dashboard]({{ '/docs/dashboard/' | relative_url }}) for what drives each flag.
 `unmask=true` only has an effect while `peekaboot.enable-unmasking=true` is also set on
 the server; without that property, the parameter is silently ignored and the response
 stays masked. See [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking)
-for the full two-opt-in design and what gets masked in the first place.
+for the full two-opt-in design and what gets masked in the first place. `enable-unmasking`
+governs only this reveal step; it has no bearing on whether the Environment/Config tabs'
+underlying values are readable at all &mdash; see [Security &mdash; actuator value
+visibility]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run)
+for what does.
 
 `rootActionType` accepts a comma-separated list of root action types (case-insensitive;
 unrecognized tokens are silently dropped rather than rejected). `rootOperation` matches
@@ -44,44 +48,24 @@ against the trace's root operation name, partially and case-insensitively. See
 [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a root action type and root
 operation are.
 
-## Raw vs insights
+## What `insights` adds
 
-For traces, `raw` and `insights` return the same underlying spans at two different levels
-of processing:
+`GET /peekaboot/api/actuator/all/insights` invokes exactly the seven Actuator endpoints
+the dashboard's tabs are built on (`health`, `info`, `env`, `loggers`, `flyway`,
+`configprops`, `scheduledtasks`) and localizes/summarizes them for the given `locale`
+(`Locale.ENGLISH` if omitted or blank).
 
-- **Raw** is what was captured &mdash; a trace's spans in the order they arrived, with
-  minimal reshaping.
-- **Insights** is enriched: spans are assembled into a tree, duplicate spans from
-  double-instrumented layers are collapsed (see [Tracing &mdash; Span
-  deduplication]({{ '/docs/tracing/' | relative_url }}#span-deduplication)), issues like
-  `SLOW` or `HIGH_QUERY_COUNT` are detected and attached (see
-  [Concepts]({{ '/docs/concepts/' | relative_url }})), and correlated logs are attached to
-  the spans that emitted them. Both `GET /peekaboot/api/traces/insights` (the list) and
-  `GET /peekaboot/api/traces/{traceId}/insights` (the detail) carry a `truncated` boolean
-  &mdash; `true` only when `max-spans-per-trace` actually dropped real, already-deduplicated
-  spans for that trace, never merely because duplicate artifacts were folded away. The
-  dashboard shows this as a `TRUNCATED` badge; see [Configuration &mdash;
-  `max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row).
-
-For the actuator surface, `raw` and `insights` are not the same data at two levels of
-processing &mdash; they cover different sets of endpoints. `GET
-/peekaboot/api/actuator/all/insights` invokes exactly the seven endpoints the dashboard's
-tabs are built on (`health`, `info`, `env`, `loggers`, `flyway`, `configprops`,
-`scheduledtasks`) and localizes/summarizes them for the given `locale` (`Locale.ENGLISH`
-if omitted or blank). `GET /peekaboot/api/actuator/all/raw` invokes **every** actuator
-endpoint bean present in your application except `heapdump`, `threaddump` and `logfile`
-(skipped only because they're expensive to run on every call, not because they're
-sensitive) &mdash; a strictly broader set than the seven the dashboard shows. Both
-endpoints mask by default and honour `unmask` identically; `raw`'s masking is a generic
-walk over whatever shape each endpoint's own JSON happens to have, rather than the typed,
-per-field masking `insights` gets from its seven mappers. See
-[Security &mdash; the raw actuator surface goes further than the dashboard
-tabs]({{ '/docs/security/' | relative_url }}#the-raw-actuator-surface-goes-further-than-the-dashboard-tabs)
-for what that can mean in practice.
-
-The dashboard itself only ever calls the insights endpoints; raw exists for tooling that
-wants the less-processed shape, or that wants to do its own analysis on spans Peekaboot
-hasn't deduplicated or truncated an issue list onto.
+For traces, `insights` enriches the underlying spans: they're assembled into a tree,
+duplicate spans from double-instrumented layers are collapsed (see [Tracing &mdash; Span
+deduplication]({{ '/docs/tracing/' | relative_url }}#span-deduplication)), issues like
+`SLOW` or `HIGH_QUERY_COUNT` are detected and attached (see
+[Concepts]({{ '/docs/concepts/' | relative_url }})), and correlated logs are attached to
+the spans that emitted them. Both `GET /peekaboot/api/traces/insights` (the list) and
+`GET /peekaboot/api/traces/{traceId}/insights` (the detail) carry a `truncated` boolean
+&mdash; `true` only when `max-spans-per-trace` actually dropped real, already-deduplicated
+spans for that trace, never merely because duplicate artifacts were folded away. The
+dashboard shows this as a `TRUNCATED` badge; see [Configuration &mdash;
+`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row).
 
 ## The `bucket` parameter
 
@@ -89,8 +73,8 @@ hasn't deduplicated or truncated an issue list onto.
 buckets described in [Tracing]({{ '/docs/tracing/' | relative_url }}). It defaults to
 `all`, and &mdash; unlike an invalid `rootActionType` token, which is silently dropped
 &mdash; an unrecognized or blank `bucket` value also falls back to `all` rather than
-producing an error response. There's no way to make either trace-listing endpoint 400 on a
-bad `bucket`.
+producing an error response. There's no way to make `GET /peekaboot/api/traces/insights`
+400 on a bad `bucket`.
 
 ## `limit`
 
@@ -100,10 +84,9 @@ throwing from the underlying stream operation, and a very large one is capped at
 rather than risking downstream arithmetic overflow. A `limit` of `0` returns an empty
 trace list, not an error.
 
-## Single-trace endpoints and 404
+## The single-trace endpoint and 404
 
-`GET /peekaboot/api/traces/{traceId}/raw` and `GET
-/peekaboot/api/traces/{traceId}/insights` both return `404 Not Found` until that trace id
+`GET /peekaboot/api/traces/{traceId}/insights` returns `404 Not Found` until that trace id
 has at least one span recorded in the store &mdash; that is, until the trace's first span
 has actually been exported into Peekaboot. If you already have a trace id (from a
 `Server-Timing` header, a toolbar bar, or a list endpoint) and query it immediately, a

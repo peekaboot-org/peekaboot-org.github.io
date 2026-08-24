@@ -12,6 +12,15 @@ configuration is read, an `EnvironmentPostProcessor`
 at the lowest possible precedence &mdash; so any `application.yml` entry, environment
 variable, or system property you set always wins, in either direction.
 
+The same detection, in the same property source, also supplies the default for
+`peekaboot.dev-toolbar` &mdash; a local run turns the dev toolbar on too, not only the
+dashboard, and an explicit `peekaboot.dev-toolbar` setting wins over the detection exactly
+like `peekaboot.enabled` does. It supplies two further defaults besides:
+`management.endpoint.env.show-values` and `.configprops.show-values`, set to `always` only
+on a local run and left unset otherwise. See [Configuration]({{ '/docs/configuration/' | relative_url }})
+and [Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run)
+for what each of those actually controls.
+
 The detection itself (`LocalDevDetector`) mirrors the heuristics Spring Boot DevTools uses:
 
 1. Running as a native image always resolves to `false`, before anything else is checked.
@@ -38,7 +47,7 @@ below is reachable while it doesn't.
 | Feature | Switch | Additional requirement |
 |---|---|---|
 | Dashboard UI & API | `peekaboot.enabled=true` | A servlet web application (guarded by `@ConditionalOnWebApplication(Type.SERVLET)` &mdash; see note below); Actuator's `HealthEndpoint`/`InfoEndpoint` on the classpath (present via the starter) |
-| Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (off by default) | A servlet web application; a Micrometer `Tracer` bean (present by default via `spring-boot-starter-opentelemetry`); also needs `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar bar has no trace data to show |
+| Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (auto-detected: on for a local run, off elsewhere, same detection as `peekaboot.enabled`, not keyed on it) | A servlet web application; a Micrometer `Tracer` bean (present by default via `spring-boot-starter-opentelemetry`); also needs `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar bar has no trace data to show |
 | In-Memory Tracing | `peekaboot.enabled=true` **and** `peekaboot.tracing.enabled=true` (on by default) | The OpenTelemetry SDK on the classpath, to actually feed spans into the store (present via the starter) |
 | Startup Summary | `peekaboot.enabled=true` **and** `peekaboot.lifecycle.enabled=true` (on by default) | None |
 | Observability Defaults | `peekaboot.enabled` resolves to `true` (detection or override) | None &mdash; applied as a lowest-precedence property source, skipped entirely while disabled |

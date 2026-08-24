@@ -41,16 +41,20 @@ dashboard is otherwise reachable, or in your own property sources if it isn't.
 
 ## The toolbar never appears
 
-**Cause:** `peekaboot.dev-toolbar` defaults to `false` &mdash; the toolbar is opt-in, not
-a consequence of `peekaboot.enabled` alone. Even with it on, the toolbar only injects
-into responses whose content type is `text/html` and that actually contain a `</body>`
-tag; a JSON API response, a redirect, or a static asset never gets it.
+**Cause:** `peekaboot.dev-toolbar` follows the same launch-context detection as
+`peekaboot.enabled` &mdash; on for a local run, off elsewhere &mdash; not
+`peekaboot.enabled` itself, so switching Peekaboot on deliberately in a shared environment
+does not also inject the toolbar there. Off a local run (a packaged jar, a container, a
+test), it defaults off; see [How activation works]({{ '/docs/how-activation-works/' | relative_url }})
+for exactly what counts as local. Even with it on, the toolbar only injects into
+responses whose content type is `text/html` and that actually contain a `</body>` tag; a
+JSON API response, a redirect, or a static asset never gets it.
 
-**Fix:** Set `peekaboot.dev-toolbar: true`. If it's already set and the toolbar still
-doesn't show up on a page you expect it on, confirm that page's response is genuinely
-HTML with a `</body>` tag, and isn't one of the excluded paths (`/actuator/**`,
-`/peekaboot/**`, `/webjars/**`, static assets) &mdash; see [Dev
-toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
+**Fix:** Set `peekaboot.dev-toolbar: true` explicitly if you're not on a local run, or if
+you've turned it off yourself. If it's already on and the toolbar still doesn't show up
+on a page you expect it on, confirm that page's response is genuinely HTML with a
+`</body>` tag, and isn't one of the excluded paths (`/actuator/**`, `/peekaboot/**`,
+`/webjars/**`, static assets) &mdash; see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
 
 ## Peekaboot is off inside `@SpringBootTest`
 
@@ -118,25 +122,40 @@ for the full mechanics and a worked example.
 
 ## Values show as `******` and I need to see them
 
-**Cause:** this is the default. Peekaboot masks a value whose key or shape looks like a
-secret on the Environment, Config, Dashboard (health detail) and Metrics tabs, and in
-captured trace headers, query/form parameters, span tags and SQL text &mdash; see
-[Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for the full
-list of what's covered.
+**Cause:** most likely, this is just the default. Peekaboot masks a value whose key or
+shape looks like a secret on the Environment, Config, Dashboard (health detail) and
+Metrics tabs, and in captured trace headers, query/form parameters, span tags and SQL text
+&mdash; see [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for
+the full list of what's covered.
 
-**Fix:** Set `peekaboot.enable-unmasking: true` on the server, then use the "Show
-secrets" toggle that appears on the Environment and Config tabs once that property is set
-(it's absent otherwise), or add `?unmask=true` to `GET
-/peekaboot/api/actuator/all/insights` or `.../raw` directly. Both are required &mdash;
-the property alone changes nothing, and the request parameter alone is silently ignored
-while the property is `false`. This only affects the two endpoints above; headers, query
-parameters, span tags, SQL and Micrometer meter tags (`/api/metrics`, which takes no
-`unmask` parameter at all) stay masked unconditionally regardless of either setting.
-If a value you expected to be masked isn't hidden at all, or a value you expected to be
-visible is masked and you don't want it to be, check it against the exact key-name and
-value-shape rules in [Security &mdash; what gets masked, and
+If it's the Environment or Config tab specifically and **every** value is `******`, not
+just ones that look like secrets, the likelier cause is different: you're off a local run.
+`management.endpoint.env.show-values`/`.configprops.show-values` are only set to `always`
+on a local run; off one, they're unset, Spring's own `never` default takes over, and the
+underlying Actuator endpoint returns `******` for everything before Peekaboot's masking
+engine ever sees a real value &mdash; see [Security &mdash; `show-values: always` only on
+a local run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
+Setting `peekaboot.enable-unmasking` and using the toggle below does nothing for this case
+&mdash; there's no real value behind the mask to reveal.
+
+**Fix (recognisable-secret masking):** Set `peekaboot.enable-unmasking: true` on the
+server, then use the "Show secrets" toggle that appears on the Environment and Config tabs
+once that property is set (it's absent otherwise), or add `?unmask=true` to `GET
+/peekaboot/api/actuator/all/insights` directly. Both are required &mdash; the property
+alone changes nothing, and the request parameter alone is silently ignored while the
+property is `false`. This only affects that one endpoint; headers, query parameters, span
+tags, SQL and Micrometer meter tags (`/api/metrics`, which takes no `unmask` parameter at
+all) stay masked unconditionally regardless of either setting. If a value you expected to
+be masked isn't hidden at all, or a value you expected to be visible is masked and you
+don't want it to be, check it against the exact key-name and value-shape rules in
+[Security &mdash; what gets masked, and
 how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) &mdash; masking is
 rule-based, not exhaustive, in both directions.
+
+**Fix (off a local run):** set `management.endpoint.env.show-values` and
+`.configprops.show-values` to `always` yourself &mdash; an explicit setting wins over
+Peekaboot's own detection either way &mdash; and only if you actually intend those two
+tabs to show real values somewhere other than your own machine.
 
 ## A trace has no logs
 
