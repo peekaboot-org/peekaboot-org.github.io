@@ -69,8 +69,9 @@ follow:
   instead &mdash; deliberately, rather than guessing from a bean or method name that
   merely contains "job", "cron" or "timer".
 - **Calling a `@Scheduled` method directly doesn't count either.** Invoke
-  `orderReconciler.reconcileOrders()` yourself &mdash; from a test, or from other
-  application code &mdash; and the trace classifies Internal, even though the method is
+  `orderReconciler.reconcileOrders()` yourself and, if the method is also `@Observed`,
+  that aspect's own span becomes the root &mdash; carrying `class`/`method` tags nothing
+  above recognizes &mdash; so the trace classifies Internal, even though the method is
   genuinely `@Scheduled`. Only a call Spring's own scheduler dispatches gets the
   Scheduled Job icon.
 </div>

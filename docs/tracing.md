@@ -19,7 +19,8 @@ store is an additional destination for the same spans, not a replacement pipelin
 ## What gets captured
 
 Every span your application produces lands in the store &mdash; HTTP requests, scheduled
-jobs, message consumers, and the database queries they run.
+jobs, message consumers, and &mdash; where your datasource instrumentation emits spans
+for them &mdash; the database queries they run.
 
 With the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) also on, a trace
 additionally carries correlated logs and full header and parameter capture for the
@@ -62,10 +63,11 @@ be true for the same trace at once:
   variant.
 - The **Slow bucket** count means *this trace's total end-to-end duration* was at or above
   `peekaboot.tracing.slow-trace-threshold-ms` (default 1000ms) &mdash; a whole-trace check
-  against a much larger threshold.
+  against a different, ten-times-larger threshold.
 
 In the screenshot above, four rows carry a SLOW badge (each contains a span past the
 100ms mark) while the Slow bucket itself reports only one trace (only one of those four
 was, in total, slow enough to clear the 1000ms bucket threshold). Both numbers are
-correct; they just answer different questions, and the badge's much lower threshold means
-it will show up far more often than the bucket count would suggest.
+correct; they just answer different questions, and the badge threshold being an order of
+magnitude smaller than the bucket threshold means the badge will almost always show up
+more often than the bucket count would suggest.
