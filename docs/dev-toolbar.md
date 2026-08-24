@@ -1,6 +1,6 @@
 ---
 title: Dev toolbar
-lead: A collapsed bar on every HTML response, one click away from the full trace.
+lead: Full request and response capture, the trace view, and logs correlated to the request &mdash; injected into the page you're already looking at.
 permalink: /docs/dev-toolbar/
 ---
 
@@ -17,24 +17,12 @@ peekaboot:
 
 It also needs a Micrometer `Tracer` bean, which the starter provides by default &mdash;
 see [Requirements]({{ '/docs/requirements/' | relative_url }}) for what happens without
-one.
+one. Once it's on, a small bar docks to the bottom of every HTML page your app renders
+&mdash; not static assets, not `/actuator/**` or `/peekaboot/**` themselves, and not AJAX
+requests &mdash; and if anything goes wrong generating it, the original page goes out
+unmodified rather than a broken one.
 
-## What gets injected, and into what
-
-A servlet filter buffers each response and, right before its closing `</body>` tag,
-inserts a small bootstrap: a JSON blob describing the request, and a `<script
-type="module">` that loads the toolbar's own code. Injection only happens for responses
-whose content type is `text/html` and that actually contain a `</body>` tag; static
-assets (`.css`, `.js`, images, fonts), `/actuator/**`, `/peekaboot/**`, `/webjars/**`, and
-AJAX requests (`X-Requested-With: XMLHttpRequest`) are skipped outright. If anything goes
-wrong while generating or injecting the toolbar, the original response goes out
-unmodified rather than a broken page.
-
-Swagger UI is a special case: its own HTML never carries the request that matters, so the
-toolbar loads in an idle mode there and picks up trace ids from your API calls instead
-&mdash; see below.
-
-## Collapsed bar
+## Full request and response capture
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
@@ -42,23 +30,31 @@ toolbar loads in an idle mode there and picks up trace ids from your API calls i
        loading="lazy">
 </figure>
 
-Docked to the bottom of the page, it shows the response status (colour-coded), method and
-path, the resolved controller method, request duration, database query count and total
-query time, and the trace id (labelled and copyable). The metrics arrive asynchronously:
-the bar fetches `/peekaboot/api/traces/{traceId}/insights` on a fixed four-attempt
-schedule &mdash; 250ms, 500ms, 1s and 3s after the previous attempt, the last landing
-around 4.75s after the response the bar is reporting on arrived &mdash; and re-renders on
-each response that carries a trace. All four attempts always run, rather than stopping the
-first time the trace looks complete, so a span that ends after the root span (an `@Async`
-continuation, a streamed body) still reaches the bar. Peekaboot's own 200ms span export
-delay when the toolbar is on (see [Auto-configured
-defaults]({{ '/docs/auto-configured-defaults/' | relative_url }})) means a trace is
-normally there well before the last attempt.
+The collapsed bar is the first look: response status (colour-coded), method and path, the
+resolved controller method, request duration, database query count and total query time,
+and the trace id, copyable with one click. Those metrics fill in asynchronously &mdash;
+the bar fetches the trace's insights on a fixed four-attempt schedule (250ms, 500ms, 1s
+and 3s after the previous attempt, the last landing around 4.75s after the response
+arrived) and re-renders each time, so a span that finishes after the response already
+went out still gets counted. Peekaboot's own 200ms trace-export delay when the toolbar is
+on (see [Auto-configured defaults]({{ '/docs/auto-configured-defaults/' | relative_url }}))
+normally means the numbers are already final well before the last attempt.
 
-Clicking anywhere on the bar &mdash; other than the trace id or the dashboard link, which
-have their own targets &mdash; opens the full trace detail overlay for that request.
+Click anywhere on the bar &mdash; other than the trace id or the dashboard link, which
+have their own targets &mdash; and its Request tab shows the request and response in
+full: every header on both sides, query and form parameters, and the resolved
+controller/handler method. Headers and parameters are masked by the same engine that
+masks everything else Peekaboot shows: a value whose key looks sensitive (`password`,
+`authorization`, `cookie`, and the like) is replaced outright, and a handful of
+value-shape patterns catch a credential &mdash; a JWT, an AWS key, a JDBC URL's embedded
+password &mdash; sitting under an innocuous key. There's no reveal control here; unlike
+the dashboard's Environment and Config tabs, a masked header or parameter stays masked.
+See [Security &mdash; Masking]({{ '/docs/security/' | relative_url }}#masking) for the
+exact rules and what they don't catch. Request and response bodies, and uploaded file
+names, aren't captured yet &mdash; there's a field reserved for them, but nothing
+populates it.
 
-## Expanded overlay
+## The trace view
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/trace-detail-light.png' | relative_url }}"
@@ -66,46 +62,40 @@ have their own targets &mdash; opens the full trace detail overlay for that requ
        loading="lazy">
 </figure>
 
-The overlay is the same trace-detail view the dashboard's Traces tab uses, with four
-tabs: **Spans** (the full tree, each node's kind, tags and duration), **Queries** (SQL
-text, duration, and row counts where the instrumentation on your classpath provides them),
-**Logs** (log messages correlated to the span that emitted them), and **Request** (method,
-path, headers, and the resolved controller/handler method). See
-[Tracing]({{ '/docs/tracing/' | relative_url }}) for what's actually captured and how span
-deduplication works, and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a
-span, a root span and a trace status mean.
+That same click opens the full trace &mdash; the same view the dashboard's Traces tab
+uses for any request, reachable here without leaving the page you're testing. The Spans
+tab, shown above, is the whole tree: every span's kind, tags and duration, nested exactly
+as they nested at runtime. The Queries tab lists the SQL each of those spans ran, with
+duration and, where your instrumentation provides them, row counts &mdash; recognizing
+OpenTelemetry's `db.query.text`/`db.statement` tags and `datasource-proxy`'s
+`jdbc.query[N]` tags, in that order, and falling back to a span's own name only when none
+of those tags are present and that name already looks like SQL. That fallback is why a
+database span in the tree above can read `SELECT customer_order` rather than the
+statement itself &mdash; that's OpenTelemetry's own summary form for the span, correct
+for a span tree, and a different rendering path than the Queries tab. See
+[Tracing]({{ '/docs/tracing/' | relative_url }}) for what's actually captured and how
+span deduplication works, and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what
+a span, a root span and a trace status mean.
 
-<div class="pk-callout" markdown="1">
-**The Queries tab shows real SQL text as long as your JDBC instrumentation tags spans with
-one of four recognized patterns**, checked in this order by `QueryExtractor.findSql`:
-`db.query.text` (OpenTelemetry's current semantic convention, emitted by
-`datasource-micrometer-opentelemetry` &mdash; the OpenTelemetry-native stack
-`peekaboot-testing-app` itself uses), then `db.statement` (the same convention's
-superseded spelling), then `jdbc.query[N]` (`datasource-proxy`/Micrometer). Only if none
-of those tags are present does the tab fall back to the span's own name, and only when
-that name itself already looks like SQL (starts with `SELECT `, `INSERT `, `UPDATE ` or
-`DELETE `). This is about the Queries tab specifically: the Spans tab shows a span's own
-name regardless &mdash; OpenTelemetry's own summary form (e.g. `SELECT customer_order`),
-which is correct there, not a fallback.
-</div>
+## Logs correlated to the request
 
-## Shadow DOM isolation
+Every log line your app emitted while it handled the request lands on the same overlay's
+Logs tab &mdash; timestamp, level and message, tagged with the span that was active when
+it was logged, filterable by text, level or span. No grep, no correlation id to copy into
+another tool by hand. Log content is captured verbatim and, unlike headers and query/form
+parameters, is **not masked** &mdash; a log statement that includes a secret or PII is
+captured exactly as written. See [Security]({{ '/docs/security/' | relative_url }}) for
+the full picture of what's exposed once the toolbar is on.
 
-The toolbar mounts into a shadow root (`element.attachShadow({mode: 'open'})`) attached to
-a dedicated host `<div>` appended to `<body>`. Everything inside that boundary &mdash; the
-toolbar's markup and its own stylesheets &mdash; is isolated in both directions: the host
-page's CSS selectors can't reach in and restyle the toolbar's internals, and the
-toolbar's own rules can't leak out and affect the host page. The host `<div>` itself is
-still a regular node in the page's own DOM, positioned with an inline style
-(`position:fixed; bottom:0`); an unusually aggressive host stylesheet targeting that
-element directly could still affect its outer box, but nothing about the toolbar's own
-appearance depends on the host page's styles or is reachable from them.
+## It also works from Swagger UI
 
-## Idle mode (Swagger UI)
-
-On Swagger UI's own page, the toolbar has no request of its own to report on, so it loads
-idle and patches `window.fetch`: every response from the app's own API is inspected for a
-`Server-Timing` header, and the trace id embedded in it is used to load that trace into
-the bar &mdash; see [Tracing]({{ '/docs/tracing/' | relative_url }}) for the header's
-exact format. Calls to Peekaboot's own paths, Swagger's own paths, and `/actuator/**` are
-excluded from that interception.
+Swagger UI's own page never carries a request that matters &mdash; there's nothing to
+report on until you actually call an endpoint. So on Swagger UI's pages the toolbar loads
+idle, showing "Waiting for request…", and patches `window.fetch`: every response your
+app's own API returns is checked for a `Server-Timing` header, and the trace id in it
+loads straight into the bar, the same as if that call had been a page navigation. Execute
+any operation through Swagger's "Try it out" and the bar updates in place with that
+call's status, duration and query count; click it and the same trace-detail overlay
+opens, Spans, Queries, Logs and Request tabs included &mdash; full request/response
+capture and correlated logs for an API call, not just a page load. Calls to Peekaboot's
+own paths, Swagger's own paths, and `/actuator/**` are excluded from that interception.

@@ -11,11 +11,12 @@ layout: home
       <h1 class="title is-1">Peekaboot</h1>
       <p class="subtitle is-4">{{ site.tagline }}</p>
       <p class="subtitle is-6">
-        Peekaboot adds a local dashboard to your Spring Boot app &mdash; health, config,
-        environment, scheduled tasks, metrics, Flyway migrations, and full request traces with
-        span trees and SQL queries, plus correlated logs when the opt-in dev toolbar is enabled.
-        Everything lives in memory inside your own process: no collector, no agent, no external
-        service &mdash; and it defaults to off outside local development.
+        Add one dependency, run your app, and a dev toolbar appears on every page &mdash; full
+        request and response capture, the trace view, and logs correlated to the request, right
+        on the page you're already looking at. A local dashboard comes with it: health, config,
+        environment, metrics, Flyway migrations, and every trace your app has served. Everything
+        lives in memory inside your own process: no collector, no agent, no external service
+        &mdash; and both default to off outside local development.
       </p>
       <div class="buttons is-centered mt-5">
         <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Quick start</a>
@@ -52,11 +53,24 @@ layout: home
       <div class="column is-half-tablet is-one-quarter-desktop">
         <div class="card">
           <div class="card-content">
-            <p class="title is-5">See inside a request</p>
+            <p class="title is-5">On the page you're testing</p>
             <p class="content">
-              Every request Peekaboot captures becomes a trace: the full span tree and the
-              SQL each span ran. Turn on the opt-in dev toolbar and the log lines emitted while
-              it executed are correlated automatically too, no manual instrumentation.
+              The dev toolbar docks to the bottom of every page your app renders locally, on
+              by default: full request and response capture, the trace view &mdash; span tree,
+              timings, queries &mdash; and every log line the request produced, correlated with
+              no grep. It works from Swagger UI too.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">A dashboard, too</p>
+            <p class="content">
+              The same toolbar links to a full dashboard: health, config, environment, metrics,
+              Flyway migrations, and every trace your app has served since it started, not just
+              the one on your screen.
             </p>
           </div>
         </div>
@@ -78,22 +92,9 @@ layout: home
           <div class="card-content">
             <p class="title is-5">Off in production by default</p>
             <p class="content">
-              <code>peekaboot.enabled</code> defaults to <code>true</code> only for a local
-              launch &mdash; an IDE run or <code>spring-boot:run</code>/<code>bootRun</code>
-              &mdash; and to <code>false</code> for every packaged jar, container, and test run.
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="card">
-          <div class="card-content">
-            <p class="title is-5">Nothing new to expose</p>
-            <p class="content">
-              Peekaboot invokes Actuator's endpoints in-process and serves the result through
-              its own API &mdash; it never needs
-              <code>management.endpoints.web.exposure.include</code>, so nothing new becomes
-              reachable over HTTP.
+              Both the toolbar and the dashboard key off the same local-launch detection
+              &mdash; an IDE run or <code>spring-boot:run</code>/<code>bootRun</code> &mdash;
+              and default off for every packaged jar, container, and test run.
             </p>
           </div>
         </div>
@@ -105,8 +106,8 @@ layout: home
 <section class="section">
   <div class="container">
     <figure class="image">
-      <img src="{{ '/assets/img/screenshots/dashboard-dashboard-light.png' | relative_url }}"
-           alt="The Peekaboot dashboard's Dashboard tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards for a running application"
+      <img src="{{ '/assets/img/screenshots/trace-detail-light.png' | relative_url }}"
+           alt="The dev toolbar's expanded trace detail overlay for a GET /orders request, showing a span tree with nested CLIENT and SERVER spans, database connection and query spans, and timing bars"
            loading="lazy">
     </figure>
   </div>
@@ -114,7 +115,7 @@ layout: home
 
 <section class="section">
   <div class="container has-text-centered">
-    <h2 class="title is-3">Add it, run your app, open the dashboard.</h2>
+    <h2 class="title is-3">Add it, run your app, the toolbar is on the page.</h2>
     <div class="buttons is-centered">
       <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Get started</a>
       <a class="button is-medium" href="{{ site.repository_url }}">View on GitHub</a>

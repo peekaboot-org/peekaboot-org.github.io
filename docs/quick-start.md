@@ -1,6 +1,6 @@
 ---
 title: Quick start
-lead: One dependency, no configuration, a dashboard on your next run.
+lead: One dependency, no configuration, the toolbar on your next run.
 permalink: /docs/quick-start/
 ---
 
@@ -32,9 +32,26 @@ implementation("org.peekaboot:peekaboot-spring-boot-starter:{{ site.peekaboot_ve
 
 Run it the way you already do &mdash; from your IDE, `mvn spring-boot:run`, or `gradle bootRun`.
 Nothing else to configure: Peekaboot detects that launch as local development and turns
-itself on.
+itself, and the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}), on. Open any page
+and it's already there:
 
-Open the dashboard at
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
+       alt="The collapsed dev toolbar docked at the bottom of the page, showing a 200 status badge, GET /orders, the controller method, duration, query count and duration, and a copyable trace id"
+       loading="lazy">
+</figure>
+
+Full request and response capture, the trace view, and logs correlated to the request are
+one click away &mdash; see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) for what
+each part shows.
+
+<div class="pk-callout" markdown="1">
+Set `peekaboot.dev-toolbar: false` to turn the toolbar off while keeping the rest of the
+dashboard; see [How activation works]({{ '/docs/how-activation-works/' | relative_url }})
+for exactly what counts as a local run.
+</div>
+
+A dashboard comes with it too, at
 [`http://localhost:8080/peekaboot/`](http://localhost:8080/peekaboot/); its API sits under
 [`http://localhost:8080/peekaboot/api/`](http://localhost:8080/peekaboot/api/).
 
@@ -46,6 +63,8 @@ Open the dashboard at
 
 ## What you get immediately
 
+- The dev toolbar, on every page: full request and response capture, the trace view, and
+  logs correlated to the request &mdash; see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }})
 - The Dashboard tab: build and Git info, Spring Boot and Java versions, system and JVM
   details, and datasource status
 - Environment and Config tabs: every property source Spring resolved, and every
@@ -54,17 +73,6 @@ Open the dashboard at
 - Metrics from Micrometer's registry
 - Full request traces &mdash; spans and SQL queries &mdash; for every request your app
   has served since it started
-
-<div class="pk-callout" markdown="1">
-The toolbar you may have heard about is part of this too: on a local run like the one
-above, `peekaboot.dev-toolbar` defaults on along with everything else, so it's already
-docked at the bottom of your pages. That flag also turns on correlating log messages to
-each trace and capturing full request/response detail (headers, query/form parameters,
-resolved controller), neither of which is captured without it. Set
-`peekaboot.dev-toolbar: false` to turn it off while keeping the rest of the dashboard; see
-[How activation works]({{ '/docs/how-activation-works/' | relative_url }}) for exactly
-what counts as a local run.
-</div>
 
 ## Next
 
