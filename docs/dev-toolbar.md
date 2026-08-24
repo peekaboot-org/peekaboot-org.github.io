@@ -79,7 +79,16 @@ span's *name*, not extracted SQL &mdash; which is why a database span there can 
 `SELECT customer_order` rather than the statement itself: that's OpenTelemetry's own
 summary form for the span, correct for a span tree, and rendered by a completely
 different code path than the Queries tab, independent of what that tab's own fallback
-does. See
+does.
+
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
+       alt="The Queries tab for the same GET /orders request, listing 26 PostgreSQL statements with their duration and row count, each showing the actual lower-case select ... from SQL text rather than a span name"
+       loading="lazy">
+</figure>
+
+That's what `QueryExtractor` actually pulls out &mdash; lower-case, parameterized SQL
+text, one row per statement, nothing like the span tree's title-case summary above. See
 [Tracing]({{ '/docs/tracing/' | relative_url }}) for what's actually captured, and
 [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a span, a root span and a
 trace status mean.

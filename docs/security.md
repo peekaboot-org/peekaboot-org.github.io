@@ -200,6 +200,18 @@ dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config) for wh
 toggling it does. Its state isn't persisted: reloading the page, or opening a new tab,
 starts masked again.
 
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/dashboard-config-light.png' | relative_url }}"
+       alt="The Config tab with the spring.datasource group expanded, its password value rendered as ****** alongside real values for its other properties, with a Show secrets toggle above the group list"
+       loading="lazy">
+</figure>
+
+The toggle stays unclicked here on purpose: this is the masked state every reader gets by
+default, `enable-unmasking` on or off. Clicking it, with both opt-ins above satisfied,
+swaps `******` for the real value in place &mdash; there's no separate revealed screenshot
+to compare against, deliberately; a published page is not the place to demonstrate an
+unmasked secret, real or fixture.
+
 ### `show-values: always` only on a local run
 
 `management.endpoint.env.show-values` and `.configprops.show-values` are set to `always`

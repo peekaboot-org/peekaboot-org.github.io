@@ -33,7 +33,7 @@ health banner with its per-component breakdown, all sourced from Actuator's `inf
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-environment-light.png' | relative_url }}"
-       alt="The Environment tab, listing property sources such as systemProperties, systemEnvironment and config resources, each expandable, with active profiles shown as a banner"
+       alt="The Environment tab with a config resource property source expanded, its real values shown in full except spring.datasource.password, rendered as ******, with a Show secrets toggle above the property list"
        loading="lazy">
 </figure>
 
@@ -79,7 +79,7 @@ change a level from here. The tab only appears when logger data is available.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-config-light.png' | relative_url }}"
-       alt="The Config tab, @ConfigurationProperties groups such as spring.mvc, spring.datasource and peekaboot.tracing, each expandable and filterable"
+       alt="The Config tab with the spring.datasource group expanded, its password value rendered as ****** alongside real values for its other properties, with a Show secrets toggle above the group list"
        loading="lazy">
 </figure>
 
