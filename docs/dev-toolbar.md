@@ -41,9 +41,9 @@ on (see [Auto-configured defaults]({{ '/docs/auto-configured-defaults/' | relati
 normally means the numbers are already final well before the last attempt.
 
 Click anywhere on the bar &mdash; other than the trace id or the dashboard link, which
-have their own targets &mdash; and its Request tab shows the request and response in
-full: every header on both sides, query and form parameters, and the resolved
-controller/handler method. Headers and parameters are masked by the same engine that
+have their own targets &mdash; and its Request tab shows the request and response: every
+header on both sides, query and form parameters, and the resolved controller/handler
+method. Headers and parameters are masked by the same engine that
 masks everything else Peekaboot shows: a value whose key looks sensitive (`password`,
 `authorization`, `cookie`, and the like) is replaced outright, and a handful of
 value-shape patterns catch a credential &mdash; a JWT, an AWS key, a JDBC URL's embedded
