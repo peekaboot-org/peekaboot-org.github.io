@@ -340,6 +340,8 @@ for the full Maven `excludes` and Gradle `developmentOnly` examples.
       all. Assume every captured trace can still contain plaintext SQL and, with the dev
       toolbar on, plaintext headers and query/form parameters. Don't point Peekaboot at
       traffic carrying secrets you can't afford to have stored in memory and displayed.
-- [ ] Leave `peekaboot.dev-toolbar` at its default (`false`) unless you specifically need
-      request/response capture &mdash; it's the setting that turns trace data from a
-      method/path/status summary into full header and parameter capture.
+- [ ] Leave `peekaboot.dev-toolbar` at its default (auto-detected: off outside a local
+      run) unless you specifically need request/response capture &mdash; it's the setting
+      that turns trace data from a method/path/status summary into full header and
+      parameter capture. Production isn't a local run, so the default is already off
+      there; don't set it explicitly unless you actually want that capture running.
