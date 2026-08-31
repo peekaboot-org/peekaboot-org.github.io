@@ -1,19 +1,20 @@
 ---
 title: The dashboard
-lead: One tab per operational question &mdash; health, config, migrations, logs, schedules, metrics and traces.
+lead: One tab per operational question &mdash; health, charts, traces, meters, config, migrations, logs and schedules.
 permalink: /docs/dashboard/
 ---
 
 The dashboard reads Actuator's `health`, `info`, `env`, `loggers`, `flyway`, `configprops`
 and `scheduledtasks` endpoints in-process on every load &mdash; no
 `management.endpoints.web.exposure` configuration needed, and nothing exposed on
-`/actuator/**` itself. Metrics and Traces are fetched separately, from their own
+`/actuator/**` itself. Insights, Meters and Traces are fetched separately, from their own
 endpoints, and are gated by feature flags rather than by that call &mdash; see the note at
 the end of this page.
 
-Tabs appear in this order, left to right.
+"Dashboard" names the whole UI here, never one tab; the landing tab is **Overview**. Tabs
+appear in this order, left to right.
 
-## Dashboard
+## Overview
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-dashboard-light.png' | relative_url }}"
@@ -23,11 +24,70 @@ Tabs appear in this order, left to right.
 
 **Answers:** is the app healthy, and what's actually running?
 
-Despite what older material says, there is no separate Health tab and no separate Info
-tab &mdash; this one tab combines both. It carries build and Git metadata, Spring Boot and
+Despite what older material says, there is no separate Health tab and no separate Info tab
+&mdash; this one tab combines both. It carries build and Git metadata, Spring Boot and
 Java versions, OS and JVM defaults, datasource status, memory and storage meters, and the
 health banner with its per-component breakdown, all sourced from Actuator's `info` and
 `health` endpoints.
+
+It also carries the stat-tile row &mdash; Started at, Startup, Ready after, Uptime, CPU
+cores. Those come from the insights collector rather than from Actuator, and they're
+defined in the same file as the Insights tab's panels, but they're rendered here because
+they answer an Overview question rather than a charting one. See [Insights &mdash; stat
+tiles live on Overview]({{ '/docs/insights/' | relative_url }}#stat-tiles-live-on-overview).
+Whenever insights are off or unreachable &mdash; no `MeterRegistry`,
+`peekaboot.insights.enabled: false`, or the call simply failing &mdash; the row is hidden
+outright rather than left as an empty box, and the rest of the tab is unaffected.
+
+## Insights
+
+**Answers:** how have CPU, memory, HTTP, the connection pool and the rest behaved over the
+last minutes, hours or days?
+
+Live charts over a curated set of Micrometer meters, aggregated in-process into fixed-size
+ring buffers at three resolutions (10 seconds, 1 minute, 1 hour by default) and pushed to
+the browser over SSE rather than polled. Sixteen panels ship enabled, six more ship
+switched off, and an application can add, replace or hide panels with its own
+`peekaboot-insights.yml`.
+
+[Insights]({{ '/docs/insights/' | relative_url }}) has the whole picture: the panel file's
+schema and merge rules, what the aggregation levels cost in memory, and what the
+percentiles at those levels can and can't honestly tell you.
+
+## Traces
+
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/dashboard-traces-light.png' | relative_url }}"
+       alt="The Traces tab, a bucketed list of recent requests, scheduled jobs and other traces, each with a duration, status and query count, filterable by root action type"
+       loading="lazy">
+</figure>
+
+**Answers:** what happened inside this request, job, or message?
+
+Recent traces, bucketed into All, Errors and Slow, filterable by root action type and
+root operation. Opening a row expands the full trace detail overlay &mdash; spans,
+queries, logs and request metadata. See [Tracing]({{ '/docs/tracing/' | relative_url }})
+and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what the bucket names, badges
+and root action types actually mean.
+
+## Meters
+
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/dashboard-metrics-light.png' | relative_url }}"
+       alt="The Metrics tab, a filterable list of Micrometer meters such as application.ready.time, db.client.operation.duration and executor.pool.size, each with its type, unit and measurement count"
+       loading="lazy">
+</figure>
+
+**Answers:** what do JVM, HTTP and datasource metrics look like right now?
+
+Every meter in Micrometer's `MeterRegistry`, filterable by name or tag, each expandable to
+its individual measurements. This is the one tab that doesn't go through Actuator at
+all &mdash; it reads the registry directly.
+
+Meters and Insights read the same registry but answer different questions: this tab is the
+raw browser, showing every meter with its current measurements and nothing else. Insights
+charts a curated subset of those same meters *over time*. A meter you find here is exactly
+what you'd name in a `peekaboot-insights.yml` series to start charting it.
 
 ## Environment
 
@@ -166,47 +226,21 @@ what's covered, what isn't, and the two-opt-in design behind the toggle.
 each expandable to its individual task rows. Backed by Actuator's `scheduledtasks`
 endpoint; the tab only appears when at least one scheduled task exists.
 
-## Metrics
-
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-metrics-light.png' | relative_url }}"
-       alt="The Metrics tab, a filterable list of Micrometer meters such as application.ready.time, db.client.operation.duration and executor.pool.size, each with its type, unit and measurement count"
-       loading="lazy">
-</figure>
-
-**Answers:** what do JVM, HTTP and datasource metrics look like right now?
-
-Every meter in Micrometer's `MeterRegistry`, filterable by name or tag, each expandable to
-its individual measurements. This is the one tab that doesn't go through Actuator at
-all &mdash; it reads the registry directly.
-
-## Traces
-
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-traces-light.png' | relative_url }}"
-       alt="The Traces tab, a bucketed list of recent requests, scheduled jobs and other traces, each with a duration, status and query count, filterable by root action type"
-       loading="lazy">
-</figure>
-
-**Answers:** what happened inside this request, job, or message?
-
-Recent traces, bucketed into All, Errors and Slow, filterable by root action type and
-root operation. Opening a row expands the full trace detail overlay &mdash; spans,
-queries, logs and request metadata. See [Tracing]({{ '/docs/tracing/' | relative_url }})
-and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what the bucket names, badges
-and root action types actually mean.
-
 ## Conditionally shown tabs
 
 Loggers, Flyway, Config and Scheduled Tasks only appear once the dashboard's main payload
 actually contains data for them &mdash; an app with no Flyway migrations simply has no
-Flyway tab, for instance. Dashboard and Environment are always shown.
+Flyway tab, for instance. Overview and Environment are always shown.
 
-Metrics and Traces are different: they're gated on a separate call, `GET
-/peekaboot/api/features`, which returns `{tracing, metrics, devToolbar,
-unmaskingEnabled}`. Metrics needs a `MeterRegistry` bean, which Spring Boot Actuator
-provides automatically; Traces needs tracing to be active (`peekaboot.tracing.enabled`, on
-by default, plus an OpenTelemetry `SpanExporter` on the classpath). `unmaskingEnabled`
-gates a control, not a tab &mdash; see [Environment vs Config](#environment-vs-config)
-above. See [Requirements]({{ '/docs/requirements/' | relative_url }}) for the full
-dependency picture.
+Insights, Meters and Traces are different: they're gated on a separate call, `GET
+/peekaboot/api/features`, which returns `{tracing, metrics, devToolbar, unmaskingEnabled,
+insights}`. Meters needs a `MeterRegistry` bean, which Spring Boot Actuator provides
+automatically; Insights needs that same bean plus `peekaboot.insights.enabled` (on by
+default); Traces needs tracing to be active (`peekaboot.tracing.enabled`, on by default,
+plus an OpenTelemetry `SpanExporter` on the classpath). `unmaskingEnabled` gates a control,
+not a tab &mdash; see [Environment vs Config](#environment-vs-config) above. See
+[Requirements]({{ '/docs/requirements/' | relative_url }}) for the full dependency picture.
+
+Note that the flag behind the Meters tab is still called `metrics`: the tab was renamed,
+the JSON field was not, so a client reading `/api/features` keys off `metrics` for Meters
+and `insights` for Insights.

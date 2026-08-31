@@ -89,11 +89,11 @@ logbook:
 | Property | Spring/library default | Peekaboot's default | Why |
 |---|---|---|---|
 | `spring.jpa.properties.[hibernate.generate_statistics]` | `false` | `true` | Exposes query counts, cache stats and slow queries through Hibernate's own statistics collector, which the dashboard reads for JPA-backed apps. |
-| `management.endpoint.health.show-details` | `never` | `always` | Shows per-component health detail (datasource, disk space, custom indicators) in the Dashboard tab's health banner instead of a bare UP/DOWN. |
-| `management.info.env.enabled` | `false` | `true` | Publishes `info.*` properties (e.g. `info.app.*` set in your own `application.yml`) via `/actuator/info`, feeding the Dashboard tab &mdash; not OS/system environment variables, which the Environment tab already covers. |
-| `management.info.java.enabled` | `false` | `true` | Exposes JVM vendor, version and runtime info in the Dashboard tab. |
-| `management.info.os.enabled` | `false` | `true` | Exposes OS name, version and architecture in the Dashboard tab. |
-| `management.info.process.enabled` | `false` | `true` | Exposes PID, uptime, CPU count and memory usage in the Dashboard tab. |
+| `management.endpoint.health.show-details` | `never` | `always` | Shows per-component health detail (datasource, disk space, custom indicators) in the Overview tab's health banner instead of a bare UP/DOWN. |
+| `management.info.env.enabled` | `false` | `true` | Publishes `info.*` properties (e.g. `info.app.*` set in your own `application.yml`) via `/actuator/info`, feeding the Overview tab &mdash; not OS/system environment variables, which the Environment tab already covers. |
+| `management.info.java.enabled` | `false` | `true` | Exposes JVM vendor, version and runtime info in the Overview tab. |
+| `management.info.os.enabled` | `false` | `true` | Exposes OS name, version and architecture in the Overview tab. |
+| `management.info.process.enabled` | `false` | `true` | Exposes PID, uptime, CPU count and memory usage in the Overview tab. |
 | `management.info.git.enabled` | `true` (unchanged) | `true` | Set explicitly for build traceability, even though it matches Spring Boot's own default &mdash; the source comment calls this out deliberately rather than relying on the implicit default. |
 | `management.tracing.sampling.probability` | `0.1` (10%) | `1.0` (100%) | Samples every request so the Traces tab reflects everything, not a random 1-in-10 slice. |
 | `management.observations.annotations.enabled` | `false` | `true` | Enables `@Observed`, `@Timed` and `@Counted` for declarative observability without extra wiring. |

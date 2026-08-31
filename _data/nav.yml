@@ -11,6 +11,8 @@
   pages:
     - title: The dashboard
       url: /docs/dashboard/
+    - title: Insights
+      url: /docs/insights/
     - title: Dev toolbar
       url: /docs/dev-toolbar/
     - title: Tracing

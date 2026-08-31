@@ -89,7 +89,48 @@ how each issue type is used.
 | `high-query-count-threshold` | int | `5` | Direct database-query children a single span can have before it triggers HIGH_QUERY_COUNT. |
 | `high-trace-query-count-threshold` | int | `20` | Total database queries a whole trace can run before it triggers HIGH_QUERY_COUNT, even if no single span crosses the per-span threshold above. |
 
+## `peekaboot.insights`
+
+Bound by `InsightsProperties`. These control the metric collector behind the Insights tab
+&mdash; how often it samples and how much history it keeps. *What* it samples comes from a
+separate YAML file rather than from properties; see
+[Insights]({{ '/docs/insights/' | relative_url }}#configuring-panels).
+
+| Property | Type | Default | Controls |
+|---|---|---|---|
+| `enabled` | boolean | `true` | Whether the collector, the `/api/insights/**` endpoints and the Insights tab exist at all. Also needs a Micrometer `MeterRegistry` bean &mdash; without one nothing is wired up regardless of this flag. |
+| `levels[n].interval` | Duration | `10s`, `1m`, `1h` | The sampling tick (level 0) and each aggregation window above it. Every interval must be a whole multiple of the previous one, or startup fails. |
+| `levels[n].size` | int | `90`, `1440`, `720` | Ring buffer entries kept per series at that level &mdash; `interval` &times; `size` is how far back the charts reach. |
+| `config-location` | String | unset | A Spring resource location for the panel file, replacing the default lookup of `peekaboot-insights.yml` on the classpath root. |
+
+Setting `levels` replaces the whole list rather than merging into it, so give every level
+you want. Level 0 stores one number per series per tick; every higher level stores seven
+(min, max, avg, median, p90, p95, p99), which is what makes the memory arithmetic worth
+checking &mdash; Peekaboot logs the result at startup. See [Insights &mdash; what it
+costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
+
 ## Worked examples
+
+### A longer, coarser insights history
+
+The defaults reach back 15 minutes at 10-second resolution, 24 hours at one minute, and 30
+days at one hour, for roughly 4.5 MB. To watch a long-running local session without paying
+for month-scale history, drop the top level and lengthen the middle one:
+
+```yaml
+peekaboot:
+  insights:
+    levels:
+      - interval: 10s
+        size: 360      # 1 hour of tick resolution
+      - interval: 2m
+        size: 2160     # 3 days
+```
+
+That's 39 &times; (360 + 2160&times;7) &times; 8 &asymp; 4.6 MB &mdash; about what the
+defaults cost, spent differently. Sampling more often is the expensive axis: halving
+`interval` on level 0 without halving its `size` doubles that level's memory and doubles
+how often every meter is read.
 
 ### Memory-constrained
 

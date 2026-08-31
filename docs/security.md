@@ -65,8 +65,14 @@ enable somewhere, read all of it.
   its trace/span id, into the trace's Logs tab &mdash; not just levels or logger names,
   the actual message content, unmodified, and **not masked at all**. A log statement that
   happens to include a secret or PII is captured exactly as written.
-- **Metrics.** Every Micrometer meter's name, tags and measurements, read directly from
+- **Meters.** Every Micrometer meter's name, tags and measurements, read directly from
   the `MeterRegistry`. Tag values are masked the same way as everything else.
+- **Metric history**, through `/peekaboot/api/insights/**`. The charts' backing rings hold
+  up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event samples at the
+  defaults, and `/config` additionally names every meter being collected. Nothing here is
+  masked, because none of it carries values a masking rule would recognise &mdash; but it
+  does describe your application's shape and load over time to anyone who can reach the
+  endpoint. See [Insights]({{ '/docs/insights/' | relative_url }}).
 
 The dashboard's tabs are backed by `GET /peekaboot/api/actuator/all/insights`, which
 invokes exactly seven Actuator endpoints

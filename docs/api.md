@@ -23,16 +23,28 @@ your own machine.
 | `GET /peekaboot/api/metrics` | &mdash; |
 | `GET /peekaboot/api/traces/insights` | `limit` (default `100`, clamped to 0&ndash;10000), `bucket`, `rootActionType`, `rootOperation` |
 | `GET /peekaboot/api/traces/{traceId}/insights` | &mdash; |
+| `GET /peekaboot/api/insights/config` | &mdash; |
+| `GET /peekaboot/api/insights/data` | `level` (required) |
+| `GET /peekaboot/api/insights/stream` | &mdash; (Server-Sent Events, not JSON) |
 
-These are the only five JSON endpoints Peekaboot exposes &mdash; the dashboard and
-toolbar call exactly this set, nothing broader. The dashboard UI itself &mdash; its HTML,
-JS and CSS &mdash; is served separately, under `/peekaboot/**` too; see [The
+These are the only eight endpoints Peekaboot exposes &mdash; the dashboard and toolbar
+call exactly this set, nothing broader. The dashboard UI itself &mdash; its HTML, JS and
+CSS &mdash; is served separately, under `/peekaboot/**` too; see [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}).
 
-`/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled}` &mdash; the
-same call the dashboard uses to decide whether to show its Metrics and Traces tabs, and
-whether the Environment/Config tabs' "Show secrets" toggle can appear at all. See [The
-dashboard]({{ '/docs/dashboard/' | relative_url }}) for what drives each flag.
+<div class="pk-callout" markdown="1">
+**Two unrelated things are called `insights` here.** `/api/*/insights` is a *suffix*
+naming the enriched, ready-to-render form of actuator or trace data &mdash; the
+backend-for-frontend pattern described below. `/api/insights/**` is a *prefix* naming the
+metric-charts feature and nothing else. They share a word and no code.
+</div>
+
+`/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled, insights}`
+&mdash; the same call the dashboard uses to decide whether to show its Insights, Meters
+and Traces tabs, and whether the Environment/Config tabs' "Show secrets" toggle can appear
+at all. `metrics` is the flag behind the tab now labelled **Meters**: the tab was renamed,
+the JSON field was not. See [The dashboard]({{ '/docs/dashboard/' | relative_url }}) for
+what drives each flag.
 
 `unmask=true` only has an effect while `peekaboot.enable-unmasking=true` is also set on
 the server; without that property, the parameter is silently ignored and the response
@@ -92,3 +104,40 @@ has actually been exported into Peekaboot. If you already have a trace id (from 
 `Server-Timing` header, a toolbar bar, or a list endpoint) and query it immediately, a
 brief `404` before the store catches up is expected, not a bug; retry rather than treating
 it as "this trace doesn't exist."
+
+## The insights endpoints
+
+The three `/api/insights/**` endpoints back the Insights tab. All the grouping, ordering
+and merging is done server-side, so a client renders what `/config` hands it rather than
+deciding anything itself. See [Insights]({{ '/docs/insights/' | relative_url }}) for the
+panel file these are driven by.
+
+`GET /peekaboot/api/insights/config` returns the levels (`index`, `intervalMs`, `size`),
+the enabled panels in final display order (`id`, `title`, `chart`, `unit`, an optional
+per-panel `level`, and their series), and the tiles with their current values. Series ids
+arrive namespaced as `<panelId>.<seriesId>`, which is also how they're keyed in `/data` and
+in the stream &mdash; a bare series id from the YAML file is only unique within its panel.
+
+`GET /peekaboot/api/insights/data?level=n` returns one level's whole ring:
+`{level, intervalMs, endEpochMs, count, series}`. For level 0 each series carries a
+`values` array of raw ticks; for levels above it, a `stats` object keyed by `min`, `max`,
+`avg`, `median`, `p90`, `p95`, `p99`, each with its own array. Whichever doesn't apply is
+`null`. There are no timestamps in the arrays &mdash; positions are derived from
+`endEpochMs` and `intervalMs`, and a missing sample is `null` (JSON has no `NaN`).
+
+An unknown `level` is the one insights call that returns `400`, as
+`{"error": "Unknown insights level: 7"}`. A missing `level` parameter is a `400` from
+Spring itself.
+
+`GET /peekaboot/api/insights/stream` is Server-Sent Events, not JSON &mdash; hold it open
+rather than polling it. Two named events arrive:
+
+| Event | When | Payload |
+|---|---|---|
+| `tick` | every level-0 interval | `{epochMs, values: {seriesId: v}, tiles: {tileId: v}}` |
+| `rollup` | when a higher level's window closes | `{level, epochMs, entries: {seriesId: {min, max, avg, median, p90, p95, p99}}}` |
+
+A comment heartbeat goes out every 15 seconds to keep proxies from reaping an idle
+connection. There's no event replay: reconnect with the browser's native `EventSource`
+retry and refetch `/data` for the levels you care about. The stream completes cleanly on
+application shutdown rather than being dropped.
