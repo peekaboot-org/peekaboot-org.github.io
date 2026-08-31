@@ -47,8 +47,41 @@ reclaim_generated_dirs() {
     echo
 }
 
+# RubyGems marks a compiled extension done by dropping an empty gem.build_complete
+# beside the object it built. It trusts that marker alone: a directory holding the marker
+# but no compiled object counts as built, so `bundle install` skips the gem and Jekyll
+# then dies loading a .so that was never produced — with an error naming the gem rather
+# than the half-built tree, which is what makes it hard to place. Bundler recovers on its
+# own when an extension directory is missing outright (it falls back to the default gem
+# and rebuilds), but not from this state. Interrupted installs and partial copies between
+# machines both produce it; this checkout has extension trees for two architectures, so it
+# is copied between machines.
+#
+# Dropping the directory is enough — bundler rebuilds what it can no longer find. Looking
+# for *.so is correct on every host: the build always happens inside the Linux container,
+# whatever this machine is.
+rebuild_half_built_extensions() {
+    local marker dir repaired=false
+
+    while IFS= read -r marker; do
+        dir=$(dirname "$marker")
+        [ -z "$(find "$dir" -name "*.so" -print -quit)" ] || continue
+
+        if [ "$repaired" = false ]; then
+            echo "Found half-built native extensions — a build marker with nothing built"
+            echo "beside it. Removing them so bundler rebuilds:"
+            repaired=true
+        fi
+        echo "  $(basename "$dir")"
+        rm -rf "$dir"
+    done < <(find vendor/bundle -name gem.build_complete 2>/dev/null || true)
+
+    [ "$repaired" = false ] || echo
+}
+
 cd "$ROOT"
 reclaim_generated_dirs
+rebuild_half_built_extensions
 
 # Gems install into vendor/bundle inside the repo (gitignored), so the first run
 # takes a minute and later ones start in seconds.
