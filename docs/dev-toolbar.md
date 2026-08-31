@@ -51,15 +51,26 @@ went out still gets counted. Peekaboot's own 200ms trace-export delay when the t
 on (see [Auto-configured defaults]({{ '/docs/auto-configured-defaults/' | relative_url }}))
 normally means the numbers are already final well before the last attempt.
 
+The status pill has one tier per response family, and 4xx and 5xx are deliberately held
+apart: a client error gets a soft red that recedes, a server error the full one, because
+the first is the caller's mistake and the second is yours. Anything unrecognised stays
+grey rather than borrowing the 5xx tier just for not being a 2xx. The bar has room for
+the number alone; the overlay spells the same status out.
+
 Click anywhere on the bar &mdash; other than the trace id or the dashboard link, which
-have their own targets &mdash; and its Request tab shows the request and response: every
-header on both sides, query and form parameters, and the resolved controller/handler
-method. Headers and parameters are masked by the same engine that
-masks everything else Peekaboot shows: a value whose key looks sensitive (`password`,
-`authorization`, `cookie`, and the like) is replaced outright, and a handful of
-value-shape patterns catch a credential &mdash; a JWT, an AWS key, a JDBC URL's embedded
-password &mdash; sitting under an innocuous key. There's no reveal control here; unlike
-the dashboard's Environment and Config tabs, a masked header or parameter stays masked.
+have their own targets &mdash; and its Request tab shows the whole exchange on one
+scrolling page: the request line itself (method, path, query string, status spelled out
+as `404 Not Found`, content type and duration), the resolved controller/handler method,
+query and form parameters, and last the two header tables, request then response. Each
+section below the request line appears only when there is something in it, except those
+two header tables, which render either way &mdash; "no headers captured" is an answer,
+where a section that vanished would read as a missing feature. Headers and parameters are
+masked by the same engine that masks everything else Peekaboot shows: a value whose key
+looks sensitive (`password`, `authorization`, `cookie`, and the like) is replaced
+outright, and a handful of value-shape patterns catch a credential &mdash; a JWT, an AWS
+key, a JDBC URL's embedded password &mdash; sitting under an innocuous key. There's no
+reveal control here; unlike the dashboard's Environment and Config tabs, a masked header
+or parameter stays masked.
 See [Security &mdash; Masking]({{ '/docs/security/' | relative_url }}#masking) for the
 exact rules and what they don't catch. Request and response bodies, and uploaded file
 names, aren't captured yet &mdash; there's a field reserved for them, but nothing

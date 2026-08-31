@@ -66,9 +66,10 @@ percentiles at those levels can and can't honestly tell you.
 
 Recent traces, bucketed into All, Errors and Slow, filterable by root action type and
 root operation. Opening a row expands the full trace detail overlay &mdash; spans,
-queries, logs and request metadata. See [Tracing]({{ '/docs/tracing/' | relative_url }})
-and [Concepts]({{ '/docs/concepts/' | relative_url }}) for what the bucket names, badges
-and root action types actually mean.
+queries, logs, and the whole HTTP exchange on a single Request page. See
+[Tracing]({{ '/docs/tracing/' | relative_url }}) and
+[Concepts]({{ '/docs/concepts/' | relative_url }}) for what the bucket names, badges and
+root action types actually mean.
 
 ## Meters
 
