@@ -65,12 +65,14 @@ A dashboard comes with it too, at
 
 - The dev toolbar, on every page: request and response detail, the trace view, and
   logs correlated to the request &mdash; see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }})
-- The Dashboard tab: build and Git info, Spring Boot and Java versions, system and JVM
+- The Overview tab: build and Git info, Spring Boot and Java versions, system and JVM
   details, and datasource status
 - Environment and Config tabs: every property source Spring resolved, and every
   `@ConfigurationProperties` bean's effective values
 - Flyway migration history, runtime logger levels, and scheduled task listings
-- Metrics from Micrometer's registry
+- Every meter in Micrometer's registry on the Meters tab, and the curated ones charted over
+  time on [Insights]({{ '/docs/insights/' | relative_url }}) &mdash; no Prometheus, no
+  scrape endpoint
 - Full request traces &mdash; spans and SQL queries &mdash; for every request your app
   has served since it started
 

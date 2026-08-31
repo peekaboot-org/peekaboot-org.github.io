@@ -23,7 +23,7 @@ Adding `peekaboot-spring-boot-starter` pulls in exactly four dependencies:
 |---|---|
 | `org.peekaboot:peekaboot-spring-boot-autoconfigure` | Peekaboot's own auto-configuration, backend services and dashboard frontend |
 | `spring-boot-starter` | the base Spring Boot starter |
-| `spring-boot-starter-actuator` | the Health, Info, Env, Loggers, Flyway, Config and Scheduled Tasks endpoints Peekaboot reads in-process &mdash; Metrics is read directly from Micrometer's `MeterRegistry`, not from an actuator endpoint |
+| `spring-boot-starter-actuator` | the Overview, Env, Loggers, Flyway, Config and Scheduled Tasks endpoints Peekaboot reads in-process &mdash; the Meters and Insights tabs read Micrometer's `MeterRegistry` directly, not an actuator endpoint, though the registry bean itself is Actuator's |
 | `spring-boot-starter-opentelemetry` | the OpenTelemetry SDK and the Micrometer Tracing bridge that feed the in-memory trace store |
 
 Caffeine, which backs the in-memory trace store's bounded caches, is not declared by the
@@ -44,3 +44,10 @@ explicitly excluding the OpenTelemetry starter.
 
 **No OpenTelemetry SDK on the classpath.** The trace store itself is still created, but
 nothing populates it &mdash; the Traces tab stays empty rather than missing entirely.
+
+**No Micrometer `MeterRegistry` bean.** The Meters tab and the whole insights feature
+&mdash; collector, `/api/insights/**` endpoints, Insights tab, and the Overview tab's
+stat-tile row &mdash; are all absent rather than empty; there's nothing to sample without
+a registry. Everything else is unaffected. The starter provides one through
+`spring-boot-starter-actuator`, so this only comes up if you've excluded it or explicitly
+disabled the registry. See [Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).

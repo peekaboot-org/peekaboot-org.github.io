@@ -91,18 +91,39 @@ management:
         schedule-delay: 50ms
 ```
 
-## The Metrics tab is missing
+## The Meters tab is missing
 
-**Cause:** the dashboard doesn't show Metrics unconditionally &mdash; it's gated on a
-separate call, `GET /peekaboot/api/features`, reporting `metrics: true`. That flag
-reflects whether a Micrometer `MeterRegistry` bean is present, which Spring Boot Actuator
-normally provides automatically.
+**Cause:** the dashboard doesn't show Meters unconditionally &mdash; it's gated on a
+separate call, `GET /peekaboot/api/features`, reporting `metrics: true`. (The tab was
+renamed from Metrics; the JSON flag behind it was not.) That flag reflects whether a
+Micrometer `MeterRegistry` bean is present, which Spring Boot Actuator normally provides
+automatically.
 
 **Fix:** Confirm `GET /peekaboot/api/features` actually reports `metrics: true` (see
 [The dashboard &mdash; conditionally shown
 tabs]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs) and [HTTP
 API]({{ '/docs/api/' | relative_url }})); if it's `false`, something on your classpath or
-in your configuration is excluding Actuator's metrics auto-configuration.
+in your configuration is excluding Actuator's metrics auto-configuration. The Insights tab
+and the Overview tab's stat-tile row need that same registry, so they'll be gone too.
+
+## The Insights tab is missing, or a panel says "No data"
+
+**Cause:** two different situations, and the tab itself tells you which. A **missing tab**
+means `GET /peekaboot/api/features` reports `insights: false` &mdash; either
+`peekaboot.insights.enabled` is set to `false`, or there's no `MeterRegistry` bean (in
+which case Meters is missing too). A panel reading **"No data"** means the tab is working
+fine and that panel's meters simply aren't registered: no Hikari pool, no Hibernate, no
+`datasource-micrometer` on the classpath. Panels stay visible in that state on purpose, so
+an absent subsystem is something you can see.
+
+A third case looks like the first: your own `peekaboot-insights.yml` failed validation and
+was dropped, so the tab shows the bundled defaults instead of your panels. That is always
+logged at `ERROR` on startup &mdash; grep for `Ignoring invalid insights panel config`.
+
+**Fix:** For a missing tab, check `peekaboot.insights.enabled` and the `metrics` flag
+alongside `insights`. For "No data" on a panel you expect data from, look the meter up on
+the Meters tab first: if it isn't in the registry, no series can resolve it. See
+[Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).
 
 ## The Traces tab shows fewer queries than my endpoint actually issues, and carries a TRUNCATED badge
 
@@ -126,8 +147,8 @@ for the full mechanics and a worked example.
 ## Values show as `******` and I need to see them
 
 **Cause:** most likely, this is just the default. Peekaboot masks a value whose key or
-shape looks like a secret on the Environment, Config, Dashboard (health detail) and
-Metrics tabs, and in captured trace headers, query/form parameters, span tags and SQL text
+shape looks like a secret on the Environment, Config, Overview (health detail) and
+Meters tabs, and in captured trace headers, query/form parameters, span tags and SQL text
 &mdash; see [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for
 the full list of what's covered.
 
