@@ -372,20 +372,29 @@ gateway-issued header) &mdash; the part that matters is `.hasRole(...)` (or
 and to show where the role is expected to come from; replace it with whatever your
 application already authenticates against.
 
-### The dev toolbar goes behind the same gate
+### The dev toolbar asks the reader to sign in
 
-The [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) is injected into your
+The [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) is rendered into your
 application's own HTML by a servlet filter, server-side, before anything knows who is
-asking &mdash; so its bootstrap markup lands on the page whether or not the reader is
-authenticated. The browser then loads the toolbar's module from
-`/peekaboot/ui/toolbar/toolbar.js`, which is a `/peekaboot/**` request like any other.
-Outside the role, that request is refused and the toolbar never mounts: no bar on the page,
-and a failed request in the console on every page load. Whoever you gate `/peekaboot/**` on
-is also exactly the set of people who still get a toolbar.
+asking &mdash; so the bar itself lands on the page whether or not the reader may read
+Peekaboot's data, carrying the stylesheets it needs with it. What it cannot do without
+authorization is load `/peekaboot/ui/toolbar/toolbar.js`, the module that fills the bar
+with the request's trace: that is a `/peekaboot/**` request like any other, and the chain
+above refuses it.
 
-The dashboard itself behaves the way `httpBasic` always does in a browser: navigating to
-`/peekaboot/` while unauthenticated returns `401` with a `WWW-Authenticate` challenge, which
-is what makes the browser show its native credentials prompt.
+So outside the role the bar appears, but empty, showing **Sign in to see this request** as
+a link to the dashboard. Following it lands the reader on `/peekaboot/`, which *is* gated
+&mdash; their browser gets the `401` and its `WWW-Authenticate` challenge, prompts for
+credentials, and once they have authenticated the toolbar fills in normally on the next
+page they load. Whoever you gate `/peekaboot/**` on is still exactly the set of people who
+get trace data; what changed is that everyone else is told why they don't, instead of
+seeing a page with no toolbar and no explanation.
+
+One caveat if your application sends a strict `Content-Security-Policy`: the bar's styles
+travel inline, and a policy without `style-src 'unsafe-inline'` drops them. A reader inside
+the role is unaffected &mdash; the same sheets are linked as well, and those load normally
+&mdash; but a reader outside it has no styles from either source, so the bar arrives as
+plain text at the end of the page rather than as a strip along the bottom.
 
 ### This example is executed, not just published
 
