@@ -43,20 +43,22 @@ one checked first, not the most specific-sounding one:
 
 | Priority | Value | Icon | Means | Recognized by |
 |---|---|---|---|---|
-| 1 | Message Consumer | 📩 | A message picked off a queue or topic | The root span is a consumer-side span, **or** carries messaging details &mdash; checked first, so a consumer-side span whose name happens to contain "job" or "cron" is still Message Consumer, never Scheduled Job |
+| 1 | Message Consumer | 📩 | A message picked off a queue or topic | The root span is a consumer-side span, **or** carries messaging details without being producer-side &mdash; checked first, so a consumer-side span whose name happens to contain "job" or "cron" is still Message Consumer, never Scheduled Job. Messaging details on their own don't decide it: a span *sending* a message carries exactly the same ones |
 | 2 | HTTP Request | 🌐 | An inbound web request, recognized from its own tags | The root span is a server-side span **and** carries HTTP details |
 | 3 | RPC Call | 🔗 | An inbound remote-procedure call (e.g. gRPC) | The root span is a server-side span **and** carries RPC details |
-| 4 | Scheduled Job | 🕐 | A `@Scheduled` method Spring's scheduler actually fired | The root span carries **both** the `code.function` and `code.namespace` tags &mdash; the exact pair Spring's own `DefaultScheduledTaskObservationConvention` sets, and only when its scheduler dispatches the call &mdash; checked only after rows 1&ndash;3 have already ruled themselves out |
-| 5 | Database | 🗂 | A database call with nothing above it in the trace | Rare &mdash; means something queried a database with no request, job or message context around it that Peekaboot could see. The root span is a client-side span **and** carries database details |
-| 6 | HTTP Request (fallback) | 🌐 | Any other inbound web request that didn't carry HTTP-specific tags | The root span is a server-side span, full stop &mdash; checked last among the server-side rules, after Scheduled Job and Database have both already failed to match |
-| 7 | Internal | ⚙ | The trace has no inbound/outbound direction at all | The root span carries none of the roles above (client, server or consumer) |
-| 8 | Unknown | ❓ | Nothing above matched | Fallback |
+| 4 | HTTP Request (fallback) | 🌐 | Any other inbound web request that didn't carry HTTP-specific tags | The root span is a server-side span, full stop &mdash; this catches every server-side span rows 2&ndash;3 left, so no rule below ever sees one |
+| 5 | Scheduled Job | 🕐 | A `@Scheduled` method Spring's scheduler actually fired | The root span carries **both** the `code.function` and `code.namespace` tags &mdash; the exact pair Spring's own `DefaultScheduledTaskObservationConvention` sets, and only when its scheduler dispatches the call. That pair is otherwise an ordinary pair of source-code attributes any instrumentation may set, which is why it only counts here, below row 4, and never on a server-side span |
+| 6 | Database | 🗂 | A database call with nothing above it in the trace | Rare &mdash; means something queried a database with no request, job or message context around it that Peekaboot could see. The root span is a client-side span **and** carries database details |
+| 7 | Internal | ⚙ | The trace has no inbound/outbound direction at all | The root span carries no role whatsoever &mdash; not client, server, producer or consumer |
+| 8 | Unknown | ❓ | Nothing above matched | In practice one of two shapes: a producer-side span, i.e. a message being sent rather than received; or a client-side span without database details &mdash; an outbound call that became the root only because its own caller's span hasn't reached Peekaboot, leaving nothing to say what started the trace |
 
 HTTP Request appears twice on purpose: the strict, tag-based check (priority 2) fires
-before Scheduled Job and Database are even considered, while the loose fallback (priority
-6) only fires after every other rule &mdash; including Scheduled Job's own check &mdash;
-has already failed. Both rows produce the same value and the same icon; only the
-condition and its position in the list differ.
+before anything else about a server-side span is considered, while the loose fallback
+(priority 4) sweeps up every server-side span the first three rules left. Both rows
+produce the same value and the same icon; only the condition and its position in the list
+differ. Between them they account for *every* server-side span, which is why Scheduled
+Job, Database, Internal and Unknown below can only ever describe a span that is not
+server-side.
 
 <div class="pk-callout" markdown="1">
 **Scheduled Job only recognizes a `@Scheduled` method that Spring's own scheduler
