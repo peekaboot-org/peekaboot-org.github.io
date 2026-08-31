@@ -42,7 +42,32 @@ any other Boot property, but it will **not** appear on the dashboard's own Confi
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
-| `enabled` | boolean | `true` | Enables `PeekabootLifecycleAutoConfiguration` &mdash; the application-ready startup summary (application name, build info, server and datasource info logged once the app is up &mdash; no Git info; that reaches the dashboard separately, through the actuator `info` endpoint under `management.info.git.enabled`). |
+| `enabled` | boolean | `true` | Enables `PeekabootLifecycleAutoConfiguration` &mdash; the application-ready startup summary (application name, build info, server, dashboard and datasource info logged once the app is up &mdash; no Git info; that reaches the dashboard separately, through the actuator `info` endpoint under `management.info.git.enabled`). |
+
+### The URLs in the summary
+
+Three lines of the summary are links, each printed only when it actually leads somewhere:
+
+```
+ Service URL: http://localhost:8080
+ Swagger UI: http://localhost:8080/swagger-ui.html
+ Peekaboot Dashboard: http://localhost:8080/peekaboot/
+```
+
+**Service URL** appears whenever the application runs an embedded web server, and every
+line below it is built from that base &mdash; `https` when `server.ssl.enabled` is set,
+the port the server actually bound to, and `server.servlet.context-path` appended when
+one is configured. A `server.address` of `0.0.0.0`, or none at all, is printed as
+`localhost`, since the wildcard bind address is not something you can click.
+
+**Swagger UI** appears when springdoc is on the classpath, honouring
+`springdoc.swagger-ui.path` when you have moved it.
+
+**Peekaboot Dashboard** appears only when the dashboard is actually being served &mdash;
+the same three conditions that activate Peekaboot's web layer at all: a servlet
+application, Actuator on the classpath, and `peekaboot.enabled` true. Off, non-servlet,
+or no Actuator, and the line is omitted rather than printed as a URL that would 404. See
+[How activation works]({{ '/docs/how-activation-works/' | relative_url }}).
 
 ## `peekaboot.tracing`
 
