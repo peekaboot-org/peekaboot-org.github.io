@@ -53,7 +53,11 @@ for exactly what counts as a local run.
 
 A dashboard comes with it too, at
 [`http://localhost:8080/peekaboot/`](http://localhost:8080/peekaboot/); its API sits under
-[`http://localhost:8080/peekaboot/api/`](http://localhost:8080/peekaboot/api/).
+[`http://localhost:8080/peekaboot/api/`](http://localhost:8080/peekaboot/api/). If your
+application doesn't run on port 8080, you don't have to work the address out: the
+application-ready summary Peekaboot logs at startup prints the dashboard's real URL,
+context path and all, on a `Peekaboot Dashboard:` line &mdash; see
+[Configuration]({{ '/docs/configuration/' | relative_url }}#the-urls-in-the-summary).
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-dashboard-light.png' | relative_url }}"
