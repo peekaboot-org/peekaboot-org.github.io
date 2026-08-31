@@ -281,7 +281,8 @@ overrides Peekaboot's lowest-precedence default.
 
 There's no built-in authentication to configure &mdash; only Spring Security in front of
 the paths. This restricts `/peekaboot/**` to a specific role, using Spring Security's
-lambda DSL:
+lambda DSL, alongside the two pieces it needs to actually work: your application's own
+chain, and wherever `ROLE_ADMIN` comes from.
 
 ```java
 import org.springframework.context.annotation.Bean;
@@ -290,6 +291,9 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -298,31 +302,103 @@ public class PeekabootSecurityConfig {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain peekabootSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http
-            .securityMatcher("/peekaboot/**")
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().hasRole("ADMIN")
-            )
-            .httpBasic(Customizer.withDefaults())
-            .build();
+        return http.securityMatcher("/peekaboot/**")
+                .authorizeHttpRequests(auth -> auth.anyRequest().hasRole("ADMIN"))
+                .httpBasic(Customizer.withDefaults())
+                .build();
+    }
+
+    /**
+     * Your application's own chain, whatever it already is. What matters is that it carries
+     * no {@code @Order} at all, so it keeps Spring Security's default of
+     * {@link Ordered#LOWEST_PRECEDENCE} and is evaluated last, as the catch-all. This sample
+     * application has no access rules of its own, hence {@code permitAll}.
+     */
+    @Bean
+    public SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll()).build();
+    }
+
+    /**
+     * Where {@code ROLE_ADMIN} comes from. An in-memory store with literal passwords is an
+     * illustration, not a recommendation - replace it with whatever your application already
+     * authenticates against.
+     */
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new InMemoryUserDetailsManager(
+                User.withUsername("admin")
+                        .password("{noop}admin-password")
+                        .roles("ADMIN")
+                        .build(),
+                User.withUsername("user")
+                        .password("{noop}user-password")
+                        .roles("USER")
+                        .build());
     }
 }
 ```
 
-`securityMatcher("/peekaboot/**")` scopes this whole filter chain to Peekaboot's own
-paths. When multiple `SecurityFilterChain` beans exist, Spring Security evaluates them in
-ascending `@Order` order and uses the first whose `securityMatcher` matches &mdash;
-**lower values are evaluated first**, the opposite of "falls through as a catch-all".
-`@Order(Ordered.HIGHEST_PRECEDENCE)` above guarantees this chain is checked before any
-other, so `/peekaboot/**` can't accidentally reach your application's general chain
-first. Leave that general chain unordered (no `@Order` at all) so it defaults to
-`Ordered.LOWEST_PRECEDENCE` and is evaluated last, as the catch-all &mdash; don't fold a
-`/peekaboot/**` rule into it instead of using this one, and don't give it an `@Order`
-lower than this chain's; either would let it match `/peekaboot/**` first and silently
-bypass the restriction this page just told you to add. Swap `httpBasic` for whatever your
-application already uses (form login, OAuth2, a gateway-issued header) &mdash; the part
-that matters is `.hasRole(...)` (or `.authenticated()`, if any logged-in user should be
-trusted with this data) actually gating `/peekaboot/**`.
+`securityMatcher("/peekaboot/**")` scopes the first chain to Peekaboot's own paths. When
+multiple `SecurityFilterChain` beans exist, Spring Security evaluates them in ascending
+`@Order` order and uses the first whose `securityMatcher` matches &mdash; **lower values
+are evaluated first**, the opposite of "falls through as a catch-all".
+`@Order(Ordered.HIGHEST_PRECEDENCE)` guarantees the Peekaboot chain is checked before any
+other, so `/peekaboot/**` can't accidentally reach your application's general chain first.
+That general chain &mdash; `applicationSecurityFilterChain` above, whatever yours actually
+does &mdash; carries no `@Order` at all, so it keeps Spring Security's default of
+`Ordered.LOWEST_PRECEDENCE` and is evaluated last. Don't fold a `/peekaboot/**` rule into
+it instead of using the first chain, and don't give it an `@Order` lower than the first
+chain's; either would let it match `/peekaboot/**` first and silently bypass the
+restriction this page just told you to add.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+**Don't paste `applicationSecurityFilterChain` over rules you already have.** It permits
+everything, because this sample application has nothing of its own to protect. If your
+application already has a chain, keep that one and add only the first bean. The second is
+in the example for two reasons: it shows the ordering relationship described above, and
+defining any `SecurityFilterChain` of your own switches off the default chain Spring Boot
+would otherwise contribute
+([`DefaultWebSecurityCondition`](https://github.com/spring-projects/spring-boot/blob/main/module/spring-boot-security/src/main/java/org/springframework/boot/security/autoconfigure/web/servlet/DefaultWebSecurityCondition.java)
+is `@ConditionalOnMissingBean(SecurityFilterChain.class)`) &mdash; so with the Peekaboot
+chain alone, every request that isn't `/peekaboot/**` matches no chain at all and passes
+through unsecured.
+</div>
+
+Swap `httpBasic` for whatever your application already uses (form login, OAuth2, a
+gateway-issued header) &mdash; the part that matters is `.hasRole(...)` (or
+`.authenticated()`, if any logged-in user should be trusted with this data) actually gating
+`/peekaboot/**`. The in-memory `UserDetailsService` is there to make the example runnable
+and to show where the role is expected to come from; replace it with whatever your
+application already authenticates against.
+
+### The dev toolbar goes behind the same gate
+
+The [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) is injected into your
+application's own HTML by a servlet filter, server-side, before anything knows who is
+asking &mdash; so its bootstrap markup lands on the page whether or not the reader is
+authenticated. The browser then loads the toolbar's module from
+`/peekaboot/ui/toolbar/toolbar.js`, which is a `/peekaboot/**` request like any other.
+Outside the role, that request is refused and the toolbar never mounts: no bar on the page,
+and a failed request in the console on every page load. Whoever you gate `/peekaboot/**` on
+is also exactly the set of people who still get a toolbar.
+
+The dashboard itself behaves the way `httpBasic` always does in a browser: navigating to
+`/peekaboot/` while unauthenticated returns `401` with a `WWW-Authenticate` challenge, which
+is what makes the browser show its native credentials prompt.
+
+### This example is executed, not just published
+
+The class above is not a sketch. It is
+[`PeekabootSecurityConfig`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/example/security/PeekabootSecurityConfig.java)
+in the product repository, loaded unmodified into the sample application by two tests:
+[`SecuredPeekabootIntegrationTest`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/testingapp/integration/SecuredPeekabootIntegrationTest.java)
+pins the HTTP contract &mdash; an anonymous request to the dashboard, to
+`/peekaboot/api/actuator/all/insights` and to a dashboard static asset is refused; a
+logged-in user *without* `ROLE_ADMIN` is forbidden; an admin gets the real payload; and the
+application's own paths stay anonymously reachable &mdash; and
+[`SecuredDashboardTest`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/testingapp/ui/SecuredDashboardTest.java)
+pins the browser behaviour described just above, in real Chromium.
 
 ## Running it in a deployed environment
 

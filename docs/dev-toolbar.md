@@ -22,6 +22,11 @@ one. Once it's on, a small bar docks to the bottom of every HTML page your app r
 requests &mdash; and if anything goes wrong generating it, the original page goes out
 unmodified rather than a broken one.
 
+If you've put Spring Security in front of `/peekaboot/**`, the toolbar sits behind that
+gate as well &mdash; it loads its own module from that path, so a reader outside the role
+gets the page without the bar. See [Security &mdash; the dev toolbar goes behind the same
+gate]({{ '/docs/security/' | relative_url }}#the-dev-toolbar-goes-behind-the-same-gate).
+
 It mounts inside its own shadow root, isolated from your page's styles in both
 directions: your CSS can't reach in and restyle it, and its own styles can't leak out and
 affect your page. See [Theming]({{ '/docs/theming/' | relative_url }}) for how to
