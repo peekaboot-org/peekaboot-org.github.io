@@ -14,7 +14,7 @@ theme: null
 repository_url: https://github.com/peekaboot-org/peekaboot
 maven_group: org.peekaboot
 maven_artifact: peekaboot-spring-boot-starter
-peekaboot_version: 0.0.4-SNAPSHOT
+peekaboot_version: 0.0.5-SNAPSHOT
 
 markdown: kramdown
 kramdown:

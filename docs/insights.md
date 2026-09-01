@@ -11,9 +11,12 @@ backend to stand up first. It's on whenever Peekaboot is
 (`peekaboot.insights.enabled: true`) and there's a Micrometer `MeterRegistry` bean to read.
 
 <div class="pk-callout" markdown="1">
-Everything lives in memory, so a restart starts the history over &mdash; the charts fill
-from empty again. Persisting the rings across restarts is tracked as [issue
-#21](https://github.com/peekaboot-org/peekaboot/issues/21).
+The rings live in memory, but they no longer die with the process: on a local run
+Peekaboot writes them to a snapshot file and reads them back at the next start, so the
+charts resume instead of filling from empty. That is
+[`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
+&mdash; on by default for a local launch, off everywhere else, and with it off a restart
+does start the history over. See [Surviving a restart](#surviving-a-restart).
 </div>
 
 ## What actually gets sampled
@@ -262,6 +265,32 @@ Charts are built lazily: a panel's chart is only created once its card scrolls i
 card below the fold still accumulates its data and draws once, on entry &mdash; so a long
 config of panels doesn't cost you dozens of live canvases.
 
+## Surviving a restart
+
+With `peekaboot.storage.enabled` on &mdash; the default for a local run &mdash; the rings
+are written to `insights.snapshot` at each `peekaboot.insights.persistence.interval`
+boundary (by default one write per coarsest window) and once more at shutdown, after the
+collector has stopped so the last write sees settled rings. The next start reads them back
+and the charts carry on.
+
+The restart itself stays visible rather than being smoothed over. The gap while the
+application was down is padded as a gap, not interpolated across, so a chart shows the
+outage as the hole it was; and every start and stop is drawn as a **restart marker** over
+the charts, from the same history the [Lifecycle tab]({{ '/docs/dashboard/' | relative_url }}#lifecycle)
+tabulates. The **Restarts** toggle in the tab header turns those markers off.
+
+Loading never delays your application's startup: the file is parsed on a virtual thread
+and applied just before the collector's first write, and a snapshot that hasn't finished
+parsing by then is dropped rather than layered on top of live samples.
+
+The snapshot is a cache, never a source of truth. One that can't be read, was written by a
+different schema version, no longer matches your `levels` geometry, or is older than
+`peekaboot.insights.persistence.max-age` (by default the span the coarsest level covers) is
+discarded, and the rings start empty exactly as they would with storage off. Nothing about
+a bad snapshot can fail your application. See
+[Configuration &mdash; `peekaboot.storage`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
+for where the file lives and what else lands beside it.
+
 ## Reading the tab
 
 - The **level switch** in the tab header sets the resolution every panel charts at. Each
@@ -271,6 +300,9 @@ config of panels doesn't cost you dozens of live canvases.
   otherwise draw an average line with a translucent min&ndash;max band.
 - **Drag-selecting** across any chart zooms every chart to that same x-window, so panels
   stay comparable; a reset control clears it and returns them all to auto-fitting.
+- The **Restarts** toggle draws a marker over every chart at each recorded start and
+  stop &mdash; see [Surviving a restart](#surviving-a-restart). It is on by default, and
+  a history that can't be fetched simply means no markers rather than a failed tab.
 - A panel reading **"No data"** has resolved none of its series &mdash; usually the
   subsystem it charts isn't on the classpath at all. It stays visible on purpose, so a
   missing pool or missing Hibernate is something you can see rather than something you have

@@ -32,6 +32,48 @@ defaults]({{ '/docs/auto-configured-defaults/' | relative_url }}) and [Security 
 `show-values: always` only on a local
 run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
 
+## `peekaboot.storage`
+
+Bound by `PeekabootProperties.Storage`. The only prefix on this page that touches the
+filesystem: it decides whether the insights history and the start/stop log outlive a
+restart. Everything else Peekaboot holds is in memory, and is gone when the process is.
+
+| Property | Type | Default | Controls |
+|---|---|---|---|
+| `enabled` | boolean | auto-detected: on for a local run, off elsewhere | Whether anything is written at all. Computed by the same launch-context detection as `peekaboot.enabled` and `peekaboot.dev-toolbar`, at the same lowest precedence, so any value you set wins either way &mdash; and, like the toolbar, it is **not** keyed on `peekaboot.enabled`: an application that turns Peekaboot on deliberately in a shared environment writes nothing to that host's disk. While it is off, both stores run from memory and never open a file. |
+| `dir` | String | unset &mdash; resolves to `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where those files live. An explicit value is used verbatim &mdash; no per-application subdirectory is appended to it. |
+
+The default directory sits deliberately outside your project: it survives a `mvn clean`
+and a re-clone, and never lands inside the repository you're working in.
+`<groupId>.<artifactId>` is read from `build-info.properties`, so it is only available in
+a build that generates one &mdash; the Spring Boot Maven plugin's `build-info` goal, or
+`springBoot { buildInfo() }` with the Gradle plugin. Without it Peekaboot falls back to
+`spring.application.name`, and to a fixed `application` folder when there is no name
+either; two applications that share a name, or have none, then share a directory, which is
+the case worth setting `dir` for. Whatever the identifier, anything in it that isn't a
+letter, digit, dot, underscore or dash becomes a dash before it names a folder.
+
+Two files land there:
+
+| File | What it holds | Size |
+|---|---|---|
+| `insights.snapshot` | The insights ring buffers in a versioned binary format, written at each `peekaboot.insights.persistence.interval` boundary and once more at shutdown | The same arithmetic as the rings in memory, plus one column per aggregated level &mdash; about 5 MB at the default levels |
+| `lifecycle.jsonl` | The application's start and stop history: one JSON object per line, at most 1000 events, oldest dropped first | &le; 400 KB when full |
+
+Neither file is a source of truth, and neither can fail your application. A snapshot that
+is unreadable, was written by a different schema version, no longer matches your
+`peekaboot.insights.levels` geometry, or is older than
+`peekaboot.insights.persistence.max-age` is discarded and the rings start empty &mdash;
+exactly as they would with storage off. A `lifecycle.jsonl` line that fails to parse is
+skipped and the rest of the file still loads. Each store creates its directory on first
+write and, if that or the write itself throws, logs once and carries on in memory rather
+than taking the application down over an unwritable `$HOME`.
+
+Both stores assume one application instance per directory. Two instances pointed at the
+same `dir` overwrite each other's files &mdash; the cost is lost history rather than
+corruption, but give each instance its own `dir` if you run several against one home
+directory.
+
 ## `peekaboot.lifecycle`
 
 <div class="pk-callout pk-callout--warning" markdown="1">
@@ -117,8 +159,9 @@ how each issue type is used.
 ## `peekaboot.insights`
 
 Bound by `InsightsProperties`. These control the metric collector behind the Insights tab
-&mdash; how often it samples and how much history it keeps. *What* it samples comes from a
-separate YAML file rather than from properties; see
+&mdash; how often it samples and how much history it keeps. Whether that history outlives
+the process is `peekaboot.storage.enabled` above. *What* it samples comes from a separate
+YAML file rather than from properties; see
 [Insights]({{ '/docs/insights/' | relative_url }}#configuring-panels).
 
 | Property | Type | Default | Controls |
@@ -127,6 +170,8 @@ separate YAML file rather than from properties; see
 | `levels[n].interval` | Duration | `10s`, `1m`, `1h` | The sampling tick (level 0) and each aggregation window above it. Every interval must be a whole multiple of the previous one, or startup fails. |
 | `levels[n].size` | int | `90`, `1440`, `720` | Ring buffer entries kept per series at that level &mdash; `interval` &times; `size` is how far back the charts reach. |
 | `config-location` | String | unset | A Spring resource location for the panel file, replacing the default lookup of `peekaboot-insights.yml` on the classpath root. |
+| `persistence.interval` | Duration | the coarsest level's own `interval` &mdash; `1h` at the defaults | How often the rings are written to `insights.snapshot`. Does nothing while `peekaboot.storage.enabled` is off. |
+| `persistence.max-age` | Duration | the coarsest level's span, `interval` &times; `size` &mdash; 30 days at the defaults | How old a snapshot may be and still be worth loading. Past it every restored sample would be an empty gap, so the file is discarded instead of read. |
 
 Setting `levels` replaces the whole list rather than merging into it, so give every level
 you want. Level 0 stores one number per series per tick; every higher level stores seven

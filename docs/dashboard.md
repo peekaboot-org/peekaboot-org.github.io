@@ -1,6 +1,6 @@
 ---
 title: The dashboard
-lead: One tab per operational question &mdash; health, charts, traces, meters, config, migrations, logs and schedules.
+lead: One tab per operational question &mdash; health, charts, restarts, traces, meters, config, migrations, logs and schedules.
 permalink: /docs/dashboard/
 ---
 
@@ -53,6 +53,32 @@ switched off, and an application can add, replace or hide panels with its own
 [Insights]({{ '/docs/insights/' | relative_url }}) has the whole picture: the panel file's
 schema and merge rules, what the aggregation levels cost in memory, and what the
 percentiles at those levels can and can't honestly tell you.
+
+## Lifecycle
+
+**Answers:** when did this application run, for how long, and what was deployed each time?
+
+Every start and stop Peekaboot has recorded, turned into **runs** &mdash; one row per run,
+newest first, 20 to a page. It is the table view of the same history the Insights charts
+draw their restart markers from.
+
+| Column | What it shows |
+|---|---|
+| Started | When the application became ready. The run in progress carries a **Running** badge |
+| Ran for | How long it ran, with a **still counting** badge while that run is the current one |
+| Stopped | When it shut down &mdash; or a dash and an **Unclean exit** badge, since a `kill -9`, a crash or a power loss records no stop |
+| Down before | The gap between the previous run's stop and this one's start |
+| Build | The version, with `branch @ commit` beneath it and the build time on hover. A run whose version, branch or commit differs from the one before it carries a **Deployment** badge naming which of the three changed |
+
+A dash in this table always means *unknowable*, never zero: a run with no recorded stop has
+no honest duration, and a run whose predecessor ended uncleanly has no stop to measure its
+downtime from. Neither is guessed at.
+
+How much history there is depends on
+[`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
+With it on &mdash; the default for a local run &mdash; the log persists across restarts, up
+to 1000 events, so roughly 500 runs. With it off the tab shows the current run alone, which
+is still a real row rather than an empty tab.
 
 ## Traces
 
@@ -231,7 +257,10 @@ endpoint; the tab only appears when at least one scheduled task exists.
 
 Loggers, Flyway, Config and Scheduled Tasks only appear once the dashboard's main payload
 actually contains data for them &mdash; an app with no Flyway migrations simply has no
-Flyway tab, for instance. Overview and Environment are always shown.
+Flyway tab, for instance. Overview, Lifecycle and Environment are always shown. Lifecycle
+is deliberately among them rather than gated: `peekaboot.lifecycle.enabled: false` removes
+its endpoint outright, and the tab then says so instead of vanishing, on the grounds that
+whoever set that flag will not be puzzled by it.
 
 Insights, Meters and Traces are different: they're gated on a separate call, `GET
 /peekaboot/api/features`, which returns `{tracing, metrics, devToolbar, unmaskingEnabled,

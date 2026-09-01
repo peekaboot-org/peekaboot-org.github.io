@@ -79,9 +79,36 @@ rebuild_half_built_extensions() {
     [ "$repaired" = false ] || echo
 }
 
+# The same sync brings the other half of this problem: extension trees for two
+# architectures, where the marker and the compiled object are both present but the
+# object was built for the other machine. Ruby reports a wrong-architecture .so as
+# "cannot open shared object file: No such file or directory" — a missing-file error
+# naming a file that is right there, which is what makes this one hard to place too,
+# and the check above passes straight over it because it only looks for *presence*.
+#
+# Which tree is the usable one can't be decided from here: this script runs on the
+# host, the build runs in a Linux container, and on a Mac those two don't even agree
+# on the architecture's name. So when there is more than one tree, drop all of them
+# along with every object already copied out into the gem directories, and let bundler
+# rebuild the one that belongs to this machine. That leaves a single tree, so the next
+# run passes straight through.
+rebuild_foreign_architecture_extensions() {
+    local trees
+    trees=$(find vendor/bundle -type d -path "*/extensions/*" -mindepth 4 -maxdepth 4 2>/dev/null || true)
+    [ "$(echo "$trees" | grep -c .)" -gt 1 ] || return 0
+
+    echo "Found native extensions built for more than one architecture — this checkout"
+    echo "has been copied between machines. Removing them so bundler rebuilds for this one:"
+    echo "$trees" | sed 's/^/  /'
+    echo "$trees" | while IFS= read -r tree; do rm -rf "$tree"; done
+    find vendor/bundle -name "*.so" -delete 2>/dev/null || true
+    echo
+}
+
 cd "$ROOT"
 reclaim_generated_dirs
 rebuild_half_built_extensions
+rebuild_foreign_architecture_extensions
 
 # Gems install into vendor/bundle inside the repo (gitignored), so the first run
 # takes a minute and later ones start in seconds.
