@@ -86,7 +86,9 @@ That same click opens the full trace &mdash; the same view the dashboard's Trace
 uses for any request, reachable here without leaving the page you're testing. The Spans
 tab, shown above, is the whole tree: every span's kind, tags and duration, nested exactly
 as they nested at runtime. The Queries tab lists the SQL each of those spans ran, with
-duration and, where your instrumentation provides them, row counts. Peekaboot reads the
+duration and, where your instrumentation provides them, row counts; a query at or above
+`peekaboot.ui.tracing.slow-query-threshold-ms` (default 50ms) is labelled SLOW here
+&mdash; the query threshold, not the span thresholds. Peekaboot reads the
 SQL from whichever of three tags your instrumentation sets &mdash; `db.query.text`,
 `db.statement` or `datasource-proxy`'s `jdbc.query[N]` &mdash; and falls back to the span's
 own name only when that already looks like SQL. The tree above shows span *names*, which

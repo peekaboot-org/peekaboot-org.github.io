@@ -183,7 +183,7 @@ These drive the dashboard's issue detection and badges, not what gets captured &
 |---|---|---|---|
 | `slow-span-threshold-ms` | long | `100` | A span's own duration at or above this gets the SLOW issue and the SLOW badge on its trace row. |
 | `very-slow-span-threshold-ms` | long | `500` | At or above this a span gets VERY_SLOW instead of SLOW; a span never gets both. |
-| `slow-query-threshold-ms` | long | `50` | A database query span at or above this gets SLOW_QUERY. |
+| `slow-query-threshold-ms` | long | `50` | A database query span at or above this gets SLOW_QUERY; the trace detail's Queries tab labels a query SLOW at this same threshold, not the span thresholds above. |
 | `high-query-count-threshold` | int | `5` | Direct database-query children one span may have before HIGH_QUERY_COUNT. |
 | `high-trace-query-count-threshold` | int | `20` | Database queries a whole trace may run before HIGH_QUERY_COUNT, even if no single span crosses the threshold above. |
 
