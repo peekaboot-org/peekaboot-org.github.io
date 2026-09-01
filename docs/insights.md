@@ -149,13 +149,15 @@ sessions** and **Memory allocation**. Nothing outside the panel file is collecte
 
 The five tiles &mdash; Started at, Startup, Ready after, Uptime, CPU cores &mdash; are
 defined in the same file, but they're rendered by the **Overview** tab, not this one. They
-carry no ring buffer &mdash; only a current value: `uptime` is `live: true` and re-samples
-on every tick, while the rest are sampled until they first resolve and then frozen.
+carry no ring buffer &mdash; only a current value. Tiles are sampled when the dashboard
+reads them, so they carry values from the first look at a freshly started app onwards:
+`uptime` is `live: true` and re-samples on every read, while the rest are sampled until
+they first resolve and then frozen.
 
 Overview reads those values off `/api/insights/config`, which carries them alongside the
 tile definitions, so the row rides the dashboard's ordinary 30-second refresh instead of
-needing the Insights tab's SSE stream. A `live` tile is therefore as current as that
-refresh, not as current as the tick.
+needing the Insights tab's SSE stream. A `live` tile is therefore exactly as current
+as that refresh.
 
 ## Configuring panels
 
@@ -233,7 +235,7 @@ minus `disk.free`. If either side is unresolved the result is a gap, not a wrong
 | `label` | shown above the value | none |
 | `tags` | as for a series | none |
 | `format` | `duration`, `datetime`, `bytes`, `count` | raw number |
-| `live` | `true` re-samples every tick; `false` freezes at the first resolved value | `false` |
+| `live` | `true` re-samples on every read; `false` freezes at the first resolved value | `false` |
 
 ### A mistake in your file costs you panels, not your app
 
