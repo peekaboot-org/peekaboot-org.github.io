@@ -31,7 +31,32 @@ enable somewhere, read all of it.
   local-run condition above applies here too.
 - **Health detail.** Per-component status &mdash; datasource, disk space, custom
   indicators &mdash; not just an aggregate UP/DOWN. A custom `HealthIndicator`'s detail
-  map is masked the same way as everything else &mdash; see [Masking](#masking).
+  map is masked the same way as everything else &mdash; see [Masking](#masking). Getting
+  this detail in-process is why Peekaboot sets `management.endpoint.health.show-details:
+  always`, which also widens your own `/actuator/health` &mdash; see [health detail on
+  `/actuator/health`](#show-details-always-whenever-peekaboot-is-on) below.
+- **Process identity.** The OS user the JVM runs as, its uid and gid, its pid, and the
+  parent-process chain &mdash; every ancestor's pid and command name, as far up as the
+  JVM can see &mdash; read from `System.getProperty("user.name")`, `id -u`/`id -g` and
+  `ProcessHandle`
+  ([`ProcessInfo`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/domain/runtime/ProcessInfo.java)),
+  shown on the Overview tab. None of it is masked.
+- **Datasource metadata.** For every `DataSource` bean: its host(s) and port, database
+  name, the database user, the database product and version, and the JDBC driver and
+  version, read from the connection's `DatabaseMetaData`
+  ([`DataSourceMetadata`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/lifecycle/DataSourceMetadata.java)).
+  Only the JDBC URL's connection parameters go through masking; the user name, host and
+  database name are shown verbatim.
+- **Scheduled tasks' last failure.** For every `@Scheduled` task, alongside its schedule
+  and last/next execution time, the last execution's exception type and message, exactly
+  as Actuator's `scheduledtasks` endpoint reports it &mdash; **not masked**
+  ([`ScheduledTasksMapper`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/mapper/actuator/ScheduledTasksMapper.java)).
+  An exception message that echoes a connection string or a payload is captured as is.
+- **Run history**, through `/peekaboot/api/lifecycle/**`: every start and stop Peekaboot
+  has recorded, with the version, branch, commit and build time that was running each
+  time, the timestamps, and which runs ended uncleanly &mdash; the deployment history of
+  this instance, as far back as the log reaches (see [What Peekaboot writes to
+  disk](#what-peekaboot-writes-to-disk)). Nothing here is masked.
 - **Logger levels.** Every logger's configured and effective level, from Actuator's
   `loggers` endpoint. Peekaboot's own dashboard and API are read-only here &mdash;
   `PeekabootController` exposes no endpoint that writes a level, only
@@ -47,13 +72,17 @@ enable somewhere, read all of it.
   `jdbc.query[N]`, in that priority order &mdash; see [Auto-configured
   defaults]({{ '/docs/auto-configured-defaults/' | relative_url }})), literal values and
   all wherever the instrumentation or the statement itself carries them, not just the
-  parameterized form &mdash; plus a basic method/path/status summary read off the root
-  span. This part isn't gated by the dev toolbar; it's already served
-  on the unauthenticated `/peekaboot/**` surface at stock local defaults. Once [the dev
-  toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) is also on
-  (`peekaboot.dev-toolbar: true`), traces additionally carry request and response
-  headers, query and form parameters, and the resolved controller/handler. Capture
-  applies to every request that reaches
+  parameterized form &mdash; plus the full span tree of every trace, with every span's
+  name, kind, timing, tags (`http.url`, `db.statement`, `handler.name`, `view.name`,
+  whatever your instrumentation sets) and error message
+  ([`TraceTreeMapper`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/mapper/trace/TraceTreeMapper.java)),
+  and a method/path/status summary read off the root span. None of this is gated by the
+  dev toolbar; it's already served on the unauthenticated `/peekaboot/**` surface at
+  stock local defaults. Once [the dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }})
+  is also on (`peekaboot.dev-toolbar: true`), traces additionally carry request and
+  response headers, query and form parameters, the resolved controller/handler on the
+  request summary, and the correlated logs described next. Capture applies to every
+  request that reaches
   [`RequestCaptureFilter`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/filter/RequestCaptureFilter.java),
   not only the HTML pages the toolbar UI injects into &mdash; a JSON API call is captured
   the same way. Headers, query and form parameters are masked by key, the same as a
@@ -65,6 +94,12 @@ enable somewhere, read all of it.
   its trace/span id, into the trace's Logs tab &mdash; not just levels or logger names,
   the actual message content, unmodified, and **not masked at all**. A log statement that
   happens to include a secret or PII is captured exactly as written.
+- **A trace id on every response**, once the dev toolbar is on. `RequestCaptureFilter`
+  adds a `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"` header to every
+  response it handles &mdash; JSON API calls included, not only HTML pages &mdash; so that
+  the toolbar can find the request's trace from Swagger UI. Every caller gets it, and with
+  that id anyone who can reach `/peekaboot/**` can open exactly that request's trace at
+  `GET /peekaboot/api/traces/{traceId}/insights`.
 - **Meters.** Every Micrometer meter's name, tags and measurements, read directly from
   the `MeterRegistry`. Tag values are masked the same way as everything else.
 - **Metric history**, through `/peekaboot/api/insights/**`. The charts' backing rings hold
@@ -112,8 +147,11 @@ Peekaboot never exposes raw Actuator endpoints over HTTP. It builds its own
 `WebEndpointDiscoverer` with empty endpoint filters and invokes each endpoint's read
 operation in-process, from `PeekabootActuatorService`. No
 `management.endpoints.web.exposure` configuration is needed for the dashboard to work,
-and none is added by Peekaboot &mdash; the real `/actuator/**` HTTP mapping is completely
-unaffected by anything Peekaboot does.
+and none is added by Peekaboot &mdash; which endpoints the real `/actuator/**` HTTP mapping
+serves is unaffected by anything Peekaboot does. What one of them *answers* is not:
+`management.endpoint.health.show-details: always` is among Peekaboot's defaults whenever
+it is on, and `/actuator/health` is exposed over HTTP by Spring's own default &mdash; see
+[`show-details: always` whenever Peekaboot is on](#show-details-always-whenever-peekaboot-is-on).
 
 ## The exposure contributor, precisely
 
@@ -300,6 +338,29 @@ even on your own machine, set `management.endpoint.env.show-values` (and
 overrides Peekaboot's lowest-precedence default.
 </div>
 
+### `show-details: always` whenever Peekaboot is on
+
+Unlike `show-values`, `management.endpoint.health.show-details: always` is set from
+`peekaboot-defaults.yml` &mdash; whenever `peekaboot.enabled` resolves to `true`, on a
+local run or not. It is there because the dashboard's health banner is built from the
+`health` endpoint bean invoked in-process (see [What Peekaboot does not
+do](#what-peekaboot-does-not-do)), with no caller identity attached; at Spring's own
+default of `never`, that call returns the aggregate status alone, and the Overview tab's
+per-component breakdown would have nothing to show.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+**This widens your own `/actuator/health`, and that endpoint is public by default.**
+`health` is the one actuator endpoint Spring Boot exposes over HTTP out of the box, and
+`show-details: always` makes it answer every anonymous caller with per-component detail
+&mdash; datasource, disk space, and every custom `HealthIndicator`'s detail map &mdash;
+instead of a bare `{"status":"UP"}`. Peekaboot's masking has no part in that path; it only
+runs inside `/peekaboot/**`. If you turn `peekaboot.enabled` on somewhere reachable, set
+`management.endpoint.health.show-details` yourself (`when-authorized`, or `never`) in
+your own configuration; it wins, because Peekaboot's defaults sit at the lowest
+precedence. The dashboard's health banner then shows the aggregate status only, since its
+in-process call carries no authorization.
+</div>
+
 ### What's left unmasked entirely
 
 - **Log message content**, wherever it's captured. Peekaboot's Logback appender copies
@@ -473,7 +534,13 @@ for the full Maven `excludes` and Gradle `developmentOnly` examples.
 - [ ] If you do turn it on somewhere reachable, put a `SecurityFilterChain` in front of
       `/peekaboot/**` first &mdash; not after.
 - [ ] Don't reach for `management.endpoints.web.exposure` as a protection here; it
-      governs `/actuator/**`, a mapping Peekaboot doesn't use or widen.
+      governs which endpoints `/actuator/**` serves, a mapping Peekaboot doesn't use or
+      widen.
+- [ ] Wherever `peekaboot.enabled` is on, set `management.endpoint.health.show-details`
+      yourself (`when-authorized` or `never`) unless per-component health detail on your
+      public `/actuator/health` is acceptable &mdash; Peekaboot's default is `always`,
+      and it applies off a local run too. See [`show-details: always` whenever Peekaboot
+      is on](#show-details-always-whenever-peekaboot-is-on).
 - [ ] Leave `peekaboot.enable-unmasking` at its default (`false`) unless you specifically
       need to reveal real values from the dashboard &mdash; it's a server-side gate, not
       something a request parameter alone can bypass, but turning it on means anyone who
