@@ -10,6 +10,12 @@ Sampling, aggregation and storage all happen in your own JVM, in fixed-size ring
 stand up first. It's on whenever Peekaboot is (`peekaboot.insights.enabled: true`) and
 there's a Micrometer `MeterRegistry` bean to read.
 
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/dashboard-insights-light.png' | relative_url }}"
+       alt="The Insights tab, live line charts of CPU usage and system load with an aggregation level switch and toggles for percentiles and restart markers"
+       loading="lazy">
+</figure>
+
 <div class="pk-callout" markdown="1">
 The rings live in memory, but on a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
 they outlive the process: Peekaboot writes

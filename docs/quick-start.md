@@ -60,7 +60,7 @@ context path and all, on a `Peekaboot Dashboard:` line &mdash; see
 [Configuration]({{ '/docs/configuration/' | relative_url }}#the-urls-in-the-summary).
 
 <figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-dashboard-light.png' | relative_url }}"
+  <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
        alt="The Peekaboot dashboard's Overview tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards for a running application"
        loading="lazy">
 </figure>
