@@ -26,8 +26,10 @@ your own machine.
 | `GET /peekaboot/api/insights/config` | &mdash; |
 | `GET /peekaboot/api/insights/data` | `level` (required) |
 | `GET /peekaboot/api/insights/stream` | &mdash; (Server-Sent Events, not JSON) |
+| `GET /peekaboot/api/lifecycle/events` | &mdash; |
+| `GET /peekaboot/api/lifecycle/runs` | &mdash; |
 
-These are the only eight endpoints Peekaboot exposes &mdash; the dashboard and toolbar
+These are the only ten endpoints Peekaboot exposes &mdash; the dashboard and toolbar
 call exactly this set, nothing broader. The dashboard UI itself &mdash; its HTML, JS and
 CSS &mdash; is served separately, under `/peekaboot/**` too; see [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}).
@@ -141,3 +143,27 @@ A comment heartbeat goes out every 15 seconds to keep proxies from reaping an id
 connection. There's no event replay: reconnect with the browser's native `EventSource`
 retry and refetch `/data` for the levels you care about. The stream completes cleanly on
 application shutdown rather than being dropped.
+
+## The lifecycle endpoints
+
+The two `/api/lifecycle/**` endpoints back the Lifecycle tab and the restart markers on
+the Insights charts. Both exist while `peekaboot.lifecycle.enabled` is `true` (the
+default); with it `false` they are absent, and the tab says so. How far back they reach
+is [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage):
+with storage off, the log holds the current run alone.
+
+`GET /peekaboot/api/lifecycle/events` returns the raw start/stop log, oldest first:
+`{events: [{type, epochMs, version, branch, commitId, shortCommitId, buildTimeEpochMs,
+uncleanPrevious}]}`. `type` is `"start"` or `"stop"`. A start's build fields are only
+populated where they differ from the previous start (the first start in the log carries
+all of them); `uncleanPrevious` is `true` on a start whose predecessor recorded no stop.
+
+`GET /peekaboot/api/lifecycle/runs` returns the same history folded into one entry per
+run, newest first: `{runs: [{startedAtEpochMs, stoppedAtEpochMs, ranForMs, downForMs,
+version, branch, shortCommitId, buildTimeEpochMs, changed, running, uncleanExit}]}`. Here
+every row is self-contained &mdash; the build fields are carried forward from the last
+start that reported them &mdash; and `changed` lists which of `"version"`, `"branch"` and
+`"commit"` differ from the run before. `stoppedAtEpochMs` and `ranForMs` are `null` when
+`uncleanExit` is `true`; `downForMs` is `null` when the gap to the previous run is
+unknowable. See [The dashboard &mdash; Lifecycle]({{ '/docs/dashboard/' | relative_url }}#lifecycle)
+for how these render.
