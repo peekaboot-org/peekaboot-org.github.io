@@ -34,6 +34,10 @@ call exactly this set, nothing broader. The dashboard UI itself &mdash; its HTML
 CSS &mdash; is served separately, under `/peekaboot/**` too; see [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}).
 
+Every response under `/peekaboot/api/**` carries `Cache-Control: no-store` and
+`X-Content-Type-Options: nosniff`, so nothing in between stores a copy and no browser
+second-guesses the content type.
+
 <div class="pk-callout" markdown="1">
 **Two unrelated things are called `insights` here.** `/api/*/insights` is a *suffix*
 naming the enriched, ready-to-render form of actuator or trace data: the server shapes it
@@ -148,9 +152,11 @@ rather than polling it. Two named events arrive:
 | `rollup` | when a higher level's window closes | `{level, epochMs, entries: {seriesId: {min, max, avg, median, p90, p95, p99}}}` |
 
 A comment heartbeat goes out every 15 seconds to keep proxies from reaping an idle
-connection. There's no event replay: reconnect with the browser's native `EventSource`
-retry and refetch `/data` for the levels you care about. The stream completes cleanly on
-application shutdown rather than being dropped.
+connection. At most 32 streams are open at once; past that a request gets a `503`, and
+retrying later is the right response. The server closes every stream after 5 minutes,
+and the browser's native `EventSource` reconnects on its own. There's no event replay:
+after a reconnect, refetch `/data` for the levels you care about. The stream completes
+cleanly on application shutdown rather than being dropped.
 
 ## The lifecycle endpoints
 
