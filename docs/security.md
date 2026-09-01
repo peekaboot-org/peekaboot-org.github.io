@@ -5,7 +5,10 @@ permalink: /docs/security/
 ---
 
 <div class="pk-callout pk-callout--danger" markdown="1">
-Peekaboot is off outside local development by default &mdash; see [How activation
+Peekaboot defaults to on whenever the launch looks local &mdash; and "local" is decided
+by the class loader, not the environment: a `java -jar` of the fat jar, a war, a native
+image and a test default to off, but `java -cp`, a Jib image and Spring Boot's extracted
+slim-jar layout default to **on** exactly like an IDE run. See [How activation
 works]({{ '/docs/how-activation-works/' | relative_url }}). When it's on, anyone who can
 reach `/peekaboot/**` gets detailed internal state &mdash; configuration, environment
 values, health, logs, migrations, and full request traces &mdash; with **no
@@ -528,6 +531,12 @@ for the full Maven `excludes` and Gradle `developmentOnly` examples.
       in your deployed environment &mdash; check the startup summary, or the value
       reported on the dashboard's own Environment tab in a non-production environment
       where you can still reach it.
+- [ ] Set `peekaboot.enabled=false` explicitly (or exclude the starter) unless you launch
+      with `java -jar` of the repackaged fat jar. The detection reads the class loader,
+      not the environment: `java -cp …`, a Jib image and the layout of `jarmode=tools
+      extract` all run on the application class loader and default to **on**, the same
+      as an IDE run &mdash; see [How activation works &mdash; what counts as
+      local]({{ '/docs/how-activation-works/' | relative_url }}#what-counts-as-local).
 - [ ] If Peekaboot should never ship at all, exclude the starter from the production
       artifact (Maven `excludes` / Gradle `developmentOnly`) rather than trusting
       `peekaboot.enabled=false` alone.
@@ -554,5 +563,6 @@ for the full Maven `excludes` and Gradle `developmentOnly` examples.
 - [ ] Leave `peekaboot.dev-toolbar` at its default (auto-detected: off outside a local
       run) unless you specifically need request/response capture &mdash; it's the setting
       that turns trace data from a method/path/status summary into full header and
-      parameter capture. Production isn't a local run, so the default is already off
-      there; don't set it explicitly unless you actually want that capture running.
+      parameter capture. It follows the same detection as `peekaboot.enabled`, so a
+      deployment the detection reads as local (see the second item) gets the toolbar
+      too; `peekaboot.enabled=false` switches it off along with everything else.

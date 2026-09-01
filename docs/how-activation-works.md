@@ -11,9 +11,31 @@ Peekaboot works out whether it's running locally and sets the default from that 
 at the lowest possible precedence, so any `application.yml` entry, environment variable,
 or system property you set always wins, in either direction.
 
-In practice: an IDE run, `mvn spring-boot:run`, and `gradle bootRun` all default to on. A
-`java -jar` of the packaged artifact, a container, a native image, an AOT-processed build,
-and a test all default to off.
+The rule is about the class loader, not about where the process runs, and it is worth
+knowing exactly
+([`LocalDevDetector`]({{ site.repository_url }}/blob/HEAD/peekaboot-spring-boot-autoconfigure/src/main/java/org/peekaboot/autoconfigure/LocalDevDetector.java),
+the same heuristic Spring Boot DevTools uses to decide whether to enable itself). A launch
+counts as local when the `main` thread runs on the JDK's application class loader
+(`AppClassLoader`) with no test-framework or AOT frame on its stack &mdash; or under
+DevTools' `RestartClassLoader`, which only ever exists in a local launch.
+
+**Not local**, so off by default: a `java -jar` of the repackaged fat jar (it runs on
+Spring Boot's `LaunchedClassLoader`), a war in a servlet container (the container's webapp
+loader), a native image, an AOT-processing run, and a test (JUnit, Spring Boot's test
+support, Cucumber).
+
+**Local**, so on by default: an IDE run, `mvn spring-boot:run`, `gradle bootRun` &mdash;
+and every other launch that puts your classes on the application class loader, including
+ones that are nowhere near a developer's machine: `java -cp lib/*:app.jar com.example.App`,
+a [Jib](https://github.com/GoogleContainerTools/jib) image (its entrypoint is a `java -cp`
+command), and the slim-jar layout `java -Djarmode=tools -jar app.jar extract` produces,
+which runs on the application class loader even though it is started with `java -jar`. A
+container is whichever of these its entrypoint is; the word itself decides nothing.
+
+Peekaboot cannot tell an exploded classpath on a laptop from the same layout in
+production. If you deploy any way other than `java -jar` of the fat jar, set
+`peekaboot.enabled=false` explicitly in that environment, or [exclude the
+starter](#keeping-the-jar-out-of-production-builds) from the artifact.
 
 The same detection also supplies the defaults for `peekaboot.dev-toolbar` and
 `peekaboot.storage.enabled` &mdash; on for a local run, off elsewhere &mdash;

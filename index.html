@@ -94,7 +94,9 @@ layout: home
             <p class="content">
               Both the toolbar and the dashboard key off the same local-launch detection
               &mdash; an IDE run or <code>spring-boot:run</code>/<code>bootRun</code> &mdash;
-              and default off for every packaged jar, container, and test run.
+              and default off for a <code>java -jar</code> of the packaged jar, a war, a native
+              image and every test run. Deploying from an exploded classpath instead? See
+              <a href="{{ '/docs/how-activation-works/' | relative_url }}">how activation works</a>.
             </p>
           </div>
         </div>
