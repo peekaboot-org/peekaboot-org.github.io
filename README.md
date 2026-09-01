@@ -108,11 +108,9 @@ light/dark link ratios inline, but the body-text figures above only come from th
 
 Everything in this repo is ready; what's left happens outside it:
 
-1. The `peekaboot-org/peekaboot-org.github.io` repository already exists on GitHub, and
-   `origin` is already configured locally — push `main`.
-2. In the repo's Settings → Pages, set **Source** to *Deploy from a branch*, branch `main`,
+1. In the repo's Settings → Pages, set **Source** to *Deploy from a branch*, branch `main`,
    folder `/ (root)`.
-3. For the custom domain: add a `CNAME` file (not part of this commit — create it
+2. For the custom domain: add a `CNAME` file (not part of this commit — create it
    separately) containing `peekaboot.org`, point the apex domain's A records at GitHub
    Pages' four addresses (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
    `185.199.111.153`) and `www` at `peekaboot-org.github.io` (CNAME record), then enable
@@ -122,13 +120,7 @@ Everything in this repo is ready; what's left happens outside it:
 
 Pages throughout `docs/` link into the product repo with `blob/HEAD/...` (e.g.
 `{{ site.repository_url }}/blob/HEAD/...`), so they always resolve against whatever
-`origin/HEAD` currently is — not a pinned commit. At the time of writing, the product repo's
-local `dev` and `origin/dev` have diverged (`git rev-list --left-right --count
-origin/dev...dev` reports 12 commits only on `origin/dev` and 57 only on local `dev`), so a
-plain `git push` will not fast-forward — it needs a merge, a rebase, or a deliberate
-force-push, whichever the repo owner decides. Until that divergence is resolved and `dev` is
-pushed, these links will show stale source for anything changed only in the unpushed
-commits.
+`origin/HEAD` currently is — not a pinned commit.
 
 ## License
 
