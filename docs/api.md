@@ -44,8 +44,8 @@ metric-charts feature and nothing else. They share a word and no code.
 `/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled, insights}`
 &mdash; the same call the dashboard uses to decide whether to show its Insights, Meters
 and Traces tabs, and whether the Environment/Config tabs' "Show secrets" toggle can appear
-at all. `metrics` is the flag behind the tab now labelled **Meters**: the tab was renamed,
-the JSON field was not. See [The dashboard]({{ '/docs/dashboard/' | relative_url }}) for
+at all. `metrics` is the flag behind the tab labelled **Meters** &mdash; the JSON field and
+the tab label differ. See [The dashboard]({{ '/docs/dashboard/' | relative_url }}) for
 what drives each flag.
 
 `unmask=true` only has an effect while `peekaboot.enable-unmasking=true` is also set on

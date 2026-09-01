@@ -256,7 +256,7 @@ plaintext request data that this doesn't catch.
 
 By default, masking cannot be turned off from the browser. Two things must both be true:
 
-1. **`peekaboot.enable-unmasking`** (new property, default `false`). While `false`,
+1. **`peekaboot.enable-unmasking`** (default `false`). While `false`,
    there is no way &mdash; dashboard, API, or otherwise &mdash; to get an unmasked value
    out of Peekaboot.
 2. **An `unmask=true` query parameter** on `GET /peekaboot/api/actuator/all/insights`.
@@ -305,11 +305,10 @@ works]({{ '/docs/how-activation-works/' | relative_url }})) &mdash; not uncondit
 and not from `peekaboot-defaults.yml`. Off a local run, neither property is set at all, so
 Spring's own default (`never`) applies.
 
-On a local run, this looks like exactly the setting that caused the original problem, and
-an earlier version of this design called for removing it there too. It's kept, for a
-structural reason: Spring Boot 4.1 registers no default `SanitizingFunction` regardless of
-`show-values`, so falling back to Spring's own default would not hand masking over to
-Spring &mdash; it would return `******` for *every* property unconditionally, including
+On a local run it is kept at `always`, for a structural reason: Spring Boot 4.1 registers
+no default `SanitizingFunction` regardless of `show-values`, so leaving Spring's own
+default in place would not hand masking over to Spring &mdash; it would return `******`
+for *every* property unconditionally, including
 harmless ones like `server.port`, and would leave Peekaboot's own masking engine with no
 real value to ever inspect or, later, reveal. Controlled unmasking would then have nothing
 to unmask either. `show-values: always`, on a local run, is what lets Peekaboot's own

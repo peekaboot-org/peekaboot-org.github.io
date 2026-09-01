@@ -94,8 +94,8 @@ management:
 ## The Meters tab is missing
 
 **Cause:** the dashboard doesn't show Meters unconditionally &mdash; it's gated on a
-separate call, `GET /peekaboot/api/features`, reporting `metrics: true`. (The tab was
-renamed from Metrics; the JSON flag behind it was not.) That flag reflects whether a
+separate call, `GET /peekaboot/api/features`, reporting `metrics: true` (the flag is named
+`metrics`, the tab Meters). That flag reflects whether a
 Micrometer `MeterRegistry` bean is present, which Spring Boot Actuator normally provides
 automatically.
 

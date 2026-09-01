@@ -34,8 +34,7 @@ doesn't capture.
 Traces land in up to three places at once:
 
 - **All** &mdash; every trace, capped at `peekaboot.tracing.max-traces` (default 1000)
-  and evicted after a fixed 30-minute time-to-live. This cap isn't currently exposed as a
-  property.
+  and evicted after a fixed 30-minute time-to-live, which is not configurable.
 - **Errors** &mdash; traces containing at least one span with an error, or an `ERROR`-level
   correlated log, capped at `peekaboot.tracing.max-error-traces` (default 100).
 - **Slow** &mdash; traces whose *total duration* is at or above

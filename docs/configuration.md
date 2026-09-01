@@ -134,10 +134,9 @@ the duplicate into its surviving parent before the cap is ever checked. Only onc
 folding is done does the cap apply: if the deduplicated count still exceeds it, the
 **oldest** real spans are dropped to make room for new ones.
 
-This means the cap now counts real, distinct work rather than counting a double-tagged
-JDBC call as two spans against it &mdash; the previous defect (fixed) let truncation run
-*before* deduplication, so the cap bit roughly twice as early as its number suggested.
-When the cap genuinely is hit, that's no longer silent: the trace is flagged `truncated`,
+This means the cap counts real, distinct work rather than counting a double-tagged JDBC
+call as two spans against it. When the cap genuinely is hit, it isn't silent: the trace is
+flagged `truncated`,
 surfaced through the API and shown as a badge in the dashboard, so a shortened trace is
 never mistaken for a complete one. See [Concepts]({{ '/docs/concepts/' | relative_url }})
 for what `HIGH_QUERY_COUNT` actually checks.

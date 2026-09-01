@@ -24,8 +24,8 @@ appear in this order, left to right.
 
 **Answers:** is the app healthy, and what's actually running?
 
-Despite what older material says, there is no separate Health tab and no separate Info tab
-&mdash; this one tab combines both. It carries build and Git metadata, Spring Boot and
+There is no separate Health tab and no separate Info tab &mdash; this one tab covers
+both. It carries build and Git metadata, Spring Boot and
 Java versions, OS and JVM defaults, datasource status, memory and storage meters, and the
 health banner with its per-component breakdown, all sourced from Actuator's `info` and
 `health` endpoints.
@@ -272,6 +272,5 @@ SDK on the classpath it is empty rather than absent. `unmaskingEnabled` gates a 
 not a tab &mdash; see [Environment vs Config](#environment-vs-config) above. See
 [Requirements]({{ '/docs/requirements/' | relative_url }}) for the full dependency picture.
 
-Note that the flag behind the Meters tab is still called `metrics`: the tab was renamed,
-the JSON field was not, so a client reading `/api/features` keys off `metrics` for Meters
-and `insights` for Insights.
+Note that the flag behind the Meters tab is named `metrics`, not `meters`: a client reading
+`/api/features` keys off `metrics` for Meters and `insights` for Insights.
