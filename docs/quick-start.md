@@ -47,7 +47,7 @@ each part shows.
 
 <div class="pk-callout" markdown="1">
 Set `peekaboot.dev-toolbar: false` to turn the toolbar off while keeping the rest of the
-dashboard; see [How activation works]({{ '/docs/how-activation-works/' | relative_url }})
+dashboard; see [Configuration]({{ '/docs/configuration/' | relative_url }}#local-run)
 for exactly what counts as a local run.
 </div>
 
