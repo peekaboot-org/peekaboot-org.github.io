@@ -5,13 +5,14 @@ permalink: /docs/insights/
 ---
 
 The Insights tab charts a curated set of the meters your application already publishes.
-Sampling, aggregation and storage all happen in your own JVM, in fixed-size arrays of
-`double` &mdash; there's no scrape endpoint to expose, no exporter to configure, and no
-backend to stand up first. It's on whenever Peekaboot is
-(`peekaboot.insights.enabled: true`) and there's a Micrometer `MeterRegistry` bean to read.
+Sampling, aggregation and storage all happen in your own JVM, in fixed-size ring buffers
+&mdash; there's no scrape endpoint to expose, no exporter to configure, and no backend to
+stand up first. It's on whenever Peekaboot is (`peekaboot.insights.enabled: true`) and
+there's a Micrometer `MeterRegistry` bean to read.
 
 <div class="pk-callout" markdown="1">
-The rings live in memory, but on a local run they outlive the process: Peekaboot writes
+The rings live in memory, but on a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
+they outlive the process: Peekaboot writes
 them to a snapshot file and reads them back at the next start, so the charts resume
 instead of filling from empty. That is
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
@@ -22,8 +23,8 @@ does start the history over. See [Surviving a restart](#surviving-a-restart).
 ## What actually gets sampled
 
 Each panel in the config resolves to a flat list of **series**: a meter name, an optional
-tag filter, and a statistic derived from it. A virtual thread reads those meters straight
-off the `MeterRegistry` once per tick.
+tag filter, and a statistic derived from it. Peekaboot reads those meters straight off the
+`MeterRegistry` once per tick.
 
 | `stat` | What it reads |
 |---|---|
@@ -54,22 +55,21 @@ separate anyway.
 
 Samples are kept at several resolutions at once. The defaults are three:
 
-| Level | Interval | Entries | Covers | Thread |
-|---|---|---|---|---|
-| 0 | `10s` | 90 | 15 minutes | `peekaboot-insights-tick` |
-| 1 | `1m` | 1440 | 24 hours | `peekaboot-insights-agg-1m` |
-| 2 | `1h` | 720 | 30 days | `peekaboot-insights-agg-1h` |
+| Level | Interval | Entries | Covers |
+|---|---|---|---|
+| 0 | `10s` | 90 | 15 minutes |
+| 1 | `1m` | 1440 | 24 hours |
+| 2 | `1h` | 720 | 30 days |
 
 Level 0 stores the raw tick value, one number per series per tick. Every higher level
 stores **seven** numbers per entry &mdash; min, max, avg, median, p90, p95, p99 &mdash;
-computed over the window that just closed. Each level runs on its own virtual thread,
-sleeping to wall-clock-aligned boundaries so windows are deterministic and timestamps come
-out round. A tick that doesn't happen is stored as a gap, never as a zero.
+computed over the window that just closed. Windows are aligned to the wall clock, so
+timestamps come out round. A tick that doesn't happen is stored as a gap, never as a zero.
 
 The list is fully replaceable through `peekaboot.insights.levels` (see
 [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootinsights)). Level 0 is
 the sampling tick; each further interval must be a whole multiple of the one before it, or
-startup fails with an `IllegalStateException` rather than aggregating over ragged windows.
+startup fails with a message naming the level.
 
 ### Percentiles are percentiles of aggregates
 
@@ -91,7 +91,7 @@ percentiles you need retained samples, which means a real metrics backend; see [
 
 ### What it costs
 
-The rings are primitive `double[]`, so the footprint is exactly:
+The footprint is:
 
 ```
 series x (level-0 size + sum of higher-level sizes x 7) x 8 bytes
@@ -106,9 +106,8 @@ work it out yourself:
 Peekaboot insights: 39 series across 16 panels, levels [10s x90, 1m x1440, 1h x720], ring buffers ~4.5 MB
 ```
 
-Object overhead is ignored by design; the arrays dominate. Raising a level's `size`, adding
-levels, or enabling more panels all move this number, and the log line tells you where it
-landed.
+Raising a level's `size`, adding levels, or enabling more panels all move this number, and
+the log line tells you where it landed.
 
 ## The default panels
 
@@ -247,23 +246,10 @@ is embedded in. Check the startup log if your panels don't appear.
 
 ## Live updates arrive by push
 
-The tab opens one `EventSource` against `GET /peekaboot/api/insights/stream` and never
-polls. Two event types arrive on it:
-
-- **`tick`** &mdash; once per level-0 interval, carrying one value per series plus the
-  current tile values.
-- **`rollup`** &mdash; whenever a higher level's window closes, carrying that entry's seven
-  statistics per series.
-
-A comment heartbeat goes out every 15 seconds so proxies don't reap an idle stream.
-Reconnection is the browser's native `EventSource` retry; on reconnect the client refetches
-the level snapshots rather than replaying missed events, so there's no `Last-Event-ID`
-bookkeeping to go wrong. See [HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints)
-for the endpoints themselves.
-
-Charts are built lazily: a panel's chart is only created once its card scrolls into view. A
-card below the fold still accumulates its data and draws once, on entry &mdash; so a long
-config of panels doesn't cost you dozens of live canvases.
+Live updates are pushed (SSE): the tab holds one stream open against
+`GET /peekaboot/api/insights/stream` and never polls, receiving a `tick` per level-0
+interval and a `rollup` whenever a higher level's window closes. See [HTTP
+API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints) for the events themselves.
 
 ## Surviving a restart
 
@@ -279,12 +265,10 @@ outage as the hole it was; and every start and stop is drawn as a **restart mark
 the charts, from the same history the [Lifecycle tab]({{ '/docs/dashboard/' | relative_url }}#lifecycle)
 tabulates. The **Restarts** toggle in the tab header turns those markers off.
 
-Loading never delays your application's startup: the file is parsed on a virtual thread
-and applied just before the collector's first write, and a snapshot that hasn't finished
-parsing by then is dropped rather than layered on top of live samples.
+Loading never delays your application's startup.
 
-The snapshot is a cache, never a source of truth. One that can't be read, was written by a
-different schema version, no longer matches your `levels` geometry, or is older than
+The snapshot is a cache, never a source of truth. One that this version can't read, that
+no longer matches your `levels` geometry, or that is older than
 `peekaboot.insights.persistence.max-age` (by default the span the coarsest level covers) is
 discarded, and the rings start empty exactly as they would with storage off. Nothing about
 a bad snapshot can fail your application. See
@@ -313,7 +297,7 @@ for where the file lives and what else lands beside it.
 The Insights tab needs all of:
 
 - a **servlet** web application (as does the rest of the dashboard),
-- `peekaboot.enabled` &mdash; see [How activation works]({{ '/docs/how-activation-works/' | relative_url }}),
+- `peekaboot.enabled` &mdash; see [Configuration]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on),
 - `peekaboot.insights.enabled`, `true` by default,
 - a Micrometer **`MeterRegistry`** bean &mdash; Spring Boot Actuator, which the starter pulls
   in, provides one.

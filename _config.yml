@@ -16,6 +16,11 @@ maven_group: org.peekaboot
 maven_artifact: peekaboot-spring-boot-starter
 peekaboot_version: 0.0.5-SNAPSHOT
 
+# Part of the github-pages gem, but only active when listed: serves the old URLs of pages
+# that were merged into others as a redirect (see `redirect_from` in their front matter).
+plugins:
+  - jekyll-redirect-from
+
 markdown: kramdown
 kramdown:
   input: GFM

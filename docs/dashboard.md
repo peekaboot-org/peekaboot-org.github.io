@@ -14,6 +14,47 @@ the end of this page.
 "Dashboard" names the whole UI here, never one tab; the landing tab is **Overview**. Tabs
 appear in this order, left to right.
 
+## The header
+
+The strip above the tabs is the same on every tab:
+
+- **Updated &lt;time&gt;** &mdash; when the data on screen was fetched. Every tab is
+  re-rendered from a fresh fetch every 30 seconds; **Refresh now** fetches immediately, and
+  **Pause auto-refresh** stops the timer until it is pressed again. The Insights charts
+  arrive over their own live stream and are unaffected by the pause.
+- **Timezone** &mdash; a **Browser**/**Server** toggle, with the zone it currently means
+  beside it. Every timestamp on the dashboard is rendered in the chosen zone; the server's
+  zone comes from the application itself. Browser is the default.
+- **Language** &mdash; EN, DE, FR or ES (`en-US`, `de-DE`, `fr-FR`, `es-ES`). It sets how
+  dates, times and numbers are formatted and is sent to the API as `locale`, which
+  localises the cron descriptions on Scheduled Tasks and the server's timezone name &mdash;
+  see [HTTP API]({{ '/docs/api/' | relative_url }}#the-locale-parameter). It defaults to
+  the browser's language.
+- **Theme** &mdash; light or dark; the toolbar and the trace-detail overlay follow it. See
+  [Theming]({{ '/docs/theming/' | relative_url }}#light-and-dark-mode).
+
+Timezone, language and theme are remembered per browser, in `localStorage`
+(`peekaboot-use-server-tz`, `peekaboot-locale`, `peekaboot-theme`). The Environment and
+Config tabs' "Show secrets" toggle deliberately is not: a reload always starts masked.
+
+### Deep links
+
+The URL's hash carries where you are, so a location can be bookmarked or pasted into a
+chat:
+
+- `#environment` opens that tab. The ids are `overview`, `insights`, `lifecycle`, `traces`,
+  `meters`, `environment`, `flyway`, `loggers`, `config` and `scheduled-tasks`; anything
+  else lands on Overview.
+- `#traces/<traceId>` opens that trace's detail overlay on top of the Traces tab; append
+  `/request`, `/spans`, `/queries` or `/logs` to land on that tab of the overlay.
+- A tab's filters travel as a query string and are written as you type:
+  `#traces?bucket=errors`, `#loggers?q=peekaboot&configured=1`,
+  `#traces/<traceId>/logs?level=WARN&q=timeout`.
+
+Switching tabs and opening a trace each add a history entry, so Back closes the overlay
+or returns to the previous tab; changing a filter or the overlay's own tab does not.
+Closing the overlay removes the trace from the hash, so a reload does not reopen it.
+
 ## Overview
 
 <figure class="image">
@@ -43,8 +84,8 @@ outright rather than left as an empty box, and the rest of the tab is unaffected
 **Answers:** how have CPU, memory, HTTP, the connection pool and the rest behaved over the
 last minutes, hours or days?
 
-Live charts over a curated set of Micrometer meters, aggregated in-process into fixed-size
-ring buffers at three resolutions (10 seconds, 1 minute, 1 hour by default) and pushed to
+Live charts over a curated set of Micrometer meters, aggregated in-process at three
+resolutions (10 seconds, 1 minute, 1 hour by default) and pushed to
 the browser over SSE rather than polled. Sixteen panels ship enabled, six more ship
 switched off, and an application can add, replace or hide panels with its own
 `peekaboot-insights.yml`.
@@ -75,7 +116,8 @@ downtime from. Neither is guessed at.
 
 How much history there is depends on
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
-With it on &mdash; the default for a local run &mdash; the log persists across restarts, up
+With it on &mdash; the default for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
+&mdash; the log persists across restarts, up
 to 1000 events, so roughly 500 runs. With it off the tab shows the current run alone, which
 is still a real row rather than an empty tab.
 
@@ -216,13 +258,8 @@ application configures &mdash; not Spring Boot's own sanitizing, which ships wit
 enabled out of the box (as of the Spring Boot version Peekaboot ships against, 4.1;
 check yours if you're on a later one).
 
-Off a local run, both tabs mask *everything*, not just recognised secrets: value
-visibility (`management.endpoint.env.show-values`/`.configprops.show-values`) is only set
-to `always` on a local run, so off one, Spring's own `never` default returns `******` for
-every property before Peekaboot's masking engine ever sees a real value &mdash;
-`server.port` included. Turning `peekaboot.enabled` on somewhere other than your own
-machine gets you the dashboard, but not readable values on these two tabs. See [Security
-&mdash; `show-values: always` only on a local
+Off a local run, both tabs show `******` for every value, `server.port` included &mdash; see
+[Security &mdash; `show-values: always` only on a local
 run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
 
 Both tabs also carry a "Show secrets" toggle, visible only when

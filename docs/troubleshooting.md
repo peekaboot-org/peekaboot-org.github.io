@@ -7,9 +7,9 @@ permalink: /docs/troubleshooting/
 ## `/peekaboot/` returns 404
 
 **Cause:** Peekaboot is disabled. `peekaboot.enabled` resolves to `false` in a packaged
-jar, a war, a native image, an AOT-processed build, or a test &mdash; see [How activation
-works]({{ '/docs/how-activation-works/' | relative_url }}) for exactly which of those
-applies and why.
+jar, a war, a native image, an AOT-processed build, a container, or a test &mdash; see
+[Configuration &mdash; when Peekaboot is
+on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on).
 
 **Fix:** Check the startup log for Peekaboot's application-ready summary (application
 name, build info, server and datasource info) &mdash; its absence confirms Peekaboot
@@ -40,12 +40,10 @@ dashboard is otherwise reachable, or in your own property sources if it isn't.
 
 ## The toolbar never appears
 
-**Cause:** `peekaboot.dev-toolbar` follows the same launch-context detection as
-`peekaboot.enabled` &mdash; on for a local run, off elsewhere &mdash; not
-`peekaboot.enabled` itself, so switching Peekaboot on deliberately in a shared environment
-does not also inject the toolbar there. Off a local run (a packaged jar, a container, a
-test), it defaults off; see [How activation works]({{ '/docs/how-activation-works/' | relative_url }})
-for exactly what counts as local. Even with it on, the toolbar only injects into
+**Cause:** `peekaboot.dev-toolbar` is on for a [local
+run]({{ '/docs/configuration/' | relative_url }}#local-run) and off elsewhere, detected
+independently of `peekaboot.enabled`, so switching Peekaboot on deliberately in a shared
+environment does not also inject the toolbar there. Even with it on, the toolbar only injects into
 responses whose content type is `text/html` and that actually contain a `</body>` tag; a
 JSON API response, a redirect, or a static asset never gets it.
 
@@ -60,8 +58,8 @@ on a page you expect it on, confirm that page's response is genuinely HTML with 
 **Cause:** this is by design, not a bug. A JUnit run under Maven Surefire or Gradle's test
 task can look like a local launch on the surface, but Peekaboot treats it as not local
 anyway, specifically so tests don't accidentally carry the dashboard, the toolbar, and the
-observability defaults into CI. See [How activation works &mdash; why tests count as "not
-local"]({{ '/docs/how-activation-works/' | relative_url }}#why-tests-count-as-not-local).
+observability defaults into CI. See [Configuration &mdash; what counts as a local
+run]({{ '/docs/configuration/' | relative_url }}#local-run).
 
 **Fix:** If a specific test needs Peekaboot active, set the property on that test:
 
@@ -71,14 +69,15 @@ local"]({{ '/docs/how-activation-works/' | relative_url }}#why-tests-count-as-no
 
 ## Traces appear late, or are still empty, in tests
 
-**Cause:** the OpenTelemetry SDK's `BatchSpanProcessor` batches and delays span export by
-default &mdash; 5 seconds. A test that queries `/peekaboot/api/traces/**` immediately
+**Cause:** Spring Boot batches span export (5 s by default). A test that queries
+`/peekaboot/api/traces/**` immediately
 after making a request can run before the span has actually reached Peekaboot's trace
 store, independent of whether tracing itself is working. This doesn't apply if your test
 profile sets `peekaboot.dev-toolbar: true` explicitly &mdash; detection alone never turns
 it on inside a test JVM, see [Peekaboot is off inside `@SpringBootTest`](#peekaboot-is-off-inside-springboottest)
 above &mdash; since Peekaboot's own dev-toolbar default then shortens the delay to 200ms
-(see [Auto-configured defaults]({{ '/docs/auto-configured-defaults/' | relative_url }})),
+(see [Configuration &mdash; what Peekaboot
+sets]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)),
 though even that can be too slow for a test that reads the trace store immediately.
 
 **Fix:** Shorten the export delay for the test profile:
@@ -138,10 +137,9 @@ count reflects the endpoint's real behaviour, not the cap.
 
 **Fix:** Raise `peekaboot.tracing.max-spans-per-trace`, not the query-count thresholds
 below it &mdash; lowering those doesn't fix an undercount, it just makes the (still wrong)
-number trigger a warning sooner. See [Configuration &mdash; `max-spans-per-trace`
-deserves more than a table
-row]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row)
-for the full mechanics and a worked example.
+number trigger a warning sooner. See [Configuration &mdash; query-heavy
+application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application) for a
+worked example.
 
 ## Values show as `******` and I need to see them
 
@@ -151,15 +149,10 @@ Meters tabs, and in captured trace headers, query/form parameters, span tags and
 &mdash; see [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for
 the full list of what's covered.
 
-If it's the Environment or Config tab specifically and **every** value is `******`, not
-just ones that look like secrets, the likelier cause is different: you're off a local run.
-`management.endpoint.env.show-values`/`.configprops.show-values` are only set to `always`
-on a local run; off one, they're unset, Spring's own `never` default takes over, and the
-underlying Actuator endpoint returns `******` for everything before Peekaboot's masking
-engine ever sees a real value &mdash; see [Security &mdash; `show-values: always` only on
-a local run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
-Setting `peekaboot.enable-unmasking` and using the toggle below does nothing for this case
-&mdash; there's no real value behind the mask to reveal.
+If **every** value on the Environment or Config tab is `******`, you're off a local run:
+Peekaboot sets `show-values: always` only on one &mdash; see [Security &mdash; `show-values:
+always` only on a local run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
+`enable-unmasking` does nothing for this case; there is no real value behind the mask.
 
 **Fix (recognisable-secret masking):** Set `peekaboot.enable-unmasking: true` on the
 server, then use the "Show secrets" toggle that appears on the Environment and Config tabs

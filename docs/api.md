@@ -36,9 +36,10 @@ dashboard]({{ '/docs/dashboard/' | relative_url }}).
 
 <div class="pk-callout" markdown="1">
 **Two unrelated things are called `insights` here.** `/api/*/insights` is a *suffix*
-naming the enriched, ready-to-render form of actuator or trace data &mdash; the
-backend-for-frontend pattern described below. `/api/insights/**` is a *prefix* naming the
-metric-charts feature and nothing else. They share a word and no code.
+naming the enriched, ready-to-render form of actuator or trace data: the server shapes it
+for the screen that shows it, so the browser renders rather than computes (a
+backend-for-frontend). `/api/insights/**` is a *prefix* naming the metric-charts feature
+and nothing else. They share a word and no code.
 </div>
 
 `/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled, insights}`
@@ -67,20 +68,27 @@ operation are.
 
 `GET /peekaboot/api/actuator/all/insights` invokes exactly the seven Actuator endpoints
 the dashboard's tabs are built on (`health`, `info`, `env`, `loggers`, `flyway`,
-`configprops`, `scheduledtasks`) and localizes/summarizes them for the given `locale`
-(`Locale.ENGLISH` if omitted or blank).
+`configprops`, `scheduledtasks`) and localizes/summarizes them for the given `locale`.
+
+### The `locale` parameter
+
+`locale` is an IETF BCP 47 language tag such as `de-DE` (the underscore form, `de_DE`, is
+accepted too); omitted or blank means English. It decides the language of the cron
+descriptions in the scheduled-tasks part of the payload and of the display names of the
+server's timezone and default locale &mdash; nothing else in the response depends on it.
+The dashboard's language selector sends one of `en-US`, `de-DE`, `fr-FR` or `es-ES`; see
+[The dashboard &mdash; the header]({{ '/docs/dashboard/' | relative_url }}#the-header).
 
 For traces, `insights` enriches the underlying spans: they're assembled into a tree,
-duplicate spans from double-instrumented layers are collapsed (see [Configuration &mdash;
-`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row)),
-issues like `SLOW` or `HIGH_QUERY_COUNT` are detected and attached (see
+duplicate spans from double-instrumented layers are folded into one, issues like `SLOW` or
+`HIGH_QUERY_COUNT` are detected and attached (see
 [Concepts]({{ '/docs/concepts/' | relative_url }})), and correlated logs are attached to
 the spans that emitted them. Both `GET /peekaboot/api/traces/insights` (the list) and
 `GET /peekaboot/api/traces/{traceId}/insights` (the detail) carry a `truncated` boolean
-&mdash; `true` only when `max-spans-per-trace` actually dropped real, already-deduplicated
-spans for that trace, never merely because duplicate artifacts were folded away. The
-dashboard shows this as a `TRUNCATED` badge; see [Configuration &mdash;
-`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#max-spans-per-trace-deserves-more-than-a-table-row).
+&mdash; `true` only when
+[`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing)
+dropped distinct spans for that trace, never merely because duplicates were folded away.
+The dashboard shows this as a `TRUNCATED` badge.
 
 ## The `bucket` parameter
 

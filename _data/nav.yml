@@ -4,8 +4,8 @@
       url: /docs/quick-start/
     - title: Requirements
       url: /docs/requirements/
-    - title: How activation works
-      url: /docs/how-activation-works/
+    - title: Do I want this in production?
+      url: /docs/in-production/
 
 - title: Features
   pages:
@@ -24,8 +24,6 @@
   pages:
     - title: Configuration
       url: /docs/configuration/
-    - title: Auto-configured defaults
-      url: /docs/auto-configured-defaults/
     - title: HTTP API
       url: /docs/api/
     - title: Theming
@@ -42,3 +40,5 @@
   pages:
     - title: Acknowledgements
       url: /docs/acknowledgements/
+    - title: Contributing
+      url: /docs/contributing/
