@@ -171,8 +171,9 @@ Two independent rule sets, evaluated together, matching Spring's own masked-valu
   camelCase-delimited token, one of: `password`, `passwd`, `pwd`, `passphrase`,
   `secret`, `client-secret`, `token`, `access-token`, `refresh-token`, `id-token`,
   `auth-token`, `bearer`, `credential`, `credentials`, `api-key`, `apikey`,
-  `private-key`, `secret-key`, `signing-key`, `encryption-key`, `authorization`, `auth`,
-  `session-id`, `salt`, `signature`, `certificate-password`, `certificate-private-key`
+  `access-key`, `private-key`, `secret-key`, `signing-key`, `encryption-key`,
+  `authorization`, `auth`, `session-id`, `salt`, `signature`, `certificate-password`,
+  `certificate-private-key`
   &mdash; plus a handful of Spring Boot 2.x's own removed `Sanitizer` defaults
   (`vcap_services`, `^vcap\.services.*$`, `sun.java.command`,
   `^spring[._]application[._]json$`), matched as whole-key patterns. A sensitive key
@@ -181,11 +182,12 @@ Two independent rule sets, evaluated together, matching Spring's own masked-valu
   the HTTP headers of the same name, not for the token "cookie" appearing anywhere in a
   compound key (a session-cookie configuration property like
   `server.servlet.session.cookie.same-site` is not a secret). One exact-key spelling is
-  excluded outright despite matching a rule word: bare `PWD`/`pwd`, the POSIX shell's
+  excluded outright despite matching a rule word: upper-case `PWD`, the POSIX shell's
   current-working-directory variable, which would otherwise collide with the `pwd`
-  password abbreviation on every developer's environment-variables property source;
-  `password`/`passwd` already cover the real password case in practice, and a compound
-  key like `db.pwd` is unaffected by this exclusion. Deliberately absent: bare `key`
+  password abbreviation on every developer's environment-variables property source.
+  The exemption is that one spelling and nothing wider: lower-case `pwd` still masks
+  &mdash; a SQL Server URL's `;pwd=`, a login form's `?pwd=` &mdash; and so does a
+  compound key like `db.pwd`. Deliberately absent: bare `key`
   and bare `certificate` &mdash; they would catch `spring.jpa.key-generator` and
   `server.ssl.key-store`/`server.ssl.certificate` (filesystem paths, not secrets), which
   is exactly the kind of over-masking that makes a dashboard useless. Actual certificate
@@ -195,9 +197,14 @@ Two independent rule sets, evaluated together, matching Spring's own masked-valu
   innocuous key &mdash; a JDBC URL's `password=` parameter is the canonical case. A
   small set of high-precision, provider-prefixed patterns catches a JWT, a PEM private
   key block, an AWS/GitHub/GCP/Slack/Stripe/OpenAI/Anthropic key, and credentials
-  embedded in a URL's userinfo (`user:pass@host`) or query string (`?password=...`).
-  Only the matched span is masked, not the whole value, so a JDBC URL keeps its host and
-  database name visible with just the credential blacked out.
+  embedded in a URL's userinfo (`user:pass@host`). Two more shapes carry no word list of
+  their own: a URL's query or `;`-separated parameters (`?password=...`, `;pwd=...`) and
+  the `-Dname=value` / `--name=value` options in a value such as `JAVA_TOOL_OPTIONS` or
+  `JDK_JAVA_OPTIONS`. Each parameter or option is judged by its name against the key-name
+  list above, so a name that masks as a property masks here too &mdash; its value blacked
+  out, the name left readable. Only the matched span is masked, not the whole value, so
+  a JDBC URL keeps its host and database name visible with just the credential blacked
+  out.
 
 Both rule sets are the full, exact list &mdash;
 [`MaskingRules`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/masking/MaskingRules.java)
