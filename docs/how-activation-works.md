@@ -15,12 +15,13 @@ In practice: an IDE run, `mvn spring-boot:run`, and `gradle bootRun` all default
 `java -jar` of the packaged artifact, a container, a native image, an AOT-processed build,
 and a test all default to off.
 
-The same detection also supplies the default for `peekaboot.dev-toolbar` &mdash; on for a
-local run, off elsewhere &mdash; independently of whatever `peekaboot.enabled` itself
-resolves to. Turning Peekaboot on deliberately in a shared environment doesn't also
-inject the toolbar there; set `peekaboot.dev-toolbar` explicitly if you want both. It
-also decides whether the Environment and Config tabs show real values or `******` by
-default. See [Configuration]({{ '/docs/configuration/' | relative_url }}) and
+The same detection also supplies the defaults for `peekaboot.dev-toolbar` and
+`peekaboot.storage.enabled` &mdash; on for a local run, off elsewhere &mdash;
+independently of whatever `peekaboot.enabled` itself resolves to. Turning Peekaboot on
+deliberately in a shared environment neither injects the toolbar into that application's
+pages nor writes Peekaboot's files into that host's home directory; set either property
+explicitly if you want them there. The same detection also decides whether the Environment
+and Config tabs show real values or `******` by default. See [Configuration]({{ '/docs/configuration/' | relative_url }}) and
 [Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run)
 for what each of those actually controls.
 
@@ -35,6 +36,7 @@ below is reachable while it doesn't.
 | Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (auto-detected: on for a local run, off elsewhere, same detection as `peekaboot.enabled`, not keyed on it) | A servlet web application; a Micrometer `Tracer` bean (present by default); `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar has no trace data to show |
 | In-Memory Tracing | `peekaboot.enabled=true` **and** `peekaboot.tracing.enabled=true` (on by default) | The OpenTelemetry SDK on the classpath (present via the starter) |
 | Startup Summary | `peekaboot.enabled=true` **and** `peekaboot.lifecycle.enabled=true` (on by default) | None |
+| Persisted history | `peekaboot.enabled=true` **and** `peekaboot.storage.enabled=true` (auto-detected: on for a local run, off elsewhere, same detection as `peekaboot.enabled`, not keyed on it) | A writable directory &mdash; an unwritable one is logged once and everything carries on in memory. See [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) |
 | Observability Defaults | `peekaboot.enabled` resolves to `true` (detection or override) | None &mdash; skipped entirely while disabled |
 
 If your application isn't a servlet web app &mdash; WebFlux, or no web application at all
