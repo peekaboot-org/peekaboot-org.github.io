@@ -81,6 +81,31 @@ invokes exactly seven Actuator endpoints
 That's the whole actuator surface Peekaboot exposes over HTTP &mdash; see [HTTP
 API]({{ '/docs/api/' | relative_url }}) for the full endpoint list.
 
+## What Peekaboot writes to disk
+
+On a local run Peekaboot keeps two files, by default under
+`${user.home}/.peekaboot/<groupId>.<artifactId>/`, so that the charts and the run history
+survive a restart. This follows the launch context, not `peekaboot.enabled`: an
+application that switches Peekaboot on deliberately in a shared environment writes nothing
+to that host. See
+[Configuration &mdash; `peekaboot.storage`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
+
+What lands in them is worth knowing precisely:
+
+- `insights.snapshot` holds the charts' aggregated numbers, keyed by the series ids your
+  panel file defines (which default to the meter name) &mdash; the same shape-and-load
+  picture the insights endpoints already serve, and no request data, property values or
+  captured traces.
+- `lifecycle.jsonl` holds one line per start or stop: a timestamp, a pid, and every
+  `build-info` and `git-info` entry the application publishes. If your build writes
+  something into `build-info.properties` you would not want at rest in a home directory,
+  that is what to look at &mdash; it is your build's own metadata, recorded verbatim.
+
+Nothing about request traces, captured headers, environment properties or config values
+is ever written to disk; those live in memory for the life of the process and no further.
+Set `peekaboot.storage.enabled: false` to write nothing at all, or `peekaboot.storage.dir`
+to put both files somewhere you control.
+
 ## What Peekaboot does not do
 
 Peekaboot never exposes raw Actuator endpoints over HTTP. It builds its own
