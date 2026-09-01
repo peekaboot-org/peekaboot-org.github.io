@@ -58,8 +58,9 @@ grey rather than borrowing the 5xx tier just for not being a 2xx. The bar has ro
 the number alone; the overlay spells the same status out.
 
 Click anywhere on the bar &mdash; other than the trace id or the dashboard link, which
-have their own targets &mdash; and its Request tab shows the whole exchange on one
-scrolling page: the request line itself (method, path, query string, status spelled out
+have their own targets &mdash; or press Enter or Space while the bar has keyboard focus,
+and its Request tab shows the whole exchange on one scrolling page: the request line
+itself (method, path, query string, status spelled out
 as `404 Not Found`, content type and duration), the resolved controller/handler method,
 query and form parameters, and last the two header tables, request then response. Each
 section below the request line appears only when there is something in it, except those

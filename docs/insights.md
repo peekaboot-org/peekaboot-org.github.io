@@ -11,9 +11,9 @@ backend to stand up first. It's on whenever Peekaboot is
 (`peekaboot.insights.enabled: true`) and there's a Micrometer `MeterRegistry` bean to read.
 
 <div class="pk-callout" markdown="1">
-The rings live in memory, but they no longer die with the process: on a local run
-Peekaboot writes them to a snapshot file and reads them back at the next start, so the
-charts resume instead of filling from empty. That is
+The rings live in memory, but on a local run they outlive the process: Peekaboot writes
+them to a snapshot file and reads them back at the next start, so the charts resume
+instead of filling from empty. That is
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
 &mdash; on by default for a local launch, off everywhere else, and with it off a restart
 does start the history over. See [Surviving a restart](#surviving-a-restart).

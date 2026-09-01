@@ -24,6 +24,16 @@ Every span your application produces lands in the store &mdash; HTTP requests, s
 jobs, message consumers, and &mdash; where your datasource instrumentation emits spans
 for them &mdash; the database queries they run.
 
+Peekaboot also contributes two spans of its own to each request while `peekaboot.enabled`
+is on: a `spring.handler` span around the controller method and, when a view is rendered,
+a `spring.view.render` span around that
+([`TracingHandlerInterceptor`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/tracing/interceptor/TracingHandlerInterceptor.java),
+registered by `TracingInterceptorAutoConfiguration` for every path except Peekaboot's own,
+`/actuator/**`, static assets and `/error`). Spans opened inside the handler &mdash; JDBC,
+HTTP clients &mdash; nest under the handler span rather than the HTTP server span. These
+are ordinary observations, so every exporter you have configured sees them, not only
+Peekaboot's store.
+
 With the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) also on, a trace
 additionally carries correlated logs and full header and parameter capture for the
 request and response &mdash; that page has the detail, including what it still
@@ -34,8 +44,7 @@ doesn't capture.
 Traces land in up to three places at once:
 
 - **All** &mdash; every trace, capped at `peekaboot.tracing.max-traces` (default 1000)
-  and evicted after a fixed 30-minute time-to-live. This cap isn't currently exposed as a
-  property.
+  and evicted after a fixed 30-minute time-to-live, which is not configurable.
 - **Errors** &mdash; traces containing at least one span with an error, or an `ERROR`-level
   correlated log, capped at `peekaboot.tracing.max-error-traces` (default 100).
 - **Slow** &mdash; traces whose *total duration* is at or above

@@ -5,7 +5,7 @@ permalink: /docs/configuration/
 ---
 
 Every property below is bound by a `@ConfigurationProperties` class, with one exception
-noted in its own section. Values shown are the Java field defaults; see [How activation
+noted in its own section. See [How activation
 works]({{ '/docs/how-activation-works/' | relative_url }}) for how `peekaboot.enabled`
 itself is actually resolved, and [Auto-configured
 defaults]({{ '/docs/auto-configured-defaults/' | relative_url }}) for what Peekaboot sets
@@ -84,7 +84,7 @@ any other Boot property, but it will **not** appear on the dashboard's own Confi
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
-| `enabled` | boolean | `true` | Enables `PeekabootLifecycleAutoConfiguration` &mdash; the application-ready startup summary (application name, build info, server, dashboard and datasource info logged once the app is up &mdash; no Git info; that reaches the dashboard separately, through the actuator `info` endpoint under `management.info.git.enabled`). |
+| `enabled` | boolean | `true` | Enables `PeekabootLifecycleAutoConfiguration` &mdash; the application-ready startup summary (application name, build info, server, dashboard and datasource info logged once the app is up &mdash; no Git info; that reaches the dashboard separately, through the actuator `info` endpoint under `management.info.git.enabled`), the matching `ApplicationStopped` summary logged at shutdown with the uptime and the start and stop timestamps, and the run history behind the Lifecycle tab and its `/peekaboot/api/lifecycle/**` endpoints. |
 
 ### The URLs in the summary
 
@@ -134,13 +134,12 @@ the duplicate into its surviving parent before the cap is ever checked. Only onc
 folding is done does the cap apply: if the deduplicated count still exceeds it, the
 **oldest** real spans are dropped to make room for new ones.
 
-This means the cap now counts real, distinct work rather than counting a double-tagged
-JDBC call as two spans against it &mdash; the previous defect (fixed) let truncation run
-*before* deduplication, so the cap bit roughly twice as early as its number suggested.
-When the cap genuinely is hit, that's no longer silent: the trace is flagged `truncated`,
-surfaced through the API and shown as a badge in the dashboard, so a shortened trace is
-never mistaken for a complete one. See [Concepts]({{ '/docs/concepts/' | relative_url }})
-for what `HIGH_QUERY_COUNT` actually checks.
+This means the cap counts real, distinct work rather than counting a double-tagged JDBC
+call as two spans against it. When the cap genuinely is hit, it isn't silent: the trace is
+flagged `truncated`, surfaced through the API and shown as a badge in the dashboard, so a
+shortened trace is never mistaken for a complete one. See
+[Concepts]({{ '/docs/concepts/' | relative_url }}) for what `HIGH_QUERY_COUNT` actually
+checks.
 
 ## `peekaboot.ui.tracing`
 
