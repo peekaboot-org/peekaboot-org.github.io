@@ -67,8 +67,16 @@ operation are.
 
 `GET /peekaboot/api/actuator/all/insights` invokes exactly the seven Actuator endpoints
 the dashboard's tabs are built on (`health`, `info`, `env`, `loggers`, `flyway`,
-`configprops`, `scheduledtasks`) and localizes/summarizes them for the given `locale`
-(`Locale.ENGLISH` if omitted or blank).
+`configprops`, `scheduledtasks`) and localizes/summarizes them for the given `locale`.
+
+### The `locale` parameter
+
+`locale` is an IETF BCP 47 language tag such as `de-DE` (the underscore form, `de_DE`, is
+accepted too); omitted or blank means English. It decides the language of the cron
+descriptions in the scheduled-tasks part of the payload and of the display names of the
+server's timezone and default locale &mdash; nothing else in the response depends on it.
+The dashboard's language selector sends one of `en-US`, `de-DE`, `fr-FR` or `es-ES`; see
+[The dashboard &mdash; the header]({{ '/docs/dashboard/' | relative_url }}#the-header).
 
 For traces, `insights` enriches the underlying spans: they're assembled into a tree,
 duplicate spans from double-instrumented layers are collapsed (see [Configuration &mdash;

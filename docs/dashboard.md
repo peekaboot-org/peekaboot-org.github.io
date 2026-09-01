@@ -14,6 +14,47 @@ the end of this page.
 "Dashboard" names the whole UI here, never one tab; the landing tab is **Overview**. Tabs
 appear in this order, left to right.
 
+## The header
+
+The strip above the tabs is the same on every tab:
+
+- **Updated &lt;time&gt;** &mdash; when the data on screen was fetched. Every tab is
+  re-rendered from a fresh fetch every 30 seconds; **Refresh now** fetches immediately, and
+  **Pause auto-refresh** stops the timer until it is pressed again. The Insights charts
+  arrive over their own live stream and are unaffected by the pause.
+- **Timezone** &mdash; a **Browser**/**Server** toggle, with the zone it currently means
+  beside it. Every timestamp on the dashboard is rendered in the chosen zone; the server's
+  zone comes from the application itself. Browser is the default.
+- **Language** &mdash; EN, DE, FR or ES (`en-US`, `de-DE`, `fr-FR`, `es-ES`). It sets how
+  dates, times and numbers are formatted and is sent to the API as `locale`, which
+  localises the cron descriptions on Scheduled Tasks and the server's timezone name &mdash;
+  see [HTTP API]({{ '/docs/api/' | relative_url }}#the-locale-parameter). It defaults to
+  the browser's language.
+- **Theme** &mdash; light or dark; the toolbar and the trace-detail overlay follow it. See
+  [Theming]({{ '/docs/theming/' | relative_url }}#light-and-dark-mode).
+
+Timezone, language and theme are remembered per browser, in `localStorage`
+(`peekaboot-use-server-tz`, `peekaboot-locale`, `peekaboot-theme`). The Environment and
+Config tabs' "Show secrets" toggle deliberately is not: a reload always starts masked.
+
+### Deep links
+
+The URL's hash carries where you are, so a location can be bookmarked or pasted into a
+chat:
+
+- `#environment` opens that tab. The ids are `overview`, `insights`, `lifecycle`, `traces`,
+  `meters`, `environment`, `flyway`, `loggers`, `config` and `scheduled-tasks`; anything
+  else lands on Overview.
+- `#traces/<traceId>` opens that trace's detail overlay on top of the Traces tab; append
+  `/request`, `/spans`, `/queries` or `/logs` to land on that tab of the overlay.
+- A tab's filters travel as a query string and are written as you type:
+  `#traces?bucket=errors`, `#loggers?q=peekaboot&configured=1`,
+  `#traces/<traceId>/logs?level=WARN&q=timeout`.
+
+Switching tabs and opening a trace each add a history entry, so Back closes the overlay
+or returns to the previous tab; changing a filter or the overlay's own tab does not.
+Closing the overlay removes the trace from the hash, so a reload does not reopen it.
+
 ## Overview
 
 <figure class="image">
