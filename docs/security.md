@@ -40,6 +40,11 @@ enable somewhere, read all of it.
   `ProcessHandle`
   ([`ProcessInfo`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/domain/runtime/ProcessInfo.java)),
   shown on the Overview tab. None of it is masked.
+- **Machine facts.** The logical processor count, the CPU model name (on Linux), the
+  total physical memory, the JVM's max heap, and the container runtime Peekaboot
+  detected &mdash; `docker`, `podman`, `kubernetes`, a generic `container`, or `none`
+  &mdash; served as `runtime.machine` and shown on the Overview tab. None of it is
+  masked; it carries no hostnames, usernames or paths.
 - **Datasource metadata.** For every `DataSource` bean: its host(s) and port, database
   name, the database user, the database product and version, and the JDBC driver and
   version, read from the connection's `DatabaseMetaData`
@@ -172,12 +177,15 @@ Two independent rule sets, evaluated together, matching Spring's own masked-valu
   `secret`, `client-secret`, `token`, `access-token`, `refresh-token`, `id-token`,
   `auth-token`, `bearer`, `credential`, `credentials`, `api-key`, `apikey`,
   `access-key`, `private-key`, `secret-key`, `signing-key`, `encryption-key`,
-  `authorization`, `auth`, `session-id`, `salt`, `signature`, `certificate-password`,
+  `authorization`, `auth`, `session-id`, `salt`, `signature`, `sig`,
+  `certificate-password`,
   `certificate-private-key`
   &mdash; plus a handful of Spring Boot 2.x's own removed `Sanitizer` defaults
   (`vcap_services`, `^vcap\.services.*$`, `sun.java.command`,
   `^spring[._]application[._]json$`), matched as whole-key patterns. A sensitive key
-  masks its **entire** value. Two narrower rules match only when they're the *entire*
+  masks its **entire** value. `sig` is Azure SAS's abbreviated signature parameter
+  (`?sig=`); like every rule word here it matches only as a whole token, so `design`
+  and `signal` stay untouched. Two narrower rules match only when they're the *entire*
   key, not merely a token inside it: `cookie` and `set-cookie` &mdash; they exist for
   the HTTP headers of the same name, not for the token "cookie" appearing anywhere in a
   compound key (a session-cookie configuration property like

@@ -107,6 +107,12 @@ statement, nothing like the span tree's title-case summary above. See
 [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a span, a root span and a
 trace status mean.
 
+The tabs link into each other, in both directions: a database span's row in the tree
+jumps to that statement's entry on the Queries tab, and a query &mdash; or a log line on
+the Logs tab &mdash; jumps back to the span it belongs to in the tree. Each jump switches
+the tab, scrolls the target into view, puts keyboard focus on it and highlights it
+briefly, so you never lose your place hunting for the row you came for.
+
 ## Logs correlated to the request
 
 Every log line your app emitted while it handled the request lands on the same overlay's

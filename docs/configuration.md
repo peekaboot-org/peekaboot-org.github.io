@@ -35,7 +35,7 @@ container, and not from a test or an AOT build.
 Not a local run, so everything off by default: a `java -jar` of the packaged jar, a war in
 a servlet container, a native image, an AOT-processing run, a test (JUnit, Spring Boot's
 test support, Cucumber), and anything running in a container &mdash; a Jib image, an
-extracted slim jar, a `java -cp` command inside Docker or Kubernetes included. A bare
+extracted slim jar, a `java -cp` command inside Docker, Podman or Kubernetes included. A bare
 `java -cp target/classes:…` on a host that is not a container still counts as local; if
 you deploy that way, set `peekaboot.enabled=false` explicitly.
 
