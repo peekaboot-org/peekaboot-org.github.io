@@ -197,7 +197,8 @@ Two independent rule sets, evaluated together, matching Spring's own masked-valu
   innocuous key &mdash; a JDBC URL's `password=` parameter is the canonical case. A
   small set of high-precision, provider-prefixed patterns catches a JWT, a PEM private
   key block, an AWS/GitHub/GCP/Slack/Stripe/OpenAI/Anthropic key, and credentials
-  embedded in a URL's userinfo (`user:pass@host`). Two more shapes carry no word list of
+  embedded in a URL's userinfo (`user:pass@host`, including Oracle's
+  `jdbc:oracle:thin:user/password@host` form). Two more shapes carry no word list of
   their own: a URL's query or `;`-separated parameters (`?password=...`, `;pwd=...`) and
   the `-Dname=value` / `--name=value` options in a value such as `JAVA_TOOL_OPTIONS` or
   `JDK_JAVA_OPTIONS`. Each parameter or option is judged by its name against the key-name
@@ -206,10 +207,8 @@ Two independent rule sets, evaluated together, matching Spring's own masked-valu
   a JDBC URL keeps its host and database name visible with just the credential blacked
   out.
 
-Both rule sets are the full, exact list &mdash;
-[`MaskingRules`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/masking/MaskingRules.java)
-is the single source of truth if you need to check whether a specific key or shape is
-covered.
+The key-name list and value shapes above are the complete set, not a sample &mdash; if a
+key or shape isn't described here, it isn't covered.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 **This is not exhaustive, and there is no entropy detection.** Key-name rules plus a
