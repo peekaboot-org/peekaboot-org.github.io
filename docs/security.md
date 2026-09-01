@@ -308,11 +308,11 @@ Spring's own default (`never`) applies.
 On a local run it is kept at `always`, for a structural reason: Spring Boot 4.1 registers
 no default `SanitizingFunction` regardless of `show-values`, so leaving Spring's own
 default in place would not hand masking over to Spring &mdash; it would return `******`
-for *every* property unconditionally, including
-harmless ones like `server.port`, and would leave Peekaboot's own masking engine with no
-real value to ever inspect or, later, reveal. Controlled unmasking would then have nothing
-to unmask either. `show-values: always`, on a local run, is what lets Peekaboot's own
-engine see real values and decide, correctly, what to show.
+for *every* property unconditionally, including harmless ones like `server.port`, and
+would leave Peekaboot's own masking engine with no real value to ever inspect or, later,
+reveal. Controlled unmasking would then have nothing to unmask either. `show-values:
+always`, on a local run, is what lets Peekaboot's own engine see real values and decide,
+correctly, what to show.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 **Off a local run, every property masks &mdash; not just the ones that look like

@@ -95,9 +95,8 @@ management:
 
 **Cause:** the dashboard doesn't show Meters unconditionally &mdash; it's gated on a
 separate call, `GET /peekaboot/api/features`, reporting `metrics: true` (the flag is named
-`metrics`, the tab Meters). That flag reflects whether a
-Micrometer `MeterRegistry` bean is present, which Spring Boot Actuator normally provides
-automatically.
+`metrics`, the tab Meters). That flag reflects whether a Micrometer `MeterRegistry` bean
+is present, which Spring Boot Actuator normally provides automatically.
 
 **Fix:** Confirm `GET /peekaboot/api/features` actually reports `metrics: true` (see
 [The dashboard &mdash; conditionally shown

@@ -25,10 +25,9 @@ appear in this order, left to right.
 **Answers:** is the app healthy, and what's actually running?
 
 There is no separate Health tab and no separate Info tab &mdash; this one tab covers
-both. It carries build and Git metadata, Spring Boot and
-Java versions, OS and JVM defaults, datasource status, memory and storage meters, and the
-health banner with its per-component breakdown, all sourced from Actuator's `info` and
-`health` endpoints.
+both. It carries build and Git metadata, Spring Boot and Java versions, OS and JVM
+defaults, datasource status, memory and storage meters, and the health banner with its
+per-component breakdown, all sourced from Actuator's `info` and `health` endpoints.
 
 It also carries the stat-tile row &mdash; Started at, Startup, Ready after, Uptime, CPU
 cores. Those come from the insights collector rather than from Actuator, and they're

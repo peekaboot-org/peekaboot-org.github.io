@@ -15,8 +15,8 @@ dashboard and the dev toolbar simply don't register. Startup isn't affected, not
 errors, and there's just no `/peekaboot/**` to reach. Two things carry no web condition
 and still run wherever `peekaboot.enabled` resolves to `true`: the startup and shutdown
 summaries (`peekaboot.lifecycle.enabled`) and, on a local run, the run-history file under
-`~/.peekaboot/` (`peekaboot.storage.enabled`). Set either to `false` if you want neither
-&mdash; see [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootlifecycle).
+`~/.peekaboot/` (`peekaboot.storage.enabled`). Each switch turns its own one off &mdash;
+see [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootlifecycle).
 
 ## What the starter brings
 

@@ -136,10 +136,10 @@ folding is done does the cap apply: if the deduplicated count still exceeds it, 
 
 This means the cap counts real, distinct work rather than counting a double-tagged JDBC
 call as two spans against it. When the cap genuinely is hit, it isn't silent: the trace is
-flagged `truncated`,
-surfaced through the API and shown as a badge in the dashboard, so a shortened trace is
-never mistaken for a complete one. See [Concepts]({{ '/docs/concepts/' | relative_url }})
-for what `HIGH_QUERY_COUNT` actually checks.
+flagged `truncated`, surfaced through the API and shown as a badge in the dashboard, so a
+shortened trace is never mistaken for a complete one. See
+[Concepts]({{ '/docs/concepts/' | relative_url }}) for what `HIGH_QUERY_COUNT` actually
+checks.
 
 ## `peekaboot.ui.tracing`
 
