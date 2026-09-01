@@ -432,12 +432,12 @@ plain text at the end of the page rather than as a strip along the bottom.
 The class above is not a sketch. It is
 [`PeekabootSecurityConfig`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/example/security/PeekabootSecurityConfig.java)
 in the product repository, loaded unmodified into the sample application by two tests:
-[`SecuredPeekabootIntegrationTest`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/testingapp/integration/SecuredPeekabootIntegrationTest.java)
+[`SecuredPeekabootIT`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/testingapp/integration/SecuredPeekabootIT.java)
 pins the HTTP contract &mdash; an anonymous request to the dashboard, to
 `/peekaboot/api/actuator/all/insights` and to a dashboard static asset is refused; a
 logged-in user *without* `ROLE_ADMIN` is forbidden; an admin gets the real payload; and the
 application's own paths stay anonymously reachable &mdash; and
-[`SecuredDashboardTest`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/testingapp/ui/SecuredDashboardTest.java)
+[`SecuredDashboardIT`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/testingapp/ui/SecuredDashboardIT.java)
 pins the browser behaviour described just above, in real Chromium.
 
 ## Running it in a deployed environment
