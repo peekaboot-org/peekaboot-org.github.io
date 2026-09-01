@@ -248,7 +248,9 @@ is embedded in. Check the startup log if your panels don't appear.
 
 Live updates are pushed (SSE): the tab holds one stream open against
 `GET /peekaboot/api/insights/stream` and never polls, receiving a `tick` per level-0
-interval and a `rollup` whenever a higher level's window closes. See [HTTP
+interval and a `rollup` whenever a higher level's window closes. The server closes each
+stream after 5 minutes and the browser reopens it on its own; at most 32 streams are open
+per application, so a 33rd dashboard gets a `503` until one of them closes. See [HTTP
 API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints) for the events themselves.
 
 ## Surviving a restart

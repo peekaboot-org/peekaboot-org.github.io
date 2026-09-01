@@ -182,3 +182,10 @@ on by default) is not enough by itself.
 **Fix:** Set `peekaboot.dev-toolbar: true`. See [Tracing &mdash; what gets
 captured]({{ '/docs/tracing/' | relative_url }}#what-gets-captured) for exactly what
 turning it on adds versus what tracing alone already provides.
+
+## My application sets `spring.jackson.*`
+
+**Not a cause of anything:** Peekaboot's API responses and its insights stream are
+serialised independently of your `spring.jackson.*` settings &mdash; a naming strategy,
+`non_null` inclusion or timestamp dates in your application change nothing on the
+dashboard, and Peekaboot changes nothing in your own JSON.

@@ -65,11 +65,13 @@ is reachable while it doesn't.
 | tracing | `peekaboot.tracing.enabled` (`true`) | The OpenTelemetry SDK (present via the starter) |
 | startup and shutdown summaries, run history | `peekaboot.lifecycle.enabled` (`true`) | Nothing |
 | persisted history | `peekaboot.storage.enabled` (detected) | A writable directory; an unwritable one is logged once and everything carries on in memory |
-| observability defaults | `peekaboot.enabled` | Nothing |
+| observability defaults | `peekaboot.enabled` | A servlet web application |
 
 On a non-servlet application &mdash; WebFlux, or no web application at all &mdash; the
-dashboard and toolbar don't register and there is nothing at `/peekaboot/**`; the summaries
-are still logged and, on a local run, the run history still written. See
+dashboard and toolbar don't register, there is nothing at `/peekaboot/**`, and the
+defaults [below](#what-peekaboot-sets-in-your-application) that hang on `peekaboot.enabled`
+are not applied either; the summaries are still logged and, on a local run, the run history
+still written. See
 [Requirements]({{ '/docs/requirements/' | relative_url }}).
 
 ## Properties
@@ -120,6 +122,10 @@ Two files land there:
 | `insights.snapshot` | The insights rings, written at each `peekaboot.insights.persistence.interval` boundary and once more at shutdown | About 5 MB at the default levels |
 | `lifecycle.jsonl` | The start and stop history, one JSON object per line, at most 1000 events, oldest dropped first | &le; 400 KB when full |
 
+On a POSIX file system the directory is created `rwx------` and both files `rw-------`,
+readable by the owning user alone; a directory that already exists keeps the permissions it
+has, and on Windows the platform defaults apply.
+
 Neither file can fail your application. A snapshot this version can't read, that no longer
 matches your `peekaboot.insights.levels`, or that is older than
 `peekaboot.insights.persistence.max-age` is discarded and the rings start empty; a
@@ -133,10 +139,8 @@ once and everything carries on in memory. Both stores assume one instance per di
 |---|---|---|---|
 | `enabled` | boolean | `true` | The startup summary, the shutdown summary, and the run history behind the Lifecycle tab and `/peekaboot/api/lifecycle/**`. |
 
-This prefix is not bound to a properties bean, so unlike everything else on this page it
-does not appear on the dashboard's Config tab. The startup summary carries the application
-name, build info, server, dashboard and datasource details; the shutdown summary the uptime
-and the start and stop timestamps.
+The startup summary carries the application name, build info, server, dashboard and
+datasource details; the shutdown summary the uptime and the start and stop timestamps.
 
 #### The URLs in the summary
 
@@ -215,20 +219,20 @@ so Spring's own default governs there.
 | Property | Spring default | Peekaboot default | Applies when | Why |
 |---|---|---|---|---|
 | `management.otlp.metrics.export.enabled` | `true` | `false` | always | The starter puts Micrometer's OTLP registry on the classpath; unconfigured, it would push metrics to `localhost:4318`. Telemetry must not leave the process unless you opt in. |
-| `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled` | Every request reaches the Traces tab, not a one-in-ten slice. |
-| `spring.jpa.properties.[hibernate.generate_statistics]` | `false` | `true` | `peekaboot.enabled` | The `hibernate.*` meter panels on Insights need Hibernate's statistics. |
-| `management.info.env.enabled` | `false` | `true` | `peekaboot.enabled` | Your `info.*` properties reach the Overview tab (not OS environment variables; the Environment tab covers those). |
-| `management.info.java.enabled` | `false` | `true` | `peekaboot.enabled` | The Java card on Overview. |
-| `management.info.os.enabled` | `false` | `true` | `peekaboot.enabled` | The System card on Overview. |
-| `management.info.process.enabled` | `false` | `true` | `peekaboot.enabled` | PID, uptime, CPU count and memory on Overview. |
-| `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled` | `@Observed`, `@Timed` and `@Counted` work without extra wiring. |
+| `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled`, servlet web application only | Every request reaches the Traces tab, not a one-in-ten slice. |
+| `spring.jpa.properties.[hibernate.generate_statistics]` | `false` | `true` | `peekaboot.enabled`, servlet web application only | The `hibernate.*` meter panels on Insights need Hibernate's statistics. |
+| `management.info.env.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | Your `info.*` properties reach the Overview tab (not OS environment variables; the Environment tab covers those). |
+| `management.info.java.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | The Java card on Overview. |
+| `management.info.os.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | The System card on Overview. |
+| `management.info.process.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | PID, uptime, CPU count and memory on Overview. |
+| `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | `@Observed`, `@Timed` and `@Counted` work without extra wiring. |
 | `management.endpoint.env.show-values` | `never` | `always` | local run only | Otherwise the Environment tab shows `******` for every property, `server.port` included; Peekaboot's own masking runs over the real values instead. |
 | `management.endpoint.configprops.show-values` | `never` | `always` | local run only | The same, for the Config tab. |
 | `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | dev toolbar on | Spring Boot's span export delay is what separates a span ending from the toolbar seeing it; shortened so a trace is readable while you are still on the page. |
 
 Traces and logs need no export switch: Spring Boot only creates OTLP exporters for them
 when you configure an endpoint. Nothing on `/actuator/**` changes &mdash; Peekaboot reads
-Actuator in-process and adds no exposure of its own. <!-- verify: show-details default removed -->
+Actuator in-process and adds no exposure of its own.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 **Some of these widen what is exposed, or cost something at runtime:**

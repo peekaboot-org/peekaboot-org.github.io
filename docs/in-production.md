@@ -20,7 +20,7 @@ the line falls.
 - Actuator's data read in-process. Peekaboot needs no
   `management.endpoints.web.exposure` change, and nothing on `/actuator/**` changes: what
   your application exposes there, and what those endpoints answer, is the same with or
-  without Peekaboot. <!-- verify: show-details default removed -->
+  without Peekaboot.
 - Micrometer's OTLP metrics push switched off, so telemetry never leaves the process by
   accident.
 - Additive: your own OTLP or Zipkin exporters and your sampling configuration keep
@@ -46,7 +46,7 @@ there Peekaboot sets `management.endpoint.env.show-values` and
 
 ### What it costs while it is on
 
-Whenever `peekaboot.enabled` is `true`:
+Whenever `peekaboot.enabled` is `true` and the application is a servlet web application:
 
 - `management.tracing.sampling.probability=1.0` &mdash; every request is sampled, for
   every exporter you have configured, not only Peekaboot's store.
