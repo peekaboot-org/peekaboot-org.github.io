@@ -266,8 +266,9 @@ Insights, Meters and Traces are different: they're gated on a separate call, `GE
 /peekaboot/api/features`, which returns `{tracing, metrics, devToolbar, unmaskingEnabled,
 insights}`. Meters needs a `MeterRegistry` bean, which Spring Boot Actuator provides
 automatically; Insights needs that same bean plus `peekaboot.insights.enabled` (on by
-default); Traces needs tracing to be active (`peekaboot.tracing.enabled`, on by default,
-plus an OpenTelemetry `SpanExporter` on the classpath). `unmaskingEnabled` gates a control,
+default); Traces needs the in-memory trace store to exist (`peekaboot.tracing.enabled`, on
+by default) &mdash; the tab is shown whenever the store is, and without the OpenTelemetry
+SDK on the classpath it is empty rather than absent. `unmaskingEnabled` gates a control,
 not a tab &mdash; see [Environment vs Config](#environment-vs-config) above. See
 [Requirements]({{ '/docs/requirements/' | relative_url }}) for the full dependency picture.
 
