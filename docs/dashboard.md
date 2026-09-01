@@ -313,8 +313,10 @@ its endpoint outright, and the tab then says so instead of vanishing, on the gro
 whoever set that flag will not be puzzled by it.
 
 Insights, Meters and Traces are different: they're gated on a separate call, `GET
-/peekaboot/api/features`, which returns `{tracing, metrics, devToolbar, unmaskingEnabled,
-insights}`. Meters needs a `MeterRegistry` bean, which Spring Boot Actuator provides
+/peekaboot/api/features`, whose flags are `{tracing, metrics, devToolbar,
+unmaskingEnabled, insights}` (it also carries the UI's duration thresholds and the mask
+literal &mdash; see [HTTP API]({{ '/docs/api/' | relative_url }})). Meters needs a
+`MeterRegistry` bean, which Spring Boot Actuator provides
 automatically; Insights needs that same bean plus `peekaboot.insights.enabled` (on by
 default); Traces needs the in-memory trace store to exist (`peekaboot.tracing.enabled`, on
 by default) &mdash; the tab is shown whenever the store is, and without the OpenTelemetry

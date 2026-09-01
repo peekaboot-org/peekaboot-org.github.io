@@ -23,6 +23,12 @@ span. Spans nest &mdash; a query span sits inside the handler span that issued i
 sits inside the request span that triggered the handler &mdash; forming the tree you see
 in the trace detail overlay's Spans tab.
 
+Wherever the UI counts, lists or labels *queries* &mdash; the Queries tab, the query
+counts, the SLOW_QUERY and HIGH_QUERY_COUNT issues &mdash; a **query span** means a
+CLIENT-kind span carrying `db.*` or `jdbc.query*` tags: the client side of a database
+call, tagged either by the OpenTelemetry conventions or by datasource-proxy. A span whose
+name merely looks like SQL doesn't count as one.
+
 ## Root span and root operation
 
 The root span is the span at the top of that tree &mdash; the one nothing else is nested

@@ -46,12 +46,22 @@ backend-for-frontend). `/api/insights/**` is a *prefix* naming the metric-charts
 and nothing else. They share a word and no code.
 </div>
 
-`/api/features` returns `{tracing, metrics, devToolbar, unmaskingEnabled, insights}`
-&mdash; the same call the dashboard uses to decide whether to show its Insights, Meters
-and Traces tabs, and whether the Environment/Config tabs' "Show secrets" toggle can appear
-at all. `metrics` is the flag behind the tab labelled **Meters** &mdash; the JSON field and
-the tab label differ. See [The dashboard]({{ '/docs/dashboard/' | relative_url }}) for
-what drives each flag.
+`/api/features` returns five flags &mdash; `{tracing, metrics, devToolbar,
+unmaskingEnabled, insights}` &mdash; plus the numbers the UI colours and labels by:
+`slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs`,
+`slowTraceThresholdMs` and `maskLiteral`. The flags are what the dashboard uses to decide
+whether to show its Insights, Meters and Traces tabs, and whether the Environment/Config
+tabs' "Show secrets" toggle can appear at all. `metrics` is the flag behind the tab
+labelled **Meters** &mdash; the JSON field and the tab label differ. See [The
+dashboard]({{ '/docs/dashboard/' | relative_url }}) for what drives each flag.
+
+The four thresholds are the effective values the backend detects issues and fills the
+Slow bucket with (see
+[Configuration &mdash; `peekaboot.ui.tracing`]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing)),
+published so the frontend never keeps a copy of its own; `slowTraceThresholdMs` is `null`
+while tracing is off, since the Slow bucket doesn't exist then. `maskLiteral` is the
+exact string masked values are replaced with (`******`) &mdash; the trace detail's
+Request tab compares header values against it to highlight what was masked.
 
 `unmask=true` only has an effect while `peekaboot.enable-unmasking=true` is also set on
 the server; without that property, the parameter is silently ignored and the response
@@ -83,6 +93,11 @@ server's timezone and default locale &mdash; nothing else in the response depend
 The dashboard's language selector sends one of `en-US`, `de-DE`, `fr-FR` or `es-ES`; see
 [The dashboard &mdash; the header]({{ '/docs/dashboard/' | relative_url }}#the-header).
 
+In the scheduled-tasks part of the payload, a task's `schedule` carries the cron
+expression alone &mdash; for a fixed-rate or fixed-delay task it is `null`, and the
+interval travels as `intervalMs` instead, formatted by the dashboard rather than the
+server.
+
 For traces, `insights` enriches the underlying spans: they're assembled into a tree,
 duplicate spans from double-instrumented layers are folded into one, issues like `SLOW` or
 `HIGH_QUERY_COUNT` are detected and attached (see
@@ -93,6 +108,19 @@ the spans that emitted them. Both `GET /peekaboot/api/traces/insights` (the list
 [`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing)
 dropped distinct spans for that trace, never merely because duplicates were folded away.
 The dashboard shows this as a `TRUNCATED` badge.
+
+The list response is `{traces, bucketCounts, filteredBucketCounts}` &mdash; the bucket
+counts are the only aggregate it carries, and `filteredBucketCounts` is `null` unless the
+request had a `rootActionType`/`rootOperation` filter. Each trace, in the list and as the
+detail response, is the same shape: a `slow` boolean (`true` when any span carries a
+`SLOW` or `VERY_SLOW` issue &mdash; the badge, not the Slow bucket; see
+[Tracing]({{ '/docs/tracing/' | relative_url }}#the-slow-badge-is-not-the-slow-bucket)),
+a per-trace `summary`, and `logs` and `queries` that are always arrays, never `null`
+&mdash; empty on a list row, populated only by the detail endpoint. A database-query span
+&mdash; a CLIENT-kind span carrying `db.*` or `jdbc.query*` tags &mdash; additionally
+carries `query`, the masked SQL statement it ran; that field is `null` when the
+instrumentation recorded no statement, and such a span still counts as a query,
+appearing in `queries` with `sql: null`.
 
 ## The `bucket` parameter
 
