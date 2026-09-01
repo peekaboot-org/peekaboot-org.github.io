@@ -14,7 +14,8 @@ On a non-servlet application &mdash; WebFlux, or no web application at all &mdas
 dashboard and the dev toolbar simply don't register. Startup isn't affected, nothing
 errors, and there's just no `/peekaboot/**` to reach. Two things carry no web condition
 and still run wherever `peekaboot.enabled` resolves to `true`: the startup and shutdown
-summaries (`peekaboot.lifecycle.enabled`) and, on a local run, the run-history file under
+summaries (`peekaboot.lifecycle.enabled`) and, on a [local
+run]({{ '/docs/configuration/' | relative_url }}#local-run), the run-history file under
 `~/.peekaboot/` (`peekaboot.storage.enabled`). Each switch turns its own one off &mdash;
 see [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootlifecycle).
 
@@ -29,9 +30,8 @@ Adding `peekaboot-spring-boot-starter` pulls in exactly four dependencies:
 | `spring-boot-starter-actuator` | the Overview, Env, Loggers, Flyway, Config and Scheduled Tasks endpoints Peekaboot reads in-process &mdash; the Meters and Insights tabs read Micrometer's `MeterRegistry` directly, not an actuator endpoint, though the registry bean itself is Actuator's |
 | `spring-boot-starter-opentelemetry` | the OpenTelemetry SDK and the Micrometer Tracing bridge that feed the in-memory trace store |
 
-Caffeine, which backs the in-memory trace store's bounded caches, is not declared by the
-starter itself &mdash; it arrives transitively through `peekaboot-backend`, a dependency of the
-autoconfigure module.
+Brave is not supported &mdash; Peekaboot reads spans from the OpenTelemetry SDK; a host on
+Brave gets no traces and no toolbar.
 
 ## Graceful degradation
 
