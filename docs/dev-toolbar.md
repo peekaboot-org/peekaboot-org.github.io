@@ -4,11 +4,9 @@ lead: Request and response detail, the trace view, and logs correlated to the re
 permalink: /docs/dev-toolbar/
 ---
 
-The dev toolbar defaults on for a local run, off elsewhere &mdash; the same launch-context
-detection as `peekaboot.enabled` itself, computed independently of it, so turning
-Peekaboot on deliberately in a shared environment doesn't also inject the toolbar there.
-See [How activation works]({{ '/docs/how-activation-works/' | relative_url }}) for exactly
-what counts as local. Set it explicitly either direction to override the detection:
+The dev toolbar is on for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
+and off elsewhere, detected independently of `peekaboot.enabled`; set it explicitly either
+direction to override the detection:
 
 ```yaml
 peekaboot:
@@ -43,13 +41,12 @@ override its look via the shared `tokens.css`.
 
 The collapsed bar is the first look: response status (colour-coded), method and path, the
 resolved controller method, request duration, database query count and total query time,
-and the trace id, copyable with one click. Those metrics fill in asynchronously &mdash;
-the bar fetches the trace's insights on a fixed four-attempt schedule (250ms, 500ms, 1s
-and 3s after the previous attempt, the last landing around 4.75s after the response
-arrived) and re-renders each time, so a span that finishes after the response already
-went out still gets counted. Peekaboot's own 200ms trace-export delay when the toolbar is
-on (see [Auto-configured defaults]({{ '/docs/auto-configured-defaults/' | relative_url }}))
-normally means the numbers are already final well before the last attempt.
+and the trace id, copyable with one click. Those metrics fill in asynchronously: the bar
+re-fetches the trace a few times over the first five seconds, so a span that finishes
+after the response already went out still gets counted, and with the toolbar's 200 ms
+export delay (see [Configuration &mdash; what Peekaboot
+sets]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application))
+the numbers are usually final on the first attempt or two.
 
 The status pill has one tier per response family, and 4xx and 5xx are deliberately held
 apart: a client error gets a soft red that recedes, a server error the full one, because
@@ -89,15 +86,12 @@ That same click opens the full trace &mdash; the same view the dashboard's Trace
 uses for any request, reachable here without leaving the page you're testing. The Spans
 tab, shown above, is the whole tree: every span's kind, tags and duration, nested exactly
 as they nested at runtime. The Queries tab lists the SQL each of those spans ran, with
-duration and, where your instrumentation provides them, row counts &mdash; recognizing
-OpenTelemetry's `db.query.text`/`db.statement` tags and `datasource-proxy`'s
-`jdbc.query[N]` tags, in that order, and falling back to a span's own name only when none
-of those tags are present and that name already looks like SQL. The tree above shows a
-span's *name*, not extracted SQL &mdash; which is why a database span there can read
-`SELECT customer_order` rather than the statement itself: that's OpenTelemetry's own
-summary form for the span, correct for a span tree, and rendered by a completely
-different code path than the Queries tab, independent of what that tab's own fallback
-does.
+duration and, where your instrumentation provides them, row counts. Peekaboot reads the
+SQL from whichever of three tags your instrumentation sets &mdash; `db.query.text`,
+`db.statement` or `datasource-proxy`'s `jdbc.query[N]` &mdash; and falls back to the span's
+own name only when that already looks like SQL. The tree above shows span *names*, which
+is why a database span there reads `SELECT customer_order` rather than the statement
+itself.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
@@ -105,8 +99,8 @@ does.
        loading="lazy">
 </figure>
 
-That's what `QueryExtractor` actually pulls out &mdash; lower-case, parameterized SQL
-text, one row per statement, nothing like the span tree's title-case summary above. See
+That's what Peekaboot extracts &mdash; lower-case, parameterized SQL text, one row per
+statement, nothing like the span tree's title-case summary above. See
 [Tracing]({{ '/docs/tracing/' | relative_url }}) for what's actually captured, and
 [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a span, a root span and a
 trace status mean.
