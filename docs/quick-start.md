@@ -77,8 +77,9 @@ context path and all, on a `Peekaboot Dashboard:` line &mdash; see
 - Every meter in Micrometer's registry on the Meters tab, and the curated ones charted over
   time on [Insights]({{ '/docs/insights/' | relative_url }}) &mdash; no Prometheus, no
   scrape endpoint
-- Full request traces &mdash; spans and SQL queries &mdash; for every request your app
-  has served since it started
+- Full request traces &mdash; spans and SQL queries &mdash; for the last thousand requests
+  your app has served, kept for thirty minutes (`peekaboot.tracing.max-traces`; see
+  [Tracing]({{ '/docs/tracing/' | relative_url }}#the-three-buckets))
 
 ## Next
 
