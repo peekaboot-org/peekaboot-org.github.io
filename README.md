@@ -71,6 +71,50 @@ builds and still loads, but it will never equal the `url` in `_data/nav.yml` —
 sidebar's current-page highlight (`aria-current="page"`, driven by `page.url == item.url` in
 `_includes/sidebar.html`) never activates on it, with no build error to flag the mistake.
 
+When a page is merged into another, keep its old URL alive with `redirect_from` in the
+surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml`);
+`docs/configuration.md` carries two such redirects.
+
+## Decisions taken deliberately
+
+- **Links into the product repo use `/blob/HEAD/`, never a branch name.** `HEAD` follows
+  whatever the default branch is and survives a rename.
+- **`theme: null` stays.** Without it GitHub Pages ships `jekyll-theme-primer`'s unused
+  CSS on every deploy.
+- **Bulma is vendored, not CDN-linked.** `assets/bulma.min.css` is a committed copy of
+  1.0.4: no third-party request, works offline.
+- **The brand mapping is three numbers.** `--bulma-primary-h/s/l` is the mark's own green.
+  That green is fill-tuned (white on it is 2.6:1), so link and body text use `--pk-link`,
+  never `--bulma-primary` — the same fill/text split the product's `tokens.css` makes.
+- **The site's dark background is Bulma's, not the dashboard's.** `#14161a` against the
+  dashboard's `#0d1117`; closing that gap would re-tune every grey Bulma derives in dark
+  mode for a difference nobody can see side by side.
+- **The theme toggle shares the product's storage key** (`peekaboot-theme`) and its
+  `data-theme` attribute. `assets/site.js` loads synchronously in `<head>` so the theme
+  applies before first paint — do not add `defer`.
+- **Honest limits are stated on purpose.** Masking is not exhaustive, there is no entropy
+  detection, and `show-values: always` on a local run widens the host's own actuator
+  endpoints. Those caveats are load-bearing; do not soften them into promises.
+
+## If you change the product, check these pages
+
+| Change | Pages to revisit |
+| --- | --- |
+| Any masking rule | `docs/security.md`, `docs/configuration.md` |
+| A new or renamed property, or one of Peekaboot's defaults | `docs/configuration.md`, `docs/in-production.md` |
+| Activation conditions | `docs/configuration.md` (*When Peekaboot is on*), `docs/in-production.md`, `docs/requirements.md`, `docs/security.md` |
+| An API endpoint or parameter | `docs/api.md` |
+| Trace capture or the span cap | `docs/tracing.md`, `docs/troubleshooting.md` |
+| Root action type detection | `docs/concepts.md` |
+| A dashboard tab, or a header control | `docs/dashboard.md`, and re-run the screenshots |
+| A dashboard tab *rename* | also `docs/troubleshooting.md`, `docs/quick-start.md`, and `docs/api.md` (the `/api/features` flag behind Meters is `metrics`) |
+| `peekaboot-insights-defaults.yml`, or the panel-file schema | `docs/insights.md` — it states the field sets and the 16/6/39 counts |
+| An insights level default, or the memory formula | `docs/insights.md`, `docs/configuration.md` — both carry worked arithmetic |
+| The startup summary's lines, or how a URL in it is built | `docs/configuration.md` (*The URLs in the summary*) |
+| Anything under `peekaboot.storage`, or what the two stores write | `docs/configuration.md`, `docs/security.md`, `docs/insights.md` |
+| The runs projection, its columns or its badges | `docs/dashboard.md` (*Lifecycle*) |
+| A `tokens.css` colour token, or a badge tier | `docs/theming.md` |
+
 ## Screenshots
 
 The screenshots under `assets/img/screenshots/` come from the product repo's Playwright
