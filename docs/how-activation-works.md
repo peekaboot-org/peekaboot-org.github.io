@@ -41,7 +41,10 @@ below is reachable while it doesn't.
 
 If your application isn't a servlet web app &mdash; WebFlux, or no web application at all
 &mdash; the dashboard and toolbar simply don't register: startup isn't affected, nothing
-crashes, there's just nothing to see at `/peekaboot/**`. See
+crashes, there's just nothing to see at `/peekaboot/**`. The rows above that carry no
+servlet requirement still apply, and two of them leave a visible mark: the startup and
+shutdown summaries are logged (`peekaboot.lifecycle.enabled`) and, on a local run, the
+run history is written under `~/.peekaboot/` (`peekaboot.storage.enabled`). See
 [Requirements]({{ '/docs/requirements/' | relative_url }}) for the full picture.
 
 ## Why tests count as "not local"
