@@ -5,7 +5,7 @@ permalink: /docs/configuration/
 ---
 
 Every property below is bound by a `@ConfigurationProperties` class, with one exception
-noted in its own section. Values shown are the Java field defaults; see [How activation
+noted in its own section. See [How activation
 works]({{ '/docs/how-activation-works/' | relative_url }}) for how `peekaboot.enabled`
 itself is actually resolved, and [Auto-configured
 defaults]({{ '/docs/auto-configured-defaults/' | relative_url }}) for what Peekaboot sets
@@ -84,7 +84,7 @@ any other Boot property, but it will **not** appear on the dashboard's own Confi
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
-| `enabled` | boolean | `true` | Enables `PeekabootLifecycleAutoConfiguration` &mdash; the application-ready startup summary (application name, build info, server, dashboard and datasource info logged once the app is up &mdash; no Git info; that reaches the dashboard separately, through the actuator `info` endpoint under `management.info.git.enabled`). |
+| `enabled` | boolean | `true` | Enables `PeekabootLifecycleAutoConfiguration` &mdash; the application-ready startup summary (application name, build info, server, dashboard and datasource info logged once the app is up &mdash; no Git info; that reaches the dashboard separately, through the actuator `info` endpoint under `management.info.git.enabled`), the matching `ApplicationStopped` summary logged at shutdown with the uptime and the start and stop timestamps, and the run history behind the Lifecycle tab and its `/peekaboot/api/lifecycle/**` endpoints. |
 
 ### The URLs in the summary
 
