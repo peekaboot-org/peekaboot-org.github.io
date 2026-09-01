@@ -131,6 +131,12 @@ starts real PostgreSQL via `spring-boot-docker-compose` and runs Flyway against 
 dashboard tab (Flyway history, queries, traces) has genuine content instead of an empty
 state.
 
+The tool's file names are canonical - `dashboard-<tab id>-<theme>.png` for the dashboard
+tabs, plus the revealed, trace-detail and toolbar shots (the product repo's
+`peekaboot-testing-app/README.md` lists them all). This repo uses those names verbatim in
+`assets/img/screenshots/` and in every `<img>` reference; when a tab id changes in the
+product, the files and references here are renamed to follow.
+
 ## Measured contrast
 
 Body text and link text, measured in a real browser (Chromium via Playwright) against their

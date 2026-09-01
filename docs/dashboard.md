@@ -58,7 +58,7 @@ Closing the overlay removes the trace from the hash, so a reload does not reopen
 ## Overview
 
 <figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-dashboard-light.png' | relative_url }}"
+  <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
        alt="The Overview tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards, plus memory meters and a health banner"
        loading="lazy">
 </figure>
@@ -83,6 +83,12 @@ outright rather than left as an empty box, and the rest of the tab is unaffected
 
 ## Insights
 
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/dashboard-insights-light.png' | relative_url }}"
+       alt="The Insights tab, live line charts of CPU usage and system load with an aggregation level switch and toggles for percentiles and restart markers"
+       loading="lazy">
+</figure>
+
 **Answers:** how have CPU, memory, HTTP, the connection pool and the rest behaved over the
 last minutes, hours or days?
 
@@ -97,6 +103,12 @@ schema and merge rules, what the aggregation levels cost in memory, and what the
 percentiles at those levels can and can't honestly tell you.
 
 ## Lifecycle
+
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/dashboard-lifecycle-light.png' | relative_url }}"
+       alt="The Lifecycle tab, a table of application runs newest first with start, duration, stop, downtime and build columns, showing Running, Unclean exit and Deployment badges"
+       loading="lazy">
+</figure>
 
 **Answers:** when did this application run, for how long, and what was deployed each time?
 
@@ -143,7 +155,7 @@ root action types actually mean.
 ## Meters
 
 <figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-metrics-light.png' | relative_url }}"
+  <img src="{{ '/assets/img/screenshots/dashboard-meters-light.png' | relative_url }}"
        alt="The Meters tab, a filterable list of Micrometer meters such as application.ready.time, db.client.operation.duration and executor.pool.size, each with its type, unit and measurement count"
        loading="lazy">
 </figure>
