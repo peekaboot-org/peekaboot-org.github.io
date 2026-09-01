@@ -44,3 +44,5 @@
   pages:
     - title: Acknowledgements
       url: /docs/acknowledgements/
+    - title: Contributing
+      url: /docs/contributing/
