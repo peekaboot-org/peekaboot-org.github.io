@@ -55,11 +55,11 @@ below is reachable while it doesn't.
 | Feature | Switch | Additional requirement |
 |---|---|---|
 | Dashboard UI & API | `peekaboot.enabled=true` | A servlet web application; Actuator's health and info endpoints on the classpath (present via the starter) |
-| Debug Toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (auto-detected: on for a local run, off elsewhere, same detection as `peekaboot.enabled`, not keyed on it) | A servlet web application; a Micrometer `Tracer` bean (present by default); `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar has no trace data to show |
-| In-Memory Tracing | `peekaboot.enabled=true` **and** `peekaboot.tracing.enabled=true` (on by default) | The OpenTelemetry SDK on the classpath (present via the starter) |
-| Startup Summary | `peekaboot.enabled=true` **and** `peekaboot.lifecycle.enabled=true` (on by default) | None |
+| Dev toolbar | `peekaboot.enabled=true` **and** `peekaboot.dev-toolbar=true` (auto-detected: on for a local run, off elsewhere, same detection as `peekaboot.enabled`, not keyed on it) | A servlet web application; a Micrometer `Tracer` bean (present by default); `peekaboot.tracing.enabled=true` (on by default) &mdash; without it, no spans reach the store and the toolbar has no trace data to show |
+| In-memory tracing | `peekaboot.enabled=true` **and** `peekaboot.tracing.enabled=true` (on by default) | The OpenTelemetry SDK on the classpath (present via the starter) |
+| Startup and shutdown summaries | `peekaboot.enabled=true` **and** `peekaboot.lifecycle.enabled=true` (on by default) | None |
 | Persisted history | `peekaboot.enabled=true` **and** `peekaboot.storage.enabled=true` (auto-detected: on for a local run, off elsewhere, same detection as `peekaboot.enabled`, not keyed on it) | A writable directory &mdash; an unwritable one is logged once and everything carries on in memory. See [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) |
-| Observability Defaults | `peekaboot.enabled` resolves to `true` (detection or override) | None &mdash; skipped entirely while disabled |
+| Observability defaults | `peekaboot.enabled` resolves to `true` (detection or override) | None &mdash; skipped entirely while disabled |
 
 If your application isn't a servlet web app &mdash; WebFlux, or no web application at all
 &mdash; the dashboard and toolbar simply don't register: startup isn't affected, nothing

@@ -18,7 +18,7 @@ appear in this order, left to right.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-dashboard-light.png' | relative_url }}"
-       alt="The Dashboard tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards, plus memory meters and a health banner"
+       alt="The Overview tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards, plus memory meters and a health banner"
        loading="lazy">
 </figure>
 
@@ -101,7 +101,7 @@ root action types actually mean.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-metrics-light.png' | relative_url }}"
-       alt="The Metrics tab, a filterable list of Micrometer meters such as application.ready.time, db.client.operation.duration and executor.pool.size, each with its type, unit and measurement count"
+       alt="The Meters tab, a filterable list of Micrometer meters such as application.ready.time, db.client.operation.duration and executor.pool.size, each with its type, unit and measurement count"
        loading="lazy">
 </figure>
 
