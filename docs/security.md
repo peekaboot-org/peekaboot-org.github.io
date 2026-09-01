@@ -519,12 +519,16 @@ that in mind, not just "logged in."
 ## Keeping it out of production entirely
 
 If Peekaboot should never ship in a production artifact regardless of what
-`peekaboot.enabled` resolves to, exclude the starter at packaging time. See [How
-activation works &mdash; keeping the jar out of production
-builds]({{ '/docs/how-activation-works/' | relative_url }}#keeping-the-jar-out-of-production-builds)
+`peekaboot.enabled` resolves to, exclude the starter at packaging time. See [Do I want
+this in production? &mdash; keeping it out of the artifact
+entirely]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely)
 for the full Maven `excludes` and Gradle `developmentOnly` examples.
 
 ## Production checklist
+
+[Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) is the
+question behind this list &mdash; what Peekaboot costs while it is on, and what it cannot
+do for you past one process.
 
 - [ ] Don't rely on the default. Verify `peekaboot.enabled` actually resolves to `false`
       in your deployed environment &mdash; check the startup summary, or the value

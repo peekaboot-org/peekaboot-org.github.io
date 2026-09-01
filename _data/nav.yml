@@ -4,6 +4,8 @@
       url: /docs/quick-start/
     - title: Requirements
       url: /docs/requirements/
+    - title: Do I want this in production?
+      url: /docs/in-production/
     - title: How activation works
       url: /docs/how-activation-works/
 
