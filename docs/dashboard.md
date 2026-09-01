@@ -66,11 +66,18 @@ Closing the overlay removes the trace from the hash, so a reload does not reopen
 **Answers:** is the app healthy, and what's actually running?
 
 There is no separate Health tab and no separate Info tab &mdash; this one tab covers
-both. It carries build and Git metadata, Spring Boot and Java versions, OS and JVM
-defaults, datasource status, memory and storage meters, and the health banner with its
+both. It carries build and Git metadata, Spring Boot and Java versions, OS, machine and
+JVM defaults, datasource status, memory and storage meters, and the health banner with its
 per-component breakdown, all sourced from Actuator's `info` and `health` endpoints. A
 composite contributor &mdash; Spring's `db` once there are two DataSources, or one of your
 own &mdash; is one row with its aggregate status, followed by its children as `db/<name>`.
+
+The Machine card describes what the JVM actually got to run on: the logical CPU count
+(with the CPU model name on Linux), the total physical memory, the JVM's max heap, and
+the container runtime it detected &mdash; `docker`, `podman`, `kubernetes`, a generic
+`container` when only the cgroup hierarchy gives the containment away, or `none`. The
+CPU and memory figures come from the JDK, which is container-aware: inside a container
+with limits they report the container's share, not the host's.
 
 It also carries the stat-tile row &mdash; Started at, Startup, Ready after, Uptime, CPU
 cores. Those come from the insights collector rather than from Actuator, and they're

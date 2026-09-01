@@ -40,6 +40,11 @@ enable somewhere, read all of it.
   `ProcessHandle`
   ([`ProcessInfo`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/domain/runtime/ProcessInfo.java)),
   shown on the Overview tab. None of it is masked.
+- **Machine facts.** The logical processor count, the CPU model name (on Linux), the
+  total physical memory, the JVM's max heap, and the container runtime Peekaboot
+  detected &mdash; `docker`, `podman`, `kubernetes`, a generic `container`, or `none`
+  &mdash; served as `runtime.machine` and shown on the Overview tab. None of it is
+  masked; it carries no hostnames, usernames or paths.
 - **Datasource metadata.** For every `DataSource` bean: its host(s) and port, database
   name, the database user, the database product and version, and the JDBC driver and
   version, read from the connection's `DatabaseMetaData`
