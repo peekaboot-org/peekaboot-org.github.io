@@ -5,11 +5,10 @@ permalink: /docs/security/
 ---
 
 <div class="pk-callout pk-callout--danger" markdown="1">
-Peekaboot defaults to on whenever the launch looks local &mdash; and "local" is decided
-by the class loader, not the environment: a `java -jar` of the fat jar, a war, a native
-image and a test default to off, but `java -cp`, a Jib image and Spring Boot's extracted
-slim-jar layout default to **on** exactly like an IDE run. See [How activation
-works]({{ '/docs/how-activation-works/' | relative_url }}). When it's on, anyone who can
+Peekaboot defaults to on for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
+&mdash; an IDE run, `spring-boot:run`, `bootRun`, or any launch of your build output on a
+host that is not a container &mdash; and off for a `java -jar` of the packaged jar, a war,
+a native image, a test and anything in a container. When it's on, anyone who can
 reach `/peekaboot/**` gets detailed internal state &mdash; configuration, environment
 values, health, logs, migrations, and full request traces &mdash; with **no
 authentication of any kind**. Peekaboot adds none of its own. If `/peekaboot/**` is
@@ -34,10 +33,7 @@ enable somewhere, read all of it.
   local-run condition above applies here too.
 - **Health detail.** Per-component status &mdash; datasource, disk space, custom
   indicators &mdash; not just an aggregate UP/DOWN. A custom `HealthIndicator`'s detail
-  map is masked the same way as everything else &mdash; see [Masking](#masking). Getting
-  this detail in-process is why Peekaboot sets `management.endpoint.health.show-details:
-  always`, which also widens your own `/actuator/health` &mdash; see [health detail on
-  `/actuator/health`](#show-details-always-whenever-peekaboot-is-on) below.
+  map is masked the same way as everything else &mdash; see [Masking](#masking).
 - **Process identity.** The OS user the JVM runs as, its uid and gid, its pid, and the
   parent-process chain &mdash; every ancestor's pid and command name, as far up as the
   JVM can see &mdash; read from `System.getProperty("user.name")`, `id -u`/`id -g` and
@@ -61,9 +57,7 @@ enable somewhere, read all of it.
   this instance, as far back as the log reaches (see [What Peekaboot writes to
   disk](#what-peekaboot-writes-to-disk)). Nothing here is masked.
 - **Logger levels.** Every logger's configured and effective level, from Actuator's
-  `loggers` endpoint. Peekaboot's own dashboard and API are read-only here &mdash;
-  `PeekabootController` exposes no endpoint that writes a level, only
-  [`GET` endpoints]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/controller/PeekabootController.java)
+  `loggers` endpoint. Peekaboot's API is GET-only, so nothing here can change a level
   &mdash; but the levels themselves, and which loggers have an explicit override, are
   fully visible.
 - **Migration history.** Every Flyway migration's version, description, script name,
@@ -72,8 +66,8 @@ enable somewhere, read all of it.
   (`peekaboot.tracing.enabled: true`, the default): every database query's SQL text
   &mdash; captured verbatim from whichever tag your JDBC instrumentation populates
   (`db.query.text`, its superseded spelling `db.statement`, or `datasource-proxy`'s
-  `jdbc.query[N]`, in that priority order &mdash; see [Auto-configured
-  defaults]({{ '/docs/auto-configured-defaults/' | relative_url }})), literal values and
+  `jdbc.query[N]`, in that priority order &mdash; see [Dev toolbar &mdash; the trace
+  view]({{ '/docs/dev-toolbar/' | relative_url }}#the-trace-view)), literal values and
   all wherever the instrumentation or the statement itself carries them, not just the
   parameterized form &mdash; plus the full span tree of every trace, with every span's
   name, kind, timing, tags (`http.url`, `db.statement`, `handler.name`, `view.name`,
@@ -85,21 +79,19 @@ enable somewhere, read all of it.
   is also on (`peekaboot.dev-toolbar: true`), traces additionally carry request and
   response headers, query and form parameters, the resolved controller/handler on the
   request summary, and the correlated logs described next. Capture applies to every
-  request that reaches
-  [`RequestCaptureFilter`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/filter/RequestCaptureFilter.java),
-  not only the HTML pages the toolbar UI injects into &mdash; a JSON API call is captured
+  request, not only the HTML pages the toolbar UI injects into &mdash; a JSON API call is captured
   the same way. Headers, query and form parameters are masked by key, the same as a
   property value; SQL text and span tags are masked only where a value-pattern rule
   recognises a credential shape inside them &mdash; see [Masking](#masking) for exactly
   what that does and doesn't catch.
 - **Log message content**, once the dev toolbar is on (`peekaboot.dev-toolbar: true`).
-  `PeekabootLogbackAppender` copies every log event your application emits, tagged with
+  Peekaboot's log capture copies every log event your application emits, tagged with
   its trace/span id, into the trace's Logs tab &mdash; not just levels or logger names,
   the actual message content, unmodified, and **not masked at all**. A log statement that
   happens to include a secret or PII is captured exactly as written.
-- **A trace id on every response**, once the dev toolbar is on. `RequestCaptureFilter`
-  adds a `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"` header to every
-  response it handles &mdash; JSON API calls included, not only HTML pages &mdash; so that
+- **A trace id on every response**, once the dev toolbar is on. Peekaboot adds a
+  `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"` header to every response
+  &mdash; JSON API calls included, not only HTML pages &mdash; so that
   the toolbar can find the request's trace from Swagger UI. Every caller gets it, and with
   that id anyone who can reach `/peekaboot/**` can open exactly that request's trace at
   `GET /peekaboot/api/traces/{traceId}/insights`.
@@ -113,11 +105,9 @@ enable somewhere, read all of it.
   endpoint. See [Insights]({{ '/docs/insights/' | relative_url }}).
 
 The dashboard's tabs are backed by `GET /peekaboot/api/actuator/all/insights`, which
-invokes exactly seven Actuator endpoints
-(`health`, `info`, `env`, `loggers`, `flyway`, `configprops`, `scheduledtasks` &mdash; see
-[`PeekabootActuatorService`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/service/PeekabootActuatorService.java)).
-That's the whole actuator surface Peekaboot exposes over HTTP &mdash; see [HTTP
-API]({{ '/docs/api/' | relative_url }}) for the full endpoint list.
+invokes exactly seven Actuator endpoints (`health`, `info`, `env`, `loggers`, `flyway`,
+`configprops`, `scheduledtasks`). That's the whole actuator surface Peekaboot exposes over
+HTTP &mdash; see [HTTP API]({{ '/docs/api/' | relative_url }}) for the full endpoint list.
 
 ## What Peekaboot writes to disk
 
@@ -146,37 +136,14 @@ to put both files somewhere you control.
 
 ## What Peekaboot does not do
 
-Peekaboot never exposes raw Actuator endpoints over HTTP. It builds its own
-`WebEndpointDiscoverer` with empty endpoint filters and invokes each endpoint's read
-operation in-process, from `PeekabootActuatorService`. No
-`management.endpoints.web.exposure` configuration is needed for the dashboard to work,
-and none is added by Peekaboot &mdash; which endpoints the real `/actuator/**` HTTP mapping
-serves is unaffected by anything Peekaboot does. What one of them *answers* is not:
-`management.endpoint.health.show-details: always` is among Peekaboot's defaults whenever
-it is on, and `/actuator/health` is exposed over HTTP by Spring's own default &mdash; see
-[`show-details: always` whenever Peekaboot is on](#show-details-always-whenever-peekaboot-is-on).
-
-## The exposure contributor, precisely
-
-Actuator endpoint beans are normally only created when
-`@ConditionalOnAvailableEndpoint` is satisfied for *some* exposure technology &mdash; web
-or JMX. With `management.endpoints.web.exposure.include` at Spring's default (`health`
-only), most endpoint beans simply wouldn't exist, and Peekaboot's own in-process
-discoverer would have nothing to invoke.
-
-[`PeekabootEndpointExposureOutcomeContributor`]({{ site.repository_url }}/blob/HEAD/peekaboot-spring-boot-autoconfigure/src/main/java/org/peekaboot/autoconfigure/PeekabootEndpointExposureOutcomeContributor.java),
-registered via `spring.factories`, plugs into that same condition and unconditionally
-votes "exposed" for the web technology, for every endpoint, whenever `peekaboot.enabled`
-is `true`. That's enough to make the endpoint *beans* exist.
-
-It does **not** make them reachable over HTTP. Boot's own `WebEndpointDiscoverer` &mdash;
-the one that actually feeds the `/actuator/**` HTTP mapping &mdash; applies
-`management.endpoints.web.exposure.include`/`.exclude` independently, at a different
-point, unaffected by this contributor. With Spring's defaults, that still leaves only
-`/actuator/health` reachable over HTTP, at the same time the dashboard has full data on
-everything else. The contributor's only effect is making endpoint beans exist for
-Peekaboot's own private discoverer to call in-process; it does not touch what the regular
-Actuator HTTP endpoint exposes.
+Peekaboot never exposes raw Actuator endpoints over HTTP. It calls each endpoint
+in-process, so no `management.endpoints.web.exposure` configuration is needed, none is
+added, and nothing on `/actuator/**` changes: which endpoints it serves, and what they
+answer, is the same with or without Peekaboot. To make the endpoint beans exist at all,
+Peekaboot marks every endpoint as available while `peekaboot.enabled` is `true`, but that
+never reaches the `/actuator/**` HTTP mapping, which applies your own `include`/`exclude`
+settings independently &mdash; with Spring's defaults, `/actuator/health` alone stays
+reachable over HTTP while the dashboard has full data on everything else.
 
 ## Masking
 
@@ -186,9 +153,8 @@ application context. As of the Spring Boot version Peekaboot builds and ships ag
 (4.1), **Spring Boot itself does not register a default one** &mdash; an application has
 to declare its own `@Bean SanitizingFunction` for any of that machinery to run at all.
 
-Peekaboot doesn't rely on it. It ships its own masking engine
-([`MaskingEngine`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/masking/MaskingEngine.java),
-package `org.peekaboot.backend.masking`) and applies it, on by default, everywhere a
+Peekaboot doesn't rely on it. It ships its own masking engine and applies it, on by
+default, everywhere a
 value could carry a secret: `@ConfigurationProperties` values (Config tab), environment
 property values (Environment tab), health indicator details, datasource connection
 parameters, Micrometer meter tags, request and response headers, query and form
@@ -244,12 +210,10 @@ bounded set of value-shape patterns catch the common, recognisable cases; they c
 catch a credential that has no recognisable shape sitting under a key that isn't listed
 above &mdash; a literal in an ordinary-looking column (`INSERT INTO users (password)
 VALUES ('hunter2')`) is not masked, because "hunter2" matches no provider pattern and the
-SQL-text masking is value-shape-only, not column-aware. Entropy-based detection (flagging
-any high-randomness string) was considered and deliberately rejected: it would destroy
-legitimate values on screen &mdash; a git SHA, a UUID, a base64-encoded asset &mdash; and
-documenting it as "secret detection" would recreate the exact overclaim this design
-exists to avoid. Assume every captured trace can still contain plaintext SQL and
-plaintext request data that this doesn't catch.
+SQL-text masking is value-shape-only, not column-aware. There is no entropy detection
+because flagging any high-randomness string would destroy legitimate values on screen
+&mdash; a git SHA, a UUID, a base64-encoded asset. Assume every captured trace can still
+contain plaintext SQL and plaintext request data that this doesn't catch.
 </div>
 
 ### Two independent opt-ins before a real value is ever shown
@@ -288,21 +252,18 @@ starts masked again.
   <code>enable-unmasking</code> is on <em>and</em> Show secrets is clicked.</figcaption>
 </figure>
 
-This is a genuine before/after, not a mockup: the same tab, the same run, before and after
-the toggle is clicked. Publishing the revealed one is safe because the value behind it,
-`sample_app_db_pwd`, is a placeholder that already sits in plaintext in this sample app's
-own `compose.yml` and `application-screenshots.yml` &mdash; revealing it here discloses
-nothing that wasn't already public. The point it's making isn't the value; it's the two
-steps it took to get there &mdash; a server-side property Peekaboot ships off by default,
-*and* a click nobody makes by accident.
+The same tab, the same run, before and after the toggle is clicked; the revealed value is
+the sample application's own placeholder password, already public in its `compose.yml`.
+The point is the two steps it took to get there &mdash; a server-side property Peekaboot
+ships off by default, *and* a click nobody makes by accident.
 
 ### `show-values: always` only on a local run
 
 `management.endpoint.env.show-values` and `.configprops.show-values` are set to `always`
-only on a local run, at the same lowest-precedence, launch-context-detected property
-source that resolves `peekaboot.enabled` and `peekaboot.dev-toolbar` (see [How activation
-works]({{ '/docs/how-activation-works/' | relative_url }})) &mdash; not unconditionally,
-and not from `peekaboot-defaults.yml`. Off a local run, neither property is set at all, so
+only on a local run, by the same detection that resolves `peekaboot.enabled` and
+`peekaboot.dev-toolbar` (see [Configuration &mdash; when Peekaboot is
+on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on)), and below
+everything you configure yourself. Off a local run, neither property is set at all, so
 Spring's own default (`never`) applies.
 
 On a local run it is kept at `always`, for a structural reason: Spring Boot 4.1 registers
@@ -340,32 +301,9 @@ even on your own machine, set `management.endpoint.env.show-values` (and
 overrides Peekaboot's lowest-precedence default.
 </div>
 
-### `show-details: always` whenever Peekaboot is on
-
-Unlike `show-values`, `management.endpoint.health.show-details: always` is set from
-`peekaboot-defaults.yml` &mdash; whenever `peekaboot.enabled` resolves to `true`, on a
-local run or not. It is there because the dashboard's health banner is built from the
-`health` endpoint bean invoked in-process (see [What Peekaboot does not
-do](#what-peekaboot-does-not-do)), with no caller identity attached; at Spring's own
-default of `never`, that call returns the aggregate status alone, and the Overview tab's
-per-component breakdown would have nothing to show.
-
-<div class="pk-callout pk-callout--warning" markdown="1">
-**This widens your own `/actuator/health`, and that endpoint is public by default.**
-`health` is the one actuator endpoint Spring Boot exposes over HTTP out of the box, and
-`show-details: always` makes it answer every anonymous caller with per-component detail
-&mdash; datasource, disk space, and every custom `HealthIndicator`'s detail map &mdash;
-instead of a bare `{"status":"UP"}`. Peekaboot's masking has no part in that path; it only
-runs inside `/peekaboot/**`. If you turn `peekaboot.enabled` on somewhere reachable, set
-`management.endpoint.health.show-details` yourself (`when-authorized`, or `never`) in
-your own configuration; it wins, because Peekaboot's defaults sit at the lowest
-precedence. The dashboard's health banner then shows the aggregate status only, since its
-in-process call carries no authorization.
-</div>
-
 ### What's left unmasked entirely
 
-- **Log message content**, wherever it's captured. Peekaboot's Logback appender copies
+- **Log message content**, wherever it's captured. Peekaboot's log capture copies
   whatever your logging statements produced, unmodified &mdash; there is no masking pass
   over log messages, by key or by shape.
 - Anything a value-shape rule doesn't recognise and no key name catches &mdash; see the
@@ -506,9 +444,10 @@ pins the browser behaviour described just above, in real Chromium.
 ## Running it in a deployed environment
 
 If you have a genuine reason to run Peekaboot somewhere other than your own machine
-&mdash; a shared staging environment, say &mdash; set `peekaboot.enabled=true` explicitly
-(see [How activation works]({{ '/docs/how-activation-works/' | relative_url }})) and put
-the `SecurityFilterChain` above in front of it before anything else. Restricting network
+&mdash; a shared staging environment, say &mdash; read [Do I want this in
+production?]({{ '/docs/in-production/' | relative_url }}) first, set
+`peekaboot.enabled=true` explicitly, and put the `SecurityFilterChain` above in front of
+it before anything else. Restricting network
 reachability as well &mdash; an internal-only ingress rule, a VPN, a sidecar that only
 proxies `/peekaboot/**` from trusted sources &mdash; is worth doing in addition to
 authentication, not instead of it. Whoever your authentication boundary now admits has
@@ -534,12 +473,11 @@ do for you past one process.
       in your deployed environment &mdash; check the startup summary, or the value
       reported on the dashboard's own Environment tab in a non-production environment
       where you can still reach it.
-- [ ] Set `peekaboot.enabled=false` explicitly (or exclude the starter) unless you launch
-      with `java -jar` of the repackaged fat jar. The detection reads the class loader,
-      not the environment: `java -cp …`, a Jib image and the layout of `jarmode=tools
-      extract` all run on the application class loader and default to **on**, the same
-      as an IDE run &mdash; see [How activation works &mdash; what counts as
-      local]({{ '/docs/how-activation-works/' | relative_url }}#what-counts-as-local).
+- [ ] Set `peekaboot.enabled=false` explicitly (or exclude the starter) if you run your
+      build output directly on a host that is not a container (`java -cp
+      target/classes:…`) &mdash; the one deployment the detection still reads as local.
+      See [Configuration &mdash; what counts as a local
+      run]({{ '/docs/configuration/' | relative_url }}#local-run).
 - [ ] If Peekaboot should never ship at all, exclude the starter from the production
       artifact (Maven `excludes` / Gradle `developmentOnly`) rather than trusting
       `peekaboot.enabled=false` alone.
@@ -548,11 +486,6 @@ do for you past one process.
 - [ ] Don't reach for `management.endpoints.web.exposure` as a protection here; it
       governs which endpoints `/actuator/**` serves, a mapping Peekaboot doesn't use or
       widen.
-- [ ] Wherever `peekaboot.enabled` is on, set `management.endpoint.health.show-details`
-      yourself (`when-authorized` or `never`) unless per-component health detail on your
-      public `/actuator/health` is acceptable &mdash; Peekaboot's default is `always`,
-      and it applies off a local run too. See [`show-details: always` whenever Peekaboot
-      is on](#show-details-always-whenever-peekaboot-is-on).
 - [ ] Leave `peekaboot.enable-unmasking` at its default (`false`) unless you specifically
       need to reveal real values from the dashboard &mdash; it's a server-side gate, not
       something a request parameter alone can bypass, but turning it on means anyone who
