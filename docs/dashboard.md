@@ -84,8 +84,8 @@ outright rather than left as an empty box, and the rest of the tab is unaffected
 **Answers:** how have CPU, memory, HTTP, the connection pool and the rest behaved over the
 last minutes, hours or days?
 
-Live charts over a curated set of Micrometer meters, aggregated in-process into fixed-size
-ring buffers at three resolutions (10 seconds, 1 minute, 1 hour by default) and pushed to
+Live charts over a curated set of Micrometer meters, aggregated in-process at three
+resolutions (10 seconds, 1 minute, 1 hour by default) and pushed to
 the browser over SSE rather than polled. Sixteen panels ship enabled, six more ship
 switched off, and an application can add, replace or hide panels with its own
 `peekaboot-insights.yml`.
@@ -116,7 +116,8 @@ downtime from. Neither is guessed at.
 
 How much history there is depends on
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
-With it on &mdash; the default for a local run &mdash; the log persists across restarts, up
+With it on &mdash; the default for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
+&mdash; the log persists across restarts, up
 to 1000 events, so roughly 500 runs. With it off the tab shows the current run alone, which
 is still a real row rather than an empty tab.
 
@@ -257,13 +258,8 @@ application configures &mdash; not Spring Boot's own sanitizing, which ships wit
 enabled out of the box (as of the Spring Boot version Peekaboot ships against, 4.1;
 check yours if you're on a later one).
 
-Off a local run, both tabs mask *everything*, not just recognised secrets: value
-visibility (`management.endpoint.env.show-values`/`.configprops.show-values`) is only set
-to `always` on a local run, so off one, Spring's own `never` default returns `******` for
-every property before Peekaboot's masking engine ever sees a real value &mdash;
-`server.port` included. Turning `peekaboot.enabled` on somewhere other than your own
-machine gets you the dashboard, but not readable values on these two tabs. See [Security
-&mdash; `show-values: always` only on a local
+Off a local run, both tabs show `******` for every value, `server.port` included &mdash; see
+[Security &mdash; `show-values: always` only on a local
 run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
 
 Both tabs also carry a "Show secrets" toggle, visible only when
