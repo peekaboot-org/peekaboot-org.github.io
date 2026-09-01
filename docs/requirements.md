@@ -12,7 +12,10 @@ permalink: /docs/requirements/
 
 On a non-servlet application &mdash; WebFlux, or no web application at all &mdash; the
 dashboard and the dev toolbar simply don't register. Startup isn't affected, nothing
-errors, and there's just no `/peekaboot/**` to reach. Two things carry no web condition
+errors, and there's just no `/peekaboot/**` to reach; the defaults Peekaboot would set for
+the dashboard's benefit ([what Peekaboot
+sets]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application))
+are not applied either. Two things carry no web condition
 and still run wherever `peekaboot.enabled` resolves to `true`: the startup and shutdown
 summaries (`peekaboot.lifecycle.enabled`) and, on a [local
 run]({{ '/docs/configuration/' | relative_url }}#local-run), the run-history file under
