@@ -13,8 +13,8 @@ the identical file into it too, so the same set of custom properties reaches all
 surfaces from one place &mdash; you don't need to override anything twice.
 
 Overriding those `--pk-*` custom properties re-themes all three surfaces at once. There's
-nothing else to override for colour: component styles and layout in `base.css` and
-`components.css` never hardcode a colour outside of these tokens.
+nothing else to override for colour: no component style hardcodes a colour outside these
+tokens.
 
 ## How to override it
 
@@ -62,9 +62,9 @@ checker before shipping &mdash; the pairing rule below is about *which* token pa
 
 Theme selection is `[data-theme="dark"]` (an attribute set on `<html>` for the dashboard
 document, and on the shadow host element for the toolbar and overlay) layered over the
-bare `:root`/`:host` block, which is the light theme. `shared/theme.js` resolves the
-active theme once &mdash; the stored preference if there is one, otherwise
-`prefers-color-scheme` &mdash; and every surface applies and watches it the same way.
+bare `:root`/`:host` block, which is the light theme. Every surface resolves the active
+theme the same way &mdash; the stored preference if there is one, otherwise
+`prefers-color-scheme` &mdash; and watches it for changes.
 
 Only the dashboard's own toggle writes the preference, to `localStorage['peekaboot-theme']`
 (`'light'` or `'dark'`). Because the dashboard, the toolbar, and the overlay are all served

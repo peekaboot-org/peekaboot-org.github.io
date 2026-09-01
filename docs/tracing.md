@@ -153,8 +153,8 @@ page:
   copying a trace id into a search box, no wondering whether you're looking at the right
   request.
 - **Everything is captured, always.** Peekaboot sets
-  `management.tracing.sampling.probability: 1.0` (see [Auto-configured
-  defaults]({{ '/docs/auto-configured-defaults/' | relative_url }})), because in-process
+  `management.tracing.sampling.probability: 1.0` (see [Configuration &mdash; what Peekaboot
+  sets]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)), because in-process
   capture has no per-span bill attached. Backends are sampled for cost, which is exactly
   why the one request you care about is so often the one that wasn't kept.
 - **More detail per request than a backend usually keeps.** Full request and response
@@ -165,7 +165,8 @@ page:
   spans you're already producing. Your OTLP exporter, sampling configuration and existing
   pipeline keep working unchanged, and turning `peekaboot.tracing.enabled` off leaves them
   exactly as they were.
-- **It stays out of production.** Peekaboot defaults off outside a local run, and it turns
+- **It stays out of production.** Peekaboot defaults off outside a [local
+  run]({{ '/docs/configuration/' | relative_url }}#local-run), and it turns
   Micrometer's OTLP metrics export *off* rather than letting telemetry leave the process by
   accident. It isn't trying to be your production observability story; that's the backend's
   job, and it's a good one.
