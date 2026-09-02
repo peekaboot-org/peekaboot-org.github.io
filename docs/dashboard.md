@@ -89,8 +89,12 @@ the container runtime it detected &mdash; `docker`, `podman`, `kubernetes`, a ge
 CPU and memory figures come from the JDK, which is container-aware: inside a container
 with limits they report the container's share, not the host's.
 
-It also carries the stat-tile row &mdash; Started at, Startup, Ready after, Uptime, CPU
-cores. Those come from the insights collector rather than from Actuator, and they're
+Datasource cards join the same card grid, right after JVM Defaults &mdash; with a single
+datasource the two sit side by side in the two-column layout, and further datasources
+flow on in the grid.
+
+It also carries the stat-tile row &mdash; Started at, Startup, Ready after, Uptime.
+Those come from the insights collector rather than from Actuator, and they're
 defined in the same file as the Insights tab's panels, but they're rendered here because
 they answer an Overview question rather than a charting one. See [Insights &mdash; stat
 tiles live on Overview]({{ '/docs/insights/' | relative_url }}#stat-tiles-live-on-overview).
@@ -256,7 +260,11 @@ change a level from here. The tab only appears when logger data is available.
 
 **Answers:** what is this component actually configured with?
 
-Values bound to `@ConfigurationProperties` beans, grouped by prefix, filterable. Backed
+Values bound to `@ConfigurationProperties` beans, grouped by prefix, filterable. Inside
+a group, nested values are flattened to one row per leaf, under its full dotted key
+&mdash; `registration.google.client-secret` rather than one collapsed blob per bean
+&mdash; and list entries are indexed, as in `servers[0]`. The filter matches those nested
+keys and the values themselves, not just a group's top-level names. Backed
 by Actuator's `configprops` endpoint; the tab only appears when there's at least one
 group to show.
 
