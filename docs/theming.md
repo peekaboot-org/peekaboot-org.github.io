@@ -44,7 +44,7 @@ each of its two blocks:
 ```css
 /* :root, :host block (light) */
 --pk-primary: #2563eb;       /* was #66b327 */
---pk-primary-text: #1d4ed8;  /* was #487e1b - recheck contrast against --pk-bg/--pk-bg-alt */
+--pk-primary-text: #1d4ed8;  /* was #447718 - recheck contrast against --pk-bg/--pk-bg-alt */
 --pk-on-primary: #ffffff;    /* was #0d1117 - recheck contrast against the new --pk-primary */
 
 /* [data-theme="dark"], :host([data-theme="dark"]) block */
@@ -82,7 +82,7 @@ and they are not interchangeable:
 
 | Role | Tokens | Where it's used |
 |---|---|---|
-| **Fill** | `--pk-primary`, `--pk-warning`, `--pk-info` (and `--pk-success`, `--pk-danger`, `--pk-danger-soft`) | Backgrounds &mdash; badge fills, buttons, banners. Each fill token is paired with an `--pk-on-*` ink token (`--pk-on-primary`, `--pk-on-warning`, `--pk-on-info`, ...) drawn on top of it. |
+| **Fill** | `--pk-primary`, `--pk-warning`, `--pk-info` (and `--pk-success`, `--pk-danger`, `--pk-danger-soft`, `--pk-purple`) | Backgrounds &mdash; badge fills, buttons, banners. Each fill token is paired with an `--pk-on-*` ink token (`--pk-on-primary`, `--pk-on-warning`, `--pk-on-info`, `--pk-on-purple`, ...) drawn on top of it. |
 | **Text** | `--pk-primary-text`, `--pk-warning-text`, `--pk-info-text`, `--pk-success-text` | Anything drawn directly on the page background (`--pk-bg`/`--pk-bg-alt`) &mdash; links, focus rings, borders, the selected-tab underline. |
 
 The two are tuned for different grounds and are not swappable: in light mode, Peekaboot's
