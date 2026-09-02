@@ -181,7 +181,9 @@ rather than polling it. Two named events arrive:
 
 A comment heartbeat goes out every 15 seconds to keep proxies from reaping an idle
 connection. At most 32 streams are open at once; past that a request gets a `503`, and
-retrying later is the right response. The server closes every stream after 5 minutes,
+retrying later is the right response. A subscriber that stops reading is dropped as soon
+as its outbound queue fills; the dropped connection then closes when its timeout expires,
+and reconnecting picks the stream back up. The server closes every stream after 5 minutes,
 and the browser's native `EventSource` reconnects on its own. There's no event replay:
 after a reconnect, refetch `/data` for the levels you care about. The stream completes
 cleanly on application shutdown rather than being dropped.
