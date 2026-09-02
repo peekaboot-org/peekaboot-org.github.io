@@ -51,7 +51,8 @@ you've narrowed it to, so a location can be bookmarked or pasted into a chat:
   bucket, root-action types and operation (`#traces?bucket=errors`), the text filters on
   Meters, Environment and Config (`#config?q=datasource`), Loggers' text filter and
   configured-only checkbox (`#loggers?q=peekaboot&configured=1`), the Insights
-  aggregation level, the Lifecycle page, and an open trace's Logs-tab filters
+  aggregation level with its Percentiles and Restarts toggles and any per-panel
+level overrides, the Lifecycle page, and an open trace's Logs-tab filters
   (`#traces/<traceId>/logs?level=WARN&q=timeout`).
 
 Filter changes rewrite the URL in place rather than growing browser history: switching
