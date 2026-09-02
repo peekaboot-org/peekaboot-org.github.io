@@ -147,8 +147,9 @@ sessions** and **Memory allocation**. Nothing outside the panel file is collecte
 
 ### Stat tiles live on Overview
 
-The five tiles &mdash; Started at, Startup, Ready after, Uptime, CPU cores &mdash; are
-defined in the same file, but they're rendered by the **Overview** tab, not this one. They
+The four tiles &mdash; Started at, Startup, Ready after, Uptime &mdash; are defined in
+the same file, but they're rendered by the **Overview** tab, not this one (the CPU core
+count isn't a tile at all; it sits on Overview's Machine card). They
 carry no ring buffer &mdash; only a current value. Tiles are sampled when the dashboard
 reads them, so they carry values from the first look at a freshly started app onwards:
 `uptime` is `live: true` and re-samples on every read, while the rest are sampled until

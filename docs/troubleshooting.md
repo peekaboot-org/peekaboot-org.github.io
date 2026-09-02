@@ -50,8 +50,19 @@ JSON API response, a redirect, or a static asset never gets it.
 **Fix:** Set `peekaboot.dev-toolbar: true` explicitly if you're not on a local run, or if
 you've turned it off yourself. If it's already on and the toolbar still doesn't show up
 on a page you expect it on, confirm that page's response is genuinely HTML with a
-`</body>` tag, and isn't one of the excluded paths (`/actuator/**`, `/peekaboot/**`,
-`/webjars/**`, static assets) &mdash; see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
+`</body>` tag, and isn't one of the excluded paths (`/peekaboot/**`, `/webjars/**`,
+static assets, and the management endpoints &mdash; that exclusion follows
+`management.endpoints.web.base-path`, so `/actuator/**` at Spring Boot's default) &mdash;
+see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
+
+A bar that does appear but reads **Peekaboot toolbar could not start &mdash; sign in,
+or check that its script is allowed to load** is the opposite situation: the injection
+worked, and the script that fills the bar in was refused instead. Either security in
+front of `/peekaboot/**` wants the reader to sign in, or a strict
+`Content-Security-Policy` &mdash; a `script-src`
+that only honours nonces &mdash; is blocking the script outright. For the latter, allow
+`/peekaboot/ui/toolbar/toolbar.js` in your `script-src`, or give it your nonce. See
+[Security]({{ '/docs/security/' | relative_url }}#the-dev-toolbar-asks-the-reader-to-sign-in).
 
 ## Peekaboot is off inside `@SpringBootTest`
 

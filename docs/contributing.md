@@ -23,6 +23,10 @@ it describes:
   &mdash; the decisions still waiting on a call, the known gaps, and what is deliberately
   left alone.
 
+One module in that repository is easy to misread from the outside:
+`peekaboot-test-support` is a helper for the other modules' own tests. It builds with the
+rest but is never published &mdash; nothing your application depends on comes from it.
+
 Bugs and proposals go to the [issue tracker]({{ site.repository_url }}/issues). Commit
 messages follow [Conventional Commits](https://www.conventionalcommits.org/): the next
 version number is derived from the commit messages since the last release, so the prefix
