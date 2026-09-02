@@ -216,6 +216,10 @@ added below every property source you control, so anything you set wins; nothing
 floor. The two `show-values` rows are set only on a local run and left unset elsewhere,
 so Spring's own default governs there.
 
+The same holds for beans: every bean Peekaboot registers backs off if your application
+defines its own &mdash; define a bean of the same type (or name), and Peekaboot uses
+yours instead of adding a second one.
+
 | Property | Spring default | Peekaboot default | Applies when | Why |
 |---|---|---|---|---|
 | `management.otlp.metrics.export.enabled` | `true` | `false` | always | The starter puts Micrometer's OTLP registry on the classpath; unconfigured, it would push metrics to `localhost:4318`. Telemetry must not leave the process unless you opt in. |
