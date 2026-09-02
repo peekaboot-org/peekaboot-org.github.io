@@ -428,8 +428,9 @@ authorization is load `/peekaboot/ui/toolbar/toolbar.js`, the module that fills 
 with the request's trace: that is a `/peekaboot/**` request like any other, and the chain
 above refuses it.
 
-So outside the role the bar appears, but empty, showing **Sign in to see this request** as
-a link to the dashboard. Following it lands the reader on `/peekaboot/`, which *is* gated
+So outside the role the bar appears, but empty, showing **Peekaboot toolbar could not
+start &mdash; sign in, or check that its script is allowed to load** and a link to the
+dashboard. Following it lands the reader on `/peekaboot/`, which *is* gated
 &mdash; their browser gets the `401` and its `WWW-Authenticate` challenge, prompts for
 credentials, and once they have authenticated the toolbar fills in normally on the next
 page they load. Whoever you gate `/peekaboot/**` on is still exactly the set of people who
@@ -441,6 +442,14 @@ travel inline, and a policy without `style-src 'unsafe-inline'` drops them. A re
 the role is unaffected &mdash; the same sheets are linked as well, and those load normally
 &mdash; but a reader outside it has no styles from either source, so the bar arrives as
 plain text at the end of the page rather than as a strip along the bottom.
+
+The script side of the same policy affects every reader, signed in or not: a `script-src`
+that only honours nonces &mdash; or otherwise doesn't allow
+`/peekaboot/ui/toolbar/toolbar.js` to load &mdash; blocks the module that fills the bar
+in, so the bar stays on its pre-boot notice, **Peekaboot toolbar could not start
+&mdash; sign in, or check that its script is allowed to load**, even for a reader the
+security chain would have admitted. Allow that script in your `script-src`, or give it
+your nonce, and the bar fills in normally.
 
 ### This example is executed, not just published
 

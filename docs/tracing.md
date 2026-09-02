@@ -29,8 +29,10 @@ is on: a `spring.handler` span around the controller method and, when a view is 
 a `spring.view.render` span around that
 ([`TracingHandlerInterceptor`]({{ site.repository_url }}/blob/HEAD/peekaboot-backend/src/main/java/org/peekaboot/backend/tracing/interceptor/TracingHandlerInterceptor.java),
 registered by `TracingInterceptorAutoConfiguration` for every path except Peekaboot's own,
-`/actuator/**`, static assets and `/error`). Spans opened inside the handler &mdash; JDBC,
-HTTP clients &mdash; nest under the handler span rather than the HTTP server span. These
+the management endpoints (that exclusion follows `management.endpoints.web.base-path`, so
+`/actuator/**` at Spring Boot's default), static assets and `/error`). Spans opened
+inside the handler &mdash; JDBC, HTTP clients &mdash; nest under the handler span rather
+than the HTTP server span. These
 are ordinary observations, so every exporter you have configured sees them, not only
 Peekaboot's store.
 

@@ -16,14 +16,16 @@ peekaboot:
 It also needs a Micrometer `Tracer` bean, which the starter provides by default &mdash;
 see [Requirements]({{ '/docs/requirements/' | relative_url }}) for what happens without
 one. Once it's on, a small bar docks to the bottom of every HTML page your app renders
-&mdash; not static assets, not `/actuator/**` or `/peekaboot/**` themselves, and not AJAX
-requests &mdash; and if anything goes wrong generating it, the original page goes out
-unmodified rather than a broken one.
+&mdash; not static assets, not `/peekaboot/**` or the management endpoints themselves
+(that exclusion follows `management.endpoints.web.base-path`, so `/actuator/**` at
+Spring Boot's default), and not AJAX requests &mdash; and if anything goes wrong
+generating it, the original page goes out unmodified rather than a broken one.
 
 The bar itself is rendered by the filter, but everything it shows is fetched by a module
 under `/peekaboot/**`. So if you've put Spring Security in front of those paths, a reader
-outside the role gets the bar with **Sign in to see this request** on it instead of the
-request's numbers. See [Security &mdash; the dev toolbar asks the reader to sign
+outside the role gets the bar with **Peekaboot toolbar could not start &mdash; sign in,
+or check that its script is allowed to load** on it instead of the request's numbers.
+See [Security &mdash; the dev toolbar asks the reader to sign
 in]({{ '/docs/security/' | relative_url }}#the-dev-toolbar-asks-the-reader-to-sign-in).
 
 It mounts inside its own shadow root, isolated from your page's styles in both
@@ -136,3 +138,7 @@ opens, Spans, Queries, Logs and Request tabs included &mdash; the same request/r
 detail and correlated logs for an API call as for a page load. Calls to Peekaboot's
 own paths, Swagger's own paths (`/v3/api-docs`, `/swagger-ui/`), `/webjars/`, and
 `/actuator/**` are excluded from that interception.
+
+A customised `springdoc.swagger-ui.path` is honoured: wherever you've moved that page,
+the UI itself is served from a `swagger-ui/` directory next to it, and those are the
+pages the toolbar treats as Swagger UI's.
