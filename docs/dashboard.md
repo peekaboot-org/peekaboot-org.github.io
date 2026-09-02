@@ -48,7 +48,9 @@ you've narrowed it to, so a location can be bookmarked or pasted into a chat:
 - `#traces/<traceId>` opens that trace's detail overlay on top of the Traces tab; append
   `/request`, `/spans`, `/queries` or `/logs` to land on that tab of the overlay.
 - A view's own state travels as a query string and is written as you type: the Traces
-  bucket, root-action types and operation (`#traces?bucket=errors`), the text filters on
+  bucket, root-action types and operation (`#traces?bucket=errors`; a link without
+  `type` shows every type except Connection Pool &mdash; selecting that chip writes
+  `type=CONNECTION_POOL`), the text filters on
   Meters, Environment and Config (`#config?q=datasource`), Loggers' text filter and
   configured-only checkbox (`#loggers?q=peekaboot&configured=1`), the Insights
   aggregation level with its Percentiles and Restarts toggles and any per-panel

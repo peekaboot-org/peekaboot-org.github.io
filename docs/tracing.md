@@ -20,6 +20,11 @@ falls once more than one application is involved.
 
 ## What gets captured
 
+Connection-pool work that happens outside any traced request &mdash; health probes, the
+pool refilling or validating connections on its own schedule &mdash; shows up as
+standalone Connection Pool traces. The Traces tab hides them by default; their filter
+chip brings them back.
+
 Every span your application produces lands in the store &mdash; HTTP requests, scheduled
 jobs, message consumers, and &mdash; where your datasource instrumentation emits spans
 for them &mdash; the database queries they run.
