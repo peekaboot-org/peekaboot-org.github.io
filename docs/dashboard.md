@@ -89,6 +89,12 @@ the container runtime it detected &mdash; `docker`, `podman`, `kubernetes`, a ge
 CPU and memory figures come from the JDK, which is container-aware: inside a container
 with limits they report the container's share, not the host's.
 
+The Machine card also lists every non-local IP address of the machine (up interfaces only; loopback and
+link-local are skipped), each with the hostname it reverse-resolves to when the lookup answers within its
+one-second budget, and annotates the CPU count with the physical topology &mdash; e.g. `8 (4 cores × 2 threads)`
+with SMT/hyper-threading active, `(4 cores, SMT off)` without; on non-Linux hosts only the logical count appears.
+Every fact is best-effort: anything the machine won't reveal simply isn't shown.
+
 Datasource cards join the same card grid, right after JVM Defaults &mdash; with a single
 datasource the two sit side by side in the two-column layout, and further datasources
 flow on in the grid.

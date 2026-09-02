@@ -107,7 +107,8 @@ enable somewhere, read all of it.
   defaults, and `/config` additionally names every meter being collected. Nothing here is
   masked, because none of it carries values a masking rule would recognise &mdash; but it
   does describe your application's shape and load over time to anyone who can reach the
-  endpoint. See [Insights]({{ '/docs/insights/' | relative_url }}).
+  endpoint. See [Insights]({{ '/docs/insights/' | relative_url }}). This includes the machine's non-local IP addresses (IPv4 and IPv6) and the hostnames they
+reverse-resolve to, plus the physical CPU topology.
 
 The dashboard's tabs are backed by `GET /peekaboot/api/actuator/all/insights`, which
 invokes exactly seven Actuator endpoints (`health`, `info`, `env`, `loggers`, `flyway`,
