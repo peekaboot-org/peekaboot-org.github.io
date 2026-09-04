@@ -14,7 +14,7 @@ theme: null
 repository_url: https://github.com/peekaboot-org/peekaboot
 maven_group: org.peekaboot
 maven_artifact: peekaboot-spring-boot-starter
-peekaboot_version: 0.0.5-SNAPSHOT
+peekaboot_version: 0.1.0
 
 # Part of the github-pages gem, but only active when listed: serves the old URLs of pages
 # that were merged into others as a redirect (see `redirect_from` in their front matter).

@@ -4,12 +4,6 @@ lead: One dependency, no configuration, the toolbar on your next run.
 permalink: /docs/quick-start/
 ---
 
-<div class="pk-callout pk-callout--warning" markdown="1">
-Peekaboot is pre-release: no version has been published yet, and `{{ site.peekaboot_version }}`
-is a snapshot coordinate Maven Central can't serve. Until a release goes out, build it
-yourself from the [source repo]({{ site.repository_url }}) with `mvn clean install`.
-</div>
-
 ## Add the dependency
 
 **Maven**
@@ -51,6 +45,14 @@ dashboard; see [Configuration]({{ '/docs/configuration/' | relative_url }}#local
 for exactly what counts as a local run.
 </div>
 
+<div class="pk-callout pk-callout--warning" markdown="1">
+**Working in a devcontainer?** VS Code Dev Containers and GitHub Codespaces run in a
+container, and a container is never a local run &mdash; so nothing turns itself on and it
+looks like the starter is broken. Set `peekaboot.enabled`, `peekaboot.dev-toolbar` and
+`peekaboot.storage.enabled` to `true` in the devcontainer's own configuration; see
+[Configuration]({{ '/docs/configuration/' | relative_url }}#local-run).
+</div>
+
 A dashboard comes with it too, at
 [`http://localhost:8080/peekaboot/`](http://localhost:8080/peekaboot/); its API sits under
 [`http://localhost:8080/peekaboot/api/`](http://localhost:8080/peekaboot/api/). If your
@@ -78,7 +80,7 @@ context path and all, on a `Peekaboot Dashboard:` line &mdash; see
   time on [Insights]({{ '/docs/insights/' | relative_url }}) &mdash; no Prometheus, no
   scrape endpoint
 - Full request traces &mdash; spans and SQL queries &mdash; for the last thousand requests
-  your app has served, kept for thirty minutes (`peekaboot.tracing.max-traces`; see
+  your app has served, kept until the cap evicts the oldest (`peekaboot.tracing.max-traces`; see
   [Tracing]({{ '/docs/tracing/' | relative_url }}#the-three-buckets))
 
 ## Next
