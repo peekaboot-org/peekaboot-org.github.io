@@ -18,14 +18,15 @@ tokens.
 
 ## How to override it
 
-Peekaboot serves `tokens.css` as a static resource, registered at `/peekaboot/ui/**` from
-`classpath:/static/peekaboot/ui/` with caching disabled. The standard Spring Boot way to
-override a starter-provided static resource applies here too: place a file at the
-identical path under your own application's static resources, and it's served in place of
-the one bundled in the starter jar.
+Peekaboot serves `tokens.css` as a resource handler mapped at `/peekaboot/ui/**` onto
+`classpath:/META-INF/peekaboot/ui/`, with caching disabled. That is deliberately outside
+every location Spring Boot serves static files from, so an application with Peekaboot off
+serves none of the bundle. Overriding it is classpath shadowing: your own module's
+resources come before the starter's jar, so a file you place at the same resource path is
+the one found.
 
 ```
-src/main/resources/static/peekaboot/ui/assets/tokens.css
+src/main/resources/META-INF/peekaboot/ui/assets/tokens.css
 ```
 
 This **replaces the file wholesale**, not just the properties you name &mdash; there's no
@@ -85,6 +86,12 @@ and they are not interchangeable:
 | **Fill** | `--pk-primary`, `--pk-warning`, `--pk-info` (and `--pk-success`, `--pk-danger`, `--pk-danger-soft`, `--pk-purple`) | Backgrounds &mdash; badge fills, buttons, banners. Each fill token is paired with an `--pk-on-*` ink token (`--pk-on-primary`, `--pk-on-warning`, `--pk-on-info`, `--pk-on-purple`, ...) drawn on top of it. |
 | **Text** | `--pk-primary-text`, `--pk-warning-text`, `--pk-info-text`, `--pk-success-text` | Anything drawn directly on the page background (`--pk-bg`/`--pk-bg-alt`) &mdash; links, focus rings, borders, the selected-tab underline. |
 
+In light mode four fills are deep enough to carry white ink &mdash; `--pk-warning`
+(`#b35900`), `--pk-danger`, `--pk-info` and `--pk-purple`, each paired with
+`--pk-on-*: #ffffff`. The rest take dark ink. `--pk-warning-text`, the on-background
+variant, is a separate value and unaffected; so is the whole dark theme, where the pairings
+invert.
+
 The two are tuned for different grounds and are not swappable: in light mode, Peekaboot's
 own brand green is a mid-lightness fill colour &mdash; white on it is only 2.6:1, well
 under AA &mdash; which is exactly why `--pk-primary-text` exists as a separate, darker
@@ -101,9 +108,37 @@ regression waiting to ship &mdash; it looks correct wherever that colour is used
 background, and silently wrong (or silently unreadable) everywhere it's used as text.
 </div>
 
+## Three tokens worth naming
+
+Most tokens explain themselves from the file. These three do not, and a copy of
+`tokens.css` that predates them loses the theming for their rules:
+
+| Token | What it paints |
+|---|---|
+| `--pk-mark-bg` / `--pk-on-mark` | The search highlight's fill and ink. A `<mark>` needs both or it is unreadable, not merely un-themed. |
+| `--pk-danger-tint` | The error banner's wash &mdash; each theme's own `--pk-danger` at 4% alpha. |
+
+Every rule reading one carries the light-theme literal as its `var()` fallback, so an older
+copy costs the dark palette for that rule and nothing else.
+
+## `color-scheme` and the type scale
+
+Both theme blocks declare `color-scheme` (`light` and `dark`), so native widgets &mdash;
+scrollbars, the `<select>` popup, checkboxes, the caret &mdash; follow the theme instead of
+staying light on a dark page. Keep it if you copy the file.
+
+The type scale is declared twice on purpose. `--pk-text-xs` through `--pk-text-lg` are
+`rem` in the shared `:root, :host` block, then re-declared as the equivalent **px** values
+in a `:host`-only block below it. The toolbar and the overlay live inside pages Peekaboot
+does not own, where `rem` follows the host's root font size &mdash; an
+`html { font-size: 62.5% }` reset would shrink the bar to 7.5px &mdash; while the
+dashboard's own document keeps honouring a reader's root-size preference. Overriding
+`--pk-text-*` for the dashboard therefore means overriding the `:host` block too, or the
+toolbar and overlay keep the px values.
+
 ## The full token list
 
 `tokens.css` defines the complete set &mdash; colour, spacing, typography and radius
 tokens, plus the exact contrast ratio behind every colour pairing, as inline comments.
 Rather than reproduce all of it here, read it directly:
-[`tokens.css`]({{ site.repository_url }}/blob/HEAD/peekaboot-frontend/src/main/resources/static/peekaboot/ui/assets/tokens.css).
+[`tokens.css`]({{ site.repository_url }}/blob/HEAD/peekaboot-frontend/src/main/resources/META-INF/peekaboot/ui/assets/tokens.css).
