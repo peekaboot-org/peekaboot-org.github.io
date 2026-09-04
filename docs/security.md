@@ -8,7 +8,8 @@ permalink: /docs/security/
 Peekaboot defaults to on for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
 &mdash; an IDE run, `spring-boot:run`, `bootRun`, or any launch of your build output on a
 host that is not a container &mdash; and off for a `java -jar` of the packaged jar, a war,
-a native image, a test and anything in a container. When it's on, anyone who can
+a native image, a test and anything in a container, an image that ships
+`spring-boot-devtools` included. When it's on, anyone who can
 reach `/peekaboot/**` gets detailed internal state &mdash; configuration, environment
 values, health, logs, migrations, and full request traces &mdash; with **no
 authentication of any kind**. Peekaboot adds none of its own. If `/peekaboot/**` is
@@ -111,9 +112,13 @@ enable somewhere, read all of it.
 reverse-resolve to, plus the physical CPU topology.
 
 The dashboard's tabs are backed by `GET /peekaboot/api/actuator/all/insights`, which
-invokes exactly seven Actuator endpoints (`health`, `info`, `env`, `loggers`, `flyway`,
-`configprops`, `scheduledtasks`). That's the whole actuator surface Peekaboot exposes over
-HTTP &mdash; see [HTTP API]({{ '/docs/api/' | relative_url }}) for the full endpoint list.
+invokes up to seven Actuator endpoints per call (`health`, `info`, `env`, `loggers`,
+`flyway`, `configprops`, `scheduledtasks` &mdash; an endpoint the application doesn't have
+is simply not called). That's the whole actuator surface Peekaboot exposes over HTTP
+&mdash; see [HTTP API]({{ '/docs/api/' | relative_url }}) for the full endpoint list. It is
+also a cost: `env` and `configprops` are not free on a large application, and without a
+`SecurityFilterChain` in front of `/peekaboot/**` anyone who can reach it can ask for all
+seven as often as they like.
 
 ## What Peekaboot writes to disk
 
@@ -130,10 +135,13 @@ What lands in them is worth knowing precisely:
   panel file defines (which default to the meter name) &mdash; the same shape-and-load
   picture the insights endpoints already serve, and no request data, property values or
   captured traces.
-- `lifecycle.jsonl` holds one line per start or stop: a timestamp, a pid, and every
-  `build-info` and `git-info` entry the application publishes. If your build writes
-  something into `build-info.properties` you would not want at rest in a home directory,
-  that is what to look at &mdash; it is your build's own metadata, recorded verbatim.
+- `lifecycle.jsonl` holds one line per start or stop: a timestamp, a pid, and only the
+  `build-info` and `git-info` entries the Lifecycle views actually render &mdash; `version`,
+  `time`, `branch`, `commit.id`, `commit.id.full`, `commit.id.abbrev`, `build.version` and
+  `build.time`. Everything else the two plugins emit is dropped before the line is written:
+  the git remote URL, which for an HTTPS remote can carry the token it was cloned with, the
+  building user's name and mail address, and anything your build wrote into
+  `build-info.properties`.
 
 Nothing about request traces, captured headers, environment properties or config values
 is ever written to disk; those live in memory for the life of the process and no further.
@@ -150,6 +158,12 @@ Peekaboot marks every endpoint as available while `peekaboot.enabled` is `true`,
 never reaches the `/actuator/**` HTTP mapping, which applies your own `include`/`exclude`
 settings independently &mdash; with Spring's defaults, `/actuator/health` alone stays
 reachable over HTTP while the dashboard has full data on everything else.
+
+With Peekaboot off there is nothing under `/peekaboot/**` at all, the UI assets included.
+The dashboard bundle ships at `classpath:/META-INF/peekaboot/ui/`, outside every location
+Spring serves static resources from, and the resource handler that maps it is registered
+only while `peekaboot.enabled` is `true`. An excluded starter and a disabled one differ in
+what sits on the class path, not in what is reachable.
 
 ## Masking
 
@@ -186,22 +200,37 @@ Two independent rule sets, evaluated together, matching Spring's own masked-valu
   `^spring[._]application[._]json$`), matched as whole-key patterns. A sensitive key
   masks its **entire** value. `sig` is Azure SAS's abbreviated signature parameter
   (`?sig=`); like every rule word here it matches only as a whole token, so `design`
-  and `signal` stay untouched. Two narrower rules match only when they're the *entire*
-  key, not merely a token inside it: `cookie` and `set-cookie` &mdash; they exist for
+  and `signal` stay untouched. Four narrower rules match only when they're the *entire*
+  key, not merely a token inside it: `cookie` and `set-cookie`, plus the two span
+  attributes that carry those headers on a captured request,
+  `http.request.header.cookie` and `http.response.header.set-cookie`. They exist for
   the HTTP headers of the same name, not for the token "cookie" appearing anywhere in a
-  compound key (a session-cookie configuration property like
-  `server.servlet.session.cookie.same-site` is not a secret). One exact-key spelling is
-  excluded outright despite matching a rule word: upper-case `PWD`, the POSIX shell's
-  current-working-directory variable, which would otherwise collide with the `pwd`
-  password abbreviation on every developer's environment-variables property source.
-  The exemption is that one spelling and nothing wider: lower-case `pwd` still masks
-  &mdash; a SQL Server URL's `;pwd=`, a login form's `?pwd=` &mdash; and so does a
-  compound key like `db.pwd`. Deliberately absent: bare `key`
-  and bare `certificate` &mdash; they would catch `spring.jpa.key-generator` and
+  compound key &mdash; the rule judges the whole dotted path, so a session-cookie
+  configuration property like `server.servlet.session.cookie.same-site` is not a secret
+  and the `server.servlet.session.cookie.*` subtree stays legible on the Config tab.
+  One exact-key spelling is excluded outright despite matching a rule word: upper-case
+  `PWD`, the POSIX shell's current-working-directory variable, which would otherwise
+  collide with the `pwd` password abbreviation on every developer's environment-variables
+  property source. The exemption is that one whole key and nothing wider: a compound key
+  like `db.PWD` still masks, and so does a `PWD=` parameter found *inside* a value
+  &mdash; a SQL Server or ODBC connection string's `;PWD=`, a login form's `?PWD=`
+  &mdash; in either case, because there the word is a parameter name, not the shell
+  variable the exemption was written for. Deliberately absent: bare `key` and bare
+  `certificate` &mdash; they would catch `spring.jpa.key-generator` and
   `server.ssl.key-store`/`server.ssl.certificate` (filesystem paths, not secrets), which
   is exactly the kind of over-masking that makes a dashboard useless. Actual certificate
   key material is still caught by the PEM value-shape pattern below regardless of the
-  key it's stored under.
+  key it's stored under. Finally, a key whose *last* token is `uri` or `url` names an
+  address rather than a secret, so the word list is not applied to it &mdash; only
+  Spring's own `Sanitizer` patterns still are. That is what keeps
+  `spring.security.oauth2.client.provider.<x>.token-uri` and `.authorization-uri`
+  readable: they are public endpoints, and among the first properties you check when an
+  OAuth2 login misbehaves, though Spring Boot 2's `Sanitizer` masked them. Only the final
+  token is waived, so `app.token-uri.password` still masks; a `vcap.services` binding's
+  `…credentials.uri` is still caught, by the `^vcap\.services.*$` pattern rather than by
+  the word list. A credential carried *inside* such a URL is still caught by value shape:
+  an `?access_token=…` on a `token-uri` has that parameter blacked out and the rest of
+  the URL left readable.
 - **By value shape**, for a credential sitting inside a value under an otherwise
   innocuous key &mdash; a JDBC URL's `password=` parameter is the canonical case. A
   small set of high-precision, provider-prefixed patterns catches a JWT, a PEM private

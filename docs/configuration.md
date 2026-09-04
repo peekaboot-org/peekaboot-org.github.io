@@ -9,8 +9,8 @@ redirect_from:
 
 ## When Peekaboot is on
 
-Three properties are detected rather than fixed. Before your own configuration is read,
-Peekaboot decides whether this is a local run and sets all three from that:
+Three properties are detected rather than fixed. Below everything you configure, Peekaboot
+adds all three, set from whether it read this launch as a local run:
 
 | Property | On a local run | Elsewhere | Turns on |
 |---|---|---|---|
@@ -29,8 +29,9 @@ files in that host's home directory.
 A **local run**, wherever these pages use the term, is a launch Peekaboot's detection reads
 as development on your own machine: an IDE run, `mvn spring-boot:run` or `gradle bootRun`
 &mdash; more precisely, a launch that runs your build output directly (a classpath entry
-such as `target/classes`, `build/classes/…`, `out/production/…` or `bin/main`), outside a
-container, and not from a test or an AOT build.
+such as `target/classes`, `build/classes/{java,kotlin,groovy,scala}/main`,
+`out/production/…` or `bin/main`), outside a container, and not from a test or an AOT
+build.
 
 Not a local run, so everything off by default: a `java -jar` of the packaged jar, a war in
 a servlet container, a native image, an AOT-processing run, a test (JUnit, Spring Boot's
@@ -38,6 +39,24 @@ test support, Cucumber), and anything running in a container &mdash; a Jib image
 extracted slim jar, a `java -cp` command inside Docker, Podman or Kubernetes included. A bare
 `java -cp target/classes:…` on a host that is not a container still counts as local; if
 you deploy that way, set `peekaboot.enabled=false` explicitly.
+
+A container marker is a container marker wherever it comes from, so **a checkout you work
+on inside a devcontainer is not a local run** &mdash; VS Code Dev Containers and GitHub
+Codespaces both carry the marker Peekaboot looks for, and a DevTools restart in there is
+judged the same way an ordinary launch is. Peekaboot, the toolbar and storage all default
+to off, which is easy to mistake for a broken starter. Set them in the devcontainer's own
+configuration to get the local experience back:
+
+```yaml
+peekaboot:
+  enabled: true
+  dev-toolbar: true
+  storage:
+    enabled: true
+```
+
+All three, because they are detected independently. The two `show-values` defaults stay at
+Spring's own regardless: they hang on the detection itself, which no property overrides.
 
 Tests count as not local on purpose, so that CI never picks up the dashboard, the toolbar
 and the observability defaults by accident. A test that needs Peekaboot says so:
@@ -70,7 +89,8 @@ is reachable while it doesn't.
 On a non-servlet application &mdash; WebFlux, or no web application at all &mdash; the
 dashboard and toolbar don't register, there is nothing at `/peekaboot/**`, and the
 defaults [below](#what-peekaboot-sets-in-your-application) that hang on `peekaboot.enabled`
-are not applied either; the summaries are still logged and, on a local run, the run history
+are not applied either. `spring.main.web-application-type` decides this where you set it,
+as a plain property as much as through `SpringApplicationBuilder.web(...)`; the summaries are still logged and, on a local run, the run history
 still written. See
 [Requirements]({{ '/docs/requirements/' | relative_url }}).
 
@@ -164,7 +184,7 @@ actually served &mdash; a servlet application, Actuator present, `peekaboot.enab
 | Property | Type | Default | Controls |
 |---|---|---|---|
 | `enabled` | boolean | `true` | Whether the in-memory trace store exists at all. |
-| `max-traces` | int | `1000` | Traces held in the **All** bucket, oldest evicted first; a fixed 30-minute time-to-live also applies. |
+| `max-traces` | int | `1000` | Traces held in the **All** bucket, oldest evicted first. |
 | `max-spans-per-trace` | int | `500` | Distinct spans kept per trace after duplicates from double-instrumented layers are folded away; oldest dropped past it, and the trace is flagged `TRUNCATED`. |
 | `max-error-traces` | int | `100` | Traces held in the **Errors** bucket. |
 | `max-slow-traces` | int | `100` | Traces held in the **Slow** bucket. |
@@ -213,8 +233,9 @@ at startup. See [Insights &mdash; what it costs]({{ '/docs/insights/' | relative
 Peekaboot also nudges a handful of Spring Boot and library defaults, so the dashboard has
 something to show without you configuring Actuator or sampling by hand. All of them are
 added below every property source you control, so anything you set wins; nothing here is a
-floor. The two `show-values` rows are set only on a local run and left unset elsewhere,
-so Spring's own default governs there.
+floor. The two `show-values` rows need a local run, `peekaboot.enabled` resolving true and
+a servlet application, all three; anywhere else they are left unset and Spring's own default
+governs. Setting `peekaboot.enabled: false` on your own machine is enough to keep it.
 
 The same holds for beans: every bean Peekaboot registers backs off if your application
 defines its own &mdash; define a bean of the same type (or name), and Peekaboot uses
@@ -230,8 +251,8 @@ yours instead of adding a second one.
 | `management.info.os.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | The System card on Overview. |
 | `management.info.process.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | PID, uptime, CPU count and memory on Overview. |
 | `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | `@Observed`, `@Timed` and `@Counted` work without extra wiring. |
-| `management.endpoint.env.show-values` | `never` | `always` | local run only | Otherwise the Environment tab shows `******` for every property, `server.port` included; Peekaboot's own masking runs over the real values instead. |
-| `management.endpoint.configprops.show-values` | `never` | `always` | local run only | The same, for the Config tab. |
+| `management.endpoint.env.show-values` | `never` | `always` | local run, `peekaboot.enabled`, servlet web application | Otherwise the Environment tab shows `******` for every property, `server.port` included; Peekaboot's own masking runs over the real values instead. |
+| `management.endpoint.configprops.show-values` | `never` | `always` | local run, `peekaboot.enabled`, servlet web application | The same, for the Config tab. |
 | `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | dev toolbar on | Spring Boot's span export delay is what separates a span ending from the toolbar seeing it; shortened so a trace is readable while you are still on the page. |
 
 Traces and logs need no export switch: Spring Boot only creates OTLP exporters for them

@@ -36,7 +36,7 @@ there Peekaboot sets `management.endpoint.env.show-values` and
 
 - **One process only.** No joining a request across services, no aggregation across
   instances, no alerting.
-- **Short retention.** 1000 traces or 30 minutes, whichever comes first. The Insights
+- **Short retention.** 1000 traces, then the oldest goes. The Insights
   charts keep 15 minutes at 10-second resolution, 24 hours at one minute and 30 days at
   one hour &mdash; and above the first level their percentiles are [percentiles of
   averages]({{ '/docs/insights/' | relative_url }}#percentiles-are-percentiles-of-aggregates).
@@ -54,6 +54,9 @@ Whenever `peekaboot.enabled` is `true` and the application is a servlet web appl
   statistics, which the `hibernate.*` meter panels need.
 - A handler span around each controller method and a view-rendering span around each
   rendered view, visible to every exporter.
+- An Actuator endpoint that keeps failing is logged once, at WARN with the stack trace,
+  and at DEBUG on every failure after that. A broken endpoint does not fill the log with
+  one WARN per dashboard refresh.
 
 With the dev toolbar on as well:
 
@@ -75,10 +78,25 @@ war, a native image, an AOT run, a test, and anything running in a container res
 running your build output directly (`java -cp target/classes:…`); set
 `peekaboot.enabled=false` explicitly there. Any explicit value wins over the detection.
 
-With Peekaboot off, exactly one of its defaults still applies: the OTLP metrics push stays
-disabled, because the starter puts that registry on the classpath regardless. To verify
-the rest is off, look for the startup summary's `Peekaboot Dashboard:` line &mdash; it is
-absent when the dashboard is not served.
+With Peekaboot off, exactly one of its *properties* still applies: the OTLP metrics push
+stays disabled, because the starter puts that registry on the class path regardless. To
+verify the rest is off, look for the startup summary's `Peekaboot Dashboard:` line &mdash;
+it is absent when the dashboard is not served.
+
+The class path is a separate question from the properties, and the starter changes it
+whether Peekaboot is on or off:
+
+- `/actuator` and `/actuator/health` answer over HTTP. That is Spring Boot's own default
+  exposure for `spring-boot-starter-actuator`, not something Peekaboot adds &mdash; but if
+  the starter is how Actuator arrived, it arrived with Peekaboot.
+- A `MeterRegistry` exists, with Boot's JVM, system and Logback binders attached.
+- The OpenTelemetry SDK and the OTLP exporters are present. Nothing leaves the process:
+  metrics are held by the default above, and Boot only builds trace and log exporters once
+  you configure an endpoint for them.
+- Peekaboot's own jars sit on the class path, unused.
+
+If none of that is acceptable, keep the starter out of the artifact rather than switching
+it off &mdash; see [keeping it out entirely](#keeping-it-out-of-the-artifact-entirely).
 
 ## If you decide to run it somewhere shared
 
@@ -102,7 +120,7 @@ absent when the dashboard is not served.
 | `peekaboot.dev-toolbar` | detected | The toolbar, log capture and request-detail capture |
 | `peekaboot.storage.enabled` | detected | Whether anything is written to disk |
 | `peekaboot.storage.dir` | `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where those files go |
-| `peekaboot.tracing.max-traces` | `1000` | Traces kept; the 30-minute time-to-live is fixed |
+| `peekaboot.tracing.max-traces` | `1000` | Traces kept before the oldest is evicted |
 | `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace |
 | `peekaboot.tracing.max-logs-per-trace` | `500` | Log lines kept per trace |
 | `peekaboot.tracing.max-error-traces` | `100` | The Errors bucket |
