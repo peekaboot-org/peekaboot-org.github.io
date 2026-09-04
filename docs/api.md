@@ -78,6 +78,13 @@ against the trace's root operation name, partially and case-insensitively. See
 [Concepts]({{ '/docs/concepts/' | relative_url }}) for what a root action type and root
 operation are.
 
+A request that names no recognizable type &mdash; the parameter absent, blank, or holding
+only unknown tokens &mdash; is answered with a **default view**: every type except
+`CONNECTION_POOL`, the routine pool maintenance
+[Tracing]({{ '/docs/tracing/' | relative_url }}#what-gets-captured) describes, which arrives
+often enough to drown everything else. The single value `*` asks for every type instead,
+hidden ones included. There is no value that asks for nothing.
+
 ## What `insights` adds
 
 `GET /peekaboot/api/actuator/all/insights` invokes exactly the seven Actuator endpoints
@@ -110,25 +117,38 @@ dropped distinct spans for that trace, never merely because duplicates were fold
 The dashboard shows this as a `TRUNCATED` badge.
 
 The list response is `{traces, bucketCounts, filteredBucketCounts}` &mdash; the bucket
-counts are the only aggregate it carries, and `filteredBucketCounts` is `null` unless the
-request had a `rootActionType`/`rootOperation` filter. Each trace, in the list and as the
-detail response, is the same shape: a `slow` boolean (`true` when any span carries a
-`SLOW` or `VERY_SLOW` issue &mdash; the badge, not the Slow bucket; see
+counts are the only aggregate it carries. `bucketCounts` is what the store holds;
+`filteredBucketCounts` is what the request admits, and it is `null` only for a request that
+filters nothing at all (`rootActionType=*` with no `rootOperation`, or a response served
+with tracing off). The default view is itself a filter, so an ordinary request carries both
+numbers.
+
+Each trace, in the list and as the detail response, is the same shape: a `slow` boolean
+(`true` when any span carries a `SLOW` or `VERY_SLOW` issue &mdash; the badge, not the
+Slow bucket; see
 [Tracing]({{ '/docs/tracing/' | relative_url }}#the-slow-badge-is-not-the-slow-bucket)),
 a per-trace `summary`, and `logs` and `queries` that are always arrays, never `null`
 &mdash; empty on a list row, populated only by the detail endpoint. A database-query span
 &mdash; a CLIENT-kind span carrying `db.*` or `jdbc.query*` tags &mdash; additionally
 carries `query`, the masked SQL statement it ran; that field is `null` when the
 instrumentation recorded no statement, and such a span still counts as a query,
-appearing in `queries` with `sql: null`.
+appearing in `queries` with `sql: null`. A batched span &mdash; one carrying `jdbc.query[N]`
+tags rather than a single statement &mdash; is one query whose statements are joined by a
+semicolon and a newline, in index order.
+
+A span that failed carries `errorClass` and `errorMessage`, both absent otherwise.
+`errorClass` is the exception's fully-qualified class name, taken from the last exception
+event recorded on the span; a span marked as failed without one carries the literal
+`ERROR`. `errorMessage` is the span status's own description, falling back to the
+exception's message when that description is empty.
 
 ## The `bucket` parameter
 
 `bucket` accepts `all`, `errors`, or `slow` (case-insensitive), matching the three trace
 buckets described in [Tracing]({{ '/docs/tracing/' | relative_url }}). It defaults to
-`all`, and &mdash; unlike an invalid `rootActionType` token, which is silently dropped
-&mdash; an unrecognized or blank `bucket` value also falls back to `all` rather than
-producing an error response. There's no way to make `GET /peekaboot/api/traces/insights`
+`all`, and an unrecognized or blank `bucket` value also falls back to `all` rather than
+producing an error response &mdash; the same forgiving treatment `rootActionType` gives an
+unknown token. There's no way to make `GET /peekaboot/api/traces/insights`
 400 on a bad `bucket`.
 
 ## `limit`
@@ -176,7 +196,7 @@ rather than polling it. Two named events arrive:
 
 | Event | When | Payload |
 |---|---|---|
-| `tick` | every level-0 interval | `{epochMs, values: {seriesId: v}, tiles: {tileId: v}}` |
+| `tick` | every level-0 interval | `{epochMs, values: {seriesId: v}}` |
 | `rollup` | when a higher level's window closes | `{level, epochMs, entries: {seriesId: {min, max, avg, median, p90, p95, p99}}}` |
 
 A comment heartbeat goes out every 15 seconds to keep proxies from reaping an idle

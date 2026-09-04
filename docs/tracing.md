@@ -22,8 +22,10 @@ falls once more than one application is involved.
 
 Connection-pool work that happens outside any traced request &mdash; health probes, the
 pool refilling or validating connections on its own schedule &mdash; shows up as
-standalone Connection Pool traces. The Traces tab hides them by default; their filter
-chip brings them back.
+standalone Connection Pool traces. They are kept, but left out of the view the listing
+endpoint answers an unfiltered request with, so the Traces tab hides them by default and
+the filter chip brings them back. Over the API,
+[`rootActionType=*`]({{ '/docs/api/' | relative_url }}) asks for every type at once.
 
 Every span your application produces lands in the store &mdash; HTTP requests, scheduled
 jobs, message consumers, and &mdash; where your datasource instrumentation emits spans
@@ -51,7 +53,7 @@ doesn't capture.
 Traces land in up to three places at once:
 
 - **All** &mdash; every trace, capped at `peekaboot.tracing.max-traces` (default 1000)
-  and evicted after a fixed 30-minute time-to-live, which is not configurable.
+  and evicting its oldest trace once that cap is full. Nothing expires on a clock.
 - **Errors** &mdash; traces containing at least one span with an error, or an `ERROR`-level
   correlated log, capped at `peekaboot.tracing.max-error-traces` (default 100).
 - **Slow** &mdash; traces whose *total duration* is at or above
@@ -118,9 +120,9 @@ The moment more than one deployable is involved, the questions change shape, and
 of these needs infrastructure Peekaboot deliberately doesn't have:
 
 - **Joining a request across services.** One waterfall spanning every process it touched.
-- **Retention past the process.** Peekaboot's traces are capped, evicted after 30 minutes,
-  and gone entirely at restart. "What did this endpoint look like before last Tuesday's
-  deploy?" needs storage that outlives the JVM.
+- **Retention past the process.** Peekaboot's traces are capped, evicted oldest-first once
+  a bucket is full, and gone entirely at restart. "What did this endpoint look like before
+  last Tuesday's deploy?" needs storage that outlives the JVM.
 - **Aggregation across instances.** Twelve pods behave differently from one, and you need
   the shape of all twelve at once.
 - **Alerting.** Nothing in-process is going to page anyone.
