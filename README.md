@@ -164,6 +164,39 @@ tabs, plus the revealed, trace-detail and toolbar shots (the product repo's
 `assets/img/screenshots/` and in every `<img>` reference. When a tab id changes in the
 product, the files and references here are renamed to follow.
 
+## Social images
+
+`assets/img/social/` and the three app icons in `assets/img/` are generated, not drawn.
+The generator lives beside the logo artwork in the sibling `assets/` directory, which is
+not a git checkout:
+
+```bash
+cd ../assets
+pip install Pillow playwright && playwright install chromium
+python3 generate_social.py && python3 verify_social.py
+```
+
+`generate_social.py` derives everything from `peekaboot-logo-favicon.png`. The mark is a
+two-colour blend of `#66b327` and `#263238`, so it recolours for dark surfaces by lifting
+the ink to `#e6edf3` — the same swap `logo-mark-dark.png` already makes, applied at full
+resolution. The cards themselves are laid out in `social_card.html` in the dark-theme
+tokens from `tokens.css` and screenshotted by headless Chromium at the exact target size;
+`verify_social.py` then checks every output's dimensions, background and alpha.
+
+| File | Size | Where it goes |
+| --- | --- | --- |
+| `social/og.png` | 1200×630 | `og:image` — X, LinkedIn, Facebook, Slack, Discord, Mastodon, Bluesky |
+| `social/github-social-preview.png` | 1280×640 | GitHub repo and org *Settings → Social preview* |
+| `social/x-header.png` | 1500×500 | X profile banner |
+| `social/linkedin-cover.png` | 1128×191 | LinkedIn page cover |
+| `social/avatar-512.png` | 512×512 | Avatar for light chrome; transparent |
+| `social/avatar-512-dark.png` | 512×512 | Avatar for dark chrome — GitHub dark, Discord, Mastodon |
+| `apple-touch-icon.png` | 180×180 | `rel="apple-touch-icon"`; opaque, since iOS composites it |
+| `icon-192.png`, `icon-512.png` | 192, 512 | `rel="icon"` |
+
+Only `og.png` and the three app icons are referenced by the site; the rest are uploaded
+through each platform's own settings and live here to keep them under version control.
+
 ## Measured contrast
 
 Body text and link text, measured in a real browser (Chromium via Playwright) against their
