@@ -1,76 +1,86 @@
 ---
 title: Troubleshooting
-lead: Symptom, cause, fix &mdash; for the failure modes that actually occur.
+lead: Symptom, cause and fix for the failure modes that actually occur.
 permalink: /docs/troubleshooting/
 ---
 
 ## `/peekaboot/` returns 404
 
-**Cause:** Peekaboot is disabled. `peekaboot.enabled` resolves to `false` in a packaged
-jar, a war, a native image, an AOT-processed build, a container, or a test &mdash; see
-[Configuration &mdash; when Peekaboot is
-on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on).
+**Cause:** Peekaboot is disabled. `peekaboot.enabled` resolves to `false` in a packaged jar, a
+war, a native image, an AOT-processed build, a container or a test. See
+[Configuration: when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on).
 
-**Fix:** Check the startup log for Peekaboot's application-ready summary (application
-name, build info, server and datasource info) &mdash; its absence confirms Peekaboot
-never activated; its presence means the 404 has a different cause (a context path
-prefix, for instance). If Peekaboot should be active here, set `peekaboot.enabled=true`
-explicitly &mdash; as an `application.yml` entry, an environment variable, or a system
-property.
+**Fix:** Look for Peekaboot's application-ready summary in the startup log (application name,
+build info, server and datasource info). No summary means Peekaboot never activated. Set
+`peekaboot.enabled=true` explicitly, as an `application.yml` entry, an environment variable or a
+system property. A summary that is there means the 404 has another cause.
 
-The `/peekaboot` prefix itself is fixed &mdash; there's no property to move it. If your
-`server.servlet.context-path` is non-empty, the dashboard is under that context path too
-(e.g. `/my-app/peekaboot/`), which is the most common cause of a 404 when the
-application-ready summary shows Peekaboot is otherwise active.
+The `/peekaboot` prefix is fixed, and no property moves it. A non-empty
+`server.servlet.context-path` puts the dashboard under that path too (`/my-app/peekaboot/`), which
+is the usual explanation when the summary shows Peekaboot running.
 
 ## The dashboard loads, but the Traces tab is empty
 
-**Cause:** one of three things: no Micrometer `Tracer` bean is present (the starter
-provides one by default via `spring-boot-starter-opentelemetry`; you'd only lose it by
-excluding that dependency), `peekaboot.tracing.enabled=false`, or
-`management.tracing.sampling.probability` has been lowered below `1.0` somewhere in your
-own configuration (Peekaboot's own default sets it to `1.0`, but any property source you
-control overrides that).
+**Cause:** the tab is there, so the trace store exists. Nothing is filling it. Either there is no
+Micrometer `Tracer` bean, or `management.tracing.sampling.probability` sits below `1.0` in a
+property source of your own. Peekaboot defaults that probability to `1.0`, and anything you
+configure outranks a Peekaboot default.
 
-**Fix:** Confirm a `Tracer` bean exists (see [Requirements]({{ '/docs/requirements/' | relative_url }})
-for what depends on it), confirm `peekaboot.tracing.enabled` hasn't been set to `false`
-(see [Configuration]({{ '/docs/configuration/' | relative_url }})), and check your
-effective `management.tracing.sampling.probability` on the Environment tab if the
-dashboard is otherwise reachable, or in your own property sources if it isn't.
+`peekaboot.tracing.enabled=false` is a different symptom. Without it there is no trace store, the
+`tracing` feature flag is false, and the Traces tab is hidden rather than empty.
+
+**Fix:** check the effective `management.tracing.sampling.probability` on the Environment tab, or
+in your own property sources if the dashboard is unreachable. The `Tracer` and the OpenTelemetry
+SDK that exports spans into the store both arrive with `spring-boot-starter-opentelemetry`, which
+the Peekaboot starter brings in; exclude it and the store stays in place with nothing to fill it.
+See [Quick start]({{ '/docs/quick-start/' | relative_url }}).
 
 ## The toolbar never appears
 
-**Cause:** `peekaboot.dev-toolbar` is on for a [local
-run]({{ '/docs/configuration/' | relative_url }}#local-run) and off elsewhere, detected
-independently of `peekaboot.enabled`, so switching Peekaboot on deliberately in a shared
-environment does not also inject the toolbar there. Even with it on, the toolbar only injects into
-responses whose content type is `text/html` and that actually contain a `</body>` tag; a
-JSON API response, a redirect, or a static asset never gets it.
+**Cause:** `peekaboot.dev-toolbar` is on for a
+[local run]({{ '/docs/configuration/' | relative_url }}#local-run) and off elsewhere, detected
+independently of `peekaboot.enabled`. Switching Peekaboot on deliberately in a shared environment
+does not also inject the toolbar there. Even with it on, injection needs a response whose content
+type contains `text/html` and whose body carries a `</body>` tag, so a JSON response or a redirect
+never gets one.
 
-**Fix:** Set `peekaboot.dev-toolbar: true` explicitly if you're not on a local run, or if
-you've turned it off yourself. If it's already on and the toolbar still doesn't show up
-on a page you expect it on, confirm that page's response is genuinely HTML with a
-`</body>` tag, and isn't one of the excluded paths (`/peekaboot/**`, `/webjars/**`,
-static assets, and the management endpoints &mdash; that exclusion follows
-`management.endpoints.web.base-path`, so `/actuator/**` at Spring Boot's default) &mdash;
-see [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
+**Fix:** Set `peekaboot.dev-toolbar: true` explicitly if you are off a local run, or if you turned
+it off yourself. If it is already on and a page you expect still has no bar, check that response
+against the remaining injection rules.
 
-A bar that does appear but reads **Peekaboot toolbar could not start &mdash; sign in,
-or check that its script is allowed to load** is the opposite situation: the injection
-worked, and the script that fills the bar in was refused instead. Either security in
-front of `/peekaboot/**` wants the reader to sign in, or a strict
-`Content-Security-Policy` &mdash; a `script-src`
-that only honours nonces &mdash; is blocking the script outright. For the latter, allow
-`/peekaboot/ui/toolbar/toolbar.js` in your `script-src`, or give it your nonce. See
+- The path is not under `/peekaboot/`, `/static/`, `/webjars/`, `/error/` or the management base
+  path (`/actuator/` unless you moved `management.endpoints.web.base-path`).
+- The path does not end in `.css`, `.js`, `.ico`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`,
+  `.woff`, `.woff2`, `.ttf` or `.eot`.
+- The request carries no `X-Requested-With: XMLHttpRequest` header.
+- The request was not handed over to an async dispatch.
+
+A plain `fetch()` sends no `X-Requested-With` header, so an HTML fragment loaded that way gets the
+bar like any other page. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
+
+That path exclusion follows your configured management base path. The toolbar's own `fetch`
+interceptor, the one that picks trace ids off Swagger UI calls, does not, and skips the literal
+`/actuator/` instead.
+
+A bar that does appear but reads
+
+```
+Peekaboot toolbar could not start — sign in, or check that its script is allowed to load
+```
+
+is the opposite situation. Injection worked, and the script that fills the bar in was refused.
+Either security in front of `/peekaboot/**` wants the reader to sign in, or a strict
+`Content-Security-Policy` (a `script-src` that only honours nonces) is blocking the script
+outright. For the latter, allow `/peekaboot/ui/toolbar/toolbar.js` in your `script-src`, or give
+it your nonce. See
 [Security]({{ '/docs/security/' | relative_url }}#the-dev-toolbar-asks-the-reader-to-sign-in).
 
 ## Peekaboot is off inside `@SpringBootTest`
 
-**Cause:** this is by design, not a bug. A JUnit run under Maven Surefire or Gradle's test
-task can look like a local launch on the surface, but Peekaboot treats it as not local
-anyway, specifically so tests don't accidentally carry the dashboard, the toolbar, and the
-observability defaults into CI. See [Configuration &mdash; what counts as a local
-run]({{ '/docs/configuration/' | relative_url }}#local-run).
+**Cause:** this is by design. A JUnit run under Maven Surefire or Gradle's test task can look like
+a local launch on the surface, and Peekaboot treats it as not local anyway, so tests never carry
+the dashboard, the toolbar and the observability defaults into CI. See
+[Configuration: what counts as a local run]({{ '/docs/configuration/' | relative_url }}#local-run).
 
 **Fix:** If a specific test needs Peekaboot active, set the property on that test:
 
@@ -80,16 +90,17 @@ run]({{ '/docs/configuration/' | relative_url }}#local-run).
 
 ## Traces appear late, or are still empty, in tests
 
-**Cause:** Spring Boot batches span export (5 s by default). A test that queries
-`/peekaboot/api/traces/**` immediately
-after making a request can run before the span has actually reached Peekaboot's trace
-store, independent of whether tracing itself is working. This doesn't apply if your test
-profile sets `peekaboot.dev-toolbar: true` explicitly &mdash; detection alone never turns
-it on inside a test JVM, see [Peekaboot is off inside `@SpringBootTest`](#peekaboot-is-off-inside-springboottest)
-above &mdash; since Peekaboot's own dev-toolbar default then shortens the delay to 200ms
-(see [Configuration &mdash; what Peekaboot
-sets]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)),
-though even that can be too slow for a test that reads the trace store immediately.
+**Cause:** Spring Boot batches span export, 5 s by default. A test that queries
+`/peekaboot/api/traces/**` immediately after making a request runs before the span has reached the
+trace store, whether or not tracing itself works. While the spans are still in flight,
+`/peekaboot/api/traces/{traceId}/insights` answers `200` with a null `rootSpan`, not `404`.
+
+Peekaboot's own 200 ms export delay applies only when `peekaboot.enabled` resolves true, the
+application is a servlet one, and `peekaboot.dev-toolbar` resolves true (see [Configuration: what
+Peekaboot sets]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)).
+Detection turns none of those on inside a test JVM, so a test profile that sets only
+`peekaboot.dev-toolbar: true` still gets Spring's 5 s. Even 200 ms can be too slow for a test that
+reads the trace store immediately.
 
 **Fix:** Shorten the export delay for the test profile:
 
@@ -103,100 +114,95 @@ management:
 
 ## The Meters tab is missing
 
-**Cause:** the dashboard doesn't show Meters unconditionally &mdash; it's gated on a
-separate call, `GET /peekaboot/api/features`, reporting `metrics: true` (the flag is named
-`metrics`, the tab Meters). That flag reflects whether a Micrometer `MeterRegistry` bean
-is present, which Spring Boot Actuator normally provides automatically.
+**Cause:** the dashboard gates Meters on `GET /peekaboot/api/features` reporting `metrics: true`.
+The flag is named `metrics`, the tab is named Meters. It reflects whether a Micrometer
+`MeterRegistry` bean is present, which Spring Boot Actuator normally provides on its own.
 
-**Fix:** Confirm `GET /peekaboot/api/features` actually reports `metrics: true` (see
-[The dashboard &mdash; conditionally shown
-tabs]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs) and [HTTP
-API]({{ '/docs/api/' | relative_url }})); if it's `false`, something on your classpath or
-in your configuration is excluding Actuator's metrics auto-configuration. The Insights tab
-and the Overview tab's stat-tile row need that same registry, so they'll be gone too.
+**Fix:** Check what `GET /peekaboot/api/features` actually reports. If `metrics` is `false`,
+something on your classpath or in your configuration is excluding Actuator's metrics
+auto-configuration. The Insights tab and the Overview tab's stat-tile row need that same registry,
+so they will be gone too. See [The dashboard: conditionally shown
+tabs]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs) and the [HTTP
+API]({{ '/docs/api/' | relative_url }}).
 
 ## The Insights tab is missing, or a panel says "No data"
 
-**Cause:** two different situations, and the tab itself tells you which. A **missing tab**
-means `GET /peekaboot/api/features` reports `insights: false` &mdash; either
-`peekaboot.insights.enabled` is set to `false`, or there's no `MeterRegistry` bean (in
-which case Meters is missing too). A panel reading **"No data"** means the tab is working
-fine and that panel's meters simply aren't registered: no Hikari pool, no Hibernate, no
-`datasource-micrometer` on the classpath. Panels stay visible in that state on purpose, so
-an absent subsystem is something you can see.
+**Cause:** two different situations, and the tab itself tells you which. A **missing tab** means
+`GET /peekaboot/api/features` reports `insights: false`, so either `peekaboot.insights.enabled` is
+set to `false` or there is no `MeterRegistry` bean (in which case Meters is missing too). A panel
+reading **"No data"** means the tab works and that panel's meters are not registered, because
+there is no Hikari pool, no Hibernate, or no `datasource-micrometer` on the classpath. Panels stay
+visible in that state on purpose, so an absent subsystem is something you can see.
 
-A third case looks like the first: your own `peekaboot-insights.yml` failed validation and
-was dropped, so the tab shows the bundled defaults instead of your panels. That is always
-logged at `ERROR` on startup &mdash; grep for `Ignoring invalid insights panel config`.
+A third case looks like the first. Your own `peekaboot-insights.yml` failed validation and was
+dropped, so the tab shows the bundled defaults instead of your panels. That is always logged at
+`ERROR` on startup; grep for `Ignoring invalid insights panel config`.
 
-**Fix:** For a missing tab, check `peekaboot.insights.enabled` and the `metrics` flag
-alongside `insights`. For "No data" on a panel you expect data from, look the meter up on
-the Meters tab first: if it isn't in the registry, no series can resolve it. See
+**Fix:** For a missing tab, check `peekaboot.insights.enabled` and the `metrics` flag alongside
+`insights`. For "No data" on a panel you expect data from, look the meter up on the Meters tab
+first. If it is not in the registry, no series can resolve it. See
 [Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).
 
 ## The Traces tab shows fewer queries than my endpoint actually issues, and carries a TRUNCATED badge
 
-**Cause:** `peekaboot.tracing.max-spans-per-trace` (default `500`) caps the
-already-deduplicated span count for a trace; once a trace's real, distinct span count
-crosses that cap, its **oldest** spans are dropped to make room for new ones, at write
-time. An endpoint that genuinely runs more than 500 distinct queries in one request can
-still lose whole queries before they're ever counted, which both undercounts query totals
-and can suppress the `HIGH_QUERY_COUNT` warning on a trace that genuinely deserves it. The
-trace is flagged `truncated` when this happens, shown as a `TRUNCATED` badge &mdash; if
-you don't see that badge, the query count you're looking at isn't truncated, and a low
-count reflects the endpoint's real behaviour, not the cap.
+**Cause:** `peekaboot.tracing.max-spans-per-trace` (default `500`) caps a trace's span count after
+duplicate folding, so folded duplicates never push a trace over it. Once the distinct span count
+crosses the cap, the spans stored first are dropped at write time to make room for later ones. An
+endpoint that really runs more than 500 distinct queries in one request loses whole queries before
+they are counted, which undercounts the totals and can suppress the `HIGH_QUERY_COUNT` warning on
+a trace that deserves it. The trace is flagged `truncated` when that happens, shown as a
+`TRUNCATED` badge, and the flag is never cleared. Without the badge the count is not truncated,
+and a low number is the endpoint's real behaviour.
 
-**Fix:** Raise `peekaboot.tracing.max-spans-per-trace`, not the query-count thresholds
-below it &mdash; lowering those doesn't fix an undercount, it just makes the (still wrong)
-number trigger a warning sooner. See [Configuration &mdash; query-heavy
-application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application) for a
-worked example.
+**Fix:** Raise `peekaboot.tracing.max-spans-per-trace`, not the query-count thresholds below it.
+Lowering those does not fix an undercount; it makes the wrong number trigger a warning sooner. See
+[Configuration: query-heavy
+application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application) for a worked
+example.
 
 ## Values show as `******` and I need to see them
 
-**Cause:** most likely, this is just the default. Peekaboot masks a value whose key or
-shape looks like a secret on the Environment, Config, Overview (health detail) and
-Meters tabs, and in captured trace headers, query/form parameters, span tags and SQL text
-&mdash; see [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) for
-the full list of what's covered.
+**Cause:** most likely this is the default. Peekaboot masks a value whose key name or whose shape
+looks like a secret, on the Environment, Config, Meters and Overview tabs and in captured request
+headers, query and form parameters, span tags, SQL text and span error messages. The rules are
+key-name and value-shape matching, and they are not exhaustive in either direction. Check a value
+against the exact list on [Security: what gets masked, and
+how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) whenever something you
+expected to be hidden is visible, or something you expected to read is masked.
 
-If **every** value on the Environment or Config tab is `******`, you're off a local run:
-Peekaboot sets `show-values: always` only on one &mdash; see [Security &mdash; `show-values:
-always` only on a local run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
-`enable-unmasking` does nothing for this case; there is no real value behind the mask.
+If **every** value on the Environment or Config tab reads `******`, you are off a local run.
+Peekaboot sets `show-values: always` only on one, and Spring replaces every value before
+Peekaboot's rules ever see it. `enable-unmasking` does nothing here, because there is no real
+value behind the mask. See [Security: `show-values: always` only on a local
+run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
 
-**Fix (recognisable-secret masking):** Set `peekaboot.enable-unmasking: true` on the
-server, then use the "Show secrets" toggle that appears on the Environment and Config tabs
-once that property is set (it's absent otherwise), or add `?unmask=true` to `GET
-/peekaboot/api/actuator/all/insights` directly. Both are required &mdash; the property
-alone changes nothing, and the request parameter alone is silently ignored while the
-property is `false`. This only affects that one endpoint; headers, query parameters, span
-tags, SQL and Micrometer meter tags (`/api/metrics`, which takes no `unmask` parameter at
-all) stay masked unconditionally regardless of either setting. If a value you expected to
-be masked isn't hidden at all, or a value you expected to be visible is masked and you
-don't want it to be, check it against the exact key-name and value-shape rules in
-[Security &mdash; what gets masked, and
-how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) &mdash; masking is
-rule-based, not exhaustive, in both directions.
+**Fix (a recognisable secret):** Set `peekaboot.enable-unmasking: true`, then use the "Show
+secrets" toggle that appears on the Environment and Config tabs once it is set (it is absent
+otherwise), or add `?unmask=true` to `GET /peekaboot/api/actuator/all/insights`. Both are
+required. The property alone changes nothing, and the parameter alone is silently ignored while
+the property is `false`. This reaches that one endpoint only. Headers, query parameters, span
+tags, SQL and Micrometer meter tags (`/api/metrics` takes no `unmask` parameter at all) stay
+masked whatever you set.
 
-**Fix (off a local run):** set `management.endpoint.env.show-values` and
-`.configprops.show-values` to `always` yourself &mdash; an explicit setting wins over
-Peekaboot's own detection either way &mdash; and only if you actually intend those two
-tabs to show real values somewhere other than your own machine.
+**Fix (off a local run):** Set `management.endpoint.env.show-values` and
+`management.endpoint.configprops.show-values` to `always` yourself. An explicit setting wins over
+Peekaboot's own detection in either direction, so this works anywhere. Do it only if you intend
+those two tabs to show real values somewhere other than your own machine. The same two properties
+widen the host's own `/actuator/env` and `/actuator/configprops`.
 
 ## A trace has no logs
 
-**Cause:** correlated logs are not a baseline tracing feature. They only start flowing
-once the dev toolbar itself is on &mdash; tracing being on (`peekaboot.tracing.enabled`,
-on by default) is not enough by itself.
+**Cause:** correlated logs are not a baseline tracing feature. They start flowing only once the
+dev toolbar is on, and tracing being on (`peekaboot.tracing.enabled`, on by default) is not enough
+by itself. Capture is Logback-only, and only events whose MDC carries the trace id are kept, so
+anything logged on a thread the trace context never reached is dropped.
 
-**Fix:** Set `peekaboot.dev-toolbar: true`. See [Tracing &mdash; what gets
-captured]({{ '/docs/tracing/' | relative_url }}#what-gets-captured) for exactly what
-turning it on adds versus what tracing alone already provides.
+**Fix:** Set `peekaboot.dev-toolbar: true`. See [Traces: what gets
+captured]({{ '/docs/traces/' | relative_url }}#what-gets-captured) for what turning it on adds
+over what tracing alone already provides.
 
 ## My application sets `spring.jackson.*`
 
-**Not a cause of anything:** Peekaboot's API responses and its insights stream are
-serialised independently of your `spring.jackson.*` settings &mdash; a naming strategy,
-`non_null` inclusion or timestamp dates in your application change nothing on the
-dashboard, and Peekaboot changes nothing in your own JSON.
+**Not a cause of anything:** Peekaboot's API responses and its insights stream are serialised with
+Peekaboot's own mapper. A naming strategy, `non_null` inclusion or timestamp dates in your
+application change nothing on the dashboard, and Peekaboot changes nothing in your own JSON.
