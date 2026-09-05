@@ -3,7 +3,7 @@ tagline: Embedded application introspection for Spring Boot
 description: >-
   A Spring Boot starter that gives you health, config, traces, queries and logs
   in a local dashboard - with no collector, no agent and no external service.
-url: https://peekaboot.org
+url: https://www.peekaboot.org
 baseurl: ""
 
 # GitHub Pages defaults an unset theme to jekyll-theme-primer (a remote theme fetched

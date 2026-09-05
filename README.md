@@ -8,6 +8,24 @@ Jekyll toolchain against it directly. There is no GitHub Actions workflow and no
 tooling anywhere in the pipeline — `Gemfile` exists only to mirror that toolchain for local
 preview, and is excluded from the built site (see `exclude:` in `_config.yml`).
 
+## The custom domain
+
+`CNAME` claims `www.peekaboot.org`, which is what `<url>` in the published poms and the
+dashboard's footer link both point at. The DNS side is not in this repository and is not
+done yet — until it is, the site answers on `https://peekaboot-org.github.io/` only, and
+`site.url` (so every `jekyll-redirect-from` page) points at a host that does not resolve.
+
+What the zone needs, on the Cloudflare account holding `peekaboot.org`:
+
+- `www` → `CNAME` → `peekaboot-org.github.io`
+- the apex, if it should redirect too → `A` records to `185.199.108.153`, `185.199.109.153`,
+  `185.199.110.153`, `185.199.111.153`, and `AAAA` to `2606:50c0:8000::153` through
+  `2606:50c0:8003::153`
+
+Set both **DNS-only**, not proxied: Pages issues its own certificate, and Cloudflare's proxy
+in front of an unvalidated domain stops it from doing so. Then set the custom domain in the
+repository's Pages settings and let it enforce HTTPS once the certificate is issued.
+
 ## Local preview
 
 Run `./serve.sh`. It builds the site and serves it at <http://localhost:4000>, rebuilding
