@@ -315,8 +315,8 @@ production?]({{ '/docs/in-production/' | relative_url }}).
 
 ### A longer, coarser insights history
 
-The defaults cost roughly 5.2 MB. To watch a long-running local session without paying for their
-month-scale history, drop the top level and lengthen the middle one:
+To follow a long local session without the defaults' month-scale history, drop the top level
+and lengthen the middle one:
 
 ```yaml
 peekaboot:
@@ -328,8 +328,9 @@ peekaboot:
         size: 2160     # 3 days
 ```
 
-That is 39 &times; (360 + 2160&times;8) &times; 8 = 5,503,680 bytes, which Peekaboot logs as
-`~5.2 MB`: about what the defaults cost, spent differently.
+That is (360 + 2160&times;8) &times; 8 bytes per series. It comes out about the same as the
+defaults, spent differently. The startup log line reports where it actually landed; see [what
+it costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
 
 Memory follows `size` alone; `interval` is not in the formula. Halving level 0's `interval`
 costs no memory, halves the window that level covers and doubles how often every meter is read.

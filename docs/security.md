@@ -104,13 +104,13 @@ enable somewhere, read all of it.
   [Insights]({{ '/docs/insights/' | relative_url }}).
 
 The dashboard's actuator-backed tabs are served by
-`GET /peekaboot/api/actuator/all/insights`, which invokes up to seven Actuator endpoints per
-call (`health`, `info`, `env`, `loggers`, `flyway`, `configprops`, `scheduledtasks`; an
+`GET /peekaboot/api/actuator/all/insights`, which invokes a fixed set of Actuator endpoints
+per call (`health`, `info`, `env`, `loggers`, `flyway`, `configprops`, `scheduledtasks`; an
 endpoint the application does not have is not called). That is the whole actuator
 surface Peekaboot exposes over HTTP. See [HTTP API]({{ '/docs/api/' | relative_url }}) for
 the full endpoint list. It is also a cost. `env` and `configprops` are not free on a large
 application, and without a `SecurityFilterChain` in front of `/peekaboot/**` anyone who can
-reach it can ask for all seven as often as they like.
+reach it can ask for all of them as often as they like.
 
 ## What Peekaboot writes to disk
 

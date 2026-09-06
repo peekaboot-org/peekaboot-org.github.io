@@ -103,22 +103,21 @@ series x (level-0 size + sum of higher-level sizes x 8) x 8 bytes
 ```
 
 Eight per higher-level entry, not seven, because the sample count rides with the statistics. At
-the defaults, 39 series over `10s`&times;90, `1m`&times;1440 and `1h`&times;720, that is 39
-&times; (90 + 1440&times;8 + 720&times;8) &times; 8 = 5,419,440 bytes, or 138,960 bytes per
-series. Peekaboot computes it from your effective config and logs it once at startup:
+the default levels that is (90 + 1440&times;8 + 720&times;8) &times; 8 bytes for each series,
+and the total follows how many series the enabled panels resolve to. Peekaboot computes that
+from your effective config and logs the real figure at startup, in this shape:
 
 ```
-Peekaboot insights: 39 series across 16 panels, levels [10s x90, 1m x1440, 1h x720], ring buffers ~5.2 MB, persisted across restarts
+Peekaboot insights: <series> series across <panels> panels, levels [10s x90, 1m x1440, 1h x720], ring buffers ~<size>, persisted across restarts
 ```
 
-Sizes there are 1024-based, which is how 5,419,440 bytes prints as 5.2 MB. The trailing
-`, persisted across restarts` appears only while storage is on. Raising a level's `size`, adding
-levels or enabling more panels all move the number, and the log line says where it landed.
-Switching all six shipped-but-off panels on takes 39 series to 56, and the estimate to 7.4 MB.
+Sizes there are 1024-based. The trailing `, persisted across restarts` appears only while
+storage is on. Raising a level's `size`, adding levels or switching more panels on all move the
+number, and the log line says where it landed.
 
 ## The default panels
 
-Sixteen panels ship enabled, in this display order. A panel whose meters are absent (no Hikari
+These panels ship enabled, in display order. A panel whose meters are absent (no Hikari
 pool, no Hibernate, no `datasource-micrometer`) resolves no series, stays in the config and
 renders as "No data" rather than disappearing.
 
@@ -141,11 +140,11 @@ renders as "No data" rather than disappearing.
 | Disk space | `disk` | Free, Used, Total | `disk.free`, `disk.total` |
 | Log events | `log-events` | Errors, Warnings | `logback.events` |
 
-Garbage collection is the one panel drawn as bars plus a line; the other fifteen are plain line
+Garbage collection is the only panel drawn as bars plus a line; the rest are plain line
 charts. Its Pauses series is a `rate`, and its Max pause series overrides the panel's unit to
 milliseconds, as do the average-time series on JDBC queries and Repositories.
 
-Six more ship with `enabled: false`, ready to switch on by id: `thread-states` (Thread states),
+Others ship with `enabled: false`, ready to switch on by id: `thread-states` (Thread states),
 `hibernate-activity` (Hibernate activity), `executors` (Executors), `open-files` (Open files),
 `tomcat-sessions` (Tomcat sessions) and `allocation` (Memory allocation). Nothing outside the
 panel file is collected; a meter no series names has no ring buffer.

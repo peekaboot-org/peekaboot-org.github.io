@@ -4,12 +4,12 @@ lead: One tab per operational question, from health and live charts to migration
 permalink: /docs/dashboard/
 ---
 
-The dashboard calls Actuator in-process on every load. Six endpoints go through Actuator's
+The dashboard calls Actuator in-process on every load. These endpoints go through Actuator's
 own endpoint discovery: `info`, `env`, `loggers`, `flyway`, `configprops` and
 `scheduledtasks`. Health is read straight off the health endpoint instead, so
 `management.endpoint.health.show-details` cannot strip the per-component breakdown. Either
 way nothing is exposed on `/actuator/**`, and `management.endpoints.web.exposure` needs no
-configuration. The same response carries four things Actuator does not produce. The Spring
+configuration. The same response also carries what Actuator does not produce: the Spring
 Boot and framework versions, the datasource metadata, the JVM's own defaults, and the OS,
 memory, storage, process and machine details behind Overview's cards. Insights,
 Meters and Traces come from their own endpoints, gated by feature flags rather than by that
@@ -127,8 +127,9 @@ last minutes, hours or days?
 
 Live charts over a curated set of Micrometer meters, aggregated in-process at three
 resolutions (10 seconds, 1 minute, 1 hour by default) and pushed to the browser over SSE
-rather than polled. Sixteen panels ship enabled, six more ship switched off, and an
-application can add, replace or hide panels with its own `peekaboot-insights.yml`.
+rather than polled. Panels for CPU, memory, threads, HTTP and the connection pool ship
+enabled, more ship switched off ready to enable by id, and an application can add, replace or
+hide panels with its own `peekaboot-insights.yml`.
 
 [Insights]({{ '/docs/insights/' | relative_url }}) has the panel file's schema and merge
 rules, what the levels cost in memory, and what the percentiles at those levels can and

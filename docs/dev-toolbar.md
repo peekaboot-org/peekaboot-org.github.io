@@ -19,8 +19,8 @@ It also needs a Micrometer `Tracer` bean, which the starter provides by default.
 ## Where the bar appears
 
 A small bar docks to the bottom of the HTML pages your app renders. Injection needs a
-`text/html` response containing a `</body>` tag; anything else goes out untouched. Four
-further rules skip a response that would otherwise qualify:
+`text/html` response containing a `</body>` tag; anything else goes out untouched. Further
+rules skip a response that would otherwise qualify:
 
 - Peekaboot's own paths and the management endpoints: `/peekaboot/**`, `/static/`,
   `/webjars/`, `/error/`, and the actuator. This exclusion follows

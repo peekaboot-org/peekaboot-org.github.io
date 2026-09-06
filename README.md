@@ -64,8 +64,8 @@ Two things you may notice, neither a problem:
 - `_data/nav.yml`: the documentation sidebar, grouped into sections.
 - `_layouts/default.html`, `home.html`, `doc.html`: page shells. `doc.html` renders the
   sidebar and a page's `title`/`lead` front matter.
-- `assets/peekaboot.css`: the brand mapping over vendored Bulma 1.0.4
-  (`assets/bulma.min.css`).
+- `assets/peekaboot.css`: the brand mapping over vendored Bulma
+  (`assets/bulma.min.css`, whose banner names the version).
 - `assets/site.js`: theme resolution (shared `peekaboot-theme` localStorage key and
   `data-theme` attribute with Peekaboot's own dashboard) and the navbar burger. Loaded
   synchronously in `<head>`, without `defer`, so the theme applies before first paint.
@@ -93,7 +93,7 @@ sidebar's current-page highlight (`aria-current="page"`, driven by `page.url == 
 
 When a page is merged into another, keep its old URL alive with `redirect_from` in the
 surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml`).
-`docs/traces.md` and `docs/configuration.md` each carry two.
+`docs/traces.md` and `docs/configuration.md` both use it.
 
 ## Decisions taken deliberately
 
@@ -101,8 +101,8 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
   whatever the default branch is and survives a rename.
 - **`theme: null` stays.** Without it GitHub Pages ships `jekyll-theme-primer`'s unused CSS
   on every deploy.
-- **Bulma is vendored, not CDN-linked.** `assets/bulma.min.css` is a committed copy of
-  1.0.4: no third-party request, works offline.
+- **Bulma is vendored, not CDN-linked.** `assets/bulma.min.css` is a committed copy: no
+  third-party request, works offline.
 - **The brand mapping is three numbers.** `--bulma-primary-h/s/l` is the mark's own green.
   That green is fill-tuned (white on it is 2.6:1), so link and body text use `--pk-link`,
   never `--bulma-primary`. It is the same fill/text split the product's `tokens.css` makes.
@@ -131,7 +131,7 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 | Root action type detection | `docs/traces.md` |
 | A dashboard tab, or a header control | `docs/dashboard.md`, and re-run the screenshots |
 | A dashboard tab *rename* | also `docs/troubleshooting.md`, `docs/quick-start.md`, and `docs/api.md` (the `/api/features` flag behind Meters is `metrics`) |
-| `peekaboot-insights-defaults.yml`, or the panel-file schema | `docs/insights.md`, which states the field sets and the 16/6/39 counts |
+| `peekaboot-insights-defaults.yml`, or the panel-file schema | `docs/insights.md`, which states the field sets and tabulates the shipped panels |
 | An insights level default, or the memory formula | `docs/insights.md`, `docs/configuration.md`, both of which carry worked arithmetic |
 | The startup summary's lines, or how a URL in it is built | `docs/configuration.md` (*The URLs in the summary*) |
 | Anything under `peekaboot.storage`, or what the two stores write | `docs/configuration.md`, `docs/security.md`, `docs/insights.md` |

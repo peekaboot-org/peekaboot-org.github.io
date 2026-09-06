@@ -59,8 +59,9 @@ With the dev toolbar on as well:
 - Spans are exported every 200 ms instead of every 5 s.
 
 Memory: the trace store's worst case is `max-traces` &times; (`max-spans-per-trace` +
-`max-logs-per-trace`) entries, one million at the defaults. The Insights rings are about
-5.2 MB at the defaults, and the exact figure is logged at startup.
+`max-logs-per-trace`) entries, one million at the defaults. The Insights rings are sized by
+your `levels` and by how many series the enabled panels resolve to; Peekaboot logs the figure
+at startup.
 
 ## What happens when you deploy
 

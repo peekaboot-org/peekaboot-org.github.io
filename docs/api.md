@@ -29,11 +29,11 @@ is present as `null`, never missing.
 | `GET /peekaboot/api/lifecycle/events` | none |
 | `GET /peekaboot/api/lifecycle/runs` | none |
 
-These ten are the whole API. The dashboard's own HTML, JS and CSS come from
+That table is the whole API. The dashboard's own HTML, JS and CSS come from
 `/peekaboot/ui/**`, with `/peekaboot` redirecting there. See [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}).
 
-All ten answer with `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`, the
+Every one answers with `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`, the
 SSE stream and the single-trace `404` included. An unmapped path under `/peekaboot/api/`
 gets Spring's own 404 without them.
 
@@ -46,16 +46,16 @@ metric-charts feature. They share a word and no code.
 
 ## `/api/features`
 
-Ten fields, in wire order: `tracing`, `metrics`, `devToolbar`, `unmaskingEnabled`,
-`insights`, `slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs`,
+In wire order: `tracing`, `metrics`, `devToolbar`, `unmaskingEnabled`, `insights`,
+`slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs`,
 `slowTraceThresholdMs`, `maskLiteral`.
 
-The five flags drive the dashboard's Insights, Meters and Traces tabs, and whether the
+The boolean flags drive the dashboard's Insights, Meters and Traces tabs, and whether the
 Environment/Config tabs' "Show secrets" toggle appears. `metrics` is the flag behind the
 tab labelled **Meters**: the JSON field and the tab label differ. See [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}) for what sets each flag.
 
-The four thresholds are the effective values the backend detects issues and fills the Slow
+The threshold fields are the effective values the backend detects issues and fills the Slow
 bucket with (see
 [Configuration, `peekaboot.ui.tracing`]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing)),
 published so the frontend keeps no copy. `slowTraceThresholdMs` is `null` while tracing is
@@ -74,7 +74,7 @@ value visibility]({{ '/docs/security/' | relative_url }}#show-values-always-only
 
 ## Filtering the trace list
 
-None of the four parameters on `GET /peekaboot/api/traces/insights` can make it fail:
+No parameter on `GET /peekaboot/api/traces/insights` can make it fail:
 
 - `bucket` takes `all`, `errors` or `slow`, case-insensitive, matching the three [trace
   buckets]({{ '/docs/traces/' | relative_url }}#the-three-buckets). Blank or unrecognised
@@ -103,7 +103,7 @@ Tasks tab link to a task's traces by its fully-qualified target.
 `GET /peekaboot/api/actuator/all/insights` returns `{application, runtime, dataSources,
 health, environment, loggers, flyway, config, scheduledTasks, server}`.
 
-Six sections come from Actuator endpoints: `info`, `env`, `loggers`, `flyway`, `configprops`
+Most of it comes from Actuator endpoints: `info`, `env`, `loggers`, `flyway`, `configprops`
 and `scheduledtasks`. Peekaboot invokes each in-process rather than over HTTP, which is why
 `management.endpoints.web.exposure` needs no configuration. `health` is deliberately not
 read that way. It comes from the health endpoint itself, so
@@ -182,7 +182,7 @@ doesn't exist".
 
 ## The insights endpoints
 
-The three `/api/insights/**` endpoints back the Insights tab. Grouping, ordering and
+The `/api/insights/**` endpoints back the Insights tab. Grouping, ordering and
 merging happen server-side, so a client renders what `/config` hands it. See
 [Insights]({{ '/docs/insights/' | relative_url }}) for the panel file behind them.
 
@@ -221,7 +221,7 @@ native `EventSource` reconnects on its own. There is no replay: after a reconnec
 
 ## The lifecycle endpoints
 
-The two `/api/lifecycle/**` endpoints back the Lifecycle tab and the restart markers on the
+The `/api/lifecycle/**` endpoints back the Lifecycle tab and the restart markers on the
 Insights charts. Both exist while `peekaboot.lifecycle.enabled` is `true` (the default);
 with it `false` they are absent, and the tab says so. How far back they reach is
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).

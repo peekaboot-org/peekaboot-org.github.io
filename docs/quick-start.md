@@ -102,7 +102,7 @@ all, on a `Peekaboot Dashboard:` line. See
 
 ## What the starter brings
 
-Adding `peekaboot-spring-boot-starter` pulls in exactly four dependencies:
+Adding `peekaboot-spring-boot-starter` pulls in these and nothing else:
 
 | Dependency | What it's for |
 |---|---|
@@ -127,7 +127,7 @@ On a servlet web application, a missing piece degrades rather than failing start
 | The OpenTelemetry SDK | The trace store is still created and nothing fills it. The Traces tab is empty rather than missing |
 | A Micrometer `MeterRegistry` bean | The Meters tab, the Insights tab, the insights API and the Overview stat tiles are absent rather than empty. See [Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there) |
 
-The starter supplies all three, so each of these only comes up if you exclude something.
+The starter supplies all of these, so each row only comes up if you exclude something.
 
 ## Next
 

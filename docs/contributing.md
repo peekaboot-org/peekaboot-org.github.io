@@ -12,7 +12,7 @@ describe.
   modules, how activation and the defaults are wired, the trace store, span deduplication,
   query extraction, the in-process Actuator calls and the persisted state.
 - [`BUILD.md`]({{ site.repository_url }}/blob/HEAD/BUILD.md): building with Maven or
-  Gradle, the nine gates a build has to clear, and how a release is cut.
+  Gradle, the quality gates a build has to clear, and how a release is cut.
 - [`docs/TESTING.md`]({{ site.repository_url }}/blob/HEAD/docs/TESTING.md): how the tests
   are structured and run, and the rules they follow (real collaborators over mocks,
   pristine output, and the third-party warnings and deliberate demo logging that count as

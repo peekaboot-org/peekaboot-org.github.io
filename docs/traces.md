@@ -55,12 +55,12 @@ instrumentation emits spans. Three things bound that:
 - **Only sampled spans reach any exporter.** Peekaboot sets
   `management.tracing.sampling.probability` to `1.0` where Spring's own default is `0.1`,
   as a default your own setting overrides. Sample at 10% and Peekaboot sees 10%.
-- **Five path prefixes are never captured at all:** `/static/`, `/webjars/`, `/peekaboot/`,
+- **Some path prefixes are never captured at all:** `/static/`, `/webjars/`, `/peekaboot/`,
   `/error/`, and the management base path (`/actuator/` at Spring Boot's default, following
   `management.endpoints.web.base-path`). Excluding a request's root span discards the whole
   trace, which is why Peekaboot's own dashboard traffic never appears in its own list.
 
-Peekaboot contributes two spans of its own to each request, on those same five exclusions
+Peekaboot contributes two spans of its own to each request, on those same exclusions
 and only while `peekaboot.enabled` and `peekaboot.tracing.enabled` are both on:
 
 - `spring.handler` around the controller method, tagged `handler.type` and `handler.name`.
