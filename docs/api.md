@@ -4,230 +4,244 @@ lead: The /peekaboot/api/** surface the dashboard, toolbar and trace-detail over
 permalink: /docs/api/
 ---
 
-Everything the dashboard shows is available as JSON in its own right.
-
 <div class="pk-callout pk-callout--warning" markdown="1">
 Every endpoint below is unauthenticated by default. Peekaboot adds no security of its own,
-so anything that can reach `/peekaboot/**` can call these directly and read your
-configuration, environment, and request traces. See
-[Security]({{ '/docs/security/' | relative_url }}) before exposing this anywhere beyond
-your own machine.
+so anything that can reach `/peekaboot/**` can read your configuration, environment and
+request traces. See [Security]({{ '/docs/security/' | relative_url }}) before exposing this
+beyond your own machine.
 </div>
+
+Nulls travel on the wire. Peekaboot does not suppress them, so every optional field below
+is present as `null`, never missing.
 
 ## Endpoints
 
 | Endpoint | Query parameters |
 |---|---|
 | `GET /peekaboot/api/actuator/all/insights` | `locale`, `unmask` (default `false`) |
-| `GET /peekaboot/api/features` | &mdash; |
-| `GET /peekaboot/api/metrics` | &mdash; |
+| `GET /peekaboot/api/features` | none |
+| `GET /peekaboot/api/metrics` | none |
 | `GET /peekaboot/api/traces/insights` | `limit` (default `100`, clamped to 0&ndash;10000), `bucket`, `rootActionType`, `rootOperation` |
-| `GET /peekaboot/api/traces/{traceId}/insights` | &mdash; |
-| `GET /peekaboot/api/insights/config` | &mdash; |
+| `GET /peekaboot/api/traces/{traceId}/insights` | none |
+| `GET /peekaboot/api/insights/config` | none |
 | `GET /peekaboot/api/insights/data` | `level` (required) |
-| `GET /peekaboot/api/insights/stream` | &mdash; (Server-Sent Events, not JSON) |
-| `GET /peekaboot/api/lifecycle/events` | &mdash; |
-| `GET /peekaboot/api/lifecycle/runs` | &mdash; |
+| `GET /peekaboot/api/insights/stream` | none (Server-Sent Events, not JSON) |
+| `GET /peekaboot/api/lifecycle/events` | none |
+| `GET /peekaboot/api/lifecycle/runs` | none |
 
-These are the only ten endpoints Peekaboot exposes &mdash; the dashboard and toolbar
-call exactly this set, nothing broader. The dashboard UI itself &mdash; its HTML, JS and
-CSS &mdash; is served separately, under `/peekaboot/**` too; see [The
+That table is the whole API. The dashboard's own HTML, JS and CSS come from
+`/peekaboot/ui/**`, with `/peekaboot` redirecting there. See [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}).
 
-Every response under `/peekaboot/api/**` carries `Cache-Control: no-store` and
-`X-Content-Type-Options: nosniff`, so nothing in between stores a copy and no browser
-second-guesses the content type.
+Every one answers with `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`, the
+SSE stream and the single-trace `404` included. An unmapped path under `/peekaboot/api/`
+gets Spring's own 404 without them.
 
 <div class="pk-callout" markdown="1">
-**Two unrelated things are called `insights` here.** `/api/*/insights` is a *suffix*
-naming the enriched, ready-to-render form of actuator or trace data: the server shapes it
-for the screen that shows it, so the browser renders rather than computes (a
-backend-for-frontend). `/api/insights/**` is a *prefix* naming the metric-charts feature
-and nothing else. They share a word and no code.
+**Two unrelated things are called `insights` here.** `/api/*/insights` is a *suffix*,
+naming the enriched, ready-to-render form of actuator or trace data, shaped server-side so
+the browser renders rather than computes. `/api/insights/**` is a *prefix*, the
+metric-charts feature. They share a word and no code.
 </div>
 
-`/api/features` returns five flags &mdash; `{tracing, metrics, devToolbar,
-unmaskingEnabled, insights}` &mdash; plus the numbers the UI colours and labels by:
+## `/api/features`
+
+In wire order: `tracing`, `metrics`, `devToolbar`, `unmaskingEnabled`, `insights`,
 `slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs`,
-`slowTraceThresholdMs` and `maskLiteral`. The flags are what the dashboard uses to decide
-whether to show its Insights, Meters and Traces tabs, and whether the Environment/Config
-tabs' "Show secrets" toggle can appear at all. `metrics` is the flag behind the tab
-labelled **Meters** &mdash; the JSON field and the tab label differ. See [The
-dashboard]({{ '/docs/dashboard/' | relative_url }}) for what drives each flag.
+`slowTraceThresholdMs`, `maskLiteral`.
 
-The four thresholds are the effective values the backend detects issues and fills the
-Slow bucket with (see
-[Configuration &mdash; `peekaboot.ui.tracing`]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing)),
-published so the frontend never keeps a copy of its own; `slowTraceThresholdMs` is `null`
-while tracing is off, since the Slow bucket doesn't exist then. `maskLiteral` is the
-exact string masked values are replaced with (`******`) &mdash; the trace detail's
-Request tab compares header values against it to highlight what was masked.
+The boolean flags drive the dashboard's Insights, Meters and Traces tabs, and whether the
+Environment/Config tabs' "Show secrets" toggle appears. `metrics` is the flag behind the
+tab labelled **Meters**: the JSON field and the tab label differ. See [The
+dashboard]({{ '/docs/dashboard/' | relative_url }}) for what sets each flag.
 
-`unmask=true` only has an effect while `peekaboot.enable-unmasking=true` is also set on
-the server; without that property, the parameter is silently ignored and the response
-stays masked. See [Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking)
-for the full two-opt-in design and what gets masked in the first place. `enable-unmasking`
-governs only this reveal step; it has no bearing on whether the Environment/Config tabs'
-underlying values are readable at all &mdash; see [Security &mdash; actuator value
-visibility]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run)
-for what does.
+The threshold fields are the effective values the backend detects issues and fills the Slow
+bucket with (see
+[Configuration, `peekaboot.ui.tracing`]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing)),
+published so the frontend keeps no copy. `slowTraceThresholdMs` is `null` while tracing is
+off, since the Slow bucket doesn't exist then. `maskLiteral` is the string masked values are
+replaced with (`******`); the trace detail's Request tab compares header values against it
+to highlight what was masked.
 
-`rootActionType` accepts a comma-separated list of root action types (case-insensitive;
-unrecognized tokens are silently dropped rather than rejected). `rootOperation` matches
-against the trace's root operation name, partially and case-insensitively. See
-[Concepts]({{ '/docs/concepts/' | relative_url }}) for what a root action type and root
-operation are.
+## The `unmask` parameter
 
-A request that names no recognizable type &mdash; the parameter absent, blank, or holding
-only unknown tokens &mdash; is answered with a **default view**: every type except
-`CONNECTION_POOL`, the routine pool maintenance
-[Tracing]({{ '/docs/tracing/' | relative_url }}#what-gets-captured) describes, which arrives
-often enough to drown everything else. The single value `*` asks for every type instead,
-hidden ones included. There is no value that asks for nothing.
+`unmask=true` works only while `peekaboot.enable-unmasking=true` is also set on the server;
+without it the parameter is ignored and the response stays masked. See [Security,
+masking]({{ '/docs/security/' | relative_url }}#masking) for the two-opt-in design and what
+gets masked. `enable-unmasking` governs this reveal step alone. Whether the
+Environment/Config tabs' underlying values are readable at all is decided by [actuator
+value visibility]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
+
+## Filtering the trace list
+
+No parameter on `GET /peekaboot/api/traces/insights` can make it fail:
+
+- `bucket` takes `all`, `errors` or `slow`, case-insensitive, matching the three [trace
+  buckets]({{ '/docs/traces/' | relative_url }}#the-three-buckets). Blank or unrecognised
+  falls back to `all`.
+- `limit` defaults to `100`, clamped to 0 to 10000: negative becomes `0`, larger becomes
+  `10000`. `limit=0` returns an empty list. The dashboard's Traces tab asks for 50.
+- `rootActionType` takes a comma-separated list of [root action
+  types]({{ '/docs/traces/' | relative_url }}#root-action-type), case-insensitive,
+  unrecognised tokens dropped silently.
+- `rootOperation` matches the trace's root operation name, partially and
+  case-insensitively.
+
+A request that names no recognisable type (absent, blank, or only unknown tokens) gets a
+**default view**: every type except `CONNECTION_POOL`, the routine pool maintenance
+[Traces]({{ '/docs/traces/' | relative_url }}#what-gets-captured) describes. The single
+value `*` asks for every type, hidden ones included. There is no value that asks for
+nothing.
+
+`rootOperation` has a second rule for scheduled tasks. A filter of more than two
+dot-separated segments also matches an operation holding just its last two, so
+`com.acme.ReportJob.run` matches a span named `reportJob.run`. That lets the Scheduled
+Tasks tab link to a task's traces by its fully-qualified target.
 
 ## What `insights` adds
 
-`GET /peekaboot/api/actuator/all/insights` invokes exactly the seven Actuator endpoints
-the dashboard's tabs are built on (`health`, `info`, `env`, `loggers`, `flyway`,
-`configprops`, `scheduledtasks`) and localizes/summarizes them for the given `locale`.
+`GET /peekaboot/api/actuator/all/insights` returns `{application, runtime, dataSources,
+health, environment, loggers, flyway, config, scheduledTasks, server}`.
+
+Most of it comes from Actuator endpoints: `info`, `env`, `loggers`, `flyway`, `configprops`
+and `scheduledtasks`. Peekaboot invokes each in-process rather than over HTTP, which is why
+`management.endpoints.web.exposure` needs no configuration. `health` is deliberately not
+read that way. It comes from the health endpoint itself, so
+`management.endpoint.health.show-details` cannot strip the components. An endpoint the
+application doesn't have is never called; one that fails leaves the rest of the payload
+intact.
+
+`runtime`, `dataSources` and `server` are not Actuator data. Peekaboot collects those
+itself. The Boot and Framework versions travel inside `application`, alongside the `build`
+and `git` maps that do come from Actuator's `info`.
 
 ### The `locale` parameter
 
 `locale` is an IETF BCP 47 language tag such as `de-DE` (the underscore form, `de_DE`, is
-accepted too); omitted or blank means English. It decides the language of the cron
-descriptions in the scheduled-tasks part of the payload and of the display names of the
-server's timezone and default locale &mdash; nothing else in the response depends on it.
-The dashboard's language selector sends one of `en-US`, `de-DE`, `fr-FR` or `es-ES`; see
-[The dashboard &mdash; the header]({{ '/docs/dashboard/' | relative_url }}#the-header).
+accepted too); omitted or blank means English. It sets the language of the cron
+descriptions in the scheduled-tasks payload and of the display names of the server's
+timezone and default locale. Nothing else in the response depends on it. The dashboard's
+language selector sends one of `en-US`, `de-DE`, `fr-FR` or `es-ES`; see [The dashboard,
+the header]({{ '/docs/dashboard/' | relative_url }}#the-header).
 
-In the scheduled-tasks part of the payload, a task's `schedule` carries the cron
-expression alone &mdash; for a fixed-rate or fixed-delay task it is `null`, and the
-interval travels as `intervalMs` instead, formatted by the dashboard rather than the
-server.
+A task carries `{target, type, schedule, scheduleDescription, intervalMs, lastExecution,
+lastStatus, lastException, nextExecution}`, `type` being `CRON`, `FIXED_DELAY` or
+`FIXED_RATE`. `schedule` holds the cron expression alone. For a fixed-rate or fixed-delay
+task it is `null` and the interval travels as `intervalMs`, formatted by the dashboard
+rather than the server.
 
-For traces, `insights` enriches the underlying spans: they're assembled into a tree,
-duplicate spans from double-instrumented layers are folded into one, issues like `SLOW` or
-`HIGH_QUERY_COUNT` are detected and attached (see
-[Concepts]({{ '/docs/concepts/' | relative_url }})), and correlated logs are attached to
-the spans that emitted them. Both `GET /peekaboot/api/traces/insights` (the list) and
-`GET /peekaboot/api/traces/{traceId}/insights` (the detail) carry a `truncated` boolean
-&mdash; `true` only when
+### Trace insights
+
+For traces, `insights` assembles the spans into a tree, folds duplicates from
+double-instrumented layers into one, detects and attaches issues like `SLOW` or
+`HIGH_QUERY_COUNT` (see [Traces]({{ '/docs/traces/' | relative_url }}#issues)), and
+attaches correlated logs to the spans that emitted them.
+
+The list response is `{traces, bucketCounts, filteredBucketCounts}`, each count being
+`{all, errors, slow}`. `bucketCounts` is what the store holds; `filteredBucketCounts` is
+what the request admits, and it is `null` only for a request that filters nothing
+(`rootActionType=*` with no `rootOperation`, or a response served with tracing off). The
+default view is itself a filter, so an ordinary request carries both numbers.
+
+Each trace, in the list and as the detail response, is the same shape: `{traceId,
+startTimeMs, durationMs, status, slow, rootActionType, rootOperation, rootSpan, summary,
+httpExchange, logs, queries, truncated}`. `slow` is `true` when any span carries a `SLOW`
+or `VERY_SLOW` issue, the badge and not the Slow bucket (see
+[Traces]({{ '/docs/traces/' | relative_url }}#the-slow-badge-is-not-the-slow-bucket)).
+`logs` and `queries` are always arrays, never `null`: empty on a list row, populated only
+by the detail endpoint. `truncated` is `true` only when
 [`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing)
-dropped distinct spans for that trace, never merely because duplicates were folded away.
-The dashboard shows this as a `TRUNCATED` badge.
+dropped distinct spans, never because duplicates were folded away. The dashboard shows it
+as a `TRUNCATED` badge.
 
-The list response is `{traces, bucketCounts, filteredBucketCounts}` &mdash; the bucket
-counts are the only aggregate it carries. `bucketCounts` is what the store holds;
-`filteredBucketCounts` is what the request admits, and it is `null` only for a request that
-filters nothing at all (`rootActionType=*` with no `rootOperation`, or a response served
-with tracing off). The default view is itself a filter, so an ordinary request carries both
-numbers.
+A database-query span (a CLIENT-kind span carrying `db.*` or `jdbc.query*` tags) also
+carries `query`, the masked SQL it ran. It is `null` when the instrumentation recorded no
+statement; the span still counts as a query and appears in `queries` with
+`sql: null`. A batched span, carrying `jdbc.query[N]` tags rather than a single statement,
+is one query whose statements are joined by a semicolon and a newline, in index order.
 
-Each trace, in the list and as the detail response, is the same shape: a `slow` boolean
-(`true` when any span carries a `SLOW` or `VERY_SLOW` issue &mdash; the badge, not the
-Slow bucket; see
-[Tracing]({{ '/docs/tracing/' | relative_url }}#the-slow-badge-is-not-the-slow-bucket)),
-a per-trace `summary`, and `logs` and `queries` that are always arrays, never `null`
-&mdash; empty on a list row, populated only by the detail endpoint. A database-query span
-&mdash; a CLIENT-kind span carrying `db.*` or `jdbc.query*` tags &mdash; additionally
-carries `query`, the masked SQL statement it ran; that field is `null` when the
-instrumentation recorded no statement, and such a span still counts as a query,
-appearing in `queries` with `sql: null`. A batched span &mdash; one carrying `jdbc.query[N]`
-tags rather than a single statement &mdash; is one query whose statements are joined by a
-semicolon and a newline, in index order.
-
-A span that failed carries `errorClass` and `errorMessage`, both absent otherwise.
-`errorClass` is the exception's fully-qualified class name, taken from the last exception
-event recorded on the span; a span marked as failed without one carries the literal
-`ERROR`. `errorMessage` is the span status's own description, falling back to the
+A span that failed carries `errorClass` and `errorMessage`; on every other span both are
+present and `null`. `errorClass` is the exception's fully-qualified class name, from the
+last exception event recorded on the span; a span marked as failed without one carries the
+literal `ERROR`. `errorMessage` is the span status's description, falling back to the
 exception's message when that description is empty.
 
-## The `bucket` parameter
+### The single-trace endpoint and 404
 
-`bucket` accepts `all`, `errors`, or `slow` (case-insensitive), matching the three trace
-buckets described in [Tracing]({{ '/docs/tracing/' | relative_url }}). It defaults to
-`all`, and an unrecognized or blank `bucket` value also falls back to `all` rather than
-producing an error response &mdash; the same forgiving treatment `rootActionType` gives an
-unknown token. There's no way to make `GET /peekaboot/api/traces/insights`
-400 on a bad `bucket`.
+The store opens a bundle for a trace on the first thing it hears about it: a span, a log
+line, or the completed request. The request lands first, published as the response
+finishes, roughly 200 ms before the first span export. So querying the id of a
+request you were just served returns `200` with `rootSpan: null`, a zeroed `summary` and
+empty `logs` and `queries`, filling in a moment later. The toolbar retries while `rootSpan`
+is null, not on a non-OK status.
 
-## `limit`
-
-`limit` defaults to `100` and is clamped to the range 0&ndash;10000 regardless of what's
-passed: a negative value is raised to `0`, and a very large one is capped at `10000`,
-rather than either producing an error. A `limit` of `0` returns an empty trace list, not
-an error.
-
-## The single-trace endpoint and 404
-
-`GET /peekaboot/api/traces/{traceId}/insights` returns `404 Not Found` until that trace id
-has at least one span recorded in the store &mdash; that is, until the trace's first span
-has actually been exported into Peekaboot. If you already have a trace id (from a
-`Server-Timing` header, a toolbar bar, or a list endpoint) and query it immediately, a
-brief `404` before the store catches up is expected, not a bug; retry rather than treating
-it as "this trace doesn't exist."
+`404 Not Found` means the store has never seen the id: unknown, already evicted, tracing
+off, or discarded because it was Peekaboot's own. With a trace id from a `Server-Timing`
+header, a toolbar bar or a list endpoint, retry rather than treating it as "this trace
+doesn't exist".
 
 ## The insights endpoints
 
-The three `/api/insights/**` endpoints back the Insights tab. All the grouping, ordering
-and merging is done server-side, so a client renders what `/config` hands it rather than
-deciding anything itself. See [Insights]({{ '/docs/insights/' | relative_url }}) for the
-panel file these are driven by.
+The `/api/insights/**` endpoints back the Insights tab. Grouping, ordering and
+merging happen server-side, so a client renders what `/config` hands it. See
+[Insights]({{ '/docs/insights/' | relative_url }}) for the panel file behind them.
 
 `GET /peekaboot/api/insights/config` returns the levels (`index`, `intervalMs`, `size`),
 the enabled panels in final display order (`id`, `title`, `chart`, `unit`, an optional
-per-panel `level`, and their series), and the tiles with their current values. Series ids
-arrive namespaced as `<panelId>.<seriesId>`, which is also how they're keyed in `/data` and
-in the stream &mdash; a bare series id from the YAML file is only unique within its panel.
+per-panel `level`, and their series), and the tiles (`id`, `label`, `format`, `live`,
+`value`). Series ids arrive namespaced as `<panelId>.<seriesId>`, which is also how `/data`
+and the stream key them; a bare series id from the YAML file is only unique within its
+panel.
 
 `GET /peekaboot/api/insights/data?level=n` returns one level's whole ring:
 `{level, intervalMs, endEpochMs, count, series}`. For level 0 each series carries a
-`values` array of raw ticks; for levels above it, a `stats` object keyed by `min`, `max`,
-`avg`, `median`, `p90`, `p95`, `p99`, each with its own array. Whichever doesn't apply is
-`null`. There are no timestamps in the arrays &mdash; positions are derived from
-`endEpochMs` and `intervalMs`, and a missing sample is `null` (JSON has no `NaN`).
+`values` array of raw ticks; above it, a `stats` object keyed by `min`, `max`, `avg`,
+`median`, `p90`, `p95`, `p99`, each with its own array. Whichever doesn't apply is `null`.
+The arrays carry no timestamps: positions derive from `endEpochMs` and `intervalMs`, and a
+missing sample is `null`, since JSON has no `NaN`.
 
 An unknown `level` is the one insights call that returns `400`, as
 `{"error": "Unknown insights level: 7"}`. A missing `level` parameter is a `400` from
 Spring itself.
 
-`GET /peekaboot/api/insights/stream` is Server-Sent Events, not JSON &mdash; hold it open
-rather than polling it. Two named events arrive:
+`GET /peekaboot/api/insights/stream` is Server-Sent Events, not JSON, so hold it open
+rather than poll it. Two named events arrive:
 
 | Event | When | Payload |
 |---|---|---|
 | `tick` | every level-0 interval | `{epochMs, values: {seriesId: v}}` |
 | `rollup` | when a higher level's window closes | `{level, epochMs, entries: {seriesId: {min, max, avg, median, p90, p95, p99}}}` |
 
-A comment heartbeat goes out every 15 seconds to keep proxies from reaping an idle
-connection. At most 32 streams are open at once; past that a request gets a `503`, and
-retrying later is the right response. A subscriber that stops reading is dropped as soon
-as its outbound queue fills; the dropped connection then closes when its timeout expires,
-and reconnecting picks the stream back up. The server closes every stream after 5 minutes,
-and the browser's native `EventSource` reconnects on its own. There's no event replay:
-after a reconnect, refetch `/data` for the levels you care about. The stream completes
-cleanly on application shutdown rather than being dropped.
+A comment heartbeat goes out every 15 seconds so proxies don't reap an idle connection. At
+most 32 streams are open at once; past that a request gets a `503`, so retry later. A
+subscriber that stops reading is dropped once its outbound queue fills, its connection
+closing at the timeout. The server closes every stream after 5 minutes, and the browser's
+native `EventSource` reconnects on its own. There is no replay: after a reconnect, refetch
+`/data` for the levels you care about. Streams complete cleanly on shutdown.
 
 ## The lifecycle endpoints
 
-The two `/api/lifecycle/**` endpoints back the Lifecycle tab and the restart markers on
-the Insights charts. Both exist while `peekaboot.lifecycle.enabled` is `true` (the
-default); with it `false` they are absent, and the tab says so. How far back they reach
-is [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage):
-with storage off, the log holds the current run alone.
+The `/api/lifecycle/**` endpoints back the Lifecycle tab and the restart markers on the
+Insights charts. Both exist while `peekaboot.lifecycle.enabled` is `true` (the default);
+with it `false` they are absent, and the tab says so. How far back they reach is
+[`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
+With storage off the log holds the current run alone. It keeps 1000 events either way,
+roughly 500 runs.
 
 `GET /peekaboot/api/lifecycle/events` returns the raw start/stop log, oldest first:
 `{events: [{type, epochMs, version, branch, commitId, shortCommitId, buildTimeEpochMs,
-uncleanPrevious}]}`. `type` is `"start"` or `"stop"`. A start's build fields are only
-populated where they differ from the previous start (the first start in the log carries
-all of them); `uncleanPrevious` is `true` on a start whose predecessor recorded no stop.
+uncleanPrevious}]}`. `type` is `"start"` or `"stop"`, and a stop carries nothing else. A
+start's build fields are populated only where they differ from the previous start, so the
+first start carries all of them. `uncleanPrevious` is `true` on a start whose predecessor
+recorded no stop, and `false` on the first start, which has none.
 
-`GET /peekaboot/api/lifecycle/runs` returns the same history folded into one entry per
-run, newest first: `{runs: [{startedAtEpochMs, stoppedAtEpochMs, ranForMs, downForMs,
-version, branch, shortCommitId, buildTimeEpochMs, changed, running, uncleanExit}]}`. Here
-every row is self-contained &mdash; the build fields are carried forward from the last
-start that reported them &mdash; and `changed` lists which of `"version"`, `"branch"` and
-`"commit"` differ from the run before. `stoppedAtEpochMs` and `ranForMs` are `null` when
-`uncleanExit` is `true`; `downForMs` is `null` when the gap to the previous run is
-unknowable. See [The dashboard &mdash; Lifecycle]({{ '/docs/dashboard/' | relative_url }}#lifecycle)
-for how these render.
+`GET /peekaboot/api/lifecycle/runs` returns the same history folded into one entry per run,
+newest first: `{runs: [{startedAtEpochMs, stoppedAtEpochMs, ranForMs, downForMs, version,
+branch, shortCommitId, buildTimeEpochMs, changed, running, uncleanExit}]}`. Every row is
+self-contained, its build fields carried forward from the last start that reported them,
+and `changed` lists which of `"version"`, `"branch"` and `"commit"` differ from the run
+before (`[]`, never `null`, for the oldest run). `stoppedAtEpochMs` and `ranForMs` are both
+`null` when `uncleanExit` is `true`; on a `running` row `stoppedAtEpochMs` is `null` while
+`ranForMs` counts the time elapsed so far. `downForMs` is `null` when the gap to the
+previous run is unknowable. See [The dashboard,
+Lifecycle]({{ '/docs/dashboard/' | relative_url }}#lifecycle) for how these render.

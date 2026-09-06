@@ -11,12 +11,10 @@ layout: home
       <h1 class="title is-1">Peekaboot</h1>
       <p class="subtitle is-4">{{ site.tagline }}</p>
       <p class="subtitle is-6">
-        Add one dependency, run your app, and a dev toolbar appears on every page &mdash; request
-        and response detail, the trace view, and logs correlated to the request, right
-        on the page you're already looking at. A local dashboard comes with it: health, config,
-        environment, live metric charts, Flyway migrations, and the last thousand traces your app has served. Everything
-        lives in memory inside your own process: no collector, no agent, no external service
-        &mdash; and both switch themselves off outside a local run.
+        Add one dependency and run your app. A dev toolbar appears on every page it renders,
+        with the request, its trace and its logs. It links to a local dashboard holding health,
+        config, environment, live metric charts, Flyway migrations and the traces your app has
+        served, all in memory inside your own process.
       </p>
       <div class="buttons is-centered mt-5">
         <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Quick start</a>
@@ -55,10 +53,9 @@ layout: home
           <div class="card-content">
             <p class="title is-5">On the page you're testing</p>
             <p class="content">
-              The dev toolbar docks to the bottom of every page your app renders locally, on
-              by default: request and response detail, the trace view &mdash; span tree,
-              timings, queries &mdash; and every log line the request produced, correlated with
-              no grep. It works from Swagger UI too.
+              The dev toolbar docks to the bottom of every page your app renders locally, on by
+              default. Open it for request and response detail, the span tree with its timings
+              and queries, and every log line that request produced. It works from Swagger UI too.
             </p>
           </div>
         </div>
@@ -68,9 +65,9 @@ layout: home
           <div class="card-content">
             <p class="title is-5">A dashboard, too</p>
             <p class="content">
-              The same toolbar links to a full dashboard: health, config, environment, charts of
-              CPU, memory, HTTP and pool metrics over time, Flyway migrations, and the last thousand
-              traces your app has served &mdash; kept until the cap evicts them &mdash; not just the one on your screen.
+              The toolbar links to a full dashboard: health, config, environment, charts of CPU,
+              memory, HTTP and pool metrics over time, Flyway migrations, and the last thousand
+              traces your app has served. Not just the one on your screen.
             </p>
           </div>
         </div>
@@ -80,9 +77,9 @@ layout: home
           <div class="card-content">
             <p class="title is-5">No infrastructure</p>
             <p class="content">
-              Traces, config and everything else live in an in-memory store inside your own
-              process. No collector, no agent, nothing to stand up before you can see the
-              first request.
+              Traces, config and everything else live in memory inside your own process. No
+              collector, no agent, nothing to stand up before you can see the first request. A
+              backend you have to start first is a backend you won't start.
             </p>
           </div>
         </div>
@@ -92,12 +89,12 @@ layout: home
           <div class="card-content">
             <p class="title is-5">Off in production by default</p>
             <p class="content">
-              Both the toolbar and the dashboard key off the same local-launch detection
-              &mdash; an IDE run or <code>spring-boot:run</code>/<code>bootRun</code> &mdash;
-              and default off for a <code>java -jar</code> of the packaged jar, a war, a native
-              image, a container and every test run. What it costs while it is on, and what
-              to do if you want it somewhere shared:
-              <a href="{{ '/docs/in-production/' | relative_url }}">Do I want this in production?</a>
+              Both the toolbar and the dashboard key off the same local-launch detection: an IDE
+              run, <code>spring-boot:run</code> or <code>bootRun</code>. A <code>java -jar</code>
+              of the packaged jar, a war, a native image, a container and every test run get
+              nothing. What it costs while it is on, and what to do if you want it somewhere
+              shared: <a href="{{ '/docs/in-production/' | relative_url }}">Do I want this in
+              production?</a>
             </p>
           </div>
         </div>
@@ -124,8 +121,8 @@ layout: home
       <a class="button is-medium" href="{{ site.repository_url }}">View on GitHub</a>
     </div>
     <p class="subtitle is-6">
-      Peekaboot builds on ideas from Symfony's profiler, Spring Boot Admin and this
-      category's other pioneers &mdash; see the
+      Peekaboot builds on ideas from Symfony's profiler, Spring Boot Admin and this category's
+      other pioneers. See the
       <a href="{{ '/docs/acknowledgements/' | relative_url }}">acknowledgements</a>.
     </p>
   </div>

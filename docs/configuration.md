@@ -9,43 +9,66 @@ redirect_from:
 
 ## When Peekaboot is on
 
-Three properties are detected rather than fixed. Below everything you configure, Peekaboot
-adds all three, set from whether it read this launch as a local run:
+Three properties are detected rather than fixed, set from whether Peekaboot read this launch as
+a local run.
 
 | Property | On a local run | Elsewhere | Turns on |
 |---|---|---|---|
-| `peekaboot.enabled` | `true` | `false` | The dashboard, its API, and Peekaboot's defaults |
-| `peekaboot.dev-toolbar` | `true` | `false` | The toolbar, log capture and request-detail capture |
-| `peekaboot.storage.enabled` | `true` | `false` | Writing the charts and the run history to disk |
+| `peekaboot.enabled` | `true` | `false` | The dashboard, its API, and Peekaboot's defaults. |
+| `peekaboot.dev-toolbar` | `true` | `false` | The toolbar, log capture and request-detail capture. |
+| `peekaboot.storage.enabled` | `true` | `false` | Writing the charts and the run history to disk. |
 
-The detected values sit below everything you configure, so anything you set &mdash; an
-`application.yml` entry, an environment variable, a system property &mdash; wins, in either
-direction. The three are detected independently: turning `peekaboot.enabled` on
-deliberately in a shared environment gives you the dashboard, not the toolbar and not
-files in that host's home directory.
+They sit below every property source you control, so an `application.yml` entry, an environment
+variable or a system property wins in either direction. The three are detected
+independently: turning `peekaboot.enabled` on deliberately in a shared environment gives you
+the dashboard, not the toolbar and not files in that host's home directory.
 
 ### What counts as a local run {#local-run}
 
-A **local run**, wherever these pages use the term, is a launch Peekaboot's detection reads
-as development on your own machine: an IDE run, `mvn spring-boot:run` or `gradle bootRun`
-&mdash; more precisely, a launch that runs your build output directly (a classpath entry
-such as `target/classes`, `build/classes/{java,kotlin,groovy,scala}/main`,
-`out/production/…` or `bin/main`), outside a container, and not from a test or an AOT
-build.
+A **local run** is a launch Peekaboot reads as development on your own machine: an IDE run,
+`mvn spring-boot:run`, `gradle bootRun`. Every one of these has to hold.
 
-Not a local run, so everything off by default: a `java -jar` of the packaged jar, a war in
-a servlet container, a native image, an AOT-processing run, a test (JUnit, Spring Boot's
-test support, Cucumber), and anything running in a container &mdash; a Jib image, an
-extracted slim jar, a `java -cp` command inside Docker, Podman or Kubernetes included. A bare
-`java -cp target/classes:…` on a host that is not a container still counts as local; if
-you deploy that way, set `peekaboot.enabled=false` explicitly.
+- The launching thread is named exactly `main`.
+- Its context class loader is the JVM's own application class loader, meaning a class whose
+  name contains `AppClassLoader`.
+- The stack that started the application carries no test or AOT frame: `org.junit.runners.`,
+  `org.junit.platform.`, `org.springframework.boot.test.`,
+  `org.springframework.boot.SpringApplicationAotProcessor`, `cucumber.runtime.`.
+- `java.class.path` contains a build-output directory: an entry ending `/target/classes`,
+  `/build/classes/java/main`, `/build/classes/kotlin/main`, `/build/classes/groovy/main`,
+  `/build/classes/scala/main` or `/bin/main`, or containing `/out/production/`.
+- No container marker is present.
+- The process is not a running native image.
 
-A container marker is a container marker wherever it comes from, so **a checkout you work
-on inside a devcontainer is not a local run** &mdash; VS Code Dev Containers and GitHub
-Codespaces both carry the marker Peekaboot looks for, and a DevTools restart in there is
-judged the same way an ordinary launch is. Peekaboot, the toolbar and storage all default
-to off, which is easy to mistake for a broken starter. Set them in the devcontainer's own
-configuration to get the local experience back:
+The first two conditions reject a packaged artifact. `java -jar` runs under Spring Boot's own
+launcher class loader, a war under the servlet container's webapp loader, and neither name
+contains `AppClassLoader`. The class-path condition reads `java.class.path` alone and never
+expands a jar's `Class-Path` manifest entry, which rejects a Jib image (class path
+`/app/resources:/app/classes:/app/libs/*`) and Spring Boot's `extract` layout (a thin jar on the
+class path). Both fail on the class path whether or not a container is involved.
+
+Under Spring Boot DevTools the restart runs on DevTools' own class loader, and Peekaboot then
+checks the container marker alone.
+
+Not a local run, so everything off by default: `java -jar`, a war, a native image, an AOT run,
+a test, anything with a container marker. A bare `java -cp target/classes:…` on a host with no
+marker still counts as local; if you deploy that way, set `peekaboot.enabled=false` yourself.
+
+#### Container markers
+
+There are exactly four, checked in this order:
+
+- the `KUBERNETES_SERVICE_HOST` environment variable is set, whatever its value.
+- `/.dockerenv` exists.
+- `/run/.containerenv` exists.
+- `/proc/1/cgroup` is readable and contains `docker`, `kubepods` or `containerd`.
+
+A missing or unreadable `/proc/1/cgroup` counts as no container.
+
+There is no devcontainer marker and none is needed, since a devcontainer runs your application
+in a container and a container is never a local run. A checkout you work on inside VS Code Dev
+Containers or Codespaces therefore starts with everything off, which is easy to mistake for a
+broken starter. Set all three in the devcontainer's own configuration:
 
 ```yaml
 peekaboot:
@@ -55,11 +78,21 @@ peekaboot:
     enabled: true
 ```
 
-All three, because they are detected independently. The two `show-values` defaults stay at
-Spring's own regardless: they hang on the detection itself, which no property overrides.
+The two `show-values` defaults do not follow `peekaboot.enabled`. Peekaboot writes them only
+on a local run and leaves the keys untouched anywhere else, so set them yourself and your
+value stands:
 
-Tests count as not local on purpose, so that CI never picks up the dashboard, the toolbar
-and the observability defaults by accident. A test that needs Peekaboot says so:
+```yaml
+management.endpoint.env.show-values: always
+management.endpoint.configprops.show-values: always
+```
+
+Read [`show-values: always` only on a local
+run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run) first: it
+widens your own `/actuator/env` and `/actuator/configprops`, not only the dashboard.
+
+Tests count as not local on purpose, so CI never picks up the dashboard, the toolbar and the
+observability defaults by accident. A test that needs Peekaboot says so:
 
 ```java
 @SpringBootTest(properties = "peekaboot.enabled=true")
@@ -74,25 +107,24 @@ production?]({{ '/docs/in-production/' | relative_url }}) and
 
 ### Per-feature switches
 
-Once `peekaboot.enabled` resolves to `true`, each feature has its own switch; nothing below
+Once `peekaboot.enabled` resolves to `true`, each feature has its own switch. Nothing below
 is reachable while it doesn't.
 
 | Feature | Switch | Also needs |
 |---|---|---|
-| dashboard and API | `peekaboot.enabled` | A servlet web application and Actuator (present via the starter) |
-| dev toolbar | `peekaboot.dev-toolbar` (detected) | A servlet web application, a Micrometer `Tracer` bean and tracing on |
-| tracing | `peekaboot.tracing.enabled` (`true`) | The OpenTelemetry SDK (present via the starter) |
-| startup and shutdown summaries, run history | `peekaboot.lifecycle.enabled` (`true`) | Nothing |
-| persisted history | `peekaboot.storage.enabled` (detected) | A writable directory; an unwritable one is logged once and everything carries on in memory |
-| observability defaults | `peekaboot.enabled` | A servlet web application |
+| dashboard and API | `peekaboot.enabled` | A servlet web application and Actuator, both present via the starter. |
+| dev toolbar | `peekaboot.dev-toolbar` (detected) | A servlet web application and a Micrometer `Tracer` bean. The toolbar renders without tracing; its request-detail capture and its log capture are what need tracing on. |
+| tracing | `peekaboot.tracing.enabled` (`true`) | A servlet web application. The trace store is created either way; the OpenTelemetry SDK, present via the starter, is what fills it. |
+| startup and shutdown summaries, run history | `peekaboot.lifecycle.enabled` (`true`) | Nothing to collect them. The Lifecycle tab and `/peekaboot/api/lifecycle/**` also need a servlet web application. |
+| persisted history | `peekaboot.storage.enabled` (detected) | A writable directory. A failed write is warned about and everything carries on in memory. |
+| observability defaults | `peekaboot.enabled` | A servlet web application. |
 
-On a non-servlet application &mdash; WebFlux, or no web application at all &mdash; the
-dashboard and toolbar don't register, there is nothing at `/peekaboot/**`, and the
-defaults [below](#what-peekaboot-sets-in-your-application) that hang on `peekaboot.enabled`
-are not applied either. `spring.main.web-application-type` decides this where you set it,
-as a plain property as much as through `SpringApplicationBuilder.web(...)`; the summaries are still logged and, on a local run, the run history
-still written. See
-[Requirements]({{ '/docs/requirements/' | relative_url }}).
+On WebFlux or a non-web application there is nothing at `/peekaboot/**`, no trace store, no
+insights collector, and the defaults [below](#what-peekaboot-sets-in-your-application) that hang
+on `peekaboot.enabled` are not applied. `spring.main.web-application-type` decides this wherever
+you set it, a plain property as much as `SpringApplicationBuilder.web(...)`. The summaries and
+the run history still run in memory; storage decides whether the history is written. See
+[Quick start]({{ '/docs/quick-start/' | relative_url }}).
 
 ## Properties
 
@@ -104,54 +136,50 @@ still written. See
 | `dev-toolbar` | boolean | detected | The dev toolbar, correlated-log capture and full request/response detail capture. |
 | `enable-unmasking` | boolean | `false` | Whether an `unmask=true` request may reveal real values from the Environment and Config data. |
 
-`dev-toolbar` captures headers, query and form parameters and the resolved controller,
-not request or response bodies. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
+`dev-toolbar` captures headers, query and form parameters and the resolved controller, not
+request or response bodies. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
 
-`enable-unmasking` changes nothing on its own: it allows the `unmask=true` parameter on
-`GET /peekaboot/api/actuator/all/insights` to work and makes the "Show secrets" toggle
-appear. It is separate from whether those values are readable at all, which follows the
-launch context: off a local run every Environment and Config value is `******`. See
-[Security &mdash; masking]({{ '/docs/security/' | relative_url }}#masking) and
-[`show-values: always` only on a local
-run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
+`enable-unmasking` changes nothing on its own. It allows the `unmask=true` parameter on
+`GET /peekaboot/api/actuator/all/insights` and makes the "Show secrets" toggle appear. Whether
+those values are readable at all follows the launch context: off a local run every Environment
+and Config value is `******`. See [Masking]({{ '/docs/security/' | relative_url }}#masking).
 
 ### `peekaboot.storage`
 
-The only prefix on this page that touches the filesystem: it decides whether the insights
-history and the start/stop log outlive a restart. Everything else Peekaboot holds is in
-memory, and is gone when the process is.
+The only prefix that touches the filesystem. It decides whether the insights history and the
+start/stop log outlive a restart.
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
 | `enabled` | boolean | detected | Whether anything is written at all. Off, both stores run from memory and never open a file. |
 | `dir` | String | `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where the files live. An explicit value is used verbatim, with no per-application subdirectory. |
 
-The default directory sits outside your project on purpose: it survives a `mvn clean` and
-a re-clone. `<groupId>.<artifactId>` comes from `build-info.properties`, so it needs a
-build that generates one (the Spring Boot Maven plugin's `build-info` goal, or
-`springBoot { buildInfo() }` in Gradle). Without it Peekaboot falls back to
-`spring.application.name`, and to a fixed `application` folder when there is no name
-either &mdash; two applications that share a name, or have none, then share a directory,
-which is the case worth setting `dir` for. Characters other than letters, digits, dots,
-underscores and dashes become dashes.
+The default directory sits outside your project on purpose, surviving a `mvn clean` and a
+re-clone. `<groupId>.<artifactId>` comes from `build-info.properties`, so it needs a build that
+generates one (the Spring Boot Maven plugin's `build-info` goal, or `springBoot { buildInfo() }`
+in Gradle). Without it Peekaboot falls back to `spring.application.name`, then to a fixed
+`application` folder. Two applications that share a name, or have none, share a directory, which
+is the case worth setting `dir` for. Every character outside `A-Za-z0-9._-` becomes one dash,
+accented and non-Latin letters included, and an id that comes out as `.` or `..` lands in
+`application` too.
 
 Two files land there:
 
 | File | What it holds | Size |
 |---|---|---|
-| `insights.snapshot` | The insights rings, written at each `peekaboot.insights.persistence.interval` boundary and once more at shutdown | About 5 MB at the default levels |
-| `lifecycle.jsonl` | The start and stop history, one JSON object per line, at most 1000 events, oldest dropped first | &le; 400 KB when full |
+| `insights.snapshot` | The insights rings, written at each `peekaboot.insights.persistence.interval` boundary and once more at shutdown. | About 5 MB at the default levels. |
+| `lifecycle.jsonl` | The start and stop history, one JSON object per line, at most 1000 events, oldest dropped first. | Typically well under 400 KB; only the event count is capped. |
 
-On a POSIX file system the directory is created `rwx------` and both files `rw-------`,
-readable by the owning user alone; a directory that already exists keeps the permissions it
-has, and on Windows the platform defaults apply.
+On a POSIX file system the directory is created `rwx------` and both files `rw-------`, owner
+only. An existing directory keeps its permissions, and on Windows the platform defaults apply.
 
-Neither file can fail your application. A snapshot this version can't read, that no longer
-matches your `peekaboot.insights.levels`, or that is older than
-`peekaboot.insights.persistence.max-age` is discarded and the rings start empty; a
-`lifecycle.jsonl` line that fails to parse is skipped. An unwritable directory is logged
-once and everything carries on in memory. Both stores assume one instance per directory
-&mdash; two instances on the same `dir` overwrite each other's history.
+Neither file can fail your application. A snapshot is discarded and deleted when this version
+can't read it, when it no longer matches your `peekaboot.insights.levels`, when it is older than
+`peekaboot.insights.persistence.max-age` or when it is dated more than five minutes in the
+future, and the rings start empty. A `lifecycle.jsonl` line that fails to parse or carries no
+event type is skipped; the rest of the file still loads. A failed write is logged and everything
+carries on in memory, the insights snapshot warning once per run and the lifecycle log on every
+failed write, at most twice. Two instances on the same `dir` overwrite each other's history.
 
 ### `peekaboot.lifecycle`
 
@@ -170,14 +198,15 @@ datasource details; the shutdown summary the uptime and the start and stop times
  Peekaboot Dashboard: http://localhost:8080/peekaboot/
 ```
 
-Each line prints only when it leads somewhere. **Service URL** appears whenever there is
-an embedded web server, and the lines below it are built from that base: `https` when
-`server.ssl.enabled` is set, the port actually bound, and `server.servlet.context-path`
-when one is configured; a `0.0.0.0` or unset `server.address` prints as `localhost`.
-**Swagger UI** appears when springdoc is on the classpath, honouring
-`springdoc.swagger-ui.path`. **Peekaboot Dashboard** appears only when the dashboard is
-actually served &mdash; a servlet application, Actuator present, `peekaboot.enabled` true
-&mdash; and is omitted otherwise, rather than printed as a URL that would 404.
+**Service URL** appears whenever there is an embedded web server, and the two lines below build on that base. The scheme is `https` when
+Spring Boot's own rule reads TLS as on. That rule looks at the whole bound `server.ssl` object,
+not `server.ssl.enabled` alone, so a key store or an SSL bundle is enough by itself, and
+`server.ssl.enabled: false` keeps the scheme `http` despite one. The port is the one actually
+bound, `server.servlet.context-path` is appended where configured, and a `server.address` that
+is unset, blank, `0.0.0.0` or `::` prints as `localhost`. **Swagger UI** appears when springdoc
+is on the classpath, honouring `springdoc.swagger-ui.path`. **Peekaboot Dashboard** appears only
+where the dashboard is served: a servlet application, Actuator present, `peekaboot.enabled`
+true. Otherwise the line is omitted rather than printed as a 404.
 
 ### `peekaboot.tracing`
 
@@ -191,13 +220,13 @@ actually served &mdash; a servlet application, Actuator present, `peekaboot.enab
 | `slow-trace-threshold-ms` | long | `1000` | Total duration at or above which a trace enters the Slow bucket. |
 | `max-logs-per-trace` | int | `500` | Correlated log entries kept per trace; only populated while the dev toolbar is on. |
 
-See [Tracing]({{ '/docs/tracing/' | relative_url }}) for the three buckets and
-[Concepts]({{ '/docs/concepts/' | relative_url }}) for what `HIGH_QUERY_COUNT` checks.
+See [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets) for the three buckets
+and [Issues]({{ '/docs/traces/' | relative_url }}#issues) for what `HIGH_QUERY_COUNT` checks.
 
 ### `peekaboot.ui.tracing`
 
-These drive the dashboard's issue detection and badges, not what gets captured &mdash; see
-[Concepts]({{ '/docs/concepts/' | relative_url }}#issues).
+These drive the dashboard's issue detection and badges, not what gets captured. See
+[Issues]({{ '/docs/traces/' | relative_url }}#issues).
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
@@ -209,71 +238,76 @@ These drive the dashboard's issue detection and badges, not what gets captured &
 
 ### `peekaboot.insights`
 
-These control the metric collector behind the Insights tab &mdash; how often it samples
-and how much history it keeps. Whether that history outlives the process is
-`peekaboot.storage.enabled` above; *what* it samples comes from a YAML file rather than
-from properties, see [Insights]({{ '/docs/insights/' | relative_url }}#configuring-panels).
+These control the metric collector behind the Insights tab. Whether its history outlives the
+process is `peekaboot.storage.enabled` above. *What* it samples comes from a YAML file, see
+[Insights]({{ '/docs/insights/' | relative_url }}#configuring-panels).
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
 | `enabled` | boolean | `true` | Whether the collector, the `/api/insights/**` endpoints and the Insights tab exist; also needs a Micrometer `MeterRegistry` bean. |
-| `levels[n].interval` | Duration | `10s`, `1m`, `1h` | The sampling tick (level 0) and each aggregation window above it; every interval must be a whole multiple of the previous one. |
+| `levels[n].interval` | Duration | `10s`, `1m`, `1h` | The sampling tick (level 0) and each aggregation window above it. |
 | `levels[n].size` | int | `90`, `1440`, `720` | Entries kept per series at that level; `interval` &times; `size` is how far back the charts reach. |
-| `config-location` | String | unset | A Spring resource location for the panel file, replacing `peekaboot-insights.yml` on the classpath root. |
+| `config-location` | String | unset | A Spring resource location for the panel file, replacing the `peekaboot-insights.yml` lookup on the classpath root. Peekaboot's bundled panel defaults are still merged underneath it. |
 | `persistence.interval` | Duration | the coarsest level's `interval` (`1h`) | How often the rings are written to `insights.snapshot`. Does nothing while storage is off. |
 | `persistence.max-age` | Duration | the coarsest level's span (30 days) | How old a snapshot may be and still be loaded; past it every sample would be a gap. |
 
-Setting `levels` replaces the whole list, so give every level you want. Level 0 stores one
-number per series per tick; every higher level stores seven (min, max, avg, median, p90,
-p95, p99), which is what makes the memory worth checking &mdash; Peekaboot logs the result
-at startup. See [Insights &mdash; what it costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
+Setting `levels` replaces the whole list, so give every level you want. Each interval must be a
+whole multiple of the previous one, and must span no more entries than the previous ring holds:
+a `1m` level over a `10s` level needs six, so that ring's `size` must be at least 6. Either rule
+broken fails startup.
+
+Level 0 stores one number per series per tick; every higher level stores eight, seven statistics
+plus a sample count the API withholds. That eighth column is why the memory is worth checking,
+and Peekaboot logs the figure at startup. See [what it
+costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
 
 ## What Peekaboot sets in your application
 
-Peekaboot also nudges a handful of Spring Boot and library defaults, so the dashboard has
-something to show without you configuring Actuator or sampling by hand. All of them are
-added below every property source you control, so anything you set wins; nothing here is a
-floor. The two `show-values` rows need a local run, `peekaboot.enabled` resolving true and
-a servlet application, all three; anywhere else they are left unset and Spring's own default
-governs. Setting `peekaboot.enabled: false` on your own machine is enough to keep it.
+Peekaboot nudges a handful of Spring Boot and library defaults, so the dashboard has something
+to show without you configuring Actuator or sampling by hand. All of them sit below every
+property source you control, so anything you set wins.
 
-The same holds for beans: every bean Peekaboot registers backs off if your application
-defines its own &mdash; define a bean of the same type (or name), and Peekaboot uses
-yours instead of adding a second one.
+The same holds for beans. Everything Peekaboot registers backs off when your application defines
+a bean of the same type; two match on bean name instead, so replacing
+`tracingInterceptorConfigurer` or `databaseMetadataList` takes the name.
 
-| Property | Spring default | Peekaboot default | Applies when | Why |
+| Property | Default without Peekaboot | Peekaboot default | Applies when | Why |
 |---|---|---|---|---|
 | `management.otlp.metrics.export.enabled` | `true` | `false` | always | The starter puts Micrometer's OTLP registry on the classpath; unconfigured, it would push metrics to `localhost:4318`. Telemetry must not leave the process unless you opt in. |
-| `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled`, servlet web application only | Every request reaches the Traces tab, not a one-in-ten slice. |
-| `spring.jpa.properties.[hibernate.generate_statistics]` | `false` | `true` | `peekaboot.enabled`, servlet web application only | The `hibernate.*` meter panels on Insights need Hibernate's statistics. |
-| `management.info.env.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | Your `info.*` properties reach the Overview tab (not OS environment variables; the Environment tab covers those). |
-| `management.info.java.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | The Java card on Overview. |
-| `management.info.os.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | The System card on Overview. |
-| `management.info.process.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | PID, uptime, CPU count and memory on Overview. |
-| `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application only | `@Observed`, `@Timed` and `@Counted` work without extra wiring. |
+| `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled`, servlet web application | Every request reaches the Traces tab, not a one-in-ten slice. |
+| `spring.jpa.properties.[hibernate.generate_statistics]` | `false` (Hibernate's own) | `true` | `peekaboot.enabled`, servlet web application | The `hibernate.*` meter panels on Insights need Hibernate's statistics. |
+| `management.info.env.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | Your `info.*` properties reach the Overview tab (not OS environment variables; the Environment tab covers those). |
+| `management.info.java.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | The Java card on Overview. |
+| `management.info.os.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | The System card on Overview. |
+| `management.info.process.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | PID, uptime, CPU count and memory on Overview. |
+| `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | `@Observed`, `@Timed` and `@Counted` work without extra wiring. |
 | `management.endpoint.env.show-values` | `never` | `always` | local run, `peekaboot.enabled`, servlet web application | Otherwise the Environment tab shows `******` for every property, `server.port` included; Peekaboot's own masking runs over the real values instead. |
 | `management.endpoint.configprops.show-values` | `never` | `always` | local run, `peekaboot.enabled`, servlet web application | The same, for the Config tab. |
-| `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | dev toolbar on | Spring Boot's span export delay is what separates a span ending from the toolbar seeing it; shortened so a trace is readable while you are still on the page. |
+| `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | `peekaboot.enabled`, servlet web application, dev toolbar on | Spring Boot's span export delay is what separates a span ending from the toolbar seeing it; shortened so a trace is readable while you are still on the page. |
 
-Traces and logs need no export switch: Spring Boot only creates OTLP exporters for them
-when you configure an endpoint. Nothing on `/actuator/**` changes &mdash; Peekaboot reads
-Actuator in-process and adds no exposure of its own.
+Anywhere but a local run Peekaboot leaves both `show-values` keys unset, so Spring's default
+governs unless you [set them yourself](#local-run). Setting `peekaboot.enabled: false` on your
+own machine keeps them off.
+
+Traces and logs need no export switch, because Spring Boot only creates OTLP exporters for them
+once you configure an endpoint. Nothing on `/actuator/**` changes; Peekaboot reads Actuator
+in-process and adds no exposure of its own.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 **Some of these widen what is exposed, or cost something at runtime:**
 
 - `show-values: always`, on a local run, also widens your own `/actuator/env` and
-  `/actuator/configprops` if you expose them over HTTP yourself &mdash; Peekaboot's masking
-  runs only inside `/peekaboot/**`. See [Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
+  `/actuator/configprops` if you expose them over HTTP. Peekaboot's masking runs only inside
+  `/peekaboot/**`. See [Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
 - `management.info.env.enabled: true` publishes `info.*` through `/actuator/info` if you
   expose that endpoint.
-- Sampling at `1.0` means every request is traced, for every exporter you have configured.
+- Sampling at `1.0` traces every request, for every exporter you have configured.
 - Hibernate statistics carry a runtime cost.
-- With the toolbar on, spans reach every exporter roughly 25 times more often than at
-  Spring's default.
+- With the toolbar on, spans reach every exporter roughly 25 times more often than at Spring's
+  default.
 
-None of this matters on your own machine. It matters the moment `peekaboot.enabled` is
-`true` somewhere reachable by anyone else &mdash; see [Do I want this in
+None of this matters on your own machine. It matters the moment `peekaboot.enabled` is `true`
+somewhere reachable by anyone else. See [Do I want this in
 production?]({{ '/docs/in-production/' | relative_url }}).
 </div>
 
@@ -281,9 +315,8 @@ production?]({{ '/docs/in-production/' | relative_url }}).
 
 ### A longer, coarser insights history
 
-The defaults reach back 15 minutes at 10-second resolution, 24 hours at one minute, and 30
-days at one hour, for roughly 4.5 MB. To watch a long-running local session without paying
-for month-scale history, drop the top level and lengthen the middle one:
+To follow a long local session without the defaults' month-scale history, drop the top level
+and lengthen the middle one:
 
 ```yaml
 peekaboot:
@@ -295,20 +328,22 @@ peekaboot:
         size: 2160     # 3 days
 ```
 
-That's 39 &times; (360 + 2160&times;7) &times; 8 &asymp; 4.6 MB &mdash; about what the
-defaults cost, spent differently. Sampling more often is the expensive axis: halving
-`interval` on level 0 without halving its `size` doubles that level's memory and doubles
-how often every meter is read.
+That is (360 + 2160&times;8) &times; 8 bytes per series. It comes out about the same as the
+defaults, spent differently. The startup log line reports where it actually landed; see [what
+it costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
+
+Memory follows `size` alone; `interval` is not in the formula. Halving level 0's `interval`
+costs no memory, halves the window that level covers and doubles how often every meter is read.
+Keeping the window means doubling `size`, which doubles the memory.
 
 ### Memory-constrained
 
-Spans and logs are capped independently per trace, and the two caps add rather than
-multiply. The All bucket's worst-case entry count is `max-traces` &times;
-(`max-spans-per-trace` + `max-logs-per-trace`). At the documented defaults (1000 / 500 /
-500) that's 1000 &times; 1000 = 1,000,000 entries, not the 250,000,000 a naive triple
-product would suggest. Turning all three down shrinks that ceiling proportionally; the
-Errors and Slow buckets are independent, smaller collections, so scale those down too
-rather than leaving them at their own defaults:
+Spans and logs are capped independently per trace, and the two caps add rather than multiply.
+The All bucket's worst case is `max-traces` &times; (`max-spans-per-trace` +
+`max-logs-per-trace`), so at the defaults (1000 / 500 / 500) 1000 &times; 1000 = 1,000,000
+entries, not the 250,000,000 a naive triple product suggests. Turning all three down shrinks the ceiling
+proportionally. The Errors and Slow buckets hold the same traces as All and keep
+one alive after All has evicted it, so scale those down too:
 
 ```yaml
 peekaboot:
@@ -320,18 +355,16 @@ peekaboot:
     max-slow-traces: 25
 ```
 
-This trades trace depth and history for memory. If your app's requests routinely produce
-more than 50 spans, this configuration will truncate them &mdash; watch for the
-`TRUNCATED` badge before combining it with a query-heavy workload.
+This trades trace depth and history for memory. Requests that routinely produce more than 50
+spans get truncated, so watch for the `TRUNCATED` badge before combining this with a
+query-heavy workload.
 
 ### Query-heavy application
 
-An endpoint that legitimately issues dozens, or a few hundred, queries by design (a
-report, a bulk export, an N+1-shaped-but-intentional fan-out) needs headroom on two axes:
-enough span capacity that its queries survive truncation, and thresholds that don't flag
-its normal behaviour as an issue on every single request. The default cap (500, after
-duplicates are folded away) already covers most such endpoints; if the trace list shows a
-`TRUNCATED` badge on this endpoint's traces, raise it further:
+Some endpoints issue hundreds of queries by design, a report or a bulk export. They need span
+capacity for those queries to survive truncation, and thresholds that do not flag normal
+behaviour. The default cap of 500, counted after duplicates are folded away, covers most of
+them. If the trace list shows a `TRUNCATED` badge on this endpoint, raise it:
 
 ```yaml
 peekaboot:
@@ -343,8 +376,7 @@ peekaboot:
       high-trace-query-count-threshold: 60
 ```
 
-Raise `max-spans-per-trace` first if truncation is actually happening &mdash; check the
-`TRUNCATED` badge before assuming it is. Only then raise the UI thresholds, and only as far
-as reflects what's actually normal for this endpoint; set them too high and a genuine
-regression (a query count that grows well past what's normal) stops triggering
-HIGH_QUERY_COUNT at all.
+Raise `max-spans-per-trace` first, and only once the `TRUNCATED` badge shows truncation is real.
+Raise the UI thresholds after that, only as far as what is normal here. Both count strictly, so
+`15` means the sixteenth direct query child trips the issue. Set them too high and a genuine
+regression stops triggering HIGH_QUERY_COUNT.
