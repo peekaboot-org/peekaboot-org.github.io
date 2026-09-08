@@ -229,11 +229,14 @@ panels:
 | `tags` | map narrowing which meters of that name are summed | none, so all of them are summed |
 | `stat` | `value`, `rate`, `avg`, `max` | `value` |
 | `unit` | overrides the panel's unit for this one line | the panel's |
-| `subtract-meter` | subtracts another meter's summed value; read only by `stat: value` | none |
+| `subtract-meter` | subtracts another meter's summed value; only valid with `stat: value` | none |
 
 `subtract-meter` is how the Disk space panel draws "used" without a meter for it, `disk.total`
 minus `disk.free`. Both sides go through the same tag filter, so a series' `tags` narrow the
 subtracted meter too. If either side is unresolved the result is a gap, not a wrong number.
+Naming `subtract-meter` on a series with `stat: rate`, `avg` or `max` fails config validation;
+see [A mistake in your file costs you panels, not your
+app](#a-mistake-in-your-file-costs-you-panels-not-your-app).
 
 ### Tile fields
 
@@ -254,16 +257,17 @@ renders a thousand times too large.
 
 The loader checks that every panel has a unique id, and that every series names a meter and has
 an id unique within its panel. Each `chart`, `unit`, `stat` and `format` must be one of the
-values above. The registry is never checked, so an unknown meter is a permanent gap and never a
-startup failure.
+values above, and a series with `subtract-meter` must use `stat: value` or leave `stat` unset.
+The registry is never checked, so an unknown meter is a permanent gap and never a startup
+failure.
 
 The bundled defaults are validated **on their own first**. A fault there is Peekaboot's bug and
-startup fails loudly. Your override is merged on top separately. If it does not validate it is
-dropped entirely, logged at `ERROR` with the stack trace, and the bundled defaults are used
-instead:
+startup fails loudly. Your override is merged on top separately. If it does not validate,
+Peekaboot discards the whole file, every panel in it, and serves the bundled defaults instead.
+The failure is logged at `ERROR` with the stack trace:
 
 ```
-Ignoring invalid insights panel config class path resource [peekaboot-insights.yml]; using the bundled defaults
+Insights panel config class path resource [peekaboot-insights.yml] is invalid; discarding it entirely and serving the bundled panels instead of the operator's customisation
 ```
 
 The resource name is whatever Spring resolved, so a `config-location` pointing at a file reads

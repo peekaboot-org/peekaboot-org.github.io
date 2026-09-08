@@ -343,8 +343,8 @@ instead of vanishing, on the grounds that whoever set that flag will not be puzz
 it.
 
 Insights, Meters and Traces are gated on a separate call, `GET /peekaboot/api/features`,
-whose flags are `{tracing, metrics, devToolbar, unmaskingEnabled, insights}`. It also
-carries the UI's duration thresholds and the mask literal; see
+whose flags are `{tracing, tracingSpansPossible, metrics, devToolbar, unmaskingEnabled,
+insights}`. It also carries the UI's duration thresholds and the mask literal; see
 [HTTP API]({{ '/docs/api/' | relative_url }}). Meters needs a `MeterRegistry` bean, which
 Spring Boot Actuator provides automatically. Insights needs that same bean plus
 `peekaboot.insights.enabled` (on by default). Traces needs the in-memory trace store

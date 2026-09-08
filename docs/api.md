@@ -46,14 +46,21 @@ metric-charts feature. They share a word and no code.
 
 ## `/api/features`
 
-In wire order: `tracing`, `metrics`, `devToolbar`, `unmaskingEnabled`, `insights`,
-`slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs`,
-`slowTraceThresholdMs`, `maskLiteral`.
+In wire order: `tracing`, `tracingSpansPossible`, `metrics`, `devToolbar`,
+`unmaskingEnabled`, `insights`, `slowSpanThresholdMs`, `verySlowSpanThresholdMs`,
+`slowQueryThresholdMs`, `slowTraceThresholdMs`, `maskLiteral`.
 
 The boolean flags drive the dashboard's Insights, Meters and Traces tabs, and whether the
 Environment/Config tabs' "Show secrets" toggle appears. `metrics` is the flag behind the
 tab labelled **Meters**: the JSON field and the tab label differ. See [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}) for what sets each flag.
+
+`tracingSpansPossible` is narrower than `tracing`. `tracing` says the trace store exists;
+`tracingSpansPossible` says whether anything is wired to fill it. `false` is a hard
+guarantee that no span can arrive, because the host has no OpenTelemetry SDK on its class
+path. `true` does not promise that spans will arrive. Sampling and the rest of the host's
+tracing setup stay outside Peekaboot's view. The field is meaningless while `tracing` is
+`false`, since there is no store for a span to reach.
 
 The threshold fields are the effective values the backend detects issues and fills the Slow
 bucket with (see
