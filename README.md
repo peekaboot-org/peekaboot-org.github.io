@@ -3,30 +3,6 @@
 Source for the [Peekaboot](https://github.com/peekaboot-org/peekaboot) documentation site,
 built with Jekyll and published via GitHub Pages.
 
-GitHub Pages builds this repository natively: push to `main` and Pages runs its own pinned
-Jekyll toolchain against it directly. There is no GitHub Actions workflow and no Node
-tooling anywhere in the pipeline. `Gemfile` exists only to mirror that toolchain for local
-preview, and is excluded from the built site (see `exclude:` in `_config.yml`).
-
-## The custom domain
-
-`CNAME` claims `www.peekaboot.org`, which is what `<url>` in the published poms and the
-dashboard's footer link both point at. That host serves the site today, from Cloudflare's
-edge in front of Pages under a Cloudflare-issued certificate. The zone is **proxied**, not
-DNS-only. The apex resolves to nothing, so only `www` works.
-
-Records on the Cloudflare account holding `peekaboot.org`:
-
-- `www` → `CNAME` → `peekaboot-org.github.io`. In place.
-- the apex, if it should redirect too → `A` records to `185.199.108.153`,
-  `185.199.109.153`, `185.199.110.153`, `185.199.111.153`, and `AAAA` to
-  `2606:50c0:8000::153` through `2606:50c0:8003::153`. Not in place.
-
-GitHub's guidance is to set these DNS-only, because a proxy in front of an unvalidated
-domain stops Pages issuing its own certificate. The live setup takes the other route and
-lets Cloudflare terminate TLS instead, which works. Switching to DNS-only later means
-waiting for the Pages certificate before enforcing HTTPS.
-
 ## Local preview
 
 Run `./serve.sh`. It builds the site and serves it at <http://localhost:4000>, rebuilding
