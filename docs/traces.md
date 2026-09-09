@@ -179,8 +179,8 @@ Every trace lands in All, and in Errors or Slow too when it qualifies:
   `peekaboot.tracing.max-slow-traces` (default 100).
 
 Nothing expires on a clock. Each bucket evicts its own oldest entry once its own cap is
-full, where oldest means least recently written: a late span for an already-evicted trace
-puts it back at the newest end. The three are independent, so a trace can keep showing
+full, where oldest means first admitted; a trace that keeps receiving spans does not move.
+A late span for an already-evicted trace puts it back at the newest end. The three are independent, so a trace can keep showing
 under Errors or Slow long after it aged out of All.
 
 See [Configuration]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) for every
