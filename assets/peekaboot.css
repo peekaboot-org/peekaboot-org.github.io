@@ -43,8 +43,8 @@ a:hover,
     color: var(--pk-link-hover);
 }
 
-/* The sidebar's links precede <main> on every doc page; keyboard users get one jump past
-   them. Off-screen until focused, so sighted mouse users never see it. */
+/* The navbar, and on doc pages the sidebar, precede <main>; keyboard users get one jump
+   past them. Off-screen until focused, so sighted mouse users never see it. */
 .pk-skip-link {
     position: absolute;
     top: 0.5rem;
