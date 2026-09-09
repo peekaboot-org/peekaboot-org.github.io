@@ -46,21 +46,9 @@ never gets one.
 
 **Fix:** Set `peekaboot.dev-toolbar: true` explicitly if you are off a local run, or if you turned
 it off yourself. If it is already on and a page you expect still has no bar, check that response
-against the remaining injection rules.
-
-- The path is not under `/peekaboot/`, `/static/`, `/webjars/`, `/error/` or the management base
-  path (`/actuator/` unless you moved `management.endpoints.web.base-path`).
-- The path does not end in `.css`, `.js`, `.ico`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`,
-  `.woff`, `.woff2`, `.ttf` or `.eot`.
-- The request carries no `X-Requested-With: XMLHttpRequest` header.
-- The request was not handed over to an async dispatch.
-
-A plain `fetch()` sends no `X-Requested-With` header, so an HTML fragment loaded that way gets the
-bar like any other page. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
-
-That path exclusion follows your configured management base path. The toolbar's own `fetch`
-interceptor, the one that picks trace ids off Swagger UI calls, does not, and skips the literal
-`/actuator/` instead.
+against the remaining injection rules under [Dev toolbar, where the bar
+appears]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears): excluded path
+prefixes, an extension blocklist, the `X-Requested-With` header and async dispatch.
 
 A bar that does appear but reads
 
@@ -162,20 +150,17 @@ example.
 ## Values show as `******` and I need to see them
 
 **Cause:** most likely this is the default. Peekaboot masks a value whose key name or whose shape
-looks like a secret, on the Environment, Config, Meters and Overview tabs and in captured request
-headers, query and form parameters, span tags, SQL text and span error messages. The rules are
-key-name and value-shape matching, and they are not exhaustive in either direction. Check a value
-against the exact list on [Security: what gets masked, and
-how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) whenever something you
-expected to be hidden is visible, or something you expected to read is masked.
+looks like a secret, wherever it shows one. The rules are key-name and value-shape matching, and
+they are not exhaustive in either direction. Check a value against the exact list on [Security:
+what gets masked, and how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how)
+whenever something you expected to be hidden is visible, or something you expected to read is
+masked.
 
-**Fix:** Set `peekaboot.enable-unmasking: true`, then use the "Show
-secrets" toggle that appears on the Environment and Config tabs once it is set (it is absent
-otherwise), or add `?unmask=true` to `GET /peekaboot/api/actuator/all/insights`. Both are
-required. The property alone changes nothing, and the parameter alone is silently ignored while
-the property is `false`. This reaches that one endpoint only. Headers, query parameters, span
-tags, SQL and Micrometer meter tags (`/api/metrics` takes no `unmask` parameter at all) stay
-masked whatever you set.
+**Fix:** Set `peekaboot.enable-unmasking: true`, then use the "Show secrets" toggle that appears
+on the Environment and Config tabs, or add `?unmask=true` to
+`GET /peekaboot/api/actuator/all/insights`. Both are required, and the reveal reaches that one
+endpoint only. See [Security: two independent
+opt-ins]({{ '/docs/security/' | relative_url }}#two-independent-opt-ins-before-a-real-value-is-ever-shown).
 
 ## A trace has no logs
 

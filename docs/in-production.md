@@ -24,9 +24,9 @@ Peekaboot's store is one more destination for the same spans.
 
 - **One process only.** No joining a request across services, no aggregation across
   instances, no alerting.
-- **Short retention.** 1000 traces, then the oldest goes. Insights keeps 15 minutes at
-  10-second resolution, 24 hours at one minute and 30 days at one hour; above the first
-  level its percentiles are [percentiles of
+- **Short retention.** 1000 traces, then the oldest goes. Insights keeps 30 days at its
+  default [levels]({{ '/docs/insights/' | relative_url }}#levels), coarsening as it goes,
+  and above the first level its percentiles are [percentiles of
   aggregates]({{ '/docs/insights/' | relative_url }}#percentiles-are-percentiles-of-aggregates).
 - **No authentication of its own.** Anyone who can reach `/peekaboot/**` can read
   everything it holds. See [Securing the
@@ -100,32 +100,30 @@ dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard) and
 
 ## Tuning what it keeps and costs
 
-| Property | Default | What it decides |
-|---|---|---|
-| `peekaboot.tracing.enabled` | `true` | Whether the trace store exists |
-| `peekaboot.insights.enabled` | `true` | Whether the metric collector and charts exist |
-| `peekaboot.lifecycle.enabled` | `true` | The startup and shutdown summaries and the run history |
-| `peekaboot.dev-toolbar` | detected | The toolbar, log capture and request-detail capture |
-| `peekaboot.storage.enabled` | detected | Whether anything is written to disk |
-| `peekaboot.storage.dir` | `${user.home}/.peekaboot/<application id>` | Where those files go |
-| `peekaboot.tracing.max-traces` | `1000` | Traces kept before the oldest is evicted |
-| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace |
-| `peekaboot.tracing.max-logs-per-trace` | `500` | Log lines kept per trace, captured only with the toolbar on |
-| `peekaboot.tracing.max-error-traces` | `100` | The Errors bucket |
-| `peekaboot.tracing.max-slow-traces` | `100` | The Slow bucket |
-| `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | What counts as slow for that bucket |
-| `peekaboot.insights.levels[n].interval` / `.size` | `10s`&times;90, `1m`&times;1440, `1h`&times;720 | Chart resolution and reach |
-| `peekaboot.insights.persistence.interval` / `.max-age` | coarsest level's interval / span | How often the snapshot is written, how old it may be |
-| `peekaboot.insights.config-location` | unset | Where the panel overrides are read from |
-| `peekaboot.ui.tracing.slow-span-threshold-ms` | `100` | SLOW badge; badges, not capture |
-| `peekaboot.ui.tracing.very-slow-span-threshold-ms` | `500` | VERY_SLOW badge |
-| `peekaboot.ui.tracing.slow-query-threshold-ms` | `50` | SLOW_QUERY badge |
-| `peekaboot.ui.tracing.high-query-count-threshold` | `5` | HIGH_QUERY_COUNT, per span |
-| `peekaboot.ui.tracing.high-trace-query-count-threshold` | `20` | HIGH_QUERY_COUNT, per trace |
+Every default and type is in [Configuration]({{ '/docs/configuration/' | relative_url }}#properties);
+this is what each group decides.
+
+- [`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing):
+  `enabled` is whether the trace store exists; `max-traces`, `max-error-traces` and
+  `max-slow-traces` size the three buckets; `max-spans-per-trace` and `max-logs-per-trace`
+  cap one trace; `slow-trace-threshold-ms` decides what the Slow bucket admits.
+- [`peekaboot.ui.tracing`]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing):
+  the thresholds behind the SLOW, VERY_SLOW, SLOW_QUERY and HIGH_QUERY_COUNT issues.
+  Badges, not capture.
+- [`peekaboot.insights`]({{ '/docs/configuration/' | relative_url }}#peekabootinsights):
+  `enabled` is whether the collector and the charts exist; `levels` sets chart resolution,
+  reach and memory; `persistence.interval` and `.max-age` decide how often the snapshot is
+  written and how old it may be; `config-location` is where the panel overrides are read
+  from.
+- [`peekaboot.lifecycle.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootlifecycle):
+  the startup and shutdown summaries and the run history.
+- [`peekaboot.dev-toolbar`]({{ '/docs/configuration/' | relative_url }}#peekaboot): the
+  toolbar, log capture and request-detail capture.
+- [`peekaboot.storage`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage):
+  `enabled` is whether anything is written to disk, `dir` where.
 
 To undo one of the observability defaults above, set the property in your own
-`application.yml`: Peekaboot's defaults sit below everything you configure. See
-[Configuration]({{ '/docs/configuration/' | relative_url }}) for every property in full.
+`application.yml`: Peekaboot's defaults sit below everything you configure.
 
 ## Keeping it out of the artifact entirely
 

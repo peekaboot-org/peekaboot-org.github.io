@@ -165,8 +165,8 @@ How much history there is depends on
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
 With it on, the default for a
 [local run]({{ '/docs/configuration/' | relative_url }}#local-run), the log survives
-restarts, up to 1000 events and so roughly 500 runs. With it off the tab shows the current
-run alone, which is still a real row rather than an empty tab.
+restarts, up to the event cap stated there. With it off the tab shows the current run
+alone, which is still a real row rather than an empty tab.
 
 ## Traces
 
@@ -302,14 +302,12 @@ Peekaboot's own masking, independent of anything your application configures; yo
 security page: [what gets masked and
 how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
 
-Both tabs carry a "Show secrets" toggle, present only when `GET /peekaboot/api/features`
-reports `unmaskingEnabled: true`, itself gated behind the server-side
-`peekaboot.enable-unmasking` property, off by default. Toggling it reveals real values on
-both tabs at once, and the state isn't persisted across a reload.
+Both tabs carry a "Show secrets" toggle, present only when the server allows unmasking.
+Toggling it reveals real values on both tabs at once, and the state isn't persisted across
+a reload.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Masking here isn't exhaustive: it catches known key names and known secret shapes, not an
-arbitrary secret with no recognizable pattern. See
+Masking here isn't exhaustive. See
 [Security, masking]({{ '/docs/security/' | relative_url }}#masking) for what's covered,
 what isn't, and the two-opt-in design behind the toggle.
 </div>

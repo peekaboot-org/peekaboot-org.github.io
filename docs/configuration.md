@@ -155,7 +155,7 @@ Two files land there:
 | File | What it holds | Size |
 |---|---|---|
 | `insights.snapshot` | The insights rings, written at each `peekaboot.insights.persistence.interval` boundary and once more at shutdown. | About 5 MB at the default levels. |
-| `lifecycle.jsonl` | The start and stop history, one JSON object per line, at most 1000 events, oldest dropped first. | Typically well under 400 KB; only the event count is capped. |
+| `lifecycle.jsonl` | The start and stop history, one JSON object per line. The log keeps at most 1000 events, roughly 500 runs, oldest dropped first, in memory and on disk alike. | Typically well under 400 KB; only the event count is capped. |
 
 On a POSIX file system the directory is created `rwx------` and both files `rw-------`, owner
 only. An existing directory keeps its permissions, and on Windows the platform defaults apply.

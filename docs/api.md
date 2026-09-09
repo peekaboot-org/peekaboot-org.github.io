@@ -231,8 +231,8 @@ The `/api/lifecycle/**` endpoints back the Lifecycle tab and the restart markers
 Insights charts. Both exist while `peekaboot.lifecycle.enabled` is `true` (the default);
 with it `false` they are absent, and the tab says so. How far back they reach is
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
-With storage off the log holds the current run alone. It keeps 1000 events either way,
-roughly 500 runs.
+With storage off the log holds the current run alone; the event cap stated there applies
+either way.
 
 `GET /peekaboot/api/lifecycle/events` returns the raw start/stop log, oldest first:
 `{events: [{type, epochMs, version, branch, commitId, shortCommitId, buildTimeEpochMs,
