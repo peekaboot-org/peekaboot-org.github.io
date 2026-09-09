@@ -97,8 +97,10 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 
 ## Decisions taken deliberately
 
-- **Links into the product repo use `/blob/HEAD/`, never a branch name.** `HEAD` follows
-  whatever the default branch is and survives a rename.
+- **Links into the product repo use `/blob/HEAD/`, never a branch name.** Pages throughout
+  `docs/` write them as `{{ site.repository_url }}/blob/HEAD/...`, so they resolve against
+  whatever `origin/HEAD` currently is, never a pinned commit and never a branch name that
+  could be renamed.
 - **`theme: null` stays.** Without it GitHub Pages ships `jekyll-theme-primer`'s unused CSS
   on every deploy.
 - **Bulma is vendored, not CDN-linked.** `assets/bulma.min.css` is a committed copy: no
@@ -189,12 +191,6 @@ Everything in this repo is ready. What is left happens outside it:
 2. The `www` host is live. The apex is not: see [The custom domain](#the-custom-domain) for
    the records it would need, and enable **Enforce HTTPS** once a certificate covers
    whatever the final arrangement is.
-
-## A note on product-repo links
-
-Pages throughout `docs/` link into the product repo with `blob/HEAD/...` (e.g.
-`{{ site.repository_url }}/blob/HEAD/...`), so they always resolve against whatever
-`origin/HEAD` currently is, never a pinned commit.
 
 ## License
 
