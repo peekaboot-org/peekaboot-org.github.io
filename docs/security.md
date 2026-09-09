@@ -21,14 +21,15 @@ it off.
 This is everything, not a curated subset. If you are deciding whether Peekaboot is safe to
 enable somewhere, read all of it.
 
-- **Environment values, on a local run.** Every property source Spring resolved, key and
-  value, from Actuator's `env` endpoint. By default a value whose key or shape looks like a
+- **Environment values.** Every property source Spring resolved, key and value, read
+  through Actuator's `env` endpoint machinery. A value whose key or shape looks like a
   secret is replaced with `******` and everything else is shown verbatim (see
-  [Masking](#masking)). Off a local run every value masks, this rule set included (see
-  [actuator value visibility](#show-values-always-only-on-a-local-run)).
-- **Config property values, on a local run.** Every value bound to a
-  `@ConfigurationProperties` bean, from Actuator's `configprops` endpoint. Same masking,
-  same local-run condition.
+  [Masking](#masking)). That holds wherever `peekaboot.enabled` is `true`, on a local run
+  or off one; your own `management.endpoint.env.show-values` setting plays no part (see
+  [Actuator's `show-values` does not apply](#show-values-does-not-apply)).
+- **Config property values.** Every value bound to a `@ConfigurationProperties` bean, from
+  Actuator's `configprops` endpoint. Same masking, same independence from
+  `management.endpoint.configprops.show-values`.
 - **Health detail.** Per-component status (datasource, disk space, custom indicators), not
   just an aggregate UP/DOWN. A custom `HealthIndicator`'s detail map is masked the same way
   as everything else.
@@ -43,8 +44,8 @@ enable somewhere, read all of it.
   `GET /peekaboot/api/actuator/all/insights` and shown on the Overview tab. None of it is
   masked, network addresses included.
 - **Datasource metadata.** For every `DataSource` bean, its host or hosts and port, database
-  name, the database user, the database product and version, and the JDBC driver and
-  version, read from the connection's `DatabaseMetaData`. Only the JDBC URL's connection
+  name, the database user, the database product and version, and the JDBC driver's name,
+  read from the connection's `DatabaseMetaData`. Only the JDBC URL's connection
   parameters go through masking. The user name, host and database name are shown verbatim.
 - **Scheduled tasks' last failure.** For every `@Scheduled` task, alongside its schedule and
   last and next execution time, the last execution's exception type and message exactly as
@@ -104,13 +105,12 @@ enable somewhere, read all of it.
   [Insights]({{ '/docs/insights/' | relative_url }}).
 
 The dashboard's actuator-backed tabs are served by
-`GET /peekaboot/api/actuator/all/insights`, which invokes a fixed set of Actuator endpoints
-per call (`health`, `info`, `env`, `loggers`, `flyway`, `configprops`, `scheduledtasks`; an
-endpoint the application does not have is not called). That is the whole actuator
-surface Peekaboot exposes over HTTP. See [HTTP API]({{ '/docs/api/' | relative_url }}) for
-the full endpoint list. It is also a cost. `env` and `configprops` are not free on a large
-application, and without a `SecurityFilterChain` in front of `/peekaboot/**` anyone who can
-reach it can ask for all of them as often as they like.
+`GET /peekaboot/api/actuator/all/insights`, one call that reads every source listed under
+[HTTP API, what `insights` adds]({{ '/docs/api/' | relative_url }}#what-insights-adds).
+That is the whole actuator surface Peekaboot exposes over HTTP. It is also a cost. `env` and
+`configprops` are not free on a large application, and without a `SecurityFilterChain` in
+front of `/peekaboot/**` anyone who can reach it can ask for all of them as often as they
+like.
 
 ## What Peekaboot writes to disk
 
@@ -142,14 +142,17 @@ both files somewhere you control.
 
 ## What Peekaboot does not do
 
-Peekaboot never exposes raw Actuator endpoints over HTTP. It calls each endpoint in-process,
-so no `management.endpoints.web.exposure` configuration is needed, none is added, and nothing
-on `/actuator/**` changes. Which endpoints it serves, and what they answer, is the same with
-or without Peekaboot. To make the endpoint beans exist at all, Peekaboot marks every endpoint
-as available while `peekaboot.enabled` is `true`, but that never reaches the `/actuator/**`
-HTTP mapping, which applies your own `include`/`exclude` settings independently. With
-Spring's defaults, `/actuator/health` alone stays reachable over HTTP while the dashboard has
-full data on everything else.
+Peekaboot never exposes raw Actuator endpoints over HTTP. It builds its own `info`, `env`,
+`configprops`, `loggers`, `flyway` and `scheduledtasks` endpoint objects and reads them
+in-process, so no `management.endpoints.web.exposure` configuration is needed, none is
+added, and nothing on `/actuator/**` changes. Which endpoints your application serves, and
+what they answer, is the same with or without Peekaboot. Health is the one endpoint
+Peekaboot borrows rather than builds. So that its bean exists, Peekaboot marks the health
+endpoint as available while `peekaboot.enabled` is `true`, but that never reaches the
+`/actuator/**` HTTP mapping, which applies your own `include`/`exclude` settings
+independently. With Spring's defaults, `/actuator/health` alone stays reachable over HTTP
+while the dashboard has full data on everything else. `management.endpoint.health.access:
+none` still removes that bean, and the dashboard's health data with it.
 
 With Peekaboot off there is nothing under `/peekaboot/**` at all, the UI assets included. The
 dashboard bundle ships at `classpath:/META-INF/peekaboot/ui/`, outside every location Spring
@@ -166,7 +169,7 @@ registers no default one**. An application has to declare its own `@Bean Sanitiz
 for any of that machinery to run at all.
 
 Peekaboot does not rely on it. It ships its own masking engine and applies it, on by default,
-everywhere a value could carry a secret:
+in addition to whatever your application declares, everywhere a value could carry a secret:
 
 - `@ConfigurationProperties` values (Config tab) and environment property values
   (Environment tab).
@@ -179,7 +182,9 @@ everywhere a value could carry a secret:
   site that writes to your log rather than to HTTP.
 
 There is nothing to configure to get this. It is the default, and it runs whether or not your
-application declares a `SanitizingFunction` of its own.
+application declares a `SanitizingFunction` of its own. One you do declare runs as well,
+inside Peekaboot's `env` and `configprops` reads, so a value it masks reaches Peekaboot
+already as `******`.
 
 ### What gets masked, and how {#what-gets-masked-and-how}
 
@@ -230,9 +235,8 @@ parameter name rather than the shell variable the exemption was written for.
 Bare `key` and bare `certificate` are deliberately absent. They would catch
 `spring.jpa.key-generator`, `server.ssl.key-store` and `server.ssl.certificate`, which name
 filesystem paths rather than secrets, and that is exactly the kind of over-masking that makes
-a dashboard useless. Nothing compensates for the gap. A PEM private key held in a property
-whose name no rule word catches is displayed in full: the value-shape pattern below replaces
-the `-----BEGIN … PRIVATE KEY-----` header and leaves the key body alone.
+a dashboard useless. Nothing compensates for the gap by key name. A PEM private key held
+under such a key is still caught, by the value-shape pattern below.
 
 A key whose *last* token is `uri` or `url` names an address rather than a secret, so the word
 list is not applied to it. Only the four inherited patterns above still are. That is what
@@ -251,13 +255,13 @@ credential carried *inside* such a URL is caught by value shape: an `?access_tok
 A JDBC URL's `password=` parameter is the canonical case. A small set of high-precision,
 provider-prefixed patterns catches a JWT, an AWS, GitHub, GCP, Slack, Stripe, OpenAI or
 Anthropic key, and credentials embedded in a URL's userinfo (`user:pass@host`, including
-Oracle's `jdbc:oracle:thin:user/password@host` form). One further pattern matches the
-`-----BEGIN … PRIVATE KEY-----` header of a PEM block. **It masks that header line and
-nothing else.** The pattern cannot cross a newline and gives up after 100 characters, so the
-base64 key body that follows the header is printed verbatim. Two more shapes carry no word
-list of their own: a URL's query or `;`-separated parameters (`?password=...`, `;pwd=...`) and
-the `-Dname=value` / `--name=value` options in a value such as `JAVA_TOOL_OPTIONS` or
-`JDK_JAVA_OPTIONS`. Each parameter or option is judged by its name against the key-name list
+Oracle's `jdbc:oracle:thin:user/password@host` form). One further pattern matches a PEM
+private key block, from its `-----BEGIN … PRIVATE KEY-----` header through its
+`-----END … PRIVATE KEY-----` footer, newlines included. A block whose footer is missing
+masks to the end of the value, and two adjacent blocks mask separately. Two more shapes
+carry no word list of their own: a URL's query or `;`-separated parameters
+(`?password=...`, `;pwd=...`) and the `-Dname=value` / `--name=value` options in a value
+such as `JAVA_TOOL_OPTIONS` or `JDK_JAVA_OPTIONS`. Each parameter or option is judged by its name against the key-name list
 above, so a name that masks as a property masks here too, its value blacked out and the name
 left readable. Both of those shapes need their marker: a bare `password=hunter2` with no
 leading `?`, `&`, `;`, `-D` or `--` is not a parameter and is not masked. Only the matched
@@ -270,11 +274,9 @@ is not described here, it is not covered.
 <div class="pk-callout pk-callout--warning" markdown="1">
 **This is not exhaustive, and there is no entropy detection.** Key-name rules plus a bounded
 set of value-shape patterns catch the common, recognisable cases. They cannot catch a
-credential with no recognisable shape sitting under a key that is not listed above. **A PEM
-private key in a property value is the sharpest case.** Unless its key name carries a rule
-word such as `private-key`, only the `-----BEGIN` header masks and the key material itself is
-shown on the Environment and Config tabs. A literal in an ordinary-looking column
-(`INSERT INTO users (password) VALUES ('hunter2')`) is not masked either, because "hunter2"
+credential with no recognisable shape sitting under a key that is not listed above. A
+literal in an ordinary-looking column
+(`INSERT INTO users (password) VALUES ('hunter2')`) is not masked, because "hunter2"
 matches no provider pattern and SQL-text masking is value-shape-only, never column-aware.
 There is no entropy detection because flagging any high-randomness string would destroy
 legitimate values on screen, a git SHA, a UUID or a base64-encoded asset among them. Assume
@@ -324,54 +326,23 @@ the sample application's placeholder password, already public in its `compose.ym
 matters is the two steps it took to get there: a server-side property Peekaboot ships off by
 default, *and* a click nobody makes by accident.
 
-### `show-values: always` only on a local run {#show-values-always-only-on-a-local-run}
+### Actuator's `show-values` does not apply {#show-values-does-not-apply}
 
-`management.endpoint.env.show-values` and `.configprops.show-values` are set to `always` only
-on a local run, by the same detection that resolves `peekaboot.enabled` and
-`peekaboot.dev-toolbar` (see [Configuration, when Peekaboot is
-on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on)), and below everything
-you configure yourself. Off a local run neither property is set at all, so Spring's own
-default (`never`) applies.
-
-On a local run it is kept at `always` for a structural reason. Spring Boot 4.1 registers no
-default `SanitizingFunction` regardless of `show-values`, so leaving Spring's own default in
-place would not hand masking over to Spring. It would return `******` for *every* property
-unconditionally, harmless ones like `server.port` included, and would leave Peekaboot's own
-masking engine with no real value to inspect or, later, reveal. Controlled unmasking would
-then have nothing to unmask either. `show-values: always`, on a local run, is what lets
-Peekaboot's engine see real values and decide correctly what to show.
-
-<div class="pk-callout pk-callout--warning" markdown="1">
-**Off a local run, every property masks, not just the ones that look like secrets.** Peekaboot
-calls the same `env`/`configprops` endpoint beans in-process that `show-values` governs (see
-[What Peekaboot does not do](#what-peekaboot-does-not-do)). With the property unset, Spring's
-own `never` default makes those beans return `******` for every value before Peekaboot's
-masking engine ever sees a real one, `server.port` included. Turning `peekaboot.enabled` on
-deliberately in a shared environment does not widen what the dashboard's Environment and
-Config tabs show there. It gets a dashboard, and those two tabs are masked outright, the same
-as on any other Spring Boot application with `show-values` left at its default.
-</div>
-
-<div class="pk-callout pk-callout--warning" markdown="1">
-**The accepted cost, confined to a local run.** On a local run, `show-values: always` also
-widens your own application's `/actuator/env` and `/actuator/configprops` endpoints if you
-expose them over HTTP yourself, independently of Peekaboot. Peekaboot's masking has no part in
-that path at all; it only ever runs inside Peekaboot's own `/peekaboot/**` surface. Off a
-local run the property is not set, so turning `peekaboot.enabled` on in a shared environment
-does **not** widen those endpoints as a side effect. Spring's own default governs them there,
-the same as if Peekaboot were not installed. If you expose those actuator endpoints yourself
-and want them masked even on your own machine, set `management.endpoint.env.show-values` (and
-`.configprops.show-values`) to `never` explicitly in your own configuration, which overrides
-Peekaboot's lowest-precedence default.
-</div>
+Peekaboot reads `env` and `configprops` through endpoint objects it builds itself, with
+values always shown, so `management.endpoint.env.show-values` and
+`.configprops.show-values` have no effect on the dashboard in either direction. Setting
+them to `never` does not blank the Environment and Config tabs; what those tabs mask is
+Peekaboot's own engine's decision alone. Peekaboot never sets either property for you, so
+your own `/actuator/env` and `/actuator/configprops` stay exactly as you configured them,
+on a local run as anywhere else. Turning `peekaboot.enabled` on in a shared environment
+therefore gets a dashboard whose Environment and Config tabs show real values, masked by
+the rules above, and widens nothing on `/actuator/**`.
 
 ### What is left unmasked entirely
 
 - **Log message content**, wherever it is captured. Peekaboot's log capture copies whatever
   your logging statements produced, unmodified. There is no masking pass over log messages, by
   key or by shape.
-- **A PEM private key body**, under any key name the word list does not catch. Only its
-  `-----BEGIN` header masks.
 - Anything a value-shape rule does not recognise and no key name catches. See the callout
   above.
 
@@ -561,9 +532,9 @@ process.
       but turning it on lets anyone who can reach `/peekaboot/**` and add `?unmask=true`
       reveal them too.
 - [ ] Do not treat masking as complete. It catches known key names and known secret shapes
-      (JWT, common cloud-provider key prefixes, credentials in a URL). It does not catch an
-      arbitrary secret with no recognisable shape, the body of a PEM private key, or log
-      message content at all. Assume every captured trace can still contain plaintext SQL
+      (JWT, common cloud-provider key prefixes, credentials in a URL, a PEM private key).
+      It does not catch an arbitrary secret with no recognisable shape, or log message
+      content at all. Assume every captured trace can still contain plaintext SQL
       and, with the dev toolbar on, plaintext headers and query and form parameters. Do not
       point Peekaboot at traffic carrying secrets you cannot afford to have held in memory and
       displayed.
