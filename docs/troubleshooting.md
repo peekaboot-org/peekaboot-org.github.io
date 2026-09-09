@@ -71,8 +71,7 @@ Peekaboot toolbar could not start — sign in, or check that its script is allow
 is the opposite situation. Injection worked, and the script that fills the bar in was refused.
 Either security in front of `/peekaboot/**` wants the reader to sign in, or a strict
 `Content-Security-Policy` (a `script-src` that only honours nonces) is blocking the script
-outright. For the latter, allow `/peekaboot/ui/toolbar/toolbar.js` in your `script-src`, or give
-it your nonce. See
+outright. For the latter, allow `/peekaboot/ui/toolbar/toolbar.js` in your `script-src`. See
 [Security]({{ '/docs/security/' | relative_url }}#the-dev-toolbar-asks-the-reader-to-sign-in).
 
 ## Peekaboot is off inside `@SpringBootTest`
@@ -136,7 +135,7 @@ visible in that state on purpose, so an absent subsystem is something you can se
 
 A third case looks like the first. Your own `peekaboot-insights.yml` failed validation and was
 dropped, so the tab shows the bundled defaults instead of your panels. That is always logged at
-`ERROR` on startup; grep for `Ignoring invalid insights panel config`.
+`ERROR` on startup; grep for `is invalid; discarding it entirely`.
 
 **Fix:** For a missing tab, check `peekaboot.insights.enabled` and the `metrics` flag alongside
 `insights`. For "No data" on a panel you expect data from, look the meter up on the Meters tab
@@ -170,25 +169,13 @@ against the exact list on [Security: what gets masked, and
 how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) whenever something you
 expected to be hidden is visible, or something you expected to read is masked.
 
-If **every** value on the Environment or Config tab reads `******`, you are off a local run.
-Peekaboot sets `show-values: always` only on one, and Spring replaces every value before
-Peekaboot's rules ever see it. `enable-unmasking` does nothing here, because there is no real
-value behind the mask. See [Security: `show-values: always` only on a local
-run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
-
-**Fix (a recognisable secret):** Set `peekaboot.enable-unmasking: true`, then use the "Show
+**Fix:** Set `peekaboot.enable-unmasking: true`, then use the "Show
 secrets" toggle that appears on the Environment and Config tabs once it is set (it is absent
 otherwise), or add `?unmask=true` to `GET /peekaboot/api/actuator/all/insights`. Both are
 required. The property alone changes nothing, and the parameter alone is silently ignored while
 the property is `false`. This reaches that one endpoint only. Headers, query parameters, span
 tags, SQL and Micrometer meter tags (`/api/metrics` takes no `unmask` parameter at all) stay
 masked whatever you set.
-
-**Fix (off a local run):** Set `management.endpoint.env.show-values` and
-`management.endpoint.configprops.show-values` to `always` yourself. An explicit setting wins over
-Peekaboot's own detection in either direction, so this works anywhere. Do it only if you intend
-those two tabs to show real values somewhere other than your own machine. The same two properties
-widen the host's own `/actuator/env` and `/actuator/configprops`.
 
 ## A trace has no logs
 
