@@ -1,6 +1,6 @@
 {%- capture page_title -%}{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} · {{ site.tagline }}{% endif %}{%- endcapture -%}
 {%- assign page_title = page_title | escape -%}
-{%- assign page_description = page.description | default: site.description | escape -%}
+{%- assign page_description = page.description | default: page.lead | default: site.description | escape -%}
 {%- assign social_image = '/assets/img/social/og.png' | absolute_url -%}
 {%- capture social_image_alt -%}The Peekaboot logo mark beside the wordmark, the tagline Embedded application introspection for Spring Boot, and the Maven coordinate org.peekaboot:peekaboot-spring-boot-starter{%- endcapture -%}
 <meta charset="utf-8">

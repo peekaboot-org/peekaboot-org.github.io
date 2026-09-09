@@ -263,25 +263,3 @@ your mind without touching application code.
 stack into one container for a local trial.
 
 Spring Boot already speaks to all of them, and adding Peekaboot costs you none of it.
-
-### Why Peekaboot still earns its place
-
-Not as a smaller backend. As a different tool for the ten seconds after you hit a page:
-
-- **Nothing to run first.** No collector, no agent, no container, no dashboard to build.
-  Add the dependency, start the app, and the trace of the request you just made is there. A backend a developer has to stand up before it shows them anything
-  is a backend most developers will not stand up.
-- **It is on the page you are already looking at.** The [dev
-  toolbar]({{ '/docs/dev-toolbar/' | relative_url }}#the-trace-view) puts the current
-  request's spans, queries and logs at the bottom of that page.
-- **More detail per request than a backend keeps.** Full request and response headers,
-  query and form parameters, the resolved controller method, SQL text, and every log line
-  correlated to the span that emitted it. Sampling defaults to 1.0 (see
-  [Configuration]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application))
-  because in-process capture has no per-span bill; backends sample for cost, and the
-  request you cared about is often the one they dropped.
-- **It stays out of production.** Peekaboot defaults off outside a [local
-  run]({{ '/docs/configuration/' | relative_url }}#local-run). Production observability is
-  the backend's job, and it is good at it.
-
-Peekaboot while you write the code, a backend once the system runs somewhere you are not.

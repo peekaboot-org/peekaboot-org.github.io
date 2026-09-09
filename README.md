@@ -4,8 +4,10 @@ Source for the [Peekaboot](https://github.com/peekaboot-org/peekaboot) documenta
 built with Jekyll and published via GitHub Pages.
 
 GitHub Pages builds this repository natively: push to `main` and Pages runs its own pinned
-Jekyll toolchain against it directly. There is no GitHub Actions workflow and no Node
-tooling anywhere in the pipeline. `Gemfile` exists only to mirror that toolchain for local
+Jekyll toolchain against it directly. `main` is the site's only long-lived branch. Unlike the
+product repo it has no `dev`; a docs branch merges straight into `main` and is live once
+Pages has rebuilt. There is no GitHub Actions workflow and no Node tooling anywhere in the
+pipeline. `Gemfile` exists only to mirror that toolchain for local
 preview, and is excluded from the built site (see `exclude:` in `_config.yml`).
 
 ## The custom domain
@@ -93,7 +95,7 @@ sidebar's current-page highlight (`aria-current="page"`, driven by `page.url == 
 
 When a page is merged into another, keep its old URL alive with `redirect_from` in the
 surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml`).
-`docs/traces.md` and `docs/configuration.md` both use it.
+`docs/quick-start.md`, `docs/traces.md` and `docs/configuration.md` all use it.
 
 ## Decisions taken deliberately
 
@@ -115,8 +117,7 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
   `data-theme` attribute. `assets/site.js` loads synchronously in `<head>` so the theme
   applies before first paint. Do not add `defer`.
 - **Honest limits are stated on purpose.** Masking is not exhaustive and has no entropy
-  detection. `show-values: always` on a local run widens the host's own actuator endpoints.
-  Peekaboot has no authentication of its own, sees one process, captures log content
+  detection. Peekaboot has no authentication of its own, sees one process, captures log content
   unmasked, and its insights percentiles are percentiles of aggregates rather than real
   percentiles. Every one of those caveats is load-bearing. Tighten the wording if you like;
   do not turn any of them into a promise.
@@ -125,7 +126,7 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 
 | Change | Pages to revisit |
 | --- | --- |
-| Any masking rule | `docs/security.md`, `docs/configuration.md` |
+| Any masking rule | `docs/security.md` |
 | A new or renamed property, or one of Peekaboot's defaults | `docs/configuration.md`, `docs/in-production.md` |
 | Activation conditions | `docs/configuration.md` (*When Peekaboot is on*), `docs/in-production.md`, `docs/quick-start.md`, `docs/security.md` |
 | An API endpoint or parameter | `docs/api.md` |
@@ -178,19 +179,19 @@ python3 generate_social.py && python3 verify_social.py
 
 `generate_social.py` derives everything from `peekaboot-logo-favicon.png`. The mark is a
 two-colour blend of `#66b327` and `#263238`, so it recolours for dark surfaces by lifting
-the ink to `#e6edf3` — the same swap `logo-mark-dark.png` already makes, applied at full
+the ink to `#e6edf3`, the same swap `logo-mark-dark.png` already makes, applied at full
 resolution. The cards themselves are laid out in `social_card.html` in the dark-theme
 tokens from `tokens.css` and screenshotted by headless Chromium at the exact target size;
 `verify_social.py` then checks every output's dimensions, background and alpha.
 
 | File | Size | Where it goes |
 | --- | --- | --- |
-| `social/og.png` | 1200×630 | `og:image` — X, LinkedIn, Facebook, Slack, Discord, Mastodon, Bluesky |
+| `social/og.png` | 1200×630 | `og:image`, read by X, LinkedIn, Facebook, Slack, Discord, Mastodon and Bluesky |
 | `social/github-social-preview.png` | 1280×640 | GitHub repo and org *Settings → Social preview* |
 | `social/x-header.png` | 1500×500 | X profile banner |
 | `social/linkedin-cover.png` | 1128×191 | LinkedIn page cover |
 | `social/avatar-512.png` | 512×512 | Avatar for light chrome; transparent |
-| `social/avatar-512-dark.png` | 512×512 | Avatar for dark chrome — GitHub dark, Discord, Mastodon |
+| `social/avatar-512-dark.png` | 512×512 | Avatar for dark chrome: GitHub dark, Discord, Mastodon |
 | `apple-touch-icon.png` | 180×180 | `rel="apple-touch-icon"`; opaque, since iOS composites it |
 | `icon-192.png`, `icon-512.png` | 192, 512 | `rel="icon"` |
 

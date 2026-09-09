@@ -1,9 +1,10 @@
 ---
 layout: default
 ---
+<a class="pk-skip-link" href="#main">Skip to content</a>
 <div class="pk-layout">
   {% include sidebar.html %}
-  <main class="pk-content content">
+  <main id="main" class="pk-content content" tabindex="-1">
     <h1 class="title is-2">{{ page.title }}</h1>
     {% if page.lead %}<p class="subtitle is-5">{{ page.lead }}</p>{% endif %}
     {{ content }}

@@ -43,6 +43,22 @@ a:hover,
     color: var(--pk-link-hover);
 }
 
+/* The sidebar's links precede <main> on every doc page; keyboard users get one jump past
+   them. Off-screen until focused, so sighted mouse users never see it. */
+.pk-skip-link {
+    position: absolute;
+    top: 0.5rem;
+    left: -999px;
+    z-index: 100;
+    padding: 0.5rem 1rem;
+    background: var(--bulma-scheme-main);
+    color: var(--pk-link);
+}
+
+.pk-skip-link:focus {
+    left: 0.5rem;
+}
+
 /* Layout: fixed navbar, sticky sidebar, readable measure for prose. */
 .pk-layout {
     display: flex;

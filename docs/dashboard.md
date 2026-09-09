@@ -227,7 +227,7 @@ banner above them. Backed by Actuator's `env` endpoint.
        loading="lazy">
   <figcaption class="has-text-grey is-size-7">Revealed, after
   <code>peekaboot.enable-unmasking</code> is on <em>and</em> Show secrets is clicked. See
-  <a href="{{ '/docs/security/#masking' | relative_url }}">Security: masking</a> for the
+  <a href="{{ '/docs/security/' | relative_url }}#masking">Security: masking</a> for the
   two-opt-in design and why this particular value is safe to publish.</figcaption>
 </figure>
 
