@@ -47,8 +47,9 @@ expands a jar's `Class-Path` manifest entry, which rejects a Jib image (class pa
 `/app/resources:/app/classes:/app/libs/*`) and Spring Boot's `extract` layout (a thin jar on the
 class path). Both fail on the class path whether or not a container is involved.
 
-Under Spring Boot DevTools the restart runs on DevTools' own class loader, and Peekaboot then
-checks the container marker alone.
+Under Spring Boot DevTools the restart runs on DevTools' own class loader. Peekaboot skips the
+thread, class-loader and stack checks there and applies the class-path and container checks
+alone.
 
 Not a local run, so everything off by default: `java -jar`, a war, a native image, an AOT run,
 a test, anything with a container marker. A bare `java -cp target/classes:…` on a host with no
@@ -77,19 +78,6 @@ peekaboot:
   storage:
     enabled: true
 ```
-
-The two `show-values` defaults do not follow `peekaboot.enabled`. Peekaboot writes them only
-on a local run and leaves the keys untouched anywhere else, so set them yourself and your
-value stands:
-
-```yaml
-management.endpoint.env.show-values: always
-management.endpoint.configprops.show-values: always
-```
-
-Read [`show-values: always` only on a local
-run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run) first: it
-widens your own `/actuator/env` and `/actuator/configprops`, not only the dashboard.
 
 Tests count as not local on purpose, so CI never picks up the dashboard, the toolbar and the
 observability defaults by accident. A test that needs Peekaboot says so:
@@ -140,9 +128,8 @@ the run history still run in memory; storage decides whether the history is writ
 request or response bodies. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
 
 `enable-unmasking` changes nothing on its own. It allows the `unmask=true` parameter on
-`GET /peekaboot/api/actuator/all/insights` and makes the "Show secrets" toggle appear. Whether
-those values are readable at all follows the launch context: off a local run every Environment
-and Config value is `******`. See [Masking]({{ '/docs/security/' | relative_url }}#masking).
+`GET /peekaboot/api/actuator/all/insights` and makes the "Show secrets" toggle appear. See
+[Masking]({{ '/docs/security/' | relative_url }}#masking).
 
 ### `peekaboot.storage`
 
@@ -178,8 +165,8 @@ can't read it, when it no longer matches your `peekaboot.insights.levels`, when 
 `peekaboot.insights.persistence.max-age` or when it is dated more than five minutes in the
 future, and the rings start empty. A `lifecycle.jsonl` line that fails to parse or carries no
 event type is skipped; the rest of the file still loads. A failed write is logged and everything
-carries on in memory, the insights snapshot warning once per run and the lifecycle log on every
-failed write, at most twice. Two instances on the same `dir` overwrite each other's history.
+carries on in memory, each file warning once per run. Two instances on the same `dir`
+overwrite each other's history.
 
 ### `peekaboot.lifecycle`
 
@@ -281,24 +268,17 @@ a bean of the same type; two match on bean name instead, so replacing
 | `management.info.os.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | The System card on Overview. |
 | `management.info.process.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | PID, uptime, CPU count and memory on Overview. |
 | `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | `@Observed`, `@Timed` and `@Counted` work without extra wiring. |
-| `management.endpoint.env.show-values` | `never` | `always` | local run, `peekaboot.enabled`, servlet web application | Otherwise the Environment tab shows `******` for every property, `server.port` included; Peekaboot's own masking runs over the real values instead. |
-| `management.endpoint.configprops.show-values` | `never` | `always` | local run, `peekaboot.enabled`, servlet web application | The same, for the Config tab. |
 | `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | `peekaboot.enabled`, servlet web application, dev toolbar on | Spring Boot's span export delay is what separates a span ending from the toolbar seeing it; shortened so a trace is readable while you are still on the page. |
 
-Anywhere but a local run Peekaboot leaves both `show-values` keys unset, so Spring's default
-governs unless you [set them yourself](#local-run). Setting `peekaboot.enabled: false` on your
-own machine keeps them off.
-
 Traces and logs need no export switch, because Spring Boot only creates OTLP exporters for them
-once you configure an endpoint. Nothing on `/actuator/**` changes; Peekaboot reads Actuator
-in-process and adds no exposure of its own.
+once you configure an endpoint. Nothing under `management.endpoint.*` is set and nothing on
+`/actuator/**` changes: Peekaboot builds its own endpoint objects and reads them in-process,
+so none of your endpoint settings decide what the dashboard sees, and it adds no exposure of
+its own. See [Security]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 **Some of these widen what is exposed, or cost something at runtime:**
 
-- `show-values: always`, on a local run, also widens your own `/actuator/env` and
-  `/actuator/configprops` if you expose them over HTTP. Peekaboot's masking runs only inside
-  `/peekaboot/**`. See [Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
 - `management.info.env.enabled: true` publishes `info.*` through `/actuator/info` if you
   expose that endpoint.
 - Sampling at `1.0` traces every request, for every exporter you have configured.
