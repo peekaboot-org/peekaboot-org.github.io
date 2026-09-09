@@ -13,17 +13,12 @@ first. It is not a smaller Grafana. Past one process you want a real tracing bac
 tracing]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing) marks where
 the line falls.
 
-Actuator's data is read in-process, so Peekaboot changes neither
-`management.endpoints.web.exposure` nor what `/actuator/**` answers. Micrometer's OTLP
-metrics push is switched off, so telemetry never leaves the process by accident. Your own
-OTLP or Zipkin exporters and sampling configuration keep working: Peekaboot's store is one
-more destination for the same spans.
-
-One exception, confined to a [local run]({{ '/docs/configuration/' | relative_url }}#local-run):
-there Peekaboot sets `management.endpoint.env.show-values` and `.configprops.show-values`
-to `always`, which widens your own `/actuator/env` and `/actuator/configprops` too if you
-expose them. See
-[Security]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
+Actuator's data is read in-process, through endpoint objects Peekaboot builds itself, so
+Peekaboot changes neither `management.endpoints.web.exposure` nor what `/actuator/**`
+answers, and none of your `management.endpoint.*` settings decide what the dashboard sees.
+Micrometer's OTLP metrics push is switched off, so telemetry never leaves the process by
+accident. Your own OTLP or Zipkin exporters and sampling configuration keep working:
+Peekaboot's store is one more destination for the same spans.
 
 ## What it cannot do
 
@@ -96,10 +91,10 @@ it off. See [keeping it out entirely](#keeping-it-out-of-the-artifact-entirely).
 
 Set `peekaboot.enabled=true` explicitly; the toolbar and disk storage stay off unless you
 set them too. Put a `SecurityFilterChain` on `/peekaboot/**` in place first, restrict
-network reach as well, and leave `peekaboot.enable-unmasking=false`. Off a local run every
-Environment and Config value reads `******`, `server.port` included, unless you set
-`management.endpoint.env.show-values` yourself. Masking is not exhaustive: log content and
-SQL literals go through unmasked. See [Securing the
+network reach as well, and leave `peekaboot.enable-unmasking=false`. The Environment and
+Config tabs show real values there, masked by Peekaboot's own rules alone; your
+`show-values` settings do not apply to them. Masking is not exhaustive: log content and SQL
+literals go through unmasked. See [Securing the
 dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard) and
 [Masking]({{ '/docs/security/' | relative_url }}#masking).
 
