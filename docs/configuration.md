@@ -34,7 +34,7 @@ A **local run** is a launch Peekaboot reads as development on your own machine: 
 - The stack that started the application carries no test or AOT frame: `org.junit.runners.`,
   `org.junit.platform.`, `org.springframework.boot.test.`,
   `org.springframework.boot.SpringApplicationAotProcessor`, `cucumber.runtime.`.
-- `java.class.path` contains a build-output directory: an entry ending `/target/classes`,
+- The class path contains a build-output directory: an entry ending `/target/classes`,
   `/build/classes/java/main`, `/build/classes/kotlin/main`, `/build/classes/groovy/main`,
   `/build/classes/scala/main` or `/bin/main`, or containing `/out/production/`.
 - No container marker is present.
@@ -42,10 +42,16 @@ A **local run** is a launch Peekaboot reads as development on your own machine: 
 
 The first two conditions reject a packaged artifact. `java -jar` runs under Spring Boot's own
 launcher class loader, a war under the servlet container's webapp loader, and neither name
-contains `AppClassLoader`. The class-path condition reads `java.class.path` alone and never
-expands a jar's `Class-Path` manifest entry, which rejects a Jib image (class path
-`/app/resources:/app/classes:/app/libs/*`) and Spring Boot's `extract` layout (a thin jar on the
-class path). Both fail on the class path whether or not a container is involved.
+contains `AppClassLoader`.
+
+The class-path condition reads `java.class.path` and, for each entry ending `.jar`, the
+`Class-Path` entries in that jar's manifest, resolved against the jar's own directory. Both
+face the same build-output test. IntelliJ shortens a long command line by moving the real class
+path into a temp jar's manifest, and Peekaboot would otherwise stay off with no message.
+
+This rejects a Jib image (class path `/app/resources:/app/classes:/app/libs/*`) and Spring
+Boot's `extract` layout, whose thin jar lists only jars in its manifest. Both fail on the class
+path whether or not a container is involved.
 
 Under Spring Boot DevTools the restart runs on DevTools' own class loader. Peekaboot skips the
 thread, class-loader and stack checks there and applies the class-path and container checks
