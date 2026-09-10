@@ -140,8 +140,8 @@ rather than the server.
 
 For traces, `insights` assembles the spans into a tree, folds duplicates from
 double-instrumented layers into one, detects and attaches issues like `SLOW` or
-`HIGH_QUERY_COUNT` (see [Traces]({{ '/docs/traces/' | relative_url }}#issues)), and
-attaches correlated logs to the spans that emitted them.
+`SLOW_QUERY` (see [Traces]({{ '/docs/traces/' | relative_url }}#issues)), and attaches
+correlated logs to the spans that emitted them.
 
 The list response is `{traces, bucketCounts, filteredBucketCounts}`, each count being
 `{all, errors, slow}`. `bucketCounts` is what the store holds; `filteredBucketCounts` is

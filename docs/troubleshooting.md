@@ -136,14 +136,11 @@ first. If it is not in the registry, no series can resolve it. See
 duplicate folding, so folded duplicates never push a trace over it. Once the distinct span count
 crosses the cap, the spans stored first are dropped at write time to make room for later ones. An
 endpoint that really runs more than 500 distinct queries in one request loses whole queries before
-they are counted, which undercounts the totals and can suppress the `HIGH_QUERY_COUNT` warning on
-a trace that deserves it. The trace is flagged `truncated` when that happens, shown as a
-`TRUNCATED` badge, and the flag is never cleared. Without the badge the count is not truncated,
-and a low number is the endpoint's real behaviour.
+they are counted, which undercounts the row's query stat. The trace is flagged `truncated` when
+that happens, shown as a `TRUNCATED` badge, and the flag is never cleared. Without the badge the
+count is not truncated, and a low number is the endpoint's real behaviour.
 
-**Fix:** Raise `peekaboot.tracing.max-spans-per-trace`, not the query-count thresholds below it.
-Lowering those does not fix an undercount; it makes the wrong number trigger a warning sooner. See
-[Configuration: query-heavy
+**Fix:** Raise `peekaboot.tracing.max-spans-per-trace`. See [Configuration: query-heavy
 application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application) for a worked
 example.
 

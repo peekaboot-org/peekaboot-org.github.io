@@ -213,8 +213,7 @@ true. Otherwise the line is omitted rather than printed as a 404.
 | `slow-trace-threshold-ms` | long | `1000` | Total duration at or above which a trace enters the Slow bucket. |
 | `max-logs-per-trace` | int | `500` | Correlated log entries kept per trace; only populated while the dev toolbar is on. |
 
-See [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets) for the three buckets
-and [Issues]({{ '/docs/traces/' | relative_url }}#issues) for what `HIGH_QUERY_COUNT` checks.
+See [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets) for the three buckets.
 
 ### `peekaboot.ui.tracing`
 
@@ -226,8 +225,6 @@ These drive the dashboard's issue detection and badges, not what gets captured. 
 | `slow-span-threshold-ms` | long | `100` | A span's own duration at or above this gets the SLOW issue and the SLOW badge on its trace row. |
 | `very-slow-span-threshold-ms` | long | `500` | At or above this a span gets VERY_SLOW instead of SLOW; a span never gets both. |
 | `slow-query-threshold-ms` | long | `50` | A database query span at or above this gets SLOW_QUERY; the trace detail's Queries tab labels a query SLOW at this same threshold, not the span thresholds above. |
-| `high-query-count-threshold` | int | `5` | Direct database-query children one span may have before HIGH_QUERY_COUNT. |
-| `high-trace-query-count-threshold` | int | `20` | Database queries a whole trace may run before HIGH_QUERY_COUNT, even if no single span crosses the threshold above. |
 
 ### `peekaboot.insights`
 
@@ -348,21 +345,15 @@ query-heavy workload.
 ### Query-heavy application
 
 Some endpoints issue hundreds of queries by design, a report or a bulk export. They need span
-capacity for those queries to survive truncation, and thresholds that do not flag normal
-behaviour. The default cap of 500, counted after duplicates are folded away, covers most of
-them. If the trace list shows a `TRUNCATED` badge on this endpoint, raise it:
+capacity for those queries to survive truncation, or the row's query stat under-reports them.
+The default cap of 500, counted after duplicates are folded away, covers most of them. If the
+trace list shows a `TRUNCATED` badge on this endpoint, raise it:
 
 ```yaml
 peekaboot:
   tracing:
     max-spans-per-trace: 1500
-  ui:
-    tracing:
-      high-query-count-threshold: 15
-      high-trace-query-count-threshold: 60
 ```
 
-Raise `max-spans-per-trace` first, and only once the `TRUNCATED` badge shows truncation is real.
-Raise the UI thresholds after that, only as far as what is normal here. Both count strictly, so
-`15` means the sixteenth direct query child trips the issue. Set them too high and a genuine
-regression stops triggering HIGH_QUERY_COUNT.
+Raise it only once the `TRUNCATED` badge shows the truncation is real. Every span kept costs
+memory, and this cap is the ceiling on what one trace can hold.

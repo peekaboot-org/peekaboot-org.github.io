@@ -108,8 +108,7 @@ this is what each group decides.
   `max-slow-traces` size the three buckets; `max-spans-per-trace` and `max-logs-per-trace`
   cap one trace; `slow-trace-threshold-ms` decides what the Slow bucket admits.
 - [`peekaboot.ui.tracing`]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing):
-  the thresholds behind the SLOW, VERY_SLOW, SLOW_QUERY and HIGH_QUERY_COUNT issues.
-  Badges, not capture.
+  the thresholds behind the SLOW, VERY_SLOW and SLOW_QUERY issues. Badges, not capture.
 - [`peekaboot.insights`]({{ '/docs/configuration/' | relative_url }}#peekabootinsights):
   `enabled` is whether the collector and the charts exist; `levels` sets chart resolution,
   reach and memory; `persistence.interval` and `.max-age` decide how often the snapshot is
