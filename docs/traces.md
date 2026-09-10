@@ -33,9 +33,9 @@ outbound call to another service. Spans nest into the tree the overlay's Spans t
 **Query span.** A client-side span carrying `db.*` or `jdbc.query*` tags, the client half
 of a database call, tagged either by the OpenTelemetry conventions or by datasource-proxy.
 That one definition drives the Queries tab, every query count, and the SLOW_QUERY issue
-below. A span whose name merely looks like SQL is not a query span,
-and neither are datasource-proxy's connection and result-set spans, which carry `jdbc.`
-tags without a query.
+below. A span whose name merely looks like SQL is not a query span, and neither are
+datasource-proxy's connection and result-set spans, which carry `jdbc.` tags without a
+query.
 
 **Root span.** The span at the top of the tree, the one nothing else is nested under: the
 request itself for an HTTP request, the job invocation for a scheduled job.
@@ -154,8 +154,7 @@ full property list.
 | ERROR | The span ended with an error | none | Error |
 | SLOW_QUERY | A query span's duration reaches the threshold | `slow-query-threshold-ms` (50) | Warning |
 
-SLOW, VERY_SLOW and SLOW_QUERY all fire at or above their threshold, never strictly above
-it.
+SLOW, VERY_SLOW and SLOW_QUERY all fire at or above their threshold.
 
 ## The three buckets
 
