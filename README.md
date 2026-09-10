@@ -149,10 +149,15 @@ The screenshots under `assets/img/screenshots/` come from the product repo's Pla
 tool, not from this repo. Run it from `peekaboot-testing-app`:
 
 ```bash
-mvn -pl peekaboot-testing-app test \
+mvn -pl peekaboot-testing-app -am test \
     -Dtest=ScreenshotCapture \
+    -Dsurefire.failIfNoSpecifiedTests=false \
     -Dpeekaboot.screenshots.out=/absolute/output/dir
 ```
+
+Without `-am` the other reactor modules come from the local repository, which may hold an
+older install, and the tool then photographs that code. `-Dtest` applies to every module
+`-am` pulls in, and only one has the class, hence the second flag.
 
 It needs Docker running. The capture runs under the `screenshots` Spring profile, which
 starts real PostgreSQL via `spring-boot-docker-compose` and runs Flyway against it, so every
