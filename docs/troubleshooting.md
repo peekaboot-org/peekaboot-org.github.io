@@ -175,3 +175,49 @@ over what tracing alone already provides.
 **Not a cause of anything:** Peekaboot's API responses and its insights stream are serialised with
 Peekaboot's own mapper. A naming strategy, `non_null` inclusion or timestamp dates in your
 application change nothing on the dashboard, and Peekaboot changes nothing in your own JSON.
+
+## The dashboard started returning 401 after upgrading {#dashboard-401-after-upgrading}
+
+**Cause:** this is a deployment launch, and nothing Peekaboot can see authenticates
+`/peekaboot/**`, so Peekaboot's own guard has armed and is challenging requests with HTTP Basic.
+Protection it cannot detect is invisible to it - a VPN, an nginx basic-auth layer, an IP
+allowlist, an API gateway, any authentication that is not Spring Security putting an
+authenticated principal on the request.
+
+**Fix:** Use the credentials from the startup log's `Peekaboot Security` block, or set
+`peekaboot.security.password` to one you choose, or set `peekaboot.security.enabled=false` where
+the perimeter already covers it. See [Security: Securing the
+dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
+
+## A smoke test that boots the packaged jar started failing with 401 {#smoke-test-401}
+
+**Cause:** a Testcontainers or docker-compose test that boots the packaged artifact starts it in
+its own process, which Peekaboot reads as a deployment launch: the detection reads the stack of
+the JVM Peekaboot itself runs in, and that JVM is not running a test, whatever the test
+framework driving the container is.
+
+**Fix:** Set `peekaboot.security.enabled=false` for that container, or supply
+`peekaboot.security.password` and send it with the request. See [Configuration:
+`peekaboot.security`]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
+
+## Users see a browser credential dialog on ordinary application pages {#credential-dialog-on-toolbar-pages}
+
+**Cause:** the dev toolbar is explicitly on in a deployed environment
+(`peekaboot.dev-toolbar: true`), and its own requests to `/peekaboot/api/**` answer `401` with
+a `WWW-Authenticate: Basic` challenge. The browser turns that into a credential prompt on
+whatever application page happens to be open, not only on the dashboard.
+
+**Fix:** Leave `peekaboot.dev-toolbar` off outside local development, which is already the
+default; this only happens where it was switched on explicitly. See [Configuration: when
+Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on).
+
+## The generated password is different after every restart {#password-changes-on-restart}
+
+**Cause:** `peekaboot.storage.enabled` is `false` - the default outside local development - so
+there is nowhere to write the credentials file, and the password Peekaboot generates on startup
+does not survive a restart.
+
+**Fix:** Set `peekaboot.storage.enabled=true` to keep the same password across restarts, or
+`peekaboot.security.password` to fix one yourself, or `peekaboot.security.credentials-file` for
+an explicit path written regardless of the storage switch. See [Configuration:
+`peekaboot.security`]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
