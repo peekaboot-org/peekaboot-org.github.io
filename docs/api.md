@@ -222,7 +222,7 @@ rather than poll it. Two named events arrive:
 A comment heartbeat goes out every 15 seconds so proxies don't reap an idle connection. At
 most 32 streams are open at once; past that a request gets a `503`, so retry later. A
 subscriber that stops reading is dropped once its outbound queue fills, its connection
-closing at the timeout. The server closes every stream after 5 minutes, and the browser's
+closing at the timeout. The server closes every stream after 30 minutes, and the browser's
 native `EventSource` reconnects on its own. There is no replay: after a reconnect, refetch
 `/data` for the levels you care about. Streams complete cleanly on shutdown.
 

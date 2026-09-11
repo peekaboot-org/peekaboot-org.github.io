@@ -277,7 +277,7 @@ The resource name is whatever Spring resolved, so a `config-location` pointing a
 
 The tab holds one SSE stream open against `GET /peekaboot/api/insights/stream` instead of
 polling, taking a `tick` per level-0 interval and a `rollup` as each higher window closes. The
-server closes a stream after 5 minutes and the browser reopens it. Nothing is replayed on
+server closes a stream after 30 minutes and the browser reopens it. Nothing is replayed on
 reconnect, so the tab re-fetches each loaded level once. At most 32 streams are open per
 application, so a 33rd dashboard gets a `503` until one closes. See
 [HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints) for the events.
