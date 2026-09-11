@@ -9,7 +9,7 @@ redirect_from:
 
 ## When Peekaboot is on
 
-Three properties are detected rather than fixed, set from whether Peekaboot read this launch as
+Four properties are detected rather than fixed, set from whether Peekaboot read this launch as
 a local run.
 
 | Property | On a local run | Elsewhere | Turns on |
@@ -17,11 +17,19 @@ a local run.
 | `peekaboot.enabled` | `true` | `false` | The dashboard, its API, and Peekaboot's defaults. |
 | `peekaboot.dev-toolbar` | `true` | `false` | The toolbar, log capture and request-detail capture. |
 | `peekaboot.storage.enabled` | `true` | `false` | Writing the charts and the run history to disk. |
+| `peekaboot.security.enabled` | `false` | `true` | Peekaboot's fallback HTTP Basic challenge on `/peekaboot/**`. |
 
 They sit below every property source you control, so an `application.yml` entry, an environment
-variable or a system property wins in either direction. The three are detected
+variable or a system property wins in either direction. The four are detected
 independently: turning `peekaboot.enabled` on deliberately in a shared environment gives you
 the dashboard, not the toolbar and not files in that host's home directory.
+
+`peekaboot.security.enabled`'s detection is **inverted** from the other three: off on a local
+run, on elsewhere, so a reader scanning the table above should not assume it follows the same
+pattern. "Elsewhere" has one exception of its own - a test resolves `false`, the same as a local
+run, not `true` like the rest of "elsewhere," so a `@SpringBootTest` is never made to
+authenticate against a dashboard it never armed. See
+[`peekaboot.security`](#peekabootsecurity) below.
 
 ### What counts as a local run {#local-run}
 
@@ -93,8 +101,10 @@ observability defaults by accident. A test that needs Peekaboot says so:
 ```
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Peekaboot's dashboard and API have no authentication of their own. Before setting
-`peekaboot.enabled=true` anywhere reachable by anyone else, read [Do I want this in
+Peekaboot's dashboard and API have no authentication of their own on a local run, the default.
+Outside local development its own fallback guard arms automatically wherever nothing else
+authenticates `/peekaboot/**`, but that is a stop-gap, not a reason to skip your own. Before
+setting `peekaboot.enabled=true` anywhere reachable by anyone else, read [Do I want this in
 production?]({{ '/docs/in-production/' | relative_url }}) and
 [Security]({{ '/docs/security/' | relative_url }}).
 </div>
@@ -173,6 +183,30 @@ future, and the rings start empty. A `lifecycle.jsonl` line that fails to parse 
 event type is skipped; the rest of the file still loads. A failed write is logged and everything
 carries on in memory, each file warning once per run. Two instances on the same `dir`
 overwrite each other's history.
+
+### `peekaboot.security`
+
+| Property | Type | Default | Controls |
+|---|---|---|---|
+| `enabled` | boolean | detected | Whether Peekaboot challenges an unauthenticated `/peekaboot/**` request with its own HTTP Basic guard. |
+| `username` | String | `<artifact>-admin` | The username the guard checks credentials against. |
+| `password` | String | unset | An explicit password. Skips generation entirely; never written to disk. |
+| `credentials-file` | String | `security.properties` beside Peekaboot's other state | An explicit path for the stored password hash, written and read regardless of `peekaboot.storage.enabled`. |
+
+`enabled`'s detection is covered under [When Peekaboot is on](#when-peekaboot-is-on) above.
+`username` falls back to the build's artifact id, then to `spring.application.name`, then to
+`peekaboot` with neither - always with `-admin` appended.
+
+`password` left unset generates a 26-character password once, prints it in the startup log's
+`Peekaboot Security` block, and stores only a PBKDF2-HMAC-SHA256 hash of it, never the password
+itself, in `security.properties` alongside [Peekaboot's other persisted
+state](#peekabootstorage). That file follows `peekaboot.storage.enabled`: off, the default
+outside local development, nothing is written and the password changes on every restart, which
+the startup log says explicitly. `credentials-file` names an explicit path instead, written and
+read regardless of the storage switch.
+
+There is no throttle on failed authentication attempts. See [Security: securing the
+dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 
 ### `peekaboot.lifecycle`
 
