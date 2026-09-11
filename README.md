@@ -4,8 +4,10 @@ Source for the [Peekaboot](https://github.com/peekaboot-org/peekaboot) documenta
 built with Jekyll and published via GitHub Pages.
 
 GitHub Pages builds this repository natively: push to `main` and Pages runs its own pinned
-Jekyll toolchain against it directly. There is no GitHub Actions workflow and no Node
-tooling anywhere in the pipeline. `Gemfile` exists only to mirror that toolchain for local
+Jekyll toolchain against it directly. `main` is the site's only long-lived branch. Unlike the
+product repo it has no `dev`; a docs branch merges straight into `main` and is live once
+Pages has rebuilt. There is no GitHub Actions workflow and no Node tooling anywhere in the
+pipeline. `Gemfile` exists only to mirror that toolchain for local
 preview, and is excluded from the built site (see `exclude:` in `_config.yml`).
 
 ## The custom domain
@@ -93,12 +95,14 @@ sidebar's current-page highlight (`aria-current="page"`, driven by `page.url == 
 
 When a page is merged into another, keep its old URL alive with `redirect_from` in the
 surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml`).
-`docs/traces.md` and `docs/configuration.md` both use it.
+`docs/quick-start.md`, `docs/traces.md` and `docs/configuration.md` all use it.
 
 ## Decisions taken deliberately
 
-- **Links into the product repo use `/blob/HEAD/`, never a branch name.** `HEAD` follows
-  whatever the default branch is and survives a rename.
+- **Links into the product repo use `/blob/HEAD/`, never a branch name.** Pages throughout
+  `docs/` write them as `{{ site.repository_url }}/blob/HEAD/...`, so they resolve against
+  whatever `origin/HEAD` currently is, never a pinned commit and never a branch name that
+  could be renamed.
 - **`theme: null` stays.** Without it GitHub Pages ships `jekyll-theme-primer`'s unused CSS
   on every deploy.
 - **Bulma is vendored, not CDN-linked.** `assets/bulma.min.css` is a committed copy: no
@@ -113,8 +117,7 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
   `data-theme` attribute. `assets/site.js` loads synchronously in `<head>` so the theme
   applies before first paint. Do not add `defer`.
 - **Honest limits are stated on purpose.** Masking is not exhaustive and has no entropy
-  detection. `show-values: always` on a local run widens the host's own actuator endpoints.
-  Peekaboot has no authentication of its own, sees one process, captures log content
+  detection. Peekaboot has no authentication of its own, sees one process, captures log content
   unmasked, and its insights percentiles are percentiles of aggregates rather than real
   percentiles. Every one of those caveats is load-bearing. Tighten the wording if you like;
   do not turn any of them into a promise.
@@ -123,7 +126,7 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 
 | Change | Pages to revisit |
 | --- | --- |
-| Any masking rule | `docs/security.md`, `docs/configuration.md` |
+| Any masking rule | `docs/security.md` |
 | A new or renamed property, or one of Peekaboot's defaults | `docs/configuration.md`, `docs/in-production.md` |
 | Activation conditions | `docs/configuration.md` (*When Peekaboot is on*), `docs/in-production.md`, `docs/quick-start.md`, `docs/security.md` |
 | An API endpoint or parameter | `docs/api.md` |
@@ -146,10 +149,15 @@ The screenshots under `assets/img/screenshots/` come from the product repo's Pla
 tool, not from this repo. Run it from `peekaboot-testing-app`:
 
 ```bash
-mvn -pl peekaboot-testing-app test \
+mvn -pl peekaboot-testing-app -am test \
     -Dtest=ScreenshotCapture \
+    -Dsurefire.failIfNoSpecifiedTests=false \
     -Dpeekaboot.screenshots.out=/absolute/output/dir
 ```
+
+Without `-am` the other reactor modules come from the local repository, which may hold an
+older install, and the tool then photographs that code. `-Dtest` applies to every module
+`-am` pulls in, and only one has the class, hence the second flag.
 
 It needs Docker running. The capture runs under the `screenshots` Spring profile, which
 starts real PostgreSQL via `spring-boot-docker-compose` and runs Flyway against it, so every
@@ -161,6 +169,39 @@ tabs, plus the revealed, trace-detail and toolbar shots (the product repo's
 `peekaboot-testing-app/README.md` lists them all). This repo uses those names verbatim in
 `assets/img/screenshots/` and in every `<img>` reference. When a tab id changes in the
 product, the files and references here are renamed to follow.
+
+## Social images
+
+`assets/img/social/` and the three app icons in `assets/img/` are generated, not drawn.
+The generator lives beside the logo artwork in the sibling `assets/` directory, which is
+not a git checkout:
+
+```bash
+cd ../assets
+pip install Pillow playwright && playwright install chromium
+python3 generate_social.py && python3 verify_social.py
+```
+
+`generate_social.py` derives everything from `peekaboot-logo-favicon.png`. The mark is a
+two-colour blend of `#66b327` and `#263238`, so it recolours for dark surfaces by lifting
+the ink to `#e6edf3`, the same swap `logo-mark-dark.png` already makes, applied at full
+resolution. The cards themselves are laid out in `social_card.html` in the dark-theme
+tokens from `tokens.css` and screenshotted by headless Chromium at the exact target size;
+`verify_social.py` then checks every output's dimensions, background and alpha.
+
+| File | Size | Where it goes |
+| --- | --- | --- |
+| `social/og.png` | 1200×630 | `og:image`, read by X, LinkedIn, Facebook, Slack, Discord, Mastodon and Bluesky |
+| `social/github-social-preview.png` | 1280×640 | GitHub repo and org *Settings → Social preview* |
+| `social/x-header.png` | 1500×500 | X profile banner |
+| `social/linkedin-cover.png` | 1128×191 | LinkedIn page cover |
+| `social/avatar-512.png` | 512×512 | Avatar for light chrome; transparent |
+| `social/avatar-512-dark.png` | 512×512 | Avatar for dark chrome: GitHub dark, Discord, Mastodon |
+| `apple-touch-icon.png` | 180×180 | `rel="apple-touch-icon"`; opaque, since iOS composites it |
+| `icon-192.png`, `icon-512.png` | 192, 512 | `rel="icon"` |
+
+Only `og.png` and the three app icons are referenced by the site; the rest are uploaded
+through each platform's own settings and live here to keep them under version control.
 
 ## Measured contrast
 
@@ -189,12 +230,6 @@ Everything in this repo is ready. What is left happens outside it:
 2. The `www` host is live. The apex is not: see [The custom domain](#the-custom-domain) for
    the records it would need, and enable **Enforce HTTPS** once a certificate covers
    whatever the final arrangement is.
-
-## A note on product-repo links
-
-Pages throughout `docs/` link into the product repo with `blob/HEAD/...` (e.g.
-`{{ site.repository_url }}/blob/HEAD/...`), so they always resolve against whatever
-`origin/HEAD` currently is, never a pinned commit.
 
 ## License
 

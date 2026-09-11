@@ -46,21 +46,9 @@ never gets one.
 
 **Fix:** Set `peekaboot.dev-toolbar: true` explicitly if you are off a local run, or if you turned
 it off yourself. If it is already on and a page you expect still has no bar, check that response
-against the remaining injection rules.
-
-- The path is not under `/peekaboot/`, `/static/`, `/webjars/`, `/error/` or the management base
-  path (`/actuator/` unless you moved `management.endpoints.web.base-path`).
-- The path does not end in `.css`, `.js`, `.ico`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`,
-  `.woff`, `.woff2`, `.ttf` or `.eot`.
-- The request carries no `X-Requested-With: XMLHttpRequest` header.
-- The request was not handed over to an async dispatch.
-
-A plain `fetch()` sends no `X-Requested-With` header, so an HTML fragment loaded that way gets the
-bar like any other page. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
-
-That path exclusion follows your configured management base path. The toolbar's own `fetch`
-interceptor, the one that picks trace ids off Swagger UI calls, does not, and skips the literal
-`/actuator/` instead.
+against the remaining injection rules under [Dev toolbar, where the bar
+appears]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears): excluded path
+prefixes, an extension blocklist, the `X-Requested-With` header and async dispatch.
 
 A bar that does appear but reads
 
@@ -71,8 +59,7 @@ Peekaboot toolbar could not start — sign in, or check that its script is allow
 is the opposite situation. Injection worked, and the script that fills the bar in was refused.
 Either security in front of `/peekaboot/**` wants the reader to sign in, or a strict
 `Content-Security-Policy` (a `script-src` that only honours nonces) is blocking the script
-outright. For the latter, allow `/peekaboot/ui/toolbar/toolbar.js` in your `script-src`, or give
-it your nonce. See
+outright. For the latter, allow `/peekaboot/ui/toolbar/toolbar.js` in your `script-src`. See
 [Security]({{ '/docs/security/' | relative_url }}#the-dev-toolbar-asks-the-reader-to-sign-in).
 
 ## Peekaboot is off inside `@SpringBootTest`
@@ -136,7 +123,7 @@ visible in that state on purpose, so an absent subsystem is something you can se
 
 A third case looks like the first. Your own `peekaboot-insights.yml` failed validation and was
 dropped, so the tab shows the bundled defaults instead of your panels. That is always logged at
-`ERROR` on startup; grep for `Ignoring invalid insights panel config`.
+`ERROR` on startup; grep for `is invalid; discarding it entirely`.
 
 **Fix:** For a missing tab, check `peekaboot.insights.enabled` and the `metrics` flag alongside
 `insights`. For "No data" on a panel you expect data from, look the meter up on the Meters tab
@@ -149,46 +136,28 @@ first. If it is not in the registry, no series can resolve it. See
 duplicate folding, so folded duplicates never push a trace over it. Once the distinct span count
 crosses the cap, the spans stored first are dropped at write time to make room for later ones. An
 endpoint that really runs more than 500 distinct queries in one request loses whole queries before
-they are counted, which undercounts the totals and can suppress the `HIGH_QUERY_COUNT` warning on
-a trace that deserves it. The trace is flagged `truncated` when that happens, shown as a
-`TRUNCATED` badge, and the flag is never cleared. Without the badge the count is not truncated,
-and a low number is the endpoint's real behaviour.
+they are counted, which undercounts the row's query stat. The trace is flagged `truncated` when
+that happens, shown as a `TRUNCATED` badge, and the flag is never cleared. Without the badge the
+count is not truncated, and a low number is the endpoint's real behaviour.
 
-**Fix:** Raise `peekaboot.tracing.max-spans-per-trace`, not the query-count thresholds below it.
-Lowering those does not fix an undercount; it makes the wrong number trigger a warning sooner. See
-[Configuration: query-heavy
+**Fix:** Raise `peekaboot.tracing.max-spans-per-trace`. See [Configuration: query-heavy
 application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application) for a worked
 example.
 
 ## Values show as `******` and I need to see them
 
 **Cause:** most likely this is the default. Peekaboot masks a value whose key name or whose shape
-looks like a secret, on the Environment, Config, Meters and Overview tabs and in captured request
-headers, query and form parameters, span tags, SQL text and span error messages. The rules are
-key-name and value-shape matching, and they are not exhaustive in either direction. Check a value
-against the exact list on [Security: what gets masked, and
-how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) whenever something you
-expected to be hidden is visible, or something you expected to read is masked.
+looks like a secret, wherever it shows one. The rules are key-name and value-shape matching, and
+they are not exhaustive in either direction. Check a value against the exact list on [Security:
+what gets masked, and how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how)
+whenever something you expected to be hidden is visible, or something you expected to read is
+masked.
 
-If **every** value on the Environment or Config tab reads `******`, you are off a local run.
-Peekaboot sets `show-values: always` only on one, and Spring replaces every value before
-Peekaboot's rules ever see it. `enable-unmasking` does nothing here, because there is no real
-value behind the mask. See [Security: `show-values: always` only on a local
-run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
-
-**Fix (a recognisable secret):** Set `peekaboot.enable-unmasking: true`, then use the "Show
-secrets" toggle that appears on the Environment and Config tabs once it is set (it is absent
-otherwise), or add `?unmask=true` to `GET /peekaboot/api/actuator/all/insights`. Both are
-required. The property alone changes nothing, and the parameter alone is silently ignored while
-the property is `false`. This reaches that one endpoint only. Headers, query parameters, span
-tags, SQL and Micrometer meter tags (`/api/metrics` takes no `unmask` parameter at all) stay
-masked whatever you set.
-
-**Fix (off a local run):** Set `management.endpoint.env.show-values` and
-`management.endpoint.configprops.show-values` to `always` yourself. An explicit setting wins over
-Peekaboot's own detection in either direction, so this works anywhere. Do it only if you intend
-those two tabs to show real values somewhere other than your own machine. The same two properties
-widen the host's own `/actuator/env` and `/actuator/configprops`.
+**Fix:** Set `peekaboot.enable-unmasking: true`, then use the "Show secrets" toggle that appears
+on the Environment and Config tabs, or add `?unmask=true` to
+`GET /peekaboot/api/actuator/all/insights`. Both are required, and the reveal reaches that one
+endpoint only. See [Security: two independent
+opt-ins]({{ '/docs/security/' | relative_url }}#two-independent-opt-ins-before-a-real-value-is-ever-shown).
 
 ## A trace has no logs
 

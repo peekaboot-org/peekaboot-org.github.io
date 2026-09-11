@@ -1,9 +1,38 @@
+{%- capture page_title -%}{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} · {{ site.tagline }}{% endif %}{%- endcapture -%}
+{%- assign page_title = page_title | escape -%}
+{%- assign page_description = page.description | default: page.lead | default: site.description | escape -%}
+{%- assign social_image = '/assets/img/social/og.png' | absolute_url -%}
+{%- capture social_image_alt -%}The Peekaboot logo mark beside the wordmark, the tagline Embedded application introspection for Spring Boot, and the Maven coordinate org.peekaboot:peekaboot-spring-boot-starter{%- endcapture -%}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} · {{ site.tagline }}{% endif %}</title>
-<meta name="description" content="{{ page.description | default: site.description }}">
+<title>{{ page_title }}</title>
+<meta name="description" content="{{ page_description }}">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site.title }}">
+<meta property="og:title" content="{{ page_title }}">
+<meta property="og:description" content="{{ page_description }}">
+<meta property="og:url" content="{{ page.url | absolute_url }}">
+<meta property="og:image" content="{{ social_image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ social_image_alt }}">
+
+<!-- X reads its own tags and ignores og:type; everything else - LinkedIn, Slack, Discord,
+     Mastodon, Bluesky - reads the Open Graph block above. -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ page_title }}">
+<meta name="twitter:description" content="{{ page_description }}">
+<meta name="twitter:image" content="{{ social_image }}">
+<meta name="twitter:image:alt" content="{{ social_image_alt }}">
+
 <link rel="icon" sizes="32x32" href="{{ '/assets/img/favicon-32.png' | relative_url }}">
 <link rel="icon" sizes="16x16" href="{{ '/assets/img/favicon-16.png' | relative_url }}">
+<link rel="icon" sizes="192x192" href="{{ '/assets/img/icon-192.png' | relative_url }}">
+<link rel="icon" sizes="512x512" href="{{ '/assets/img/icon-512.png' | relative_url }}">
+<!-- iOS squares this one and composites it on white, so it is the opaque variant. -->
+<link rel="apple-touch-icon" sizes="180x180" href="{{ '/assets/img/apple-touch-icon.png' | relative_url }}">
 <link rel="stylesheet" href="{{ '/assets/bulma.min.css' | relative_url }}">
 <link rel="stylesheet" href="{{ '/assets/peekaboot.css' | relative_url }}">
 <!-- Loaded synchronously and early on purpose: it sets [data-theme] before first paint. -->

@@ -32,10 +32,10 @@ outbound call to another service. Spans nest into the tree the overlay's Spans t
 
 **Query span.** A client-side span carrying `db.*` or `jdbc.query*` tags, the client half
 of a database call, tagged either by the OpenTelemetry conventions or by datasource-proxy.
-That one definition drives the Queries tab, every query count, and the SLOW_QUERY and
-HIGH_QUERY_COUNT issues below. A span whose name merely looks like SQL is not a query span,
-and neither are datasource-proxy's connection and result-set spans, which carry `jdbc.`
-tags without a query.
+That one definition drives the Queries tab, every query count, and the SLOW_QUERY issue
+below. A span whose name merely looks like SQL is not a query span, and neither are
+datasource-proxy's connection and result-set spans, which carry `jdbc.` tags without a
+query.
 
 **Root span.** The span at the top of the tree, the one nothing else is nested under: the
 request itself for an HTTP request, the job invocation for a scheduled job.
@@ -141,8 +141,7 @@ the Slow bucket, both below.
 ## Issues
 
 An issue is a problem Peekaboot detected on one span, shown as a coloured marker in the
-span tree. The per-trace query count is the exception, a trace-level finding hung on the
-root span for want of anywhere else.
+span tree.
 
 Every threshold below binds under `peekaboot.ui.tracing.`; see
 [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing) for the
@@ -154,16 +153,8 @@ full property list.
 | SLOW | The span's own duration reaches the threshold and it did not already raise VERY_SLOW | `slow-span-threshold-ms` (100) | Warning |
 | ERROR | The span ended with an error | none | Error |
 | SLOW_QUERY | A query span's duration reaches the threshold | `slow-query-threshold-ms` (50) | Warning |
-| HIGH_QUERY_COUNT (per trace) | The whole trace ran *more* queries than the threshold. Raised on the root span only | `high-trace-query-count-threshold` (20) | Warning |
-| HIGH_QUERY_COUNT (per span) | A span has *more* direct query children than the threshold. Applies to every span in the tree | `high-query-count-threshold` (5) | Warning |
 
-SLOW, VERY_SLOW and SLOW_QUERY fire at or above their threshold; both query counts need
-strictly more than theirs, so a span with exactly five direct query children raises
-nothing.
-
-The two HIGH_QUERY_COUNT arms are independent. A root span over both thresholds carries
-both, with different messages: one counting the trace, one counting that span's direct
-children.
+SLOW, VERY_SLOW and SLOW_QUERY all fire at or above their threshold.
 
 ## The three buckets
 
@@ -179,8 +170,8 @@ Every trace lands in All, and in Errors or Slow too when it qualifies:
   `peekaboot.tracing.max-slow-traces` (default 100).
 
 Nothing expires on a clock. Each bucket evicts its own oldest entry once its own cap is
-full, where oldest means least recently written: a late span for an already-evicted trace
-puts it back at the newest end. The three are independent, so a trace can keep showing
+full, where oldest means first admitted; a trace that keeps receiving spans does not move.
+A late span for an already-evicted trace puts it back at the newest end. The three are independent, so a trace can keep showing
 under Errors or Slow long after it aged out of All.
 
 See [Configuration]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) for every
@@ -263,25 +254,3 @@ your mind without touching application code.
 stack into one container for a local trial.
 
 Spring Boot already speaks to all of them, and adding Peekaboot costs you none of it.
-
-### Why Peekaboot still earns its place
-
-Not as a smaller backend. As a different tool for the ten seconds after you hit a page:
-
-- **Nothing to run first.** No collector, no agent, no container, no dashboard to build.
-  Add the dependency, start the app, and the trace of the request you just made is there. A backend a developer has to stand up before it shows them anything
-  is a backend most developers will not stand up.
-- **It is on the page you are already looking at.** The [dev
-  toolbar]({{ '/docs/dev-toolbar/' | relative_url }}#the-trace-view) puts the current
-  request's spans, queries and logs at the bottom of that page.
-- **More detail per request than a backend keeps.** Full request and response headers,
-  query and form parameters, the resolved controller method, SQL text, and every log line
-  correlated to the span that emitted it. Sampling defaults to 1.0 (see
-  [Configuration]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application))
-  because in-process capture has no per-span bill; backends sample for cost, and the
-  request you cared about is often the one they dropped.
-- **It stays out of production.** Peekaboot defaults off outside a [local
-  run]({{ '/docs/configuration/' | relative_url }}#local-run). Production observability is
-  the backend's job, and it is good at it.
-
-Peekaboot while you write the code, a backend once the system runs somewhere you are not.

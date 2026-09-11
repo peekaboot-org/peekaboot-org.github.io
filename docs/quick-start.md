@@ -63,11 +63,9 @@ exactly what counts as a local run.
 </div>
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**Working in a devcontainer?** A container is never a local run, and a devcontainer runs
-your application in a container. Nothing turns itself on, and it looks like the starter is
-broken. Set `peekaboot.enabled`, `peekaboot.dev-toolbar` and `peekaboot.storage.enabled` to
-`true` in the devcontainer's own configuration. See
-[Configuration]({{ '/docs/configuration/' | relative_url }}#local-run).
+**Working in a devcontainer?** A container is never a local run, so nothing turns itself on.
+Set the three detected properties yourself; see [Configuration, container
+markers]({{ '/docs/configuration/' | relative_url }}#container-markers).
 </div>
 
 ## Open the dashboard

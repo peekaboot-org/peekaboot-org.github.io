@@ -30,7 +30,8 @@ is present as `null`, never missing.
 | `GET /peekaboot/api/lifecycle/runs` | none |
 
 That table is the whole API. The dashboard's own HTML, JS and CSS come from
-`/peekaboot/ui/**`, with `/peekaboot` redirecting there. See [The
+`/peekaboot/ui/**`; `/peekaboot` and `/peekaboot/` both redirect to
+`/peekaboot/ui/dashboard/index.html`. See [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}).
 
 Every one answers with `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`, the
@@ -75,9 +76,7 @@ to highlight what was masked.
 `unmask=true` works only while `peekaboot.enable-unmasking=true` is also set on the server;
 without it the parameter is ignored and the response stays masked. See [Security,
 masking]({{ '/docs/security/' | relative_url }}#masking) for the two-opt-in design and what
-gets masked. `enable-unmasking` governs this reveal step alone. Whether the
-Environment/Config tabs' underlying values are readable at all is decided by [actuator
-value visibility]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
+gets masked.
 
 ## Filtering the trace list
 
@@ -110,13 +109,13 @@ Tasks tab link to a task's traces by its fully-qualified target.
 `GET /peekaboot/api/actuator/all/insights` returns `{application, runtime, dataSources,
 health, environment, loggers, flyway, config, scheduledTasks, server}`.
 
-Most of it comes from Actuator endpoints: `info`, `env`, `loggers`, `flyway`, `configprops`
-and `scheduledtasks`. Peekaboot invokes each in-process rather than over HTTP, which is why
-`management.endpoints.web.exposure` needs no configuration. `health` is deliberately not
-read that way. It comes from the health endpoint itself, so
-`management.endpoint.health.show-details` cannot strip the components. An endpoint the
-application doesn't have is never called; one that fails leaves the rest of the payload
-intact.
+Most of it is Actuator data: `info`, `env`, `loggers`, `flyway`, `configprops` and
+`scheduledtasks`, read through endpoint objects Peekaboot builds itself and calls
+in-process, which is why `management.endpoints.web.exposure` needs no configuration and
+`show-values` has no effect. `health` is the one endpoint borrowed from the application,
+read directly so that `management.endpoint.health.show-details` cannot strip the
+components. A source with nothing behind it (no Flyway bean, say) is absent from the
+payload; one that fails leaves the rest intact.
 
 `runtime`, `dataSources` and `server` are not Actuator data. Peekaboot collects those
 itself. The Boot and Framework versions travel inside `application`, alongside the `build`
@@ -141,8 +140,8 @@ rather than the server.
 
 For traces, `insights` assembles the spans into a tree, folds duplicates from
 double-instrumented layers into one, detects and attaches issues like `SLOW` or
-`HIGH_QUERY_COUNT` (see [Traces]({{ '/docs/traces/' | relative_url }}#issues)), and
-attaches correlated logs to the spans that emitted them.
+`SLOW_QUERY` (see [Traces]({{ '/docs/traces/' | relative_url }}#issues)), and attaches
+correlated logs to the spans that emitted them.
 
 The list response is `{traces, bucketCounts, filteredBucketCounts}`, each count being
 `{all, errors, slow}`. `bucketCounts` is what the store holds; `filteredBucketCounts` is
@@ -232,8 +231,8 @@ The `/api/lifecycle/**` endpoints back the Lifecycle tab and the restart markers
 Insights charts. Both exist while `peekaboot.lifecycle.enabled` is `true` (the default);
 with it `false` they are absent, and the tab says so. How far back they reach is
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
-With storage off the log holds the current run alone. It keeps 1000 events either way,
-roughly 500 runs.
+With storage off the log holds the current run alone; the event cap stated there applies
+either way.
 
 `GET /peekaboot/api/lifecycle/events` returns the raw start/stop log, oldest first:
 `{events: [{type, epochMs, version, branch, commitId, shortCommitId, buildTimeEpochMs,

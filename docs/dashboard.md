@@ -4,9 +4,9 @@ lead: One tab per operational question, from health and live charts to migration
 permalink: /docs/dashboard/
 ---
 
-The dashboard calls Actuator in-process on every load. These endpoints go through Actuator's
-own endpoint discovery: `info`, `env`, `loggers`, `flyway`, `configprops` and
-`scheduledtasks`. Health is read straight off the health endpoint instead, so
+The dashboard calls Actuator in-process on every load. Peekaboot builds its own `info`,
+`env`, `configprops`, `loggers`, `flyway` and `scheduledtasks` endpoint objects and reads
+them in-process; only `health` is the application's own bean, kept available so
 `management.endpoint.health.show-details` cannot strip the per-component breakdown. Either
 way nothing is exposed on `/actuator/**`, and `management.endpoints.web.exposure` needs no
 configuration. The same response also carries what Actuator does not produce: the Spring
@@ -33,7 +33,7 @@ The strip above the tabs is the same on every tab:
   times and numbers, and is sent to the API as `locale`, which localises the cron
   descriptions on Scheduled Tasks and the server's timezone name (see
   [HTTP API]({{ '/docs/api/' | relative_url }}#the-locale-parameter)). It defaults to the
-  browser's language.
+  browser's language, which is added to the list when it is none of those four.
 - **Theme** is light or dark; the toolbar and the trace-detail overlay follow it.
 
 The Insights charts are the one thing the pause does not stop: they arrive over their own
@@ -165,8 +165,8 @@ How much history there is depends on
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
 With it on, the default for a
 [local run]({{ '/docs/configuration/' | relative_url }}#local-run), the log survives
-restarts, up to 1000 events and so roughly 500 runs. With it off the tab shows the current
-run alone, which is still a real row rather than an empty tab.
+restarts, up to the event cap stated there. With it off the tab shows the current run
+alone, which is still a real row rather than an empty tab.
 
 ## Traces
 
@@ -227,7 +227,7 @@ banner above them. Backed by Actuator's `env` endpoint.
        loading="lazy">
   <figcaption class="has-text-grey is-size-7">Revealed, after
   <code>peekaboot.enable-unmasking</code> is on <em>and</em> Show secrets is clicked. See
-  <a href="{{ '/docs/security/#masking' | relative_url }}">Security: masking</a> for the
+  <a href="{{ '/docs/security/' | relative_url }}#masking">Security: masking</a> for the
   two-opt-in design and why this particular value is safe to publish.</figcaption>
 </figure>
 
@@ -296,25 +296,18 @@ Environment. `@Value` injections aren't covered by Config; look those up under E
 The same split exists in Actuator itself, as `/env` versus `/configprops`, which back these
 two tabs.
 
-On a local run both tabs mask sensitive values by default, by key name and by value shape.
-This is Peekaboot's own masking, independent of anything your application configures.
-Spring Boot's own sanitizing ships with nothing enabled out of the box, as of the Spring
-Boot version Peekaboot builds against (4.1; check yours if you're on a later one). The
-rules are on the security page: [what gets masked and
+Both tabs mask sensitive values by default, by key name and by value shape. This is
+Peekaboot's own masking, independent of anything your application configures; your
+`management.endpoint.*.show-values` settings do not apply to it. The rules are on the
+security page: [what gets masked and
 how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
 
-Off a local run both tabs show `******` for every value, `server.port` included. See
-[Security, `show-values: always` only on a local
-run]({{ '/docs/security/' | relative_url }}#show-values-always-only-on-a-local-run).
-
-Both tabs carry a "Show secrets" toggle, present only when `GET /peekaboot/api/features`
-reports `unmaskingEnabled: true`, itself gated behind the server-side
-`peekaboot.enable-unmasking` property, off by default. Toggling it reveals real values on
-both tabs at once, and the state isn't persisted across a reload.
+Both tabs carry a "Show secrets" toggle, present only when the server allows unmasking.
+Toggling it reveals real values on both tabs at once, and the state isn't persisted across
+a reload.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Masking here isn't exhaustive: it catches known key names and known secret shapes, not an
-arbitrary secret with no recognizable pattern. See
+Masking here isn't exhaustive. See
 [Security, masking]({{ '/docs/security/' | relative_url }}#masking) for what's covered,
 what isn't, and the two-opt-in design behind the toggle.
 </div>
