@@ -4,7 +4,7 @@ lead: What Peekaboot is for, what it costs while it is on, and what deploying do
 permalink: /docs/in-production/
 ---
 
-## What Peekaboot is for
+## What Peekaboot is for {#what-peekaboot-is-for}
 
 The ten seconds after you hit a page on your own machine: the toolbar on that page, the
 request's trace, its queries and its logs, with no collector, agent or backend to run
@@ -20,21 +20,21 @@ Micrometer's OTLP metrics push is switched off, so telemetry never leaves the pr
 accident. Your own OTLP or Zipkin exporters and sampling configuration keep working:
 Peekaboot's store is one more destination for the same spans.
 
-## What it cannot do
+## What it cannot do {#what-it-cannot-do}
 
 - **One process only.** No joining a request across services, no aggregation across
   instances, no alerting.
 - **Short retention.** 1000 traces, then the oldest goes. Insights keeps 30 days at its
   default [levels]({{ '/docs/insights/' | relative_url }}#levels), coarsening as it goes,
   and above the first level its percentiles are [percentiles of
-  aggregates]({{ '/docs/insights/' | relative_url }}#percentiles-are-percentiles-of-aggregates).
+  aggregates]({{ '/docs/insights/' | relative_url }}#percentiles-of-aggregates).
 - **No access control of its own.** Outside local development, Peekaboot's automatic HTTP
   Basic fallback keeps out anyone without the generated credentials, but it is one flat
   credential, not a role or a policy, and it stands down for anyone your own security chain
   already let through. See [Securing the
   dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 
-## What it costs while it is on
+## What it costs while it is on {#what-it-costs-while-it-is-on}
 
 Whenever `peekaboot.enabled` is `true` and the application is a servlet web application:
 
@@ -60,7 +60,7 @@ Memory: the trace store's worst case is `max-traces` &times; (`max-spans-per-tra
 your `levels` and by how many series the enabled panels resolve to; Peekaboot logs the figure
 at startup.
 
-## What happens when you deploy
+## What happens when you deploy {#what-happens-when-you-deploy}
 
 `peekaboot.enabled`, `peekaboot.dev-toolbar` and `peekaboot.storage.enabled` are detected,
 not fixed: on for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run), off
@@ -73,7 +73,7 @@ stays disabled, because the starter puts that registry on the class path regardl
 verify the rest is off, look for the startup summary's `Peekaboot Dashboard:` line. It is
 absent when the dashboard is not served.
 
-### The class path is a separate question
+### The class path is a separate question {#class-path}
 
 The starter changes it whether Peekaboot is on or off:
 
@@ -89,7 +89,7 @@ The starter changes it whether Peekaboot is on or off:
 If none of that is acceptable, keep the starter out of the artifact rather than switching
 it off. See [keeping it out entirely](#keeping-it-out-of-the-artifact-entirely).
 
-## If you run it somewhere shared
+## If you run it somewhere shared {#if-you-run-it-somewhere-shared}
 
 Set `peekaboot.enabled=true` explicitly; the toolbar and disk storage stay off unless you
 set them too. Put a `SecurityFilterChain` on `/peekaboot/**` in place first, restrict
@@ -100,7 +100,7 @@ literals go through unmasked. See [Securing the
 dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard) and
 [Masking]({{ '/docs/security/' | relative_url }}#masking).
 
-## Tuning what it keeps and costs
+## Tuning what it keeps and costs {#tuning-what-it-keeps-and-costs}
 
 Every default and type is in [Configuration]({{ '/docs/configuration/' | relative_url }}#properties);
 this is what each group decides.
@@ -126,7 +126,7 @@ this is what each group decides.
 To undo one of the observability defaults above, set the property in your own
 `application.yml`: Peekaboot's defaults sit below everything you configure.
 
-## Keeping it out of the artifact entirely
+## Keeping it out of the artifact entirely {#keeping-it-out-of-the-artifact-entirely}
 
 If Peekaboot should never ship at all, exclude it at packaging time instead of relying on
 the default being off.

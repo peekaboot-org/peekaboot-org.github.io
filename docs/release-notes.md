@@ -4,7 +4,7 @@ lead: What changed in each release, and what an upgrade needs from you.
 permalink: /docs/release-notes/
 ---
 
-## 0.2.0
+## 0.2.0 {#v0-2-0}
 
 Peekaboot now protects the dashboard on its own. On a deployment launch - not local
 development, not a test - with `peekaboot.enabled=true` and nothing already authenticating
@@ -26,7 +26,7 @@ New properties, all under [`peekaboot.security`]({{ '/docs/configuration/' | rel
 - `credentials-file` sets an explicit path for the stored hash, written and read regardless of
   `peekaboot.storage.enabled`.
 
-### Upgrading
+### Upgrading {#upgrading}
 
 Three ways this can surprise an application that did nothing differently.
 
@@ -59,7 +59,7 @@ exists; `false` on the new field is a hard guarantee that nothing will ever fill
 there is no OpenTelemetry SDK on the classpath to emit a span at all. See
 [HTTP API]({{ '/docs/api/' | relative_url }}).
 
-### Fixes
+### Fixes {#fixes}
 
 - A `forward:` view runs a second dispatch inside the first one's rendering; the inner
   dispatch overwrote the outer one's observation instead of nesting under it. The outer
@@ -84,6 +84,6 @@ there is no OpenTelemetry SDK on the classpath to emit a span at all. See
   recursion; a client-side span under an excluded path is no longer dropped without a
   marker.
 
-## 0.1.0
+## 0.1.0 {#v0-1-0}
 
 First release, published to Maven Central on 2026-09-04.

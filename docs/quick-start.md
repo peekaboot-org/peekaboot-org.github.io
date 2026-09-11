@@ -6,7 +6,7 @@ redirect_from:
   - /docs/requirements/
 ---
 
-## Add the dependency
+## Add the dependency {#add-the-dependency}
 
 **Maven**
 
@@ -24,7 +24,7 @@ redirect_from:
 implementation("org.peekaboot:peekaboot-spring-boot-starter:{{ site.peekaboot_version }}")
 ```
 
-## What your application needs
+## What your application needs {#what-your-application-needs}
 
 - **Java 25 or newer**
 - **Spring Boot 4.1.** Built and tested against this version; earlier 4.x releases are
@@ -39,7 +39,7 @@ run]({{ '/docs/configuration/' | relative_url }}#local-run) turns on by default.
 [defaults Peekaboot would set]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
 for the dashboard's benefit are not applied there either.
 
-## Run your app
+## Run your app {#run-your-app}
 
 Run it the way you already do: from your IDE, `mvn spring-boot:run`, or `gradle bootRun`.
 Nothing else to configure. Peekaboot detects that launch as local development and turns
@@ -68,7 +68,7 @@ Set the three detected properties yourself; see [Configuration, container
 markers]({{ '/docs/configuration/' | relative_url }}#container-markers).
 </div>
 
-## Open the dashboard
+## Open the dashboard {#open-the-dashboard}
 
 It sits at [`http://localhost:8080/peekaboot/`](http://localhost:8080/peekaboot/), its API
 under [`http://localhost:8080/peekaboot/api/`](http://localhost:8080/peekaboot/api/). If
@@ -83,7 +83,7 @@ all, on a `Peekaboot Dashboard:` line. See
        loading="lazy">
 </figure>
 
-## What you get immediately
+## What you get immediately {#what-you-get-immediately}
 
 - The dev toolbar on every page: request and response detail, the trace view, and logs
   correlated to the request
@@ -98,7 +98,7 @@ all, on a `Peekaboot Dashboard:` line. See
   has served, oldest evicted once the cap is full (`peekaboot.tracing.max-traces`; see
   [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets))
 
-## What the starter brings
+## What the starter brings {#what-the-starter-brings}
 
 Adding `peekaboot-spring-boot-starter` pulls in these and nothing else:
 
@@ -116,7 +116,7 @@ never resolves a trace, and an empty Traces tab. The starter brings
 `spring-boot-starter-opentelemetry` as a hard dependency, so this only arises if you
 exclude it.
 
-## Graceful degradation
+## Graceful degradation {#graceful-degradation}
 
 On a servlet web application, a missing piece degrades rather than failing startup.
 
@@ -128,7 +128,7 @@ On a servlet web application, a missing piece degrades rather than failing start
 
 The starter supplies all of these, so each row only comes up if you exclude something.
 
-## Next
+## Next {#next}
 
 - [The dashboard]({{ '/docs/dashboard/' | relative_url }}): a tour of every tab.
 - [Configuration]({{ '/docs/configuration/' | relative_url }}): every property, its default,

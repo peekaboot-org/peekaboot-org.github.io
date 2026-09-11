@@ -16,7 +16,7 @@ peekaboot:
 It also needs a Micrometer `Tracer` bean, which the starter provides by default. See
 [Quick start]({{ '/docs/quick-start/' | relative_url }}) for what happens without one.
 
-## Where the bar appears
+## Where the bar appears {#where-the-bar-appears}
 
 A small bar docks to the bottom of the HTML pages your app renders. Injection needs a
 `text/html` response containing a `</body>` tag; anything else goes out untouched. Further
@@ -44,12 +44,12 @@ Peekaboot toolbar could not start — sign in, or check that its script is allow
 ```
 
 See [Security, the dev toolbar asks the reader to sign
-in]({{ '/docs/security/' | relative_url }}#the-dev-toolbar-asks-the-reader-to-sign-in).
+in]({{ '/docs/security/' | relative_url }}#toolbar-requires-sign-in).
 
 It mounts in its own shadow root: your CSS can't restyle it, and its styles can't leak into
 your page.
 
-## Request and response detail
+## Request and response detail {#request-and-response-detail}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
@@ -87,7 +87,7 @@ Masking]({{ '/docs/security/' | relative_url }}#masking) for the rules and what 
 Bodies and uploaded file names aren't captured yet; a field is reserved for them that
 nothing populates.
 
-## The trace view
+## The trace view {#the-trace-view}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/trace-detail-light.png' | relative_url }}"
@@ -123,7 +123,7 @@ The tabs link into each other both ways. A database span's row jumps to that sta
 the Queries tab; a query, or a log line, jumps back to its span in the tree. Each jump
 switches the tab, scrolls the target into view, focuses it and highlights it briefly.
 
-## Logs correlated to the request
+## Logs correlated to the request {#logs-correlated-to-the-request}
 
 Every log line your app emitted while handling the request lands on the same overlay's Logs
 tab: timestamp, level and message, tagged with the span that was active, filterable by
@@ -132,7 +132,7 @@ content is captured verbatim and, unlike headers and parameters, is **not masked
 statement that includes a secret or PII is stored exactly as written. See
 [Security]({{ '/docs/security/' | relative_url }}) for what's exposed once the toolbar is on.
 
-## It also works from Swagger UI
+## It also works from Swagger UI {#it-also-works-from-swagger-ui}
 
 Swagger UI's own page has no request worth reporting on until you call an endpoint. So
 there the toolbar loads idle, showing "Waiting for request…", and patches `window.fetch`.

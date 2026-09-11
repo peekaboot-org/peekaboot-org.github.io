@@ -18,7 +18,7 @@ call.
 "Dashboard" names the whole UI here, never one tab; the landing tab is **Overview**. Tabs
 appear in this order, left to right.
 
-## The header
+## The header {#the-header}
 
 The strip above the tabs is the same on every tab:
 
@@ -44,7 +44,7 @@ Timezone, language and theme are remembered per browser, in `localStorage`
 (`peekaboot-use-server-tz`, `peekaboot-locale`, `peekaboot-theme`). The Environment and
 Config tabs' "Show secrets" toggle deliberately is not: a reload always starts masked.
 
-### Deep links
+### Deep links {#deep-links}
 
 Every view is a shareable URL. The hash carries the tab, the open trace and the filters,
 so a location can be bookmarked or pasted into a chat:
@@ -75,7 +75,7 @@ a link falls back to the default instead of filtering invisibly.
 Theme, language and timezone stay [personal browser settings](#the-header) and never enter
 a link: a shared URL doesn't impose the sender's display preferences on whoever opens it.
 
-## Overview
+## Overview {#overview}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
@@ -114,7 +114,7 @@ Overview]({{ '/docs/insights/' | relative_url }}#stat-tiles-live-on-overview). W
 insights off or unreachable (no `MeterRegistry`, `peekaboot.insights.enabled: false`, or
 the call failing) the row is hidden outright rather than left as an empty box.
 
-## Insights
+## Insights {#insights}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-insights-light.png' | relative_url }}"
@@ -135,7 +135,7 @@ hide panels with its own `peekaboot-insights.yml`.
 rules, what the levels cost in memory, and what the percentiles at those levels can and
 can't honestly tell you.
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-lifecycle-light.png' | relative_url }}"
@@ -168,7 +168,7 @@ With it on, the default for a
 restarts, up to the event cap stated there. With it off the tab shows the current run
 alone, which is still a real row rather than an empty tab.
 
-## Traces
+## Traces {#traces}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-traces-light.png' | relative_url }}"
@@ -185,7 +185,7 @@ queries, logs, and the whole HTTP exchange on a single Request page.
 [Traces]({{ '/docs/traces/' | relative_url }}#root-action-type) has what the bucket names,
 badges and root action types actually mean.
 
-## Meters
+## Meters {#meters}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-meters-light.png' | relative_url }}"
@@ -204,7 +204,7 @@ raw browser: every meter, its current measurements, nothing else. Insights chart
 subset of them *over time*. A meter you find here is exactly what you'd name in a
 `peekaboot-insights.yml` series to start charting it.
 
-## Environment
+## Environment {#environment}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-environment-light.png' | relative_url }}"
@@ -231,7 +231,7 @@ banner above them. Backed by Actuator's `env` endpoint.
   two-opt-in design and why this particular value is safe to publish.</figcaption>
 </figure>
 
-## Flyway
+## Flyway {#flyway}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-flyway-light.png' | relative_url }}"
@@ -245,7 +245,7 @@ One table row per migration: version, description, script name, type, duration, 
 time, status. Backed by Actuator's `flyway` endpoint; the tab only appears when Flyway
 migrations exist.
 
-## Loggers
+## Loggers {#loggers}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-loggers-light.png' | relative_url }}"
@@ -261,7 +261,7 @@ explicit configured level. The tab is read-only: it shows effective and configur
 from Actuator's `loggers` endpoint, and has no control to change one. It only appears when
 logger data is available.
 
-## Config
+## Config {#config}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-config-light.png' | relative_url }}"
@@ -278,7 +278,7 @@ entries are indexed, as in `servers[0]`. The filter matches those nested keys an
 values themselves, not just a group's top-level names. Backed by Actuator's `configprops`
 endpoint; the tab only appears when there's at least one group to show.
 
-### Environment vs Config
+### Environment vs Config {#environment-vs-config}
 
 The two tabs look similar and answer different questions:
 
@@ -312,7 +312,7 @@ Masking here isn't exhaustive. See
 what isn't, and the two-opt-in design behind the toggle.
 </div>
 
-## Scheduled Tasks
+## Scheduled Tasks {#scheduled-tasks}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-scheduled-tasks-light.png' | relative_url }}"
@@ -326,7 +326,7 @@ what isn't, and the two-opt-in design behind the toggle.
 expandable to its individual task rows. Backed by Actuator's `scheduledtasks` endpoint; the
 tab only appears when at least one scheduled task exists.
 
-## Conditionally shown tabs
+## Conditionally shown tabs {#conditionally-shown-tabs}
 
 Loggers, Flyway, Config and Scheduled Tasks appear only once the main payload contains data
 for them. An app with no Flyway migrations has no Flyway tab. Overview, Lifecycle and

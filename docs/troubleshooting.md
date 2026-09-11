@@ -4,7 +4,7 @@ lead: Symptom, cause and fix for the failure modes that actually occur.
 permalink: /docs/troubleshooting/
 ---
 
-## `/peekaboot/` returns 404
+## `/peekaboot/` returns 404 {#peekaboot-returns-404}
 
 **Cause:** Peekaboot is disabled. `peekaboot.enabled` resolves to `false` in a packaged jar, a
 war, a native image, an AOT-processed build, a container or a test. See
@@ -19,7 +19,7 @@ The `/peekaboot` prefix is fixed, and no property moves it. A non-empty
 `server.servlet.context-path` puts the dashboard under that path too (`/my-app/peekaboot/`), which
 is the usual explanation when the summary shows Peekaboot running.
 
-## The dashboard loads, but the Traces tab is empty
+## The dashboard loads, but the Traces tab is empty {#traces-tab-empty}
 
 **Cause:** the tab is there, so the trace store exists. Nothing is filling it. Either there is no
 Micrometer `Tracer` bean, or `management.tracing.sampling.probability` sits below `1.0` in a
@@ -35,7 +35,7 @@ SDK that exports spans into the store both arrive with `spring-boot-starter-open
 the Peekaboot starter brings in; exclude it and the store stays in place with nothing to fill it.
 See [Quick start]({{ '/docs/quick-start/' | relative_url }}).
 
-## The toolbar never appears
+## The toolbar never appears {#toolbar-never-appears}
 
 **Cause:** `peekaboot.dev-toolbar` is on for a
 [local run]({{ '/docs/configuration/' | relative_url }}#local-run) and off elsewhere, detected
@@ -60,9 +60,9 @@ is the opposite situation. Injection worked, and the script that fills the bar i
 Either security in front of `/peekaboot/**` wants the reader to sign in, or a strict
 `Content-Security-Policy` (a `script-src` that only honours nonces) is blocking the script
 outright. For the latter, allow `/peekaboot/ui/toolbar/toolbar.js` in your `script-src`. See
-[Security]({{ '/docs/security/' | relative_url }}#the-dev-toolbar-asks-the-reader-to-sign-in).
+[Security]({{ '/docs/security/' | relative_url }}#toolbar-requires-sign-in).
 
-## Peekaboot is off inside `@SpringBootTest`
+## Peekaboot is off inside `@SpringBootTest` {#disabled-in-springboottest}
 
 **Cause:** this is by design. A JUnit run under Maven Surefire or Gradle's test task can look like
 a local launch on the surface, and Peekaboot treats it as not local anyway, so tests never carry
@@ -75,7 +75,7 @@ the dashboard, the toolbar and the observability defaults into CI. See
 @SpringBootTest(properties = "peekaboot.enabled=true")
 ```
 
-## Traces appear late, or are still empty, in tests
+## Traces appear late, or are still empty, in tests {#traces-late-or-empty-in-tests}
 
 **Cause:** Spring Boot batches span export, 5 s by default. A test that queries
 `/peekaboot/api/traces/**` immediately after making a request runs before the span has reached the
@@ -99,7 +99,7 @@ management:
         schedule-delay: 50ms
 ```
 
-## The Meters tab is missing
+## The Meters tab is missing {#meters-tab-missing}
 
 **Cause:** the dashboard gates Meters on `GET /peekaboot/api/features` reporting `metrics: true`.
 The flag is named `metrics`, the tab is named Meters. It reflects whether a Micrometer
@@ -112,7 +112,7 @@ so they will be gone too. See [The dashboard: conditionally shown
 tabs]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs) and the [HTTP
 API]({{ '/docs/api/' | relative_url }}).
 
-## The Insights tab is missing, or a panel says "No data"
+## The Insights tab is missing, or a panel says "No data" {#insights-tab-missing-or-no-data}
 
 **Cause:** two different situations, and the tab itself tells you which. A **missing tab** means
 `GET /peekaboot/api/features` reports `insights: false`, so either `peekaboot.insights.enabled` is
@@ -130,7 +130,7 @@ dropped, so the tab shows the bundled defaults instead of your panels. That is a
 first. If it is not in the registry, no series can resolve it. See
 [Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).
 
-## The Traces tab shows fewer queries than my endpoint actually issues, and carries a TRUNCATED badge
+## The Traces tab shows fewer queries than my endpoint actually issues, and carries a TRUNCATED badge {#traces-tab-truncated}
 
 **Cause:** `peekaboot.tracing.max-spans-per-trace` (default `500`) caps a trace's span count after
 duplicate folding, so folded duplicates never push a trace over it. Once the distinct span count
@@ -144,7 +144,7 @@ count is not truncated, and a low number is the endpoint's real behaviour.
 application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application) for a worked
 example.
 
-## Values show as `******` and I need to see them
+## Values show as `******` and I need to see them {#values-show-as-asterisks}
 
 **Cause:** most likely this is the default. Peekaboot masks a value whose key name or whose shape
 looks like a secret, wherever it shows one. The rules are key-name and value-shape matching, and
@@ -157,9 +157,9 @@ masked.
 on the Environment and Config tabs, or add `?unmask=true` to
 `GET /peekaboot/api/actuator/all/insights`. Both are required, and the reveal reaches that one
 endpoint only. See [Security: two independent
-opt-ins]({{ '/docs/security/' | relative_url }}#two-independent-opt-ins-before-a-real-value-is-ever-shown).
+opt-ins]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
-## A trace has no logs
+## A trace has no logs {#trace-has-no-logs}
 
 **Cause:** correlated logs are not a baseline tracing feature. They start flowing only once the
 dev toolbar is on, and tracing being on (`peekaboot.tracing.enabled`, on by default) is not enough
@@ -170,7 +170,7 @@ anything logged on a thread the trace context never reached is dropped.
 captured]({{ '/docs/traces/' | relative_url }}#what-gets-captured) for what turning it on adds
 over what tracing alone already provides.
 
-## My application sets `spring.jackson.*`
+## My application sets `spring.jackson.*` {#spring-jackson-properties}
 
 **Not a cause of anything:** Peekaboot's API responses and its insights stream are serialised with
 Peekaboot's own mapper. A naming strategy, `non_null` inclusion or timestamp dates in your

@@ -18,7 +18,7 @@ yourself. If `/peekaboot/**` is reachable by anyone other than you, secure it fi
 off.
 </div>
 
-## What the dashboard and API expose
+## What the dashboard and API expose {#what-the-dashboard-and-api-expose}
 
 This is everything, not a curated subset. If you are deciding whether Peekaboot is safe to
 enable somewhere, read all of it.
@@ -114,7 +114,7 @@ That is the whole actuator surface Peekaboot exposes over HTTP. It is also a cos
 front of `/peekaboot/**` anyone who can reach it can ask for all of them as often as they
 like.
 
-## What Peekaboot writes to disk
+## What Peekaboot writes to disk {#what-peekaboot-writes-to-disk}
 
 On a local run Peekaboot keeps two files, by default under
 `${user.home}/.peekaboot/<groupId>.<artifactId>/`, so that the charts and the run history
@@ -150,7 +150,7 @@ to disk. They live in memory for the life of the process and no further. Set
 `peekaboot.storage.enabled: false` to write nothing at all, or `peekaboot.storage.dir` to put
 whichever of these files land there somewhere you control.
 
-## What Peekaboot does not do
+## What Peekaboot does not do {#what-peekaboot-does-not-do}
 
 Peekaboot never exposes raw Actuator endpoints over HTTP. It builds its own `info`, `env`,
 `configprops`, `loggers`, `flyway` and `scheduledtasks` endpoint objects and reads them
@@ -170,7 +170,7 @@ serves static resources from, and the resource handler that maps it is registere
 `peekaboot.enabled` is `true`. An excluded starter and a disabled one differ in what sits on
 the class path, not in what is reachable.
 
-## Masking
+## Masking {#masking}
 
 Spring Boot's `env` and `configprops` endpoints normally mask values through a `Sanitizer`,
 which runs whatever `SanitizingFunction` beans are present in the application context. As of
@@ -298,7 +298,7 @@ every captured trace can still contain plaintext SQL and plaintext request data 
 not catch.
 </div>
 
-### Two independent opt-ins before a real value is ever shown
+### Two independent opt-ins before a real value is ever shown {#masking-opt-ins}
 
 By default, masking cannot be turned off from the browser. Two things must both be true:
 
@@ -352,7 +352,7 @@ on a local run as anywhere else. Turning `peekaboot.enabled` on in a shared envi
 therefore gets a dashboard whose Environment and Config tabs show real values, masked by
 the rules above, and widens nothing on `/actuator/**`.
 
-### What is left unmasked entirely
+### What is left unmasked entirely {#what-is-left-unmasked-entirely}
 
 - **Log message content**, wherever it is captured. Peekaboot's log capture copies whatever
   your logging statements produced, unmodified. There is no masking pass over log messages, by
@@ -360,7 +360,7 @@ the rules above, and widens nothing on `/actuator/**`.
 - Anything a value-shape rule does not recognise and no key name catches. See the callout
   above.
 
-## Securing the dashboard
+## Securing the dashboard {#securing-the-dashboard}
 
 Put your application's own Spring Security chain in front of `/peekaboot/**`, restricted to a
 specific role. That is the recommendation regardless of what Peekaboot does on its own if you
@@ -464,7 +464,7 @@ which pins the HTTP contract, and
 [`SecuredDashboardIT`]({{ site.repository_url }}/blob/HEAD/peekaboot-testing-app/src/test/java/org/peekaboot/testingapp/ui/SecuredDashboardIT.java),
 which pins the toolbar's authorization behaviour and its notice text in real Chromium.
 
-### The dev toolbar asks the reader to sign in
+### The dev toolbar asks the reader to sign in {#toolbar-requires-sign-in}
 
 The [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) is rendered into your
 application's own HTML by a servlet filter, server-side, before anything knows who is asking.
@@ -527,7 +527,7 @@ derivation, roughly 100 ms, and nothing bounds how many an attacker can send. Ra
 a deployed dashboard belongs at the proxy in front of it, not here. This is a stop-gap for a
 dashboard nobody secured - the `SecurityFilterChain` above stays the recommendation.
 
-## Running it in a deployed environment
+## Running it in a deployed environment {#running-it-in-a-deployed-environment}
 
 If you have a genuine reason to run Peekaboot somewhere other than your own machine (a shared
 staging environment, say), read [Do I want this in
@@ -541,7 +541,7 @@ has read access to everything in [What the dashboard and API
 expose](#what-the-dashboard-and-api-expose). Choose the role or group you gate on with that in
 mind, not just "logged in".
 
-## Keeping it out of production entirely
+## Keeping it out of production entirely {#keeping-it-out-of-production-entirely}
 
 If Peekaboot should never ship in a production artifact regardless of what `peekaboot.enabled`
 resolves to, exclude the starter at packaging time. See [Do I want this in production?,
@@ -549,7 +549,7 @@ keeping it out of the artifact
 entirely]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely)
 for the full Maven `excludes` and Gradle `developmentOnly` examples.
 
-## Production checklist
+## Production checklist {#production-checklist}
 
 [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) is the question
 behind this list: what Peekaboot costs while it is on, and what it cannot do for you past one

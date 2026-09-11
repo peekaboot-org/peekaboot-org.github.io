@@ -15,7 +15,7 @@ machine.
 Nulls travel on the wire. Peekaboot does not suppress them, so every optional field below
 is present as `null`, never missing.
 
-## Endpoints
+## Endpoints {#endpoints}
 
 | Endpoint | Query parameters |
 |---|---|
@@ -46,7 +46,7 @@ the browser renders rather than computes. `/api/insights/**` is a *prefix*, the
 metric-charts feature. They share a word and no code.
 </div>
 
-## `/api/features`
+## `/api/features` {#apifeatures}
 
 In wire order: `tracing`, `tracingSpansPossible`, `metrics`, `devToolbar`,
 `unmaskingEnabled`, `insights`, `slowSpanThresholdMs`, `verySlowSpanThresholdMs`,
@@ -72,14 +72,14 @@ off, since the Slow bucket doesn't exist then. `maskLiteral` is the string maske
 replaced with (`******`); the trace detail's Request tab compares header values against it
 to highlight what was masked.
 
-## The `unmask` parameter
+## The `unmask` parameter {#the-unmask-parameter}
 
 `unmask=true` works only while `peekaboot.enable-unmasking=true` is also set on the server;
 without it the parameter is ignored and the response stays masked. See [Security,
 masking]({{ '/docs/security/' | relative_url }}#masking) for the two-opt-in design and what
 gets masked.
 
-## Filtering the trace list
+## Filtering the trace list {#filtering-the-trace-list}
 
 No parameter on `GET /peekaboot/api/traces/insights` can make it fail:
 
@@ -105,7 +105,7 @@ dot-separated segments also matches an operation holding just its last two, so
 `com.acme.ReportJob.run` matches a span named `reportJob.run`. That lets the Scheduled
 Tasks tab link to a task's traces by its fully-qualified target.
 
-## What `insights` adds
+## What `insights` adds {#what-insights-adds}
 
 `GET /peekaboot/api/actuator/all/insights` returns `{application, runtime, dataSources,
 health, environment, loggers, flyway, config, scheduledTasks, server}`.
@@ -122,7 +122,7 @@ payload; one that fails leaves the rest intact.
 itself. The Boot and Framework versions travel inside `application`, alongside the `build`
 and `git` maps that do come from Actuator's `info`.
 
-### The `locale` parameter
+### The `locale` parameter {#the-locale-parameter}
 
 `locale` is an IETF BCP 47 language tag such as `de-DE` (the underscore form, `de_DE`, is
 accepted too); omitted or blank means English. It sets the language of the cron
@@ -137,7 +137,7 @@ lastStatus, lastException, nextExecution}`, `type` being `CRON`, `FIXED_DELAY` o
 task it is `null` and the interval travels as `intervalMs`, formatted by the dashboard
 rather than the server.
 
-### Trace insights
+### Trace insights {#trace-insights}
 
 For traces, `insights` assembles the spans into a tree, folds duplicates from
 double-instrumented layers into one, detects and attaches issues like `SLOW` or
@@ -154,7 +154,7 @@ Each trace, in the list and as the detail response, is the same shape: `{traceId
 startTimeMs, durationMs, status, slow, rootActionType, rootOperation, rootSpan, summary,
 httpExchange, logs, queries, truncated}`. `slow` is `true` when any span carries a `SLOW`
 or `VERY_SLOW` issue, the badge and not the Slow bucket (see
-[Traces]({{ '/docs/traces/' | relative_url }}#the-slow-badge-is-not-the-slow-bucket)).
+[Traces]({{ '/docs/traces/' | relative_url }}#slow-badge-vs-slow-bucket)).
 `logs` and `queries` are always arrays, never `null`: empty on a list row, populated only
 by the detail endpoint. `truncated` is `true` only when
 [`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing)
@@ -173,7 +173,7 @@ last exception event recorded on the span; a span marked as failed without one c
 literal `ERROR`. `errorMessage` is the span status's description, falling back to the
 exception's message when that description is empty.
 
-### The single-trace endpoint and 404
+### The single-trace endpoint and 404 {#the-single-trace-endpoint-and-404}
 
 The store opens a bundle for a trace on the first thing it hears about it: a span, a log
 line, or the completed request. The request lands first, published as the response
@@ -187,7 +187,7 @@ off, or discarded because it was Peekaboot's own. With a trace id from a `Server
 header, a toolbar bar or a list endpoint, retry rather than treating it as "this trace
 doesn't exist".
 
-## The insights endpoints
+## The insights endpoints {#the-insights-endpoints}
 
 The `/api/insights/**` endpoints back the Insights tab. Grouping, ordering and
 merging happen server-side, so a client renders what `/config` hands it. See
@@ -226,7 +226,7 @@ closing at the timeout. The server closes every stream after 30 minutes, and the
 native `EventSource` reconnects on its own. There is no replay: after a reconnect, refetch
 `/data` for the levels you care about. Streams complete cleanly on shutdown.
 
-## The lifecycle endpoints
+## The lifecycle endpoints {#the-lifecycle-endpoints}
 
 The `/api/lifecycle/**` endpoints back the Lifecycle tab and the restart markers on the
 Insights charts. Both exist while `peekaboot.lifecycle.enabled` is `true` (the default);

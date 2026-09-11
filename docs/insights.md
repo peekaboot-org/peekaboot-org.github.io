@@ -23,7 +23,7 @@ by default for a local launch and off everywhere else. See
 [Surviving a restart](#surviving-a-restart).
 </div>
 
-## What actually gets sampled
+## What actually gets sampled {#what-actually-gets-sampled}
 
 Each panel resolves to a flat list of **series**, each a meter name, an optional tag filter and
 a statistic. Peekaboot reads them off the `MeterRegistry` once per tick.
@@ -33,14 +33,14 @@ a statistic. Peekaboot reads them off the `MeterRegistry` once per tick.
 | `value` | The meter's current value at tick time: gauges, counter totals, a long task timer's active-task count. A timer or a distribution summary yields a gap, not a number. |
 | `rate` | The count's delta since the previous tick, normalized to per-second. The first tick has no baseline yet, so it is a gap. |
 | `avg` | &Delta;total-time &divide; &Delta;count over the tick, the average duration of the calls that happened *in that window*, not since startup. A tick with no calls is a gap. |
-| `max` | The timer's or summary's MAX, which is a decaying window rather than this one tick. See [Percentiles are percentiles of aggregates](#percentiles-are-percentiles-of-aggregates). |
+| `max` | The timer's or summary's MAX, which is a decaying window rather than this one tick. See [Percentiles are percentiles of aggregates](#percentiles-of-aggregates). |
 
 Meters are re-resolved on **every** tick, not looked up once at startup, because Micrometer
 registers them lazily. `http.server.requests` does not exist before the first request, and new
 tag combinations (a new URI) appear later still. A panel whose meters never resolve still costs
 a lookup per tick and its share of the ring budget.
 
-### A series with no `tags` sums every meter matching its name
+### A series with no `tags` sums every meter matching its name {#series-without-tags}
 
 `http.server.requests` is not one meter. It is one meter per method/URI/status/outcome
 combination, and a series naming it with no tag filter adds all of them together, so the HTTP
@@ -51,7 +51,7 @@ The collapsing is deliberate. Cardinality that would sink an in-process ring buf
 real metrics backend is for, and per-endpoint questions belong on the
 [Traces]({{ '/docs/traces/' | relative_url }}) tab.
 
-## Levels
+## Levels {#levels}
 
 Samples are kept at several resolutions at once, three by default:
 
@@ -73,7 +73,7 @@ sampling tick. Each further interval must be a whole multiple of the one before 
 window must fit inside the previous level's ring. Either failure fails startup, naming the two
 intervals rather than a level index.
 
-### Percentiles are percentiles of aggregates
+### Percentiles are percentiles of aggregates {#percentiles-of-aggregates}
 
 Micrometer retains no raw samples, so neither does Peekaboot. That limits what the aggregated
 levels can honestly claim:
@@ -94,7 +94,7 @@ Enough to see a shape change, spot a leak or catch a pool saturating. Not the nu
 an SLO. True percentiles need retained samples, which means a real metrics backend. See
 [Traces: tracing vs distributed tracing]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing).
 
-### What it costs
+### What it costs {#what-it-costs}
 
 The footprint is:
 
@@ -115,7 +115,7 @@ Sizes there are 1024-based. The trailing `, persisted across restarts` appears o
 storage is on. Raising a level's `size`, adding levels or switching more panels on all move the
 number, and the log line says where it landed.
 
-## The default panels
+## The default panels {#the-default-panels}
 
 These panels ship enabled, in display order. A panel whose meters are absent (no Hikari
 pool, no Hibernate, no `datasource-micrometer`) resolves no series, stays in the config and
@@ -149,7 +149,7 @@ Others ship with `enabled: false`, ready to switch on by id: `thread-states` (Th
 `tomcat-sessions` (Tomcat sessions) and `allocation` (Memory allocation). Nothing outside the
 panel file is collected; a meter no series names has no ring buffer.
 
-### Stat tiles live on Overview
+### Stat tiles live on Overview {#stat-tiles-live-on-overview}
 
 The four tiles, Started at, Startup, Ready after and Uptime, are defined in the same file but
 rendered by the Overview tab. (The CPU core count is not a tile; it sits on Overview's Machine
@@ -161,7 +161,7 @@ Overview reads them off `/api/insights/config` alongside the tile definitions, s
 the dashboard's 30-second refresh rather than the Insights SSE stream. A `live` tile is exactly
 as current as that refresh.
 
-## Configuring panels
+## Configuring panels {#configuring-panels}
 
 The bundled defaults live inside the starter jar as `peekaboot-insights-defaults.yml`. To change
 them, put your own `peekaboot-insights.yml` on the classpath root (`src/main/resources/`), or
@@ -206,7 +206,7 @@ panels:
         unit: persec
 ```
 
-### Panel fields
+### Panel fields {#panel-fields}
 
 | Field | Values | Default |
 |---|---|---|
@@ -219,7 +219,7 @@ panels:
 | `level` | pins this panel to one aggregation level by default; must index a configured level | follows the global switch |
 | `series` | the lines to draw | empty |
 
-### Series fields
+### Series fields {#series-fields}
 
 | Field | Values | Default |
 |---|---|---|
@@ -236,9 +236,9 @@ minus `disk.free`. Both sides go through the same tag filter, so a series' `tags
 subtracted meter too. If either side is unresolved the result is a gap, not a wrong number.
 Naming `subtract-meter` on a series with `stat: rate`, `avg` or `max` fails config validation;
 see [A mistake in your file costs you panels, not your
-app](#a-mistake-in-your-file-costs-you-panels-not-your-app).
+app](#invalid-panel-file).
 
-### Tile fields
+### Tile fields {#tile-fields}
 
 | Field | Values | Default |
 |---|---|---|
@@ -253,7 +253,7 @@ four shipped tiles sit on Micrometer `TimeGauge`s, read in seconds, which is wha
 `datetime` formatting assumes. A tile of your own over a plain gauge holding milliseconds
 renders a thousand times too large.
 
-### A mistake in your file costs you panels, not your app
+### A mistake in your file costs you panels, not your app {#invalid-panel-file}
 
 The loader checks that every panel has a unique id, and that every series names a meter and has
 an id unique within its panel. Each `chart`, `unit`, `stat` and `format` must be one of the
@@ -273,7 +273,7 @@ Insights panel config class path resource [peekaboot-insights.yml] is invalid; d
 The resource name is whatever Spring resolved, so a `config-location` pointing at a file reads
 `file [/etc/app/panels.yml]`. Check the startup log if your panels do not appear.
 
-## Live updates arrive by push
+## Live updates arrive by push {#live-updates-arrive-by-push}
 
 The tab holds one SSE stream open against `GET /peekaboot/api/insights/stream` instead of
 polling, taking a `tick` per level-0 interval and a `rollup` as each higher window closes. The
@@ -282,7 +282,7 @@ reconnect, so the tab re-fetches each loaded level once. At most 32 streams are 
 application, so a 33rd dashboard gets a `503` until one closes. See
 [HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints) for the events.
 
-## Surviving a restart
+## Surviving a restart {#surviving-a-restart}
 
 With `peekaboot.storage.enabled` on, the default for a local run, the rings are written to
 `insights.snapshot` at each `peekaboot.insights.persistence.interval` boundary, one write per
@@ -306,7 +306,7 @@ application now or later. See
 [`peekaboot.storage`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) for where the
 file lives and what else lands beside it.
 
-## Reading the tab
+## Reading the tab {#reading-the-tab}
 
 - The **level switch** in the tab header sets the resolution every panel charts at. Each panel
   carries the same switch, sized down, to pin itself to another; a reset control returns it to

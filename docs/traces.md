@@ -21,7 +21,7 @@ Peekaboot itself pushes nothing out of the process: it adds no exporter of its o
 turns Micrometer's OTLP metrics export off.
 </div>
 
-## The vocabulary
+## The vocabulary {#the-vocabulary}
 
 **Trace.** Everything Peekaboot recorded for one unit of work: one HTTP request, one run of
 a scheduled job, one message handled off a queue. Every trace has an id, shown throughout
@@ -44,7 +44,7 @@ request itself for an HTTP request, the job invocation for a scheduled job.
 instrumentation wrote it: `http get /orders`, `http get /api/orders/{id}/report`, or, for a
 `@Scheduled` method, `task orderReconciler.reconcileOrders`.
 
-## What gets captured
+## What gets captured {#what-gets-captured}
 
 Every span the OpenTelemetry SDK exports is copied into the store: HTTP requests, scheduled
 jobs, message consumers, and the database queries they run. The starter instruments JDBC out
@@ -87,7 +87,7 @@ carries correlated logs (up to `peekaboot.tracing.max-logs-per-trace`, default 5
 dropped first) and full header and parameter capture for request and response. That page
 has the detail, including what it does not capture.
 
-## Root action type
+## Root action type {#root-action-type}
 
 The root action type classifies what started the trace. It supplies the icon next to each
 row and the type filter on the trace list. Peekaboot works it out from the root span alone,
@@ -123,7 +123,7 @@ name.
   no rule recognizes, and the trace classifies Internal.
 </div>
 
-### Connection Pool traces are hidden by default
+### Connection Pool traces are hidden by default {#connection-pool-traces-hidden}
 
 The pool refills and validates connections on its own schedule, outside any traced work,
 and enough arrive to drown everything else. They stay in the store but are left out of the
@@ -135,13 +135,13 @@ once.
 A pool acquisition *inside* traced work is an ordinary child span, never classified. Only a
 connection span with no parent in the trace reaches rule 7.
 
-## Trace status
+## Trace status {#trace-status}
 
 A trace's status is one of exactly two values: **OK**, or **HAS_ERRORS** when any span in
 the trace ended with an error. There is no third, slow status. Slowness is a span issue and
 the Slow bucket, both below.
 
-## Issues
+## Issues {#issues}
 
 An issue is a problem Peekaboot detected on one span, shown as a coloured marker in the
 span tree.
@@ -159,7 +159,7 @@ full property list.
 
 SLOW, VERY_SLOW and SLOW_QUERY all fire at or above their threshold.
 
-## The three buckets
+## The three buckets {#the-three-buckets}
 
 Every trace lands in All, and in Errors or Slow too when it qualifies:
 
@@ -180,7 +180,7 @@ under Errors or Slow long after it aged out of All.
 See [Configuration]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) for every
 other tracing default.
 
-## The SLOW badge is not the Slow bucket
+## The SLOW badge is not the Slow bucket {#slow-badge-vs-slow-bucket}
 
 Two thresholds produce two similar-looking signals, and both can be true of the same trace
 at once.
@@ -209,12 +209,12 @@ the SLOW badge**, never both. A slow trace that also failed is invisible to a co
 badges, which undercounts slow traces whenever any errored. The TRUNCATED badge is separate
 and can sit beside either.
 
-## Tracing vs distributed tracing
+## Tracing vs distributed tracing {#tracing-vs-distributed-tracing}
 
 Peekaboot's store and a tracing backend answer different questions. Past one application
 you want both.
 
-### One word, two jobs
+### One word, two jobs {#one-word-two-jobs}
 
 In OpenTelemetry's vocabulary a **trace** is one logical operation across however many
 processes take part in it, stitched together by a trace id that travels in a
@@ -228,7 +228,7 @@ it in two services that call each other and you get two partial traces, under on
 trace id, on two dashboards that cannot join them. That follows from running in-process
 with no backend. It is not a defect awaiting a fix.
 
-### What a real backend is for
+### What a real backend is for {#what-a-real-backend-is-for}
 
 Every one of these needs infrastructure Peekaboot deliberately does not have:
 
@@ -241,7 +241,7 @@ Every one of these needs infrastructure Peekaboot deliberately does not have:
 - **Alerting.** Nothing in-process is going to page anyone.
 - **True percentiles.** Real percentiles need retained samples, which is why the aggregated
   levels on
-  [Insights]({{ '/docs/insights/' | relative_url }}#percentiles-are-percentiles-of-aggregates)
+  [Insights]({{ '/docs/insights/' | relative_url }}#percentiles-of-aggregates)
   are explicit about being percentiles *of aggregates*.
 
 The [Grafana stack](https://grafana.com/oss/grafana/) is the usual open-source answer,

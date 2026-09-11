@@ -7,7 +7,7 @@ redirect_from:
   - /docs/auto-configured-defaults/
 ---
 
-## When Peekaboot is on
+## When Peekaboot is on {#when-peekaboot-is-on}
 
 Four properties are detected rather than fixed, set from whether Peekaboot read this launch as
 a local run.
@@ -69,7 +69,7 @@ Not a local run, so everything off by default: `java -jar`, a war, a native imag
 a test, anything with a container marker. A bare `java -cp target/classes:…` on a host with no
 marker still counts as local; if you deploy that way, set `peekaboot.enabled=false` yourself.
 
-#### Container markers
+#### Container markers {#container-markers}
 
 There are exactly four, checked in this order:
 
@@ -109,7 +109,7 @@ production?]({{ '/docs/in-production/' | relative_url }}) and
 [Security]({{ '/docs/security/' | relative_url }}).
 </div>
 
-### Per-feature switches
+### Per-feature switches {#per-feature-switches}
 
 Once `peekaboot.enabled` resolves to `true`, each feature has its own switch. Nothing below
 is reachable while it doesn't.
@@ -130,9 +130,9 @@ you set it, a plain property as much as `SpringApplicationBuilder.web(...)`. The
 the run history still run in memory; storage decides whether the history is written. See
 [Quick start]({{ '/docs/quick-start/' | relative_url }}).
 
-## Properties
+## Properties {#properties}
 
-### `peekaboot`
+### `peekaboot` {#peekaboot}
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
@@ -147,7 +147,7 @@ request or response bodies. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative
 `GET /peekaboot/api/actuator/all/insights` and makes the "Show secrets" toggle appear. See
 [Masking]({{ '/docs/security/' | relative_url }}#masking).
 
-### `peekaboot.storage`
+### `peekaboot.storage` {#peekabootstorage}
 
 The only prefix that touches the filesystem. It decides whether the insights history and the
 start/stop log outlive a restart.
@@ -184,7 +184,7 @@ event type is skipped; the rest of the file still loads. A failed write is logge
 carries on in memory, each file warning once per run. Two instances on the same `dir`
 overwrite each other's history.
 
-### `peekaboot.security`
+### `peekaboot.security` {#peekabootsecurity}
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
@@ -208,7 +208,7 @@ read regardless of the storage switch.
 There is no throttle on failed authentication attempts. See [Security: securing the
 dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 
-### `peekaboot.lifecycle`
+### `peekaboot.lifecycle` {#peekabootlifecycle}
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
@@ -217,7 +217,7 @@ dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 The startup summary carries the application name, build info, server, dashboard and
 datasource details; the shutdown summary the uptime and the start and stop timestamps.
 
-#### The URLs in the summary
+#### The URLs in the summary {#the-urls-in-the-summary}
 
 ```
  Service URL: http://localhost:8080
@@ -235,7 +235,7 @@ is on the classpath, honouring `springdoc.swagger-ui.path`. **Peekaboot Dashboar
 where the dashboard is served: a servlet application, Actuator present, `peekaboot.enabled`
 true. Otherwise the line is omitted rather than printed as a 404.
 
-### `peekaboot.tracing`
+### `peekaboot.tracing` {#peekaboottracing}
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
@@ -249,7 +249,7 @@ true. Otherwise the line is omitted rather than printed as a 404.
 
 See [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets) for the three buckets.
 
-### `peekaboot.ui.tracing`
+### `peekaboot.ui.tracing` {#peekabootuitracing}
 
 These drive the dashboard's issue detection and badges, not what gets captured. See
 [Issues]({{ '/docs/traces/' | relative_url }}#issues).
@@ -260,7 +260,7 @@ These drive the dashboard's issue detection and badges, not what gets captured. 
 | `very-slow-span-threshold-ms` | long | `500` | At or above this a span gets VERY_SLOW instead of SLOW; a span never gets both. |
 | `slow-query-threshold-ms` | long | `50` | A database query span at or above this gets SLOW_QUERY; the trace detail's Queries tab labels a query SLOW at this same threshold, not the span thresholds above. |
 
-### `peekaboot.insights`
+### `peekaboot.insights` {#peekabootinsights}
 
 These control the metric collector behind the Insights tab. Whether its history outlives the
 process is `peekaboot.storage.enabled` above. *What* it samples comes from a YAML file, see
@@ -285,7 +285,7 @@ plus a sample count the API withholds. That eighth column is why the memory is w
 and Peekaboot logs the figure at startup. See [what it
 costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
 
-## What Peekaboot sets in your application
+## What Peekaboot sets in your application {#what-peekaboot-sets-in-your-application}
 
 Peekaboot nudges a handful of Spring Boot and library defaults, so the dashboard has something
 to show without you configuring Actuator or sampling by hand. All of them sit below every
@@ -328,9 +328,9 @@ somewhere reachable by anyone else. See [Do I want this in
 production?]({{ '/docs/in-production/' | relative_url }}).
 </div>
 
-## Worked examples
+## Worked examples {#worked-examples}
 
-### A longer, coarser insights history
+### A longer, coarser insights history {#a-longer-coarser-insights-history}
 
 To follow a long local session without the defaults' month-scale history, drop the top level
 and lengthen the middle one:
@@ -353,7 +353,7 @@ Memory follows `size` alone; `interval` is not in the formula. Halving level 0's
 costs no memory, halves the window that level covers and doubles how often every meter is read.
 Keeping the window means doubling `size`, which doubles the memory.
 
-### Memory-constrained
+### Memory-constrained {#memory-constrained}
 
 Spans and logs are capped independently per trace, and the two caps add rather than multiply.
 The All bucket's worst case is `max-traces` &times; (`max-spans-per-trace` +
@@ -376,7 +376,7 @@ This trades trace depth and history for memory. Requests that routinely produce 
 spans get truncated, so watch for the `TRUNCATED` badge before combining this with a
 query-heavy workload.
 
-### Query-heavy application
+### Query-heavy application {#query-heavy-application}
 
 Some endpoints issue hundreds of queries by design, a report or a bulk export. They need span
 capacity for those queries to survive truncation, or the row's query stat under-reports them.
