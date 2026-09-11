@@ -127,6 +127,32 @@ a:hover,
     border-radius: var(--bulma-radius-large);
 }
 
+/* Deep-link affordance appended to every heading id in .pk-content (see site.js). Stays in
+   flow at all times so revealing it never shifts the line; opacity, not display, is what
+   toggles it so a keyboard user tabbing onto it still sees it appear. Selectors carry an
+   extra .pk-content so they outrank the sitewide ".content a" rule above, which would
+   otherwise paint this the same saturated link colour at all times. */
+.pk-content .pk-heading-anchor {
+    margin-left: 0.4em;
+    font-size: 0.75em;
+    font-weight: 400;
+    color: var(--bulma-text-weak);
+    text-decoration: none;
+    opacity: 0;
+    white-space: nowrap;
+}
+
+.pk-content h2:hover .pk-heading-anchor,
+.pk-content h3:hover .pk-heading-anchor,
+.pk-content h4:hover .pk-heading-anchor,
+.pk-content .pk-heading-anchor:focus {
+    opacity: 1;
+}
+
+.pk-content .pk-heading-anchor:hover {
+    color: var(--pk-link);
+}
+
 /* Callouts. Coloured left rule plus a tinted ground - never coloured body text. */
 .pk-callout {
     border-left: 4px solid var(--bulma-primary);
