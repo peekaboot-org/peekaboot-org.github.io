@@ -201,9 +201,9 @@ Everything in this repo is ready. What is left happens outside it:
 
 1. In the repo's Settings → Pages, **Source** must be *Deploy from a branch*, branch
    `main`, folder `/ (root)`. There is no Actions workflow to fall back on.
-2. The `www` host is live. The apex is not: see [The custom domain](#the-custom-domain) for
-   the records it would need, and enable **Enforce HTTPS** once a certificate covers
-   whatever the final arrangement is.
+2. The `www` host is live, served through Cloudflare in front of Pages. The apex resolves
+   to nothing and would need its own `A` and `AAAA` records first. Enable **Enforce HTTPS**
+   once a certificate covers whatever the final arrangement is.
 
 ## License
 
