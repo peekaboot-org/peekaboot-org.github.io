@@ -47,8 +47,11 @@ instrumentation wrote it: `http get /orders`, `http get /api/orders/{id}/report`
 ## What gets captured
 
 Every span the OpenTelemetry SDK exports is copied into the store: HTTP requests, scheduled
-jobs, message consumers, and the database queries they run where your datasource
-instrumentation emits spans. Three things bound that:
+jobs, message consumers, and the database queries they run. The starter instruments JDBC out
+of the box, so queries show up without wiring anything up. A host that instruments its own
+`DataSource` excludes the starter's copy, or sets `jdbc.datasource-proxy.enabled=false`.
+
+Three things bound what gets captured:
 
 - **The OpenTelemetry SDK has to be on the classpath.** There is no Brave bridge, so an
   application wired to Brave instead gets a Traces tab that is present and empty.

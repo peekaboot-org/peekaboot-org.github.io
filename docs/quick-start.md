@@ -108,6 +108,7 @@ Adding `peekaboot-spring-boot-starter` pulls in these and nothing else:
 | `spring-boot-starter` | The base Spring Boot starter |
 | `spring-boot-starter-actuator` | The Overview, Env, Loggers, Flyway, Config and Scheduled Tasks endpoints Peekaboot reads in process. Micrometer's `MeterRegistry` comes with it; the Meters and Insights tabs read that bean directly rather than through an endpoint |
 | `spring-boot-starter-opentelemetry` | The OpenTelemetry SDK and the Micrometer Tracing bridge that feed the in-memory trace store |
+| `datasource-micrometer-spring-boot`, `datasource-micrometer-opentelemetry` | Instruments the application's `DataSource` so JDBC queries show up in the Queries tab, the trace tree and Insights without further setup |
 
 Peekaboot reads spans from the OpenTelemetry SDK only. There is no Micrometer Tracing Brave
 (OpenZipkin) bridge: an application wired to Brave instead gets a toolbar that renders but
