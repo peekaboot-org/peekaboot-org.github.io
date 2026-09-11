@@ -5,10 +5,11 @@ permalink: /docs/api/
 ---
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Every endpoint below is unauthenticated by default. Peekaboot adds no security of its own,
-so anything that can reach `/peekaboot/**` can read your configuration, environment and
-request traces. See [Security]({{ '/docs/security/' | relative_url }}) before exposing this
-beyond your own machine.
+Every endpoint below is unauthenticated on a local run, the default. Outside local
+development Peekaboot arms a fallback HTTP Basic guard automatically wherever nothing else
+authenticates `/peekaboot/**` - a stop-gap, not a substitute for securing it yourself. See
+[Security]({{ '/docs/security/' | relative_url }}) before exposing this beyond your own
+machine.
 </div>
 
 Nulls travel on the wire. Peekaboot does not suppress them, so every optional field below

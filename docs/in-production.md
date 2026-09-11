@@ -28,8 +28,10 @@ Peekaboot's store is one more destination for the same spans.
   default [levels]({{ '/docs/insights/' | relative_url }}#levels), coarsening as it goes,
   and above the first level its percentiles are [percentiles of
   aggregates]({{ '/docs/insights/' | relative_url }}#percentiles-are-percentiles-of-aggregates).
-- **No authentication of its own.** Anyone who can reach `/peekaboot/**` can read
-  everything it holds. See [Securing the
+- **No access control of its own.** Outside local development, Peekaboot's automatic HTTP
+  Basic fallback keeps out anyone without the generated credentials, but it is one flat
+  credential, not a role or a policy, and it stands down for anyone your own security chain
+  already let through. See [Securing the
   dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 
 ## What it costs while it is on

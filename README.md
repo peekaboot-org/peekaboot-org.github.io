@@ -91,10 +91,11 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
   `data-theme` attribute. `assets/site.js` loads synchronously in `<head>` so the theme
   applies before first paint. Do not add `defer`.
 - **Honest limits are stated on purpose.** Masking is not exhaustive and has no entropy
-  detection. Peekaboot has no authentication of its own, sees one process, captures log content
-  unmasked, and its insights percentiles are percentiles of aggregates rather than real
-  percentiles. Every one of those caveats is load-bearing. Tighten the wording if you like;
-  do not turn any of them into a promise.
+  detection. Peekaboot's automatic dashboard credentials are a stop-gap with no throttle on
+  failed attempts, not a substitute for your own `SecurityFilterChain`. It sees one process,
+  captures log content unmasked, and its insights percentiles are percentiles of aggregates
+  rather than real percentiles. Every one of those caveats is load-bearing. Tighten the
+  wording if you like; do not turn any of them into a promise.
 
 ## If you change the product, check these pages
 
