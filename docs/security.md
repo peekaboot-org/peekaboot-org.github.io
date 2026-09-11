@@ -9,11 +9,13 @@ Peekaboot defaults to on for a [local run]({{ '/docs/configuration/' | relative_
 That covers an IDE run, `spring-boot:run`, `bootRun`, and any launch of your build output on
 a host that is not a container. It defaults to off for a `java -jar` of the packaged jar, a
 war, a native image, a test, and anything in a container, an image shipping
-`spring-boot-devtools` included. When it is on, anyone who can reach `/peekaboot/**` gets
-detailed internal state (configuration, environment values, health, logs, migrations, full
-request traces) with **no authentication of any kind**. Peekaboot adds none of its own. If
-`/peekaboot/**` is reachable by anyone other than you, secure it first (see below) or leave
-it off.
+`spring-boot-devtools` included. On a local run `/peekaboot/**` carries detailed internal state
+(configuration, environment values, health, logs, migrations, full request traces) with **no
+authentication of any kind** - Peekaboot's own guard is off there too. Outside local
+development, turning it on arms a fallback guard automatically (see [Securing the
+dashboard](#securing-the-dashboard)), but that is a stop-gap, not a substitute for securing it
+yourself. If `/peekaboot/**` is reachable by anyone other than you, secure it first or leave it
+off.
 </div>
 
 ## What the dashboard and API expose
@@ -135,10 +137,18 @@ What lands in them is worth knowing precisely:
   with, the building user's name and mail address, and anything your build wrote into
   `build-info.properties`.
 
+A third file, `security.properties`, lands in the same directory whenever [the automatic
+dashboard guard](#securing-the-dashboard) generates a password - the default outside local
+development, never on a local run. It holds a PBKDF2 hash of that password, never the password
+itself, follows `peekaboot.storage.enabled` the same way the other two do, and the file itself
+is created owner-only (`rw-------`), same as them. `peekaboot.security.credentials-file` writes
+it to an explicit path instead, regardless of the storage switch. See [Configuration,
+`peekaboot.security`]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
+
 Request traces, captured headers, environment properties and config values are never written
 to disk. They live in memory for the life of the process and no further. Set
 `peekaboot.storage.enabled: false` to write nothing at all, or `peekaboot.storage.dir` to put
-both files somewhere you control.
+whichever of these files land there somewhere you control.
 
 ## What Peekaboot does not do
 
@@ -348,10 +358,11 @@ the rules above, and widens nothing on `/actuator/**`.
 
 ## Securing the dashboard
 
-There is no built-in authentication to configure, only Spring Security in front of the paths.
-This restricts `/peekaboot/**` to a specific role, using Spring Security's lambda DSL,
-alongside the two pieces it needs to actually work: your application's own chain, and wherever
-`ROLE_ADMIN` comes from.
+Put your application's own Spring Security chain in front of `/peekaboot/**`, restricted to a
+specific role. That is the recommendation regardless of what Peekaboot does on its own if you
+don't (see [below](#if-nothing-else-secures-it)). The worked example below does this with Spring
+Security's lambda DSL, alongside the two pieces it needs to actually work: your application's
+own chain, and wherever `ROLE_ADMIN` comes from.
 
 ```java
 import org.springframework.context.annotation.Bean;
@@ -485,16 +496,44 @@ admitted. A policy permitting `'self'` scripts covers it. A nonce-only policy do
 cannot be satisfied: Peekaboot puts no `nonce` attribute on the script tag, so the only fix is
 to allow the path.
 
+### If nothing else secures it {#if-nothing-else-secures-it}
+
+On a deployment launch - not local development, not a test - with `peekaboot.enabled=true` and
+nothing already authenticating `/peekaboot/**`, Peekaboot arms this for you rather than leaving
+the dashboard open. It generates a username, `<artifact>-admin` unless
+`peekaboot.security.username` says otherwise, and a 26-character password, printed once in the
+startup log's `Peekaboot Security` block and stored only as a PBKDF2-HMAC-SHA256 hash - never
+the password itself. `peekaboot.security.password` supplies one directly instead; nothing is
+generated or written in that case. See [What Peekaboot writes to
+disk](#what-peekaboot-writes-to-disk) for where the hash lands and when.
+
+It stands down the moment a request already arrived authenticated. Your own
+`SecurityFilterChain` above, or any other Spring Security authentication that covers
+`/peekaboot/**`, keeps working exactly as configured, and Peekaboot never sees a request it
+needs to challenge. What it cannot see is protection outside Spring Security altogether - a
+VPN, an nginx basic-auth layer, an IP allowlist, an API gateway. None of those puts an
+authenticated principal on the request, so the guard still arms in front of them.
+
+`peekaboot.security.enabled=false` turns it off entirely, for a consumer who wants no guard at
+all rather than a replacement one. A deployment launch still logs one WARN naming the dashboard
+as unauthenticated, so turning it off is a decision you see at startup, not a silent gap.
+
+**There is no throttle on failed attempts.** Each wrong password still costs one PBKDF2
+derivation, roughly 100 ms, and nothing bounds how many an attacker can send. Rate limiting for
+a deployed dashboard belongs at the proxy in front of it, not here. This is a stop-gap for a
+dashboard nobody secured - the `SecurityFilterChain` above stays the recommendation.
+
 ## Running it in a deployed environment
 
 If you have a genuine reason to run Peekaboot somewhere other than your own machine (a shared
 staging environment, say), read [Do I want this in
 production?]({{ '/docs/in-production/' | relative_url }}) first, set `peekaboot.enabled=true`
-explicitly, and put the `SecurityFilterChain` above in front of it before anything else.
-Restricting network reachability as well (an internal-only ingress rule, a VPN, a sidecar that
-only proxies `/peekaboot/**` from trusted sources) is worth doing in addition to
-authentication, not instead of it. Whoever your authentication boundary now admits has read
-access to everything in [What the dashboard and API
+explicitly, and put the `SecurityFilterChain` above in front of it before anything else. The
+[automatic fallback](#if-nothing-else-secures-it) arms itself if you skip this, but it is a
+stop-gap, not a reason to. Restricting network reachability as well (an internal-only ingress
+rule, a VPN, a sidecar that only proxies `/peekaboot/**` from trusted sources) is worth doing in
+addition to authentication, not instead of it. Whoever your authentication boundary now admits
+has read access to everything in [What the dashboard and API
 expose](#what-the-dashboard-and-api-expose). Choose the role or group you gate on with that in
 mind, not just "logged in".
 
