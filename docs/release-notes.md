@@ -42,3 +42,48 @@ Three ways this can surprise an application that did nothing differently.
   toolbar is explicitly on in a deployed environment: its own requests now get challenged too.
   See
   [Troubleshooting]({{ '/docs/troubleshooting/' | relative_url }}#credential-dialog-on-toolbar-pages).
+
+The starter now brings its own JDBC instrumentation (`datasource-micrometer`). A
+`DataSource` nobody instruments emits no query spans, and nothing downstream can tell that
+apart from an endpoint that genuinely runs no queries - both used to read as `0`. Queries
+now show up in the [Queries tab]({{ '/docs/dev-toolbar/' | relative_url }}#the-trace-view),
+the trace tree and Insights without wiring anything up. A host that instruments its own
+`DataSource` excludes the starter's copy, or sets `jdbc.datasource-proxy.enabled=false`.
+
+Query spans carry their row count now, in the same trace view. It used to sit only on
+datasource-proxy's separate result-set span, which is not the span anyone reads, so it went
+unseen; it is paired onto the query span itself and formatted for the reader's locale.
+
+`/peekaboot/api/features` gained `tracingSpansPossible`. `tracing` only says the trace store
+exists; `false` on the new field is a hard guarantee that nothing will ever fill it, because
+there is no OpenTelemetry SDK on the classpath to emit a span at all. See
+[HTTP API]({{ '/docs/api/' | relative_url }}).
+
+### Fixes
+
+- A `forward:` view runs a second dispatch inside the first one's rendering; the inner
+  dispatch overwrote the outer one's observation instead of nesting under it. The outer
+  observation was left open, and its trace context stuck to the pooled thread for
+  whatever request that thread served next - now the inner dispatch nests properly.
+- Tomcat 11 suspends a wrapped response after a forward and silently dropped the toolbar's
+  write; forwarded pages carry the toolbar again.
+- Local-dev detection missed two real setups and left Peekaboot off: IntelliJ's "shorten
+  command line: JAR manifest" launcher, and Spring Boot DevTools restarting from a Jib image
+  or an extracted layout. Both are detected correctly now.
+- Masking closed several gaps: PEM private key bodies (previously only the header), plural
+  secret key names (`passphrases`, `signing-keys`, `encryption-keys`, `secrets`,
+  `passwords`), a scheduled task's own exception text, and credentials in upper-case URL
+  schemes. A JDBC URL's password can no longer reach application logs through a datasource
+  metadata record's default `toString()`.
+- Application shutdown no longer hangs behind a dashboard client that disconnected
+  mid-write.
+- The Insights tab now says "Live updates stopped" instead of freezing silently when its
+  stream closes for good, and reopens less often - its server-side timeout went from 5 to
+  30 minutes.
+- A trace tree containing a genuine span cycle no longer sends the mapper into infinite
+  recursion; a client-side span under an excluded path is no longer dropped without a
+  marker.
+
+## 0.1.0
+
+First release, published to Maven Central on 2026-09-04.
