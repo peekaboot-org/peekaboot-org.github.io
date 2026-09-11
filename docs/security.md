@@ -205,16 +205,20 @@ Two independent rule sets, evaluated together, using Spring's own masked-value l
 camelCase-delimited token.
 
 ```
-password              passwd                pwd
-passphrase            secret                client-secret
-token                 access-token          refresh-token
+password              passwords             passwd
+passwds               pwd                   passphrase
+passphrases           secret                secrets
+client-secret         client-secrets        token
+tokens                access-token          refresh-token
 id-token              auth-token            bearer
 credential            credentials           api-key
-apikey                access-key            private-key
-secret-key            signing-key           encryption-key
-authorization         auth                  session-id
-salt                  signature             sig
-certificate-password  certificate-private-key
+api-keys              apikey                apikeys
+access-key            access-keys           private-key
+private-keys          secret-key            secret-keys
+signing-key           signing-keys          encryption-key
+encryption-keys       authorization         auth
+session-id            salt                  signature
+sig                   certificate-password  certificate-private-key
 ```
 
 A sensitive key masks its **entire** value. Four regular expressions inherited from Spring
