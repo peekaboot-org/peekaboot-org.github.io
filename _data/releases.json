@@ -1,0 +1,2998 @@
+[
+  {
+    "version": "0.1.0",
+    "date": "2026-09-04",
+    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.1.0",
+    "groups": [
+      {
+        "title": "Breaking changes",
+        "entries": [
+          {
+            "text": "Rename metrics to summary, request to httpExchange",
+            "scope": "api",
+            "breaking": true,
+            "detail": "API response structure changed"
+          }
+        ]
+      },
+      {
+        "title": "Features",
+        "entries": [
+          {
+            "text": "Add tracing API endpoints with conditional loading",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add Traces tab structure to HTML",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add feature detection for conditional traces tab",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add trace rendering with span tree and details",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add CSS styles for traces tab",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add configurable trace capture mode",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add starter defaults for full observability",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add dev toolbar infrastructure (Phase 1)",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add dev toolbar expanded view (Phase 2)",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add dashboard stats to dev toolbar (Phase 3)",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Next iteration of the dashbord",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add health domain records",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add runtime domain records",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add datasource domain records",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add application, environment, loggers, flyway, config domain records",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add actuator mappers for BFF layer",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add insights API endpoints",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add UiTracingProperties for trace insight thresholds",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add trace domain records",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add TraceTreeMapper with tree building and attribute hoisting",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add IssueDetector with configurable thresholds",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add TraceInsightsService",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add trace raw and insights endpoints",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Simplify frontend to use insights API",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add typed actuator response beans with Jackson mapping",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add scheduled tasks to insights endpoint and UI",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add scheduled tasks to example app",
+            "scope": "example",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Improve scheduled tasks display",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add cron-utils dependency, CronDescriptionService, and ServerInfo",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add scheduleDescription field and locale support to ScheduledTasksMapper",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add frontend state management for timezone and locale",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add timezone toggle and locale selector UI controls",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Update toolbar date formatting to respect locale settings",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add JVM Defaults card to dashboard",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add RootActionType enum for trace action detection",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add rootActionType field to TraceTree record",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add root action type detection in TraceTreeMapper",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add URL hash management functions for deep-linking",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Wire up deep-linking to tab navigation",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Update URL hash on trace expand/collapse",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add root action type icon and label mappings",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Display root action type icon in trace headers",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add CSS for Gantt timeline view",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add timeline rendering functions for Gantt view",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add Tree/Timeline view toggle to trace details",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add event system foundation for trace data collection",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add centralized TraceDataStorage for trace aggregation",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Wire up event publishers for trace data collection",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add request details capture infrastructure",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add TraceEventBus and TraceDataStorage to autoconfiguration",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add shared trace-detail.js module for full-screen overlay",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add expand/collapse to Gantt view and improve DB query detection",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Enhance DB span detection for HikariCP, JDBC patterns",
+            "scope": "trace-detail",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Load trace-detail.js for unified trace view",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add trace type filter checkboxes to traces tab",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Implement trace filter logic in peekaboot.js",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add TracingHandlerInterceptor for controller/view spans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add httpTotalDurationMs to TraceMetrics",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Implement async fetch with retry and loading states",
+            "scope": "devtoolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add log-to-span correlation and filtering in insights API",
+            "scope": "traces",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add trace filter indicator and span logs popup",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add new trace domain types for API refactoring",
+            "scope": "domain",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add sub-tab navigation to Request tab",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add reusable CSS classes for stats, icon buttons, overlays",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Update collapsed toolbar metrics to pipe-separated format",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make expanded toolbar fullscreen with ESC to close",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make trace detail and logs popup fullscreen",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Convert SQL and logs buttons to icon style for clear distinction from badges",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add full metrics to traces list with pipe-separated format",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show events as timeline markers and display all tags",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Improve logs popup with traceId-spanId title and back button",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add back button to toolbar and enhance logs popup navigation",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add span filter to Logs tab, traceId and back button to trace-detail",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add W3C Server-Timing response header with trace context",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add idle-mode JSON for Swagger UI toolbar",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Inject idle-mode toolbar with fetch interceptor for Swagger UI",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Enrich startup report and runtime info with process and service details",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Deduplicate spans in trace insights",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add REST PersonApi and expose all actuator endpoints",
+            "scope": "example",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add error/slow bucket config properties",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify traces into error and slow buckets",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bucket retention outlives cache eviction",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bucket-based trace queries replace capture mode",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bucket views for all/error/slow traces",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Cap logs per trace",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Opt-in trace type filter with filtered/total bucket counts",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Enable peekaboot only in local development by default",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Create actuator endpoint beans without requiring web exposure",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add shared component primitives",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add shared markup, format, severity and root-action modules",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add shared theme resolution and shadow-root style attachment",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add component builders and API client",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Export open/close from trace-detail.js for dynamic import",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make tab strips keyboard-navigable",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Labelled, full-length, copy-to-clipboard trace and span ids",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Green brand palette and the Peekaboot icon set",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Order domain with lines, schema and seed data",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Orders page with a deliberate N+1",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Slow multi-stage order report",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Deliberately failing endpoint for the Errors bucket",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Order creation and an outbound customer lookup",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Reconciliation job with nested spans and warnings",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add the masking engine for sensitive keys and values",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add generic tree masking to ActuatorRawMapper",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add the missing query-parameter URL credential rule",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add an unmask bypass to the engine and its wrappers",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Thread the unmask decision through the actuator mappers",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add peekaboot.enable-unmasking and the unmask parameter",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Dashboard control to reveal masked secrets",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Record and surface a truncated flag for capped traces",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Enable the dev toolbar by default on a local run",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Key actuator value visibility on the launch context",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ring buffers and aggregate statistics",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Panel config model with mergeable YAML loader",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bundled default panel configuration",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Peekaboot.insights properties with level validation",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Per-tick series sampler with lazy meter resolution",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Collector core with multi-level roll-up and snapshots",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Per-level virtual thread collection lifecycle",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Insights service with config and level data DTOs",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "SSE publisher and insights API controller",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Auto-configuration and features flag",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Insights tab with tiles, panel cards and vendored uPlot",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Live uPlot charts with SSE push and viewport-lazy rendering",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Say \"no data\" instead of charting an empty panel",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Move the stat tiles to the dashboard tab",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Segmented interval switch and per-panel override reset",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Per-panel level switch and synchronized chart zoom",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Move the span-log lookup off the tree, retire the logs popup",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add shared url-state module and 3-segment hash routing",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Deep-linkable trace overlay tab and log filters",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show shortened span id in the logs span-filter chip",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Deep-linkable dashboard tab filters",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Span ids, percent-of-trace and count badge on the spans tab",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show the whole HTTP exchange on one Request page",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Link the dashboard from the ApplicationReady banner",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Tell the reader to sign in when Peekaboot is gated",
+            "scope": "toolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add the opt-in directory both persisted stores share",
+            "scope": "storage",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add the ring snapshot format",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture and restore the collector's rings",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Apply a restored snapshot at the first tick, never at startup",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Persist the rings to an atomically replaced snapshot file",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restore and persist ring history when storage is enabled",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Render an uptime the way a person would say it",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Log a shutdown banner with the application's uptime",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Record start and stop events as JSON lines",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the last 1000 start/stop events, loaded off the startup path",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Record every start and stop of the application",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve the start/stop history with what changed per start",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Draw application restarts as chart markers",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mark application restarts on every insights chart",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Project the lifecycle log into runs",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Expose run history over HTTP",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add Lifecycle tab for start/stop run history",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Persist by default on a local launch",
+            "scope": "storage",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask empty-user URL userinfo and Oracle thin passwords",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Describe peekaboot.lifecycle.enabled in the configuration metadata",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bind peekaboot.lifecycle.enabled and own the trace TTL in the store",
+            "scope": "config",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Publish the effective slow thresholds as a typed Features record",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Publish the mask literal as Features.maskLiteral",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Detect the container runtime the process runs under",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Carry machine facts (CPU, memory, container) in the runtime insights",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Machine card on the Overview tab",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask sig as an exact key token (Azure SAS)",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restore insights level and lifecycle page from the URL",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Cross-link spans, queries and logs in the trace overlay",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Flatten nested config properties to dotted keys",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Follow management.endpoints.web.base-path via a PeekabootPaths bean",
+            "scope": "paths",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name the ink on the purple fill --pk-on-purple",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Let user beans replace every remaining toolbar/insights/tracing default",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Explain both sign-in and blocked-script causes in the pre-boot notice",
+            "scope": "toolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Parse physical-core/SMT topology from /proc/cpuinfo",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Discover non-local IPs with budgeted reverse-DNS hostnames",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Carry CPU topology and network addresses on MachineInfo",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show non-local IPs and CPU topology on the Machine card",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give pressed buttons a theme-aware hover brightness cue",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Carry insights checkboxes and panel overrides in the URL",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Split the Machine card's IP rows into IPv4/IPv6 tabs",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify standalone connection-pool roots as CONNECTION_POOL",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Hide connection-pool traces by default behind their own chip",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Take the error class and message from the recorded exception",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Default the trace listing to every type but connection pool",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Link the documentation site from the footer",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Bug fixes",
+        "entries": [
+          {
+            "text": "Update autoconfigure module for Spring Boot 4",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Resolve controller loading and parameter binding issues",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Correct dashboard API endpoint to /peekaboot/api/v1",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Simplify autoconfiguration and fix test context issues",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add @Service annotation to PeekabookActuatorService",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add actuator package to component scan",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add logging and null checks to CronDescriptionService, parameterize ServerInfo locale",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add ServerInfo to insights response, fix controller locale handling",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Narrow exception catch in CronDescriptionService",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add explicit name to @RequestParam for locale parameter",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Clarify null kind handling in root action type detection",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Improve expandTraceById security and reliability",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard against null traceId in deep-linking",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add explicit parameter names and enable -parameters flag",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Change shadow DOM mode from closed to open for toolbar expansion",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make toolbar clickable anywhere and wire up logs to trace detail",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Remove redundant string computation in isDbSpan",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add defensive check for PeekabootTraceDetail in click handler",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add @ConditionalOnBean to logbackAppenderRegistrar",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add logging for FlywayMapper date parsing failures",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Remove obsolete peekaboot-tracing dependency from starter",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add fallback utilities for trace-detail.js in toolbar context",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Exclude /peekaboot/** paths from trace capturing",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Correct auto-configuration ordering for TracingHandlerInterceptor",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ensure DevToolbarAutoConfiguration runs after tracing autoconfiguration",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Escape HTML in user-controlled data to prevent XSS",
+            "scope": "devtoolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Detect jdbc.query tags for DB query metrics",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Handle null exception field in scheduled tasks response",
+            "scope": "scheduled-tasks",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fix logs popup visibility and enhance request tab display",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Use base64 encoding for logs data attribute to fix JSON parsing",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Use design tokens for CSS consistency",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Remove HTTP calls from toolbar (API not ready), fix icons",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Prevent ESC handler memory leak on toolbar close",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Use CSS variables for toggle buttons, add active states",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add missing traces list features from review",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fix trace detail header and controller display",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Set Server-Timing header before the filter chain runs",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Escape quotes in escapeHtml to prevent attribute XSS",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Harden toolbar JSON escaping against script-tag breakout",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "One failing actuator endpoint no longer breaks the insights API",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop invoking expensive actuator endpoints on dashboard loads",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Order lifecycle auto-config after Boot's DataSource/ProjectInfo",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Peekaboot.enabled=false no longer crashes with dev-toolbar=true",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Skip unreachable datasources instead of storing null metadata",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Copy spans under lock to avoid ConcurrentModificationException",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make Gantt collapse actually hide descendant rows",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop the toolbar filter from breaking async and streaming responses",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make handler tracing async-aware and nest child spans correctly",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Detach the log-capture appender on shutdown and guard for Logback",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Remove unbounded requestCompletionTimes map from trace storage",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep orphan span subtrees in the trace tree; bound row-count matching",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Honor peekaboot.enabled in the defaults post-processor",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Report the real tracing availability; implement per-span query check",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep dashboard state across refreshes; consistent trace filters",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Batch of low-severity correctness fixes",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Listener leaks, hash sync, formatting nits; align docs",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Convert POJO actuator results instead of dropping them",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Preserve span logs when IssueDetector rebuilds the trace tree",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Match rootOperation trace filter against fully-qualified scheduled task targets",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make peekaboot.enabled a true master switch covering tracing and lifecycle",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read hostname field on dashboard datasource card host display",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Never push OTLP metrics by default, even when peekaboot is disabled",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Detect local development under devtools restart classloader",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Race build-info wait against error visibility in openDashboard",
+            "scope": "test",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Correct badge/button contrast and complete group-name/kv variants",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Correct format.js invalid-date, fractional-byte and negative-duration handling",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop toolbar-polling noise in shared-module tests, harden coverage",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give the trace-detail overlay host real dimensions",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give the toolbar real button semantics and fix double-escaping",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restore contrast-tuned foregrounds on the trace overlay's fills",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Address dashboard shell review findings",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Revert filter-driven auto-expand in dashboard tabs",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restore filtered traces cross-link, fix polling/a11y regressions",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Un-nest trace item scheduler link, fix vacuous bucket test",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close hash-routing gap and boot-time strip/panel divergence",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Derive the queries tab's SLOW label from durationClass",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Catch openOverlay() rejection to stop it escaping into host pages",
+            "scope": "toolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard localStorage reads and writes against storage-blocked contexts",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restore log capture after Logback re-initialisation",
+            "scope": "logging",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture every level Logback delivers to the trace",
+            "scope": "logging",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show env and configprops values in the dashboard",
+            "scope": "actuator",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop shipping git.properties from the library modules",
+            "scope": "build",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Table-based Flyway tab, inline filter row, panel spacing",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Steady metrics columns and a cron row that keeps its badge",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop using fill-tuned tokens as text colours",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close the remaining accessibility gaps",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Narrow exception handling in trace polling to prevent masking real errors",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Derive FlywayTabTest's expected row count from disk",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give order report stage spans domain names",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Suppress the /boom stack trace across the full suite",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Log the caught exception in the customer lookup fallback",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard PeekabootAutoConfiguration to servlet apps",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify scheduled jobs from Spring's own task tags",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Catch mixed-case spellings of masking key-name rules",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask secret-looking property values on the Environment tab",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Route Config tab masking through the shared masking engine",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Route DataSource connection-param masking through the engine",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close the getRaw() masking bypass",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Route header masking through the shared masking engine",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Remove the fake client-side masking, trust the API",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask query and form parameters, and the raw query string",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask span tags and captured SQL text",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask custom HealthIndicator details",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask Micrometer meter tags",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop comparing masked headers against the stale mask literal",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Deduplicate spans on write, not on read",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop unmask toggle's dead active-class line",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Raise the default span cap from 100 to 500",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bound the write-time redirect table by eviction",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Remove TraceTree's 9-arg constructor",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask nested @ConfigurationProperties values (C1)",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop over-masking cookie config, cert paths, PWD and sk- infra ids",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask span error messages, expose truncated on raw trace data",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restore legacy sk- keys without matching infra identifiers",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Pin Locale.ROOT for case conversions of technical strings",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Use explicit split limit to keep trailing empty segments predictable",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read process and HTTP output with an explicit UTF-8 charset",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Compare spans by value instead of reference when attaching orphans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Catch only the expected exception types when probing the process tree",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Handle a not-yet-started web server when resolving the service URL",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard trace mapping against a missing store and skip null trace trees",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make the committed flag of the buffering response wrapper volatile",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read db.query.text and db.system.name from query spans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the toolbar reading so late spans reach the collapsed bar",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Address whole-branch review findings for toolbar defaults",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Prune chained-redirect residue in TraceDataBundle",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask info.build in ApplicationMapper",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Tolerate Playwright's TargetClosedError race in teardown",
+            "scope": "test",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Widen ToolbarLateSpanTest margin, fix docs, log swallowed teardown races",
+            "scope": "test",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stamp roll-up epoch at the boundary, not the sleep offset",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a strong reference to the test's cpu.usage gauge",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Dispatch SSE events off the collector thread",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close the SSE loop exit/restart race",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restart a panel chart build that a level switch overtook",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Gate SSE fan-out on subscribers and close it on shutdown",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fill missed collector boundaries with NaN gaps",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the mirrored ring truthful across gaps and resyncs",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop the SSE loops before completing emitters",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Warn once per SSE queue-overflow episode",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fall back to the bundled panels when the user file is broken",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Label the global insights level selector",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Pin git-commit-id plugin and tolerate a missing .git in the testing app",
+            "scope": "build",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Pin the Playwright browser locale so POSIX hosts don't break Intl",
+            "scope": "test",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the stat tiles from losing a shared config request",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make chart zoom reset actually reset, and fix its test blind spots",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Solid legend swatches instead of outline boxes",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Wait for query ingestion before asserting the overlay tab count",
+            "scope": "test",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Park the dispatcher deterministically before flooding the SSE queue",
+            "scope": "test",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Resolve log spanIds through duplicate-span redirects",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Derive the trace-overlay re-open guard from the DOM, not a flag",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Validate the deep-linked log level and sync the click-to-open trace path",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Clean the hash on close after an overlay tab switch from the click-open path",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Escape short span id in the logs filter chip label",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop dashboard filters from resurrecting closed traces or clearing on tab switch",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Distinguish a hand-edited hash from a tab-switch's bare hash",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Put overlay header buttons in flow and label non-HTTP traces",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop the traces tab's auto-refresh from clobbering an open overlay's filter params",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restore the copy control's hit-target floor, cover the span-logs URL",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restore focus to the Logs tab after a span's logs toggle",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Delete dead displayValue option from copyableId",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Pluralize span log and row-count badges correctly",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Pluralize the Queries tab's row-count badge correctly",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Pin the de-stubbed scheduled-job test's query count to 1",
+            "scope": "test",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop classifying message producers as consumers",
+            "scope": "trace",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard folder name sanitizing against a bare '.' or '..'",
+            "scope": "storage",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Abandon the restore barrier for good even when the source throws",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard file persistence and tests against latent bugs",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Extract tile sampling from InsightsCollector, drop broad catches",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "De-flake InsightsServicePersistenceTest's persistence proof",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close remaining review items on the gate repair",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read uPlot's device-pixel ratio off the class, not the instance",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the persisted snapshot consistent with its own header",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop two recorders racing for the same event log",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guarantee the snapshot load future always completes",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Count downtime after an orphaned leading stop",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Style disabled .pk-btn so the pager's dead state is visible",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give every gantt bar a background, colour producer/consumer spans",
+            "scope": "trace-detail",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Let formatDateTime honour a time-only option set",
+            "scope": "shared",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Decide a logger's configured state in one place",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Hide decorative glyphs and drive gantt collapse state from aria-expanded",
+            "scope": "a11y",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Style OUT_OF_SERVICE health as an error",
+            "scope": "shared",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Escape the span id in the SQL toggle markup and selector",
+            "scope": "trace-detail",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask connection params in the ready banner",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serialise snapshot writes",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Count all eight StatsRing columns in the memory estimate",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve UI assets no-cache instead of no-store",
+            "scope": "config",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Log the throwable in the filters' catch-alls",
+            "scope": "filter",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Reject a roll-up window wider than the previous ring",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Remove the temp file when a lifecycle rewrite fails",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep newlines out of the banner's format strings",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Order Insights after Boot's metrics auto-configuration",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make the tracing auto-configurations servlet-only",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Advertise peekaboot.enabled's real default",
+            "scope": "config",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Judge URL-query and -D option values by the key-name rules",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Cap SSE subscribers at 32 and time emitters out after five minutes",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Create state files owner-only and never write through a planted symlink",
+            "scope": "storage",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Send Cache-Control: no-store and X-Content-Type-Options: nosniff on /peekaboot/api/**",
+            "scope": "web",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read health from the HealthEndpoint bean, drop the show-details default",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep composite health components and each DataSource's own status",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep Hikari out of the ready listener so other pools can start",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mark the pool read in HikariPoolInfo as a borrowed resource for PMD",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serialise Peekaboot's own JSON with its own mapper",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Skip the observability defaults for non-servlet applications",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Require a build-output classpath and no container marker for local-dev detection",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop defaulting Logbook, datasource-proxy and git info settings",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Split the class path with an explicit limit, exclude the marker-path SpotBugs finding",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Leave the error page to the container when a handler throws mid-render",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Follow server.servlet.context-path in the toolbar, filters and dashboard",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read the request summary off Spring's default observation tags",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Accept the documented title-less panel override as a patch",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Record one stop when a child management context closes too",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture an async request when its cycle completes, not at hand-off",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a snapshot captured mid-tick writable",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Count each listed trace's logs so the Traces tab shows its badges",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep Flyway's own migration order instead of re-sorting by version",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Print https when any server.ssl property is bound, and localhost for ::",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "File lifecycle events in time order whatever order they arrive",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give the toolbar's response wrapper Spring's reset and commit semantics",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Open the view span for a View instance as well as a view name",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Gate the tracing interceptor on peekaboot.tracing.enabled too",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop the redundant null check SpotBugs rejects in mapBucket",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Treat a client abort during toolbar injection as DEBUG and detect non-HTML via the Content-Type header",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serialise a NaN metric statistic as null",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Tolerate a scheduled task without a schedule string in the tooltip; drop the UiTracingProperties round-trip test",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "List ISSUE_TYPES in IssueType's own order",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Align severity comparisons with the backend's >= and label queries by the query threshold",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Recognise Jetty's EofException as a client abort",
+            "scope": "dev-toolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop widening actuator value visibility for non-servlet applications",
+            "scope": "defaults",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a pressed button's own fill under its ink on hover",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Sample overview tiles on read, not on the tick cadence",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop the cpu-cores stat tile, the Machine card carries it",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Seat datasource cards beside JVM Defaults in the Overview grid",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Retune palette so every badge, pill and hover pairing clears AA",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Follow a customised springdoc.swagger-ui.path into idle mode",
+            "scope": "toolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Align chart fallback hexes with the retuned palette",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Skip host actuator spans behind a servlet context path",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Isolate SSE subscribers behind bounded per-subscriber send lanes",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mark the lookup executor's shutdownNow as the intended close",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Cover the blocked-script case in the toolbar notice tooltip",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Recognise client aborts by simple name and Windows wording",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Deepen the light INFO fill to carry white ink",
+            "scope": "frontend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ship the UI outside Boot's default static locations",
+            "scope": "web",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Malformed query strings, tree key paths, PWD scope",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Discard a trace whose root span is one of Peekaboot's own",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify multipart and PATCH form fields as form parameters",
+            "scope": "filter",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show every statement of a JDBC batch, in index order",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Exclude the bare /peekaboot and /actuator like the MVC patterns do",
+            "scope": "paths",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture every value of a repeated header",
+            "scope": "filter",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Warn once, with the cause, for a failing endpoint",
+            "scope": "actuator",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "A DevTools restart inside a container is not local",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep Peekaboot's defaults below the application's",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture requests and logs only when a store exists",
+            "scope": "autoconfigure",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Place an order in one transaction with a collision-free reference",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Open a deep-linked trace only once /api/features has answered",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Validate the traces type param; catch a failed insights resync",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Report the process's own uid/gid, not the cwd owner's",
+            "scope": "runtime",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Complete the SSE stream on timeout instead of letting Spring 503 it",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Say \"unbounded\" for a memory pool without a maximum",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Reject duplicate panel/series ids and unknown panel levels",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Label the gantt's axis origin 0ms rather than <1ms",
+            "scope": "overlay",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give the highlight and tint rules a literal fallback",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Move the pre-paint theme stamp into its own script file",
+            "scope": "dashboard",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Clear the reconnect flag in teardown",
+            "scope": "insights",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Order request headers and params by code point",
+            "scope": "overlay",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Whitelist badgeHtml's variant against the styled set",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a query-string key whose percent-encoding is malformed",
+            "scope": "capture",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Judge a span carrying an HTTP path by that path alone",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve the blank UI fixture from the path the ui handler maps",
+            "scope": "test",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the coverage collection out of the test phase",
+            "scope": "build",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Persist only the build and git keys the views read",
+            "scope": "lifecycle",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read a key ending in uri or url as an address",
+            "scope": "masking",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Clear the eleven warnings Error Prone reports",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Require a parentless span to classify CONNECTION_POOL",
+            "scope": "traces",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep incomplete trace fragments out of the listing",
+            "scope": "traces",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Take the Gradle version and build instant from the poms",
+            "scope": "build",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Performance",
+        "entries": [
+          {
+            "text": "Shorten the span export delay while the dev toolbar is on",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Resolve the marker colours once per chart",
+            "scope": "ui",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop the JVM-wide lock from the capture appender",
+            "scope": "log",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold the stylesheets into the toolbar shell once",
+            "scope": "devtoolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read uid/gid from the unix attribute view instead of forking id",
+            "scope": "backend",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Filter and count buckets from the root span, map only the page",
+            "scope": "traces",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify buckets from incremental bundle signals",
+            "scope": "traces",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify list filters by the bundle's root without copying its spans",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Strip CSS comments from the sheets inlined into every page",
+            "scope": "toolbar",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Dependency upgrades",
+        "entries": [
+          {
+            "text": "Bump actions/checkout from 5 to 7",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump dependabot/fetch-metadata from 2 to 3",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump softprops/action-gh-release from 2 to 3",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump WyriHaximus/github-action-get-previous-tag from 1 to 2",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-surefire-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump io.github.git-commit-id:git-commit-id-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-jar-plugin",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-compiler-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-source-plugin",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-dependency-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump nl.basjes.maven.release:conventional-commits-version-policy",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-release-plugin",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.sonatype.central:central-publishing-maven-plugin",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.springdoc:springdoc-openapi-starter-webmvc-ui",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.springframework.boot:spring-boot-starter-parent",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.springframework.boot:spring-boot-dependencies",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.microsoft.playwright:playwright",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump actions/cache from 4 to 6",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump actions/setup-java from 5 to 6",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump net.sourceforge.pmd:pmd-core from 7.26.0 to 7.27.0",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump net.sourceforge.pmd:pmd-java from 7.26.0 to 7.27.0",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven:apache-maven from 3.9.9 to 3.9.16",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.puppycrawl.tools:checkstyle from 14.0.0 to 14.1.0",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-site-plugin",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump gradle-wrapper from 9.7.0 to 9.7.1",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      }
+    ]
+  }
+]

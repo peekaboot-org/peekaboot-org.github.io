@@ -1,0 +1,46 @@
+---
+layout: default
+title: Releases
+description: Every Peekaboot release, with the breaking changes, features and fixes in each.
+permalink: /releases/
+---
+
+<main id="main" tabindex="-1">
+<section class="section">
+  <div class="container">
+    <h1 class="title is-2">Releases</h1>
+    <p class="subtitle is-5">
+      What changed in each release. Breaking changes, features, fixes, performance and
+      dependency upgrades; the full notes for a version are on GitHub.
+    </p>
+
+    {% for release in site.data.releases %}
+    <details class="pk-release"{% if forloop.first %} open{% endif %}>
+      <summary class="pk-release__summary">
+        <h2 class="title is-4">{{ release.version | escape }}</h2>
+        <span class="subtitle is-6 ml-3">{{ release.date | escape }}</span>
+      </summary>
+
+      <div class="content mt-4">
+        {% for group in release.groups %}
+        <h3 class="title is-5">{{ group.title | escape }}</h3>
+        <ul>
+          {% for entry in group.entries %}
+          <li>
+            {% if entry.breaking %}<span class="tag is-warning">breaking</span> {% endif %}
+            {% if entry.scope %}<strong>{{ entry.scope | escape }}</strong>: {% endif %}
+            {{ entry.text | escape }}{% if entry.detail %}. {{ entry.detail | escape }}{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endfor %}
+
+        <p><a href="{{ release.url | escape }}">Full notes for {{ release.version | escape }} on GitHub</a></p>
+      </div>
+    </details>
+    {% else %}
+    <p>No releases yet.</p>
+    {% endfor %}
+  </div>
+</section>
+</main>

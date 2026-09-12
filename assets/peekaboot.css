@@ -204,3 +204,19 @@ a:hover,
         max-height: none;
     }
 }
+
+/* Each release collapses: 0.1.0 alone carries the whole pre-release history. */
+.pk-release {
+    border-top: 1px solid var(--bulma-border);
+    padding: 1.25rem 0;
+}
+
+.pk-release__summary {
+    cursor: pointer;
+}
+
+.pk-release__summary > .title,
+.pk-release__summary > .subtitle {
+    display: inline;
+    margin-bottom: 0;
+}
