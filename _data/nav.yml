@@ -32,8 +32,6 @@
 
 - title: About
   pages:
-    - title: Release notes
-      url: /docs/release-notes/
     - title: Releases
       url: /releases/
     - title: Acknowledgements
