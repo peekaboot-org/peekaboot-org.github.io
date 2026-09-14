@@ -1,5 +1,212 @@
 [
   {
+    "version": "0.2.0",
+    "date": "2026-09-14",
+    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.2.0",
+    "initial": false,
+    "groups": [
+      {
+        "title": "Features",
+        "entries": [
+          {
+            "text": "Expose whether trace spans can arrive",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture JDBC queries out of the box",
+            "scope": "starter",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show a query's row count in the span tree",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Secure the dashboard automatically",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bundle the Geist webfonts",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Bug fixes",
+        "entries": [
+          {
+            "text": "Close the defects the docs rewrite left",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Correct trace and span edge cases",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Harden the passthrough writer hand-over",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close the remaining masking gaps",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Shut down cleanly behind a stalled SSE peer",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Correct activation and startup edge cases",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Correct dashboard UI defects",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep forwarded pages intact under Tomcat 11",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Scope observations to the dispatch, not the request",
+            "scope": "tracing",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stack the trace overlay above host page chrome",
+            "scope": "toolbar",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Polish the dashboard UI",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fail the release-data render on a broken pipe",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Performance",
+        "entries": [
+          {
+            "text": "Apply the audit's performance fixes",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Cache the bundled font for a year",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Dependency upgrades",
+        "entries": [
+          {
+            "text": "Bump org.apache.maven.plugins:maven-failsafe-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump io.github.git-commit-id:git-commit-id-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-surefire-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.github.spotbugs:spotbugs-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.diffplug.spotless:spotless-plugin-gradle",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.springdoc:springdoc-openapi-starter-webmvc-ui",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump actions/setup-java in /.github/actions/prepare-build",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump WyriHaximus/github-action-get-previous-tag",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Reverts",
+        "entries": [
+          {
+            "text": "Restore the URL query masking rule",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.1.0",
     "date": "2026-09-04",
     "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.1.0",
