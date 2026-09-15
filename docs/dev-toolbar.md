@@ -64,11 +64,12 @@ your page.
 </figure>
 
 The collapsed bar is the first look: response status (colour-coded), method and path, the
-resolved controller method, request duration, database query count and total query time,
-an error-log and a warn-log count when the request produced either, and the trace id,
-copyable with one click. The numbers fill in asynchronously: the bar re-fetches the trace
-four times over the first five seconds, so a span finishing after the response still gets
-counted. With the toolbar's 200 ms export delay (see [Configuration, what Peekaboot
+resolved controller method, request duration, the span count, database query count and
+total query time, the log count, an error-log and a warn-log count when the request
+produced either, and the trace id, copyable with one click. The numbers fill in
+asynchronously: the bar re-fetches the trace four times over the first five seconds, so a
+span finishing after the response still gets counted. With the toolbar's 200 ms export
+delay (see [Configuration, what Peekaboot
 sets]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)),
 they are usually final on the first attempt or two.
 
@@ -80,9 +81,9 @@ the overlay spells it out.
 Click the bar, anywhere but the trace id and the dashboard link, or press Enter or Space
 while it has focus. The Request tab then shows the whole exchange on one scrolling page.
 First the request line: method, path, query string when there is one, status spelled out
-as `404 Not Found`, content type and duration. Then the controller method, query and form
-parameters, and last the two header tables, request before response. Sections below the
-request line appear only when there is something in them. The header tables render either
+as `404 Not Found`, and duration. Then the controller method, query and form parameters,
+and last the two header tables, request before response. Sections below the request line
+appear only when there is something in them. The header tables render either
 way: "no headers captured" is an answer, where a vanished section reads as a missing
 feature.
 
@@ -103,7 +104,10 @@ nothing populates.
 
 The same click opens the full trace, the view the dashboard's Traces tab uses, without
 leaving the page you're testing. It opens on the Spans tab, shown above: the whole tree,
-every span's kind, tags and duration, nested exactly as they nested at runtime.
+every span's kind, tags and duration, nested exactly as they nested at runtime. Click a
+span's name to open a details panel below its row, with the kind spelled out, a copyable
+span id, and, where they apply, the error class and message, the SQL, and the tags with
+full keys.
 
 The Queries tab lists the SQL those spans ran, with duration and, where your
 instrumentation provides them, row counts. A query at or above
@@ -125,9 +129,10 @@ See [Traces]({{ '/docs/traces/' | relative_url }}#what-gets-captured) for what l
 store, and [trace status]({{ '/docs/traces/' | relative_url }}#trace-status) for what a
 span, a root span and a trace status mean.
 
-The tabs link into each other both ways. A database span's row jumps to that statement on
-the Queries tab; a query, or a log line, jumps back to its span in the tree. Each jump
-switches the tab, scrolls the target into view, focuses it and highlights it briefly.
+The tabs link into each other both ways. A database span's details panel carries a "Show in
+Queries tab" button that jumps to that statement; a query, or a log line, jumps back to its
+span in the tree. Each jump switches the tab, scrolls the target into view, focuses it and
+highlights it briefly.
 
 ## Logs correlated to the request {#logs-correlated-to-the-request}
 
