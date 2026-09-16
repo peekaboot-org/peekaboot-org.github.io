@@ -9,7 +9,7 @@ redirect_from:
 
 ## When Peekaboot is on {#when-peekaboot-is-on}
 
-Four properties are detected rather than fixed, set from whether Peekaboot read this launch as
+Five properties are detected rather than fixed, set from whether Peekaboot read this launch as
 a local run.
 
 | Property | On a local run | Elsewhere | Turns on |
@@ -17,14 +17,15 @@ a local run.
 | `peekaboot.enabled` | `true` | `false` | The dashboard, its API, and Peekaboot's defaults. |
 | `peekaboot.dev-toolbar` | `true` | `false` | The toolbar, log capture and request-detail capture. |
 | `peekaboot.storage.enabled` | `true` | `false` | Writing the charts and the run history to disk. |
+| `peekaboot.error-page.enabled` | `true` | `false` | The error page in place of Boot's whitelabel page. |
 | `peekaboot.security.enabled` | `false` | `true` | Peekaboot's fallback HTTP Basic challenge on `/peekaboot/**`. |
 
 They sit below every property source you control, so an `application.yml` entry, an environment
-variable or a system property wins in either direction. The four are detected
+variable or a system property wins in either direction. The five are detected
 independently: turning `peekaboot.enabled` on deliberately in a shared environment gives you
 the dashboard, not the toolbar and not files in that host's home directory.
 
-`peekaboot.security.enabled`'s detection is **inverted** from the other three: off on a local
+`peekaboot.security.enabled`'s detection is **inverted** from the other four: off on a local
 run, on elsewhere, so a reader scanning the table above should not assume it follows the same
 pattern. "Elsewhere" has one exception of its own - a test resolves `false`, the same as a local
 run, not `true` like the rest of "elsewhere," so a `@SpringBootTest` is never made to
@@ -83,13 +84,15 @@ A missing or unreadable `/proc/1/cgroup` counts as no container.
 There is no devcontainer marker and none is needed, since a devcontainer runs your application
 in a container and a container is never a local run. A checkout you work on inside VS Code Dev
 Containers or Codespaces therefore starts with everything off, which is easy to mistake for a
-broken starter. Set all three in the devcontainer's own configuration:
+broken starter. Set all four in the devcontainer's own configuration:
 
 ```yaml
 peekaboot:
   enabled: true
   dev-toolbar: true
   storage:
+    enabled: true
+  error-page:
     enabled: true
 ```
 
@@ -207,6 +210,25 @@ read regardless of the storage switch.
 
 There is no throttle on failed authentication attempts. See [Security: securing the
 dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
+
+### `peekaboot.error-page` {#peekabooterrorpage}
+
+| Property | Type | Default | Controls |
+|---|---|---|---|
+| `enabled` | boolean | detected | The error page Peekaboot renders in place of Spring Boot's whitelabel page. |
+
+`enabled`'s detection is covered under [When Peekaboot is on](#when-peekaboot-is-on) above: on
+for a local run, off elsewhere, with an explicit setting winning either way.
+
+The page shows the status and its reason, the request line, the exception class and message,
+and the stack trace with the application's own frames marked. It backs off wherever the
+application already has an error page of its own - an `error` view bean, an `error` template,
+or a static `error/*.html` - and stays out of the way while
+`spring.web.error.whitelabel.enabled` is `false`. It carries the dev toolbar like any other
+HTML response, reporting the request that failed rather than the `/error` dispatch that renders
+the page. See [Dev toolbar, where the bar
+appears]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
+[Security, the error page]({{ '/docs/security/' | relative_url }}#the-error-page).
 
 ### `peekaboot.lifecycle` {#peekabootlifecycle}
 

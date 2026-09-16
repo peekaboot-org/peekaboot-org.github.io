@@ -35,6 +35,12 @@ rules skip a response that would otherwise qualify:
 
 If generating the bar fails, the original page goes out unmodified rather than a broken one.
 
+The bar also appears on the error page Peekaboot renders in place of Boot's whitelabel page
+(see [Configuration, the error
+page]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage)), reporting the request
+that failed rather than the `/error` dispatch that renders the page. A direct request to
+`/error/` is still excluded, as listed above.
+
 The bar is server-rendered; everything on it is fetched from `/peekaboot/**`. Put Spring
 Security in front of those paths and a reader outside the role gets the bar with a notice
 instead of the numbers:

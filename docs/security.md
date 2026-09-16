@@ -114,6 +114,17 @@ That is the whole actuator surface Peekaboot exposes over HTTP. It is also a cos
 front of `/peekaboot/**` anyone who can reach it can ask for all of them as often as they
 like.
 
+## The error page {#the-error-page}
+
+On a local run, Peekaboot's error page replaces Boot's whitelabel page with the exception's
+class and message and its full stack trace. Whoever triggers the failing request sees it, not
+only someone who can reach `/peekaboot/**`.
+
+It follows the same detection as the dashboard: on for a detected local run, off elsewhere.
+`peekaboot.error-page.enabled=false` turns it off outright, regardless of the launch context.
+See [Configuration,
+`peekaboot.error-page`]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage).
+
 ## What Peekaboot writes to disk {#what-peekaboot-writes-to-disk}
 
 On a local run Peekaboot keeps two files, by default under
