@@ -215,18 +215,26 @@ dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 
 | Property | Type | Default | Controls |
 |---|---|---|---|
-| `enabled` | boolean | detected | The error page Peekaboot renders in place of Spring Boot's whitelabel page. |
+| `enabled` | boolean | detected | The error page Peekaboot renders in place of Spring Boot's whitelabel page, or the application's own where `override` is set. |
+| `override` | boolean | `false` | Whether Peekaboot's page takes precedence over an error page the application already has. |
 
 `enabled`'s detection is covered under [When Peekaboot is on](#when-peekaboot-is-on) above: on
 for a local run, off elsewhere, with an explicit setting winning either way.
 
 The page shows the status and its reason, the request line, the exception class and message,
-and the stack trace with the application's own frames marked. It backs off wherever the
-application already has an error page of its own - an `error` view bean, an `error` template,
-or a static `error/*.html` - and stays out of the way while
-`spring.web.error.whitelabel.enabled` is `false`. It carries the dev toolbar like any other
-HTML response, reporting the request that failed rather than the `/error` dispatch that renders
-the page. See [Dev toolbar, where the bar
+and the stack trace with the application's own frames marked. By default it backs off wherever
+the application already has an error page of its own - an `error` view bean, an `error`
+template, or a static `error/*.html` - and stays out of the way while
+`spring.web.error.whitelabel.enabled` is `false`.
+
+`override` is the opt-in for a project that wants to keep its own branded error page in normal
+use and still see Peekaboot's diagnostic page while developing locally. Set
+`peekaboot.error-page.override: true` in the local profile, and Peekaboot's page takes
+precedence over the application's own wherever `enabled` also resolves `true` - a local run,
+unless you set it explicitly. On that path the whitelabel setting does not apply.
+
+It carries the dev toolbar like any other HTML response, reporting the request that failed
+rather than the `/error` dispatch that renders the page. See [Dev toolbar, where the bar
 appears]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
 [Security, the error page]({{ '/docs/security/' | relative_url }}#the-error-page).
 
