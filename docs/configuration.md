@@ -233,6 +233,10 @@ use and still see Peekaboot's diagnostic page while developing locally. Set
 precedence over the application's own wherever `enabled` also resolves `true` - a local run,
 unless you set it explicitly. On that path the whitelabel setting does not apply.
 
+It also takes precedence over an `@ControllerAdvice` or `@ExceptionHandler` that renders the
+application's error page, which is the common case for a branded page. A request that asks for
+JSON is left alone, so an API client and the browser see different things on the same failure.
+
 It carries the dev toolbar like any other HTML response, reporting the request that failed
 rather than the `/error` dispatch that renders the page. See [Dev toolbar, where the bar
 appears]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
