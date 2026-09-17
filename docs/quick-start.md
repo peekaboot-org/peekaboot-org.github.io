@@ -64,7 +64,7 @@ exactly what counts as a local run.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 **Working in a devcontainer?** A container is never a local run, so nothing turns itself on.
-Set the four detected properties yourself; see [Configuration, container
+Set the five detected properties yourself; see [Configuration, container
 markers]({{ '/docs/configuration/' | relative_url }}#container-markers).
 </div>
 

@@ -9,7 +9,7 @@ redirect_from:
 
 ## When Peekaboot is on {#when-peekaboot-is-on}
 
-Five properties are detected rather than fixed, set from whether Peekaboot read this launch as
+Six properties are detected rather than fixed, set from whether Peekaboot read this launch as
 a local run.
 
 | Property | On a local run | Elsewhere | Turns on |
@@ -18,14 +18,15 @@ a local run.
 | `peekaboot.dev-toolbar` | `true` | `false` | The toolbar, log capture and request-detail capture. |
 | `peekaboot.storage.enabled` | `true` | `false` | Writing the charts and the run history to disk. |
 | `peekaboot.error-page.enabled` | `true` | `false` | The error page in place of Boot's whitelabel page. |
+| `peekaboot.stack-trace.fold` | `true` | `false` | Folding framework frames behind a disclosure on the error page and in the Logs tab. |
 | `peekaboot.security.enabled` | `false` | `true` | Peekaboot's fallback HTTP Basic challenge on `/peekaboot/**`. |
 
 They sit below every property source you control, so an `application.yml` entry, an environment
-variable or a system property wins in either direction. The five are detected
+variable or a system property wins in either direction. The six are detected
 independently: turning `peekaboot.enabled` on deliberately in a shared environment gives you
 the dashboard, not the toolbar and not files in that host's home directory.
 
-`peekaboot.security.enabled`'s detection is **inverted** from the other four: off on a local
+`peekaboot.security.enabled`'s detection is **inverted** from the other five: off on a local
 run, on elsewhere, so a reader scanning the table above should not assume it follows the same
 pattern. "Elsewhere" has one exception of its own - a test resolves `false`, the same as a local
 run, not `true` like the rest of "elsewhere," so a `@SpringBootTest` is never made to
@@ -84,7 +85,7 @@ A missing or unreadable `/proc/1/cgroup` counts as no container.
 There is no devcontainer marker and none is needed, since a devcontainer runs your application
 in a container and a container is never a local run. A checkout you work on inside VS Code Dev
 Containers or Codespaces therefore starts with everything off, which is easy to mistake for a
-broken starter. Set all four in the devcontainer's own configuration:
+broken starter. Set all five in the devcontainer's own configuration:
 
 ```yaml
 peekaboot:
@@ -94,6 +95,8 @@ peekaboot:
     enabled: true
   error-page:
     enabled: true
+  stack-trace:
+    fold: true
 ```
 
 Tests count as not local on purpose, so CI never picks up the dashboard, the toolbar and the
@@ -241,6 +244,59 @@ It carries the dev toolbar like any other HTML response, reporting the request t
 rather than the `/error` dispatch that renders the page. See [Dev toolbar, where the bar
 appears]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
 [Security, the error page]({{ '/docs/security/' | relative_url }}#the-error-page).
+
+### `peekaboot.stack-trace` {#peekabootstacktrace}
+
+| Property | Type | Default | Controls |
+|---|---|---|---|
+| `fold` | boolean | detected | Whether framework frames collapse behind a disclosure on the error page and in the Logs tab. |
+| `exclude` | `List<String>` | unset | The patterns that pick which frames fold away. Setting it to a non-empty list replaces the resolved list rather than adding to it. |
+
+`fold`'s detection is covered under [When Peekaboot is on](#when-peekaboot-is-on) above: on
+for a local run, off elsewhere, with an explicit setting winning either way. Off, nothing folds
+anywhere - the error page renders every frame inline and the Logs tab gets no hidden ranges.
+
+A frame folds when its line contains one of the exclude patterns as a substring, matched the
+way Logback's own `%wEx` conversion word matches them - not a prefix, not a regex. The
+application's own frames are never folded, whatever the patterns say; they are what you came
+for.
+
+`exclude` resolves from the first of three sources that has an opinion. An empty list does not
+count as one - `exclude: []` behaves exactly like not setting the property at all, and falls
+through to the next source. Use `fold: false` to stop folding altogether; an empty `exclude`
+will not do it.
+
+1. `peekaboot.stack-trace.exclude`, set to a non-empty list. Replaces the built-in list
+   entirely - there is no way to add one pattern to it.
+2. The patterns already in your own `logging.exception-conversion-word`, read from its
+   `%wEx{...}` block. A block naming nothing past its leading depth, `%wEx{full}` on its own,
+   is already an opinion - "exclude nothing" - so folding hides nothing at all rather than
+   falling back to the built-in list. Only a conversion word with no `%wEx{...}` block
+   whatsoever falls through to it.
+3. A built-in list of fifteen patterns:
+
+   ```
+   java.lang.reflect.Method
+   jdk.internal.reflect
+   sun.reflect
+   org.apache.catalina
+   org.apache.coyote
+   org.apache.tomcat
+   org.springframework
+   org.thymeleaf
+   org.attoparser      # Thymeleaf's own parser
+   jakarta.servlet
+   net.sf.cglib
+   ByCGLIB             # a CGLIB-generated proxy class name, not a package
+   org.zalando.logbook
+   net.ttddyy.dsproxy
+   com.mysql
+   ```
+
+A captured throwable's trace is capped at 1000 lines regardless of `fold`. Past that,
+`PeekabootLogbackAppender` truncates it and appends a `... N lines omitted` marker - the case
+this exists for is a `StackOverflowError`, whose own trace runs to 1024 frames by default and
+would otherwise dominate the trace store on its own.
 
 ### `peekaboot.lifecycle` {#peekabootlifecycle}
 

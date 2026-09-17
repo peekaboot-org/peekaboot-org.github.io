@@ -62,9 +62,10 @@ at startup.
 
 ## What happens when you deploy {#what-happens-when-you-deploy}
 
-`peekaboot.enabled`, `peekaboot.dev-toolbar` and `peekaboot.storage.enabled` are detected,
-not fixed: on for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run), off
-everywhere else, and an explicit value wins in either direction. The one deployment that
+`peekaboot.enabled`, `peekaboot.dev-toolbar`, `peekaboot.storage.enabled`,
+`peekaboot.error-page.enabled` and `peekaboot.stack-trace.fold` are detected, not fixed: on
+for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run), off everywhere
+else, and an explicit value wins in either direction. The one deployment that
 still reads as local is your build output run directly (`java -cp target/classes:…`) on a
 host that is not a container. Set `peekaboot.enabled=false` explicitly there.
 
