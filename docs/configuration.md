@@ -296,7 +296,9 @@ will not do it.
 A captured throwable's trace is capped at 1000 lines regardless of `fold`. Past that,
 `PeekabootLogbackAppender` truncates it and appends a `... N lines omitted` marker - the case
 this exists for is a `StackOverflowError`, whose own trace runs to 1024 frames by default and
-would otherwise dominate the trace store on its own.
+would otherwise dominate the trace store on its own. That 1000-line cap multiplies by
+`peekaboot.tracing.max-logs-per-trace` (500) and then by `peekaboot.tracing.max-traces` (1000)
+for the worst case held across the whole trace store.
 
 ### `peekaboot.lifecycle` {#peekabootlifecycle}
 
