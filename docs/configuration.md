@@ -332,6 +332,7 @@ true. Otherwise the line is omitted rather than printed as a 404.
 | Property | Type | Default | Controls |
 |---|---|---|---|
 | `enabled` | boolean | `true` | Whether the in-memory trace store exists at all. |
+| `async` | boolean | `true` | Whether Peekaboot raises a span around each task handed to one of Spring's task executors. Needs `spring.task.execution.propagate-context`, below. |
 | `max-traces` | int | `1000` | Traces held in the **All** bucket, oldest evicted first. |
 | `max-spans-per-trace` | int | `500` | Distinct spans kept per trace after duplicates from double-instrumented layers are folded away; oldest dropped past it, and the trace is flagged `TRUNCATED`. |
 | `max-error-traces` | int | `100` | Traces held in the **Errors** bucket. |
@@ -339,7 +340,32 @@ true. Otherwise the line is omitted rather than printed as a 404.
 | `slow-trace-threshold-ms` | long | `1000` | Total duration at or above which a trace enters the Slow bucket. |
 | `max-logs-per-trace` | int | `500` | Correlated log entries kept per trace; only populated while the dev toolbar is on. |
 
-See [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets) for the three buckets.
+See [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets) for the three buckets, and
+[background work]({{ '/docs/traces/' | relative_url }}#background-work) for what `async`
+changes in the UI.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+**Peekaboot does not enable `spring.task.execution.propagate-context`. Your application has
+to.** Spring Boot leaves it off, so the trace context stays on the submitting thread and there
+is nothing on the executor thread for Peekaboot to continue. `async` is on by default and
+still raises no span. The property changes what every task on that executor sees, not only
+what Peekaboot records, which is why it stays your decision.
+
+**An application that wants its own bounded pool needs `spring.task.execution.mode=force`.**
+Declaring any `Executor` bean otherwise suppresses Boot's `applicationTaskExecutor` outright:
+the condition is `@ConditionalOnMissingBean(Executor.class)` and it matches by assignability,
+so declaring a narrower type does not avoid it. Nothing then builds the executor for Boot,
+and neither context propagation nor Peekaboot's decorator reaches it.
+</div>
+
+The one property an application on Boot's own executor has to set:
+
+```yaml
+spring:
+  task:
+    execution:
+      propagate-context: true
+```
 
 ### `peekaboot.ui.tracing` {#peekabootuitracing}
 
@@ -384,8 +410,14 @@ to show without you configuring Actuator or sampling by hand. All of them sit be
 property source you control, so anything you set wins.
 
 The same holds for beans. Everything Peekaboot registers backs off when your application defines
-a bean of the same type; two match on bean name instead, so replacing
-`tracingInterceptorConfigurer` or `databaseMetadataList` takes the name.
+a bean of the same type, and a few match on bean name instead, so replacing
+`tracingInterceptorConfigurer` or `peekabootAsyncTaskDecorator` takes the name.
+
+`peekabootAsyncTaskDecorator` is the `TaskDecorator` behind the async span. Spring Boot composes
+task decorators rather than picking one, so a decorator of your own keeps running, and
+Peekaboot's sits just inside Boot's context-propagating decorator so its span opens on the
+restored trace. Peekaboot sets no `spring.task.execution.*` property, `propagate-context` and
+`mode` included. See [`peekaboot.tracing`](#peekaboottracing).
 
 | Property | Default without Peekaboot | Peekaboot default | Applies when | Why |
 |---|---|---|---|---|

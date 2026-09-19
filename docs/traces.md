@@ -21,6 +21,18 @@ Peekaboot itself pushes nothing out of the process: it adds no exporter of its o
 turns Micrometer's OTLP metrics export off.
 </div>
 
+<div class="pk-callout pk-callout--warning" markdown="1">
+**Peekaboot raises three observations of its own.** Two around each request
+(`spring.handler`, `spring.view.render`) and one around each task handed to a Spring task
+executor (`peekaboot.async.task`). They are ordinary Micrometer observations, so they reach
+every exporter you have configured, not only Peekaboot's store.
+
+[What gets captured](#what-gets-captured) names all three with their tags.
+`peekaboot.tracing.async` turns the async one off on its own;
+`peekaboot.tracing.enabled: false` removes all three. Everything else in the store is a span
+your application already produced.
+</div>
+
 ## The vocabulary {#the-vocabulary}
 
 **Trace.** Everything Peekaboot recorded for one unit of work: one HTTP request, one run of
@@ -63,17 +75,25 @@ Three things bound what gets captured:
   `management.endpoints.web.base-path`). Excluding a request's root span discards the whole
   trace, which is why Peekaboot's own dashboard traffic never appears in its own list.
 
-Peekaboot contributes two spans of its own to each request, on those same exclusions
-and only while `peekaboot.enabled` and `peekaboot.tracing.enabled` are both on:
+Peekaboot contributes three spans of its own, only while `peekaboot.enabled` and
+`peekaboot.tracing.enabled` are both on. Two sit on the request path, under the same
+exclusions as everything else:
 
 - `spring.handler` around the controller method, tagged `handler.type` and `handler.name`.
 - `spring.view.render` around view rendering, tagged `view.type` and `view.name`, raised
   only when the handler resolved a view, so a `@ResponseBody` controller produces none.
 
-Both are ordinary observations, so every configured exporter sees them, and turning tracing
-off removes them from those exporters along with the store. The handler span stays current
-for the length of the controller method, so spans opened inside it (JDBC, HTTP clients)
-nest under it rather than under the HTTP server span.
+The third sits outside it. `peekaboot.async.task` wraps each task handed to one of Spring's
+task executors, tagged `peekaboot.async` and `peekaboot.async.thread`, and is raised only
+when the thread that handed the task over already had a trace in scope.
+`peekaboot.tracing.async: false` turns that one off by itself. See [background
+work](#background-work) for what it needs from your application and what it changes in the
+UI.
+
+All three are ordinary observations, so every configured exporter sees them, and turning
+tracing off removes them from those exporters along with the store. The handler span stays
+current for the length of the controller method, so spans opened inside it (JDBC, HTTP
+clients) nest under it rather than under the HTTP server span.
 
 One trace holds at most `peekaboot.tracing.max-spans-per-trace` spans (default 500). Past
 that the oldest spans are dropped and the trace carries a **TRUNCATED** badge in the list.
@@ -100,11 +120,12 @@ the most specific-sounding one.
 | 2 | HTTP Request | 🌐 | An inbound web request, recognized from its own tags | The root span is server-side **and** carries HTTP tags: any `http.` tag, or `method` and `uri` together |
 | 3 | RPC Call | 🔗 | An inbound remote-procedure call (gRPC, for example) | The root span is server-side **and** carries `rpc.` tags |
 | 4 | HTTP Request (fallback) | 🌐 | Any other inbound web request, one that carried no HTTP-specific tags | The root span is server-side, full stop. Rules 2 to 4 between them catch every server-side span, so no rule below ever sees one |
-| 5 | Scheduled Job | 🕑 | A `@Scheduled` method Spring's scheduler actually fired | The root span carries the `code.function` and `code.namespace` tags Spring's scheduler sets when it dispatches a `@Scheduled` method. It sits above every rule below it because a scheduled invocation carries no span kind at all, and it wins over Database and Unknown on a client- or producer-side root too |
-| 6 | Database | 🗂 | A database call with nothing above it in the trace | The root span is client-side **and** carries `db.` tags. Rare: it means something queried a database with no request, job or message context around it that Peekaboot could see |
-| 7 | Connection Pool | 🔌 | The pool acquiring or validating a connection outside any traced work | The root span is client-side, named `connection`, carries the datasource tags, and has no parent in the trace. Checked after row 6, so a query span that also carries pool tags stays Database |
-| 8 | Internal | ⚙ | The trace has no inbound or outbound direction at all | The root span carries no span kind: not client, server, producer or consumer. Messaging tags still win, so a kind-less span carrying them is Message Consumer |
-| 9 | Unknown | ❓ | Nothing above matched | A producer-side span, meaning a message being sent rather than received; or a client-side span with no database tags. The second shape includes an outbound HTTP or RPC call that became the root only because its own caller's span has not reached Peekaboot |
+| 5 | Async Task | ⚡ | Background work Peekaboot observed on one of Spring's task executors | The root span carries Peekaboot's own `peekaboot.async` tag. Checked ahead of every rule under it, being Peekaboot's own marker rather than an inference from someone else's convention. The entry span carries no span kind, so rule 9 would otherwise swallow it. See [background work](#background-work) |
+| 6 | Scheduled Job | 🕑 | A `@Scheduled` method Spring's scheduler actually fired | The root span carries the `code.function` and `code.namespace` tags Spring's scheduler sets when it dispatches a `@Scheduled` method. It sits above every rule below it because a scheduled invocation carries no span kind at all, and it wins over Database and Unknown on a client- or producer-side root too |
+| 7 | Database | 🗂 | A database call with nothing above it in the trace | The root span is client-side **and** carries `db.` tags. Rare: it means something queried a database with no request, job or message context around it that Peekaboot could see |
+| 8 | Connection Pool | 🔌 | The pool acquiring or validating a connection outside any traced work | The root span is client-side, named `connection`, carries the datasource tags, and has no parent in the trace. Checked after row 7, so a query span that also carries pool tags stays Database |
+| 9 | Internal | ⚙ | The trace has no inbound or outbound direction at all | The root span carries no span kind: not client, server, producer or consumer. Messaging tags still win, so a kind-less span carrying them is Message Consumer |
+| 10 | Unknown | ❓ | Nothing above matched | A producer-side span, meaning a message being sent rather than received; or a client-side span with no database tags. The second shape includes an outbound HTTP or RPC call that became the root only because its own caller's span has not reached Peekaboot |
 
 HTTP Request appears twice on purpose. The strict tag check sits at priority 2, the
 fallback at priority 4, sweeping up whatever server-side spans it left.
@@ -133,7 +154,60 @@ Connection Pool filter. Over the API,
 once.
 
 A pool acquisition *inside* traced work is an ordinary child span, never classified. Only a
-connection span with no parent in the trace reaches rule 7.
+connection span with no parent in the trace reaches rule 8.
+
+## Background work {#background-work}
+
+A task handed to one of Spring's task executors runs on another thread. The trace context
+does not follow it by default, so the work starts a trace of its own with nothing to say what
+triggered it. Turn `spring.task.execution.propagate-context` on and the context travels;
+Peekaboot then raises `peekaboot.async.task` around the task, and the work lands in the trace
+that submitted it.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+**Peekaboot does not set `spring.task.execution.propagate-context`. Your application does.**
+Without it there is no trace on the executor thread to continue, so Peekaboot raises nothing
+and background work keeps starting traces of its own. An application that wants its own
+bounded pool for this needs `spring.task.execution.mode=force` as well. Both are covered
+under [`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing).
+</div>
+
+A `@Scheduled` run is untouched. It keeps its Scheduled Job type and gets no async span, even
+though Spring hands the same decorator to its scheduler.
+
+### The triggering trace is timed without it {#async-timing}
+
+A request that returns in 50ms reports 50ms, however long the task it started runs
+afterwards. The trace's duration, the span-duration total on its Spans tab, the window those
+bars are measured against and admission to the Slow bucket all read the synchronous part
+alone.
+
+Counts are not filtered the same way. A background task that fails still puts its trace in
+Errors and shows it as HAS_ERRORS, and its query spans still count on the Queries tab. Only
+the duration figures misrepresent what the caller waited for, so only those exclude the
+subtree.
+
+### Background work gets its own row {#async-rows}
+
+Each entry point is listed separately, typed Async Task and timed by its own subtree rather
+than by the trace around it. One trace can therefore produce several rows, and a type filter
+selects rows rather than traces: filter for HTTP Request and you get the request, filter for
+Async Task and you get the work it started. A row carries a ⤴ link to the trace that
+triggered it while that trace is still in the store; a task whose trace has already been
+evicted is listed on its own.
+
+Opening an async row opens the Spans tab scoped to that subtree, timed against the subtree's
+own window. In the triggering trace's own Spans tab the same subtree starts collapsed and its
+entry span carries a **background** chip. Its spans are drawn against the subtree's own window
+rather than the trace's, so a four-minute task cannot crush a 50ms request into an invisible
+sliver.
+
+### The span is named `async task` {#async-naming}
+
+A `TaskDecorator` receives an opaque `Runnable`, so the method behind it is unrecoverable and
+every async entry span carries the same name. A name that says something has to come from
+the application, through `@Observed(contextualName = "...")` on the method or the child spans
+the task produces.
 
 ## Trace status {#trace-status}
 
@@ -170,7 +244,8 @@ Every trace lands in All, and in Errors or Slow too when it qualifies:
   spans alone.
 - **Slow** holds traces whose *total* wall-clock duration is at or above
   `peekaboot.tracing.slow-trace-threshold-ms` (default 1000ms), capped at
-  `peekaboot.tracing.max-slow-traces` (default 100).
+  `peekaboot.tracing.max-slow-traces` (default 100). [Background work](#background-work) is
+  not part of that duration, so a fast request that started a slow task stays out.
 
 Nothing expires on a clock. Each bucket evicts its own oldest entry once its own cap is
 full, where oldest means first admitted; a trace that keeps receiving spans does not move.
@@ -196,9 +271,9 @@ at once.
   past `very-slow-span-threshold-ms` (default 500ms) produces the same badge; that
   threshold colours span, query and duration text in the trace detail overlay, never the
   row badge.
-- The **Slow bucket** count means *this trace's total end-to-end duration* reached
-  `peekaboot.tracing.slow-trace-threshold-ms` (default 1000ms), a whole-trace check against
-  a threshold ten times larger.
+- The **Slow bucket** count means *this trace's total end-to-end duration*, background work
+  excluded, reached `peekaboot.tracing.slow-trace-threshold-ms` (default 1000ms), a
+  whole-trace check against a threshold ten times larger.
 
 In the screenshot, four rows carry a SLOW badge while the Slow bucket reports one trace:
 only one of the four was past 1000ms end to end. The smaller badge threshold fires far more
