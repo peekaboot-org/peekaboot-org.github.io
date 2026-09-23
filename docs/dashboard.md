@@ -1,61 +1,63 @@
 ---
 title: The dashboard
-lead: One tab per operational question, from health and live charts to migrations, loggers and schedules.
+lead: One tab each for health, live charts, run history, traces, meters, properties, migrations, loggers and schedules.
 permalink: /docs/dashboard/
 ---
 
-The dashboard calls Actuator in-process on every load. Peekaboot builds its own `info`,
-`env`, `configprops`, `loggers`, `flyway` and `scheduledtasks` endpoint objects and reads
-them in-process; only `health` is the application's own bean, kept available so
-`management.endpoint.health.show-details` cannot strip the per-component breakdown. Either
-way nothing is exposed on `/actuator/**`, and `management.endpoints.web.exposure` needs no
-configuration. The same response also carries what Actuator does not produce: the Spring
-Boot and framework versions, the datasource metadata, the JVM's own defaults, and the OS,
-memory, storage, process and machine details behind Overview's cards. Insights,
-Meters and Traces come from their own endpoints, gated by feature flags rather than by that
-call.
+## Open the dashboard {#open-the-dashboard}
 
-"Dashboard" names the whole UI here, never one tab; the landing tab is **Overview**. Tabs
-appear in this order, left to right.
+Open `/peekaboot` under your servlet context path, for example `http://localhost:8080/peekaboot`.
+It redirects to `/peekaboot/ui/dashboard/index.html`. The landing tab is Overview.
+
+The dashboard exists when all of these hold:
+
+- `peekaboot.enabled` is on. It defaults to on for a
+  [local run]({{ '/docs/configuration/' | relative_url }}#local-run) only.
+- The application is a servlet web application.
+- Spring Boot Actuator is on the classpath. The starter brings it.
+
+You do not need to expose anything on `/actuator/**`. The dashboard works with no
+`management.endpoints.web.exposure` setting, and `management.endpoint.health.show-details`
+does not hide health components from it.
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+The dashboard shows your configuration and environment. Read
+[Security]({{ '/docs/security/' | relative_url }}#securing-the-dashboard) and
+[Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) before you turn
+it on anywhere but your own machine.
+</div>
 
 ## The header {#the-header}
 
-The strip above the tabs is the same on every tab:
+The strip above the tabs is the same on every tab.
 
-- **Updated &lt;time&gt;** is when the data on screen was fetched. The dashboard refetches
-  every 30 seconds; **Refresh now** fetches immediately, and **Pause auto-refresh** stops
-  the timer until pressed again. Traces, Lifecycle and Meters fetch from their own
-  endpoints on the same cycle, and only while they are the tab on screen.
-- **Timezone** is a **Browser**/**Server** toggle, with the zone it currently means beside
-  it. Every timestamp is rendered in the chosen zone. Browser is the default, and the
-  server's zone is the application's own.
-- **Language** is EN, DE, FR or ES (`en-US`, `de-DE`, `fr-FR`, `es-ES`). It formats dates,
-  times and numbers, and is sent to the API as `locale`, which localises the cron
-  descriptions on Scheduled Tasks and the server's timezone name (see
-  [HTTP API]({{ '/docs/api/' | relative_url }}#the-locale-parameter)). It defaults to the
-  browser's language, which is added to the list when it is none of those four.
-- **Theme** is light or dark; the toolbar and the trace-detail overlay follow it.
+- **Updated &lt;time&gt;** shows when the data on screen was fetched. The dashboard refetches
+  every 30 seconds. **Refresh now** fetches immediately. **Pause auto-refresh** stops the
+  timer until you press it again. The Insights charts keep updating while paused.
+- **Timezone** switches between **Browser** (the default) and **Server**. Every timestamp is
+  shown in the chosen zone.
+- **Language** is EN, DE, FR or ES. It formats dates, times and numbers, and localises the
+  cron descriptions on Scheduled Tasks. It defaults to the browser's language, which is added
+  to the list when it is none of the four.
+- **Theme** is light or dark. The toolbar and the trace detail follow it.
 
-The Insights charts are the one thing the pause does not stop: they arrive over their own
-live stream and keep updating while the timer is off. The Insights stat tiles on Overview
-do ride the 30-second cycle, and stop with it.
+Timezone, language and theme are remembered per browser. The Environment and Config tabs'
+**Show secrets** toggle is not: a reload always starts masked.
 
-Timezone, language and theme are remembered per browser, in `localStorage`
-(`peekaboot-use-server-tz`, `peekaboot-locale`, `peekaboot-theme`). The Environment and
-Config tabs' "Show secrets" toggle deliberately is not: a reload always starts masked.
+## Share a view with a link {#deep-links}
 
-### Deep links {#deep-links}
-
-Every view is a shareable URL. The hash carries the tab, the open trace and the filters,
-so a location can be bookmarked or pasted into a chat:
+The URL hash holds the tab, the open trace and the filters. Copy the address bar to share a
+view.
 
 - `#environment` opens that tab. The ids are `overview`, `insights`, `lifecycle`, `traces`,
-  `meters`, `environment`, `flyway`, `loggers`, `config` and `scheduled-tasks`; anything
-  else lands on Overview.
-- `#traces/<traceId>` opens that trace's detail overlay on top of the Traces tab, on its
-  Spans page. Append `/request`, `/spans`, `/queries` or `/logs` to land elsewhere.
+  `meters`, `environment`, `flyway`, `loggers`, `config` and `scheduled-tasks`. Any other id
+  opens Overview.
+- `#traces/<traceId>` opens that trace's detail on its Spans page. Append `/request`,
+  `/spans`, `/queries` or `/logs` to open another page.
+- `#traces/<traceId>/spans?root=<spanId>` opens one background task's own subtree of that
+  trace.
 
-A view's own filters travel as a query string, written as you type:
+Filters travel as a query string:
 
 | View | Query string |
 |---|---|
@@ -64,16 +66,10 @@ A view's own filters travel as a query string, written as you type:
 | Loggers | `q` plus the configured-only checkbox (`#loggers?q=peekaboot&configured=1`) |
 | Insights | `level`, the `percentiles` and `restarts` toggles, and `panels` for per-panel level overrides |
 | Lifecycle | `page` |
-| An open trace's Logs tab | `q`, `level` and `span` (`#traces/<traceId>/logs?level=WARN&q=timeout`) |
+| An open trace's Logs page | `q`, `level` and `span` (`#traces/<traceId>/logs?level=WARN&q=timeout`) |
 
-Switching tabs and opening a trace add history entries; changing a filter or the overlay's
-own tab rewrites the URL in place. Back therefore closes the overlay or returns to the
-previous tab instead of walking back through your filter edits. Closing the overlay drops
-the trace from the hash, so a reload doesn't reopen it. An invalid bucket, level or page in
-a link falls back to the default instead of filtering invisibly.
-
-Theme, language and timezone stay [personal browser settings](#the-header) and never enter
-a link: a shared URL doesn't impose the sender's display preferences on whoever opens it.
+An invalid bucket, level or page in a link falls back to the default. Theme, language and
+timezone are never part of a link.
 
 ## Overview {#overview}
 
@@ -83,36 +79,26 @@ a link: a shared URL doesn't impose the sender's display preferences on whoever 
        loading="lazy">
 </figure>
 
-**Answers:** is the app healthy, and what's actually running?
+Overview shows the application's health and what is running. It holds the health banner with
+its per-component breakdown, build and Git metadata, Spring Boot and Java versions, OS and JVM
+defaults, datasource status, and memory and storage meters. A composite health contributor,
+such as Spring's `db` with two DataSources, shows as one row with its aggregate status,
+followed by its children as `db/<name>`.
 
-There is no separate Health tab and no separate Info tab; this one covers both. It carries
-build and Git metadata, Spring Boot and Java versions, OS, machine and JVM defaults,
-datasource status, memory and storage meters, and the health banner with its per-component
-breakdown.
-A composite contributor (Spring's `db` once there are two DataSources, or one of your own)
-is one row with its aggregate status, followed by its children as `db/<name>`.
+The Machine card shows the logical CPU count (with the CPU model on Linux), total physical
+memory, the JVM's max heap, the machine's IPv4 and IPv6 addresses with their hostnames where these resolve, and
+the container runtime: `docker`, `podman`, `kubernetes`, `container` or `none`. Inside a
+container, CPU and memory show the container's limits.
 
-The Machine card is what the JVM actually got to run on: logical CPU count (plus the CPU
-model on Linux), total physical memory, JVM max heap, and the container runtime. That last
-one reads `docker`, `podman`, `kubernetes`, a generic `container` when only the cgroup
-hierarchy gives the containment away, or `none`. CPU and memory come from the JDK, which is
-container-aware: under container limits they report the container's share, not the host's.
+### Stat tiles {#stat-tiles}
 
-It also lists the machine's non-local IP addresses under IPv4/IPv6 tabs (IPv4 first; a
-family with no addresses hides its tab; up interfaces only; loopback and link-local
-skipped), each with the hostname it reverse-resolves to when the lookup answers inside its
-one-second budget. The CPU count is annotated with the physical topology: `8 (4 cores × 2
-threads)` with SMT/hyper-threading active, `(4 cores, SMT off)` without, the plain count
-where topology can't be read. Everything here is best-effort. What the machine won't reveal
-is left out rather than guessed at.
+The row at the top shows Started at, Startup, Ready after and Uptime. Each tile shows a
+current value only, with no history. Uptime updates on every refresh. The other three keep
+their first value.
 
-The stat-tile row (Started at, Startup, Ready after, Uptime) comes from the insights
-collector rather than Actuator, and is defined in the same file as the Insights panels. It
-lives here because it answers an Overview question rather than a charting one. See
-[Insights, stat tiles live on
-Overview]({{ '/docs/insights/' | relative_url }}#stat-tiles-live-on-overview). With
-insights off or unreachable (no `MeterRegistry`, `peekaboot.insights.enabled: false`, or
-the call failing) the row is hidden outright rather than left as an empty box.
+The tiles are defined in the Insights panel file, so you can replace them or add your own
+there. See [Insights, tile fields]({{ '/docs/insights/' | relative_url }}#tile-fields).
+The row is hidden when Insights is off or has no `MeterRegistry`.
 
 ## Insights {#insights}
 
@@ -122,18 +108,9 @@ the call failing) the row is hidden outright rather than left as an empty box.
        loading="lazy">
 </figure>
 
-**Answers:** how have CPU, memory, HTTP, the connection pool and the rest behaved over the
-last minutes, hours or days?
-
-Live charts over a curated set of Micrometer meters, aggregated in-process at three
-resolutions (10 seconds, 1 minute, 1 hour by default) and pushed to the browser over SSE
-rather than polled. Panels for CPU, memory, threads, HTTP and the connection pool ship
-enabled, more ship switched off ready to enable by id, and an application can add, replace or
-hide panels with its own `peekaboot-insights.yml`.
-
-[Insights]({{ '/docs/insights/' | relative_url }}) has the panel file's schema and merge
-rules, what the levels cost in memory, and what the percentiles at those levels can and
-can't honestly tell you.
+Insights shows live charts of CPU, memory, threads, HTTP, the connection pool and more, over
+the last minutes, hours or days. [Insights]({{ '/docs/insights/' | relative_url }}) covers
+the default panels, adding your own, the memory cost and the limits of the percentiles.
 
 ## Lifecycle {#lifecycle}
 
@@ -143,30 +120,23 @@ can't honestly tell you.
        loading="lazy">
 </figure>
 
-**Answers:** when did this application run, for how long, and what was deployed each time?
-
-Every start and stop Peekaboot has recorded, turned into **runs**: one row per run, newest
-first, 20 to a page. It is the table view of the same history the Insights charts draw
-their restart markers from.
+Lifecycle lists every run of the application, newest first, 20 to a page.
 
 | Column | What it shows |
 |---|---|
-| Started | When the application became ready. The run in progress carries a **Running** badge |
-| Ran for | How long it ran, with a **still counting** badge while that run is the current one |
-| Stopped | When it shut down, or a dash and an **Unclean exit** badge, since a `kill -9`, a crash or a power loss records no stop |
-| Down before | The gap between the previous run's stop and this one's start |
-| Build | The version, with `branch @ commit` beneath it and the build time on hover. A run whose version, branch or commit differs from the one before it carries a **Deployment** badge naming which of the three changed |
+| Started | When the application became ready. The current run carries a **Running** badge |
+| Ran for | How long it ran, with a **still counting** badge on the current run |
+| Stopped | When it shut down. A `kill -9`, a crash or a power loss records no stop, so the cell shows a dash and an **Unclean exit** badge |
+| Down before | The gap between the previous run's stop and this run's start |
+| Build | The version, with `branch @ commit` beneath it and the build time on hover. A **Deployment** badge names which of the three changed since the previous run |
 
-A dash in this table always means *unknowable*, never zero: a run with no recorded stop has
-no honest duration, and a run whose predecessor ended uncleanly has no stop to measure its
-downtime from. Neither is guessed at.
+A dash means the value is unknown. A run with no recorded stop has no duration, and a run
+after an unclean exit has no downtime.
 
-How much history there is depends on
-[`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
-With it on, the default for a
-[local run]({{ '/docs/configuration/' | relative_url }}#local-run), the log survives
-restarts, up to the event cap stated there. With it off the tab shows the current run
-alone, which is still a real row rather than an empty tab.
+History across restarts needs
+[`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage),
+on by default for a local run. Without it the tab shows the current run only. With
+`peekaboot.lifecycle.enabled: false` the tab shows "Lifecycle history is unavailable".
 
 ## Traces {#traces}
 
@@ -176,14 +146,15 @@ alone, which is still a real row rather than an empty tab.
        loading="lazy">
 </figure>
 
-**Answers:** what happened inside this request, job, or message?
+Traces lists recent requests, jobs and messages in three buckets: All, Errors and Slow. You
+can filter by root action type and root operation. The list shows the 50 newest matches, so
+a bucket's count can be higher than the rows under it.
 
-Recent traces, bucketed into All, Errors and Slow, filterable by root action type and root
-operation. The list asks for the 50 newest matches, so a bucket's count can be higher than
-the number of rows under it. Opening a row expands the full trace detail overlay: spans,
-queries, logs, and the whole HTTP exchange on a single Request page.
-[Traces]({{ '/docs/traces/' | relative_url }}#root-action-type) has what the bucket names,
-badges and root action types actually mean.
+Click a row to open the trace detail with its spans, queries, logs and the HTTP exchange.
+Background work started from a trace gets its own row. When the trace it ran under is still
+stored, the row has a **View the trace this ran under** link.
+[Traces]({{ '/docs/traces/' | relative_url }}) explains buckets, badges, root action types
+and [background work]({{ '/docs/traces/' | relative_url }}#background-work).
 
 ## Meters {#meters}
 
@@ -193,16 +164,10 @@ badges and root action types actually mean.
        loading="lazy">
 </figure>
 
-**Answers:** what do JVM, HTTP and datasource metrics look like right now?
-
-Every meter in Micrometer's `MeterRegistry`, filterable by name or tag, each expandable to
-its individual measurements. This is the one tab that doesn't go through Actuator at all.
-It reads the registry directly.
-
-Meters and Insights read the same registry and answer different questions. This tab is the
-raw browser: every meter, its current measurements, nothing else. Insights charts a curated
-subset of them *over time*. A meter you find here is exactly what you'd name in a
-`peekaboot-insights.yml` series to start charting it.
+Meters lists every meter in the Micrometer `MeterRegistry` with its current measurements,
+filterable by name or tag. A meter name from this list is what you put in a
+[panel file series]({{ '/docs/insights/' | relative_url }}#configuring-panels) to chart it on
+Insights.
 
 ## Environment {#environment}
 
@@ -213,13 +178,10 @@ subset of them *over time*. A meter you find here is exactly what you'd name in 
   <figcaption class="has-text-grey is-size-7">Masked by default.</figcaption>
 </figure>
 
-**Answers:** which property source wins for a given key, and why isn't my property taking
-effect?
-
-Every property source Spring resolved (command-line args, OS environment, JVM system
-properties, `application.yml`, Peekaboot's own defaults, and the rest) in resolution order,
-each expandable to its raw key/value pairs, with a filter and the active profiles as a
-banner above them. Backed by Actuator's `env` endpoint.
+Environment lists every property source Spring resolved, in resolution order, with its raw
+keys and values. Command-line arguments, OS environment, system properties,
+`application.yml` and Peekaboot's own defaults all appear here. The active profiles are
+shown above the list. Use it to find which source wins for a key.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-environment-revealed-light.png' | relative_url }}"
@@ -228,7 +190,7 @@ banner above them. Backed by Actuator's `env` endpoint.
   <figcaption class="has-text-grey is-size-7">Revealed, after
   <code>peekaboot.enable-unmasking</code> is on <em>and</em> Show secrets is clicked. See
   <a href="{{ '/docs/security/' | relative_url }}#masking">Security: masking</a> for the
-  two-opt-in design and why this particular value is safe to publish.</figcaption>
+  two opt-ins and why this particular value is safe to publish.</figcaption>
 </figure>
 
 ## Flyway {#flyway}
@@ -239,11 +201,8 @@ banner above them. Backed by Actuator's `env` endpoint.
        loading="lazy">
 </figure>
 
-**Answers:** which migrations ran, when, and did any fail?
-
-One table row per migration: version, description, script name, type, duration, install
-time, status. Backed by Actuator's `flyway` endpoint; the tab only appears when Flyway
-migrations exist.
+Flyway shows one row per migration: version, description, script, type, duration, install
+time and status.
 
 ## Loggers {#loggers}
 
@@ -253,13 +212,9 @@ migrations exist.
        loading="lazy">
 </figure>
 
-**Answers:** what level is this logger actually running at, and is that an explicit setting
-or a default?
-
-Loggers grouped by package, filterable by name, with a checkbox for only those carrying an
-explicit configured level. The tab is read-only: it shows effective and configured levels
-from Actuator's `loggers` endpoint, and has no control to change one. It only appears when
-logger data is available.
+Loggers shows each logger's effective and configured level, grouped by package. You can
+filter by name and show only loggers with an explicit level. The tab is read-only. It cannot
+change a level.
 
 ## Config {#config}
 
@@ -269,47 +224,33 @@ logger data is available.
        loading="lazy">
 </figure>
 
-**Answers:** what is this component actually configured with?
-
-Values bound to `@ConfigurationProperties` beans, grouped by prefix, filterable. Inside a
-group, nested values are flattened to one row per leaf under its full dotted key
-(`registration.google.client-secret` rather than one collapsed blob per bean), and list
-entries are indexed, as in `servers[0]`. The filter matches those nested keys and the
-values themselves, not just a group's top-level names. Backed by Actuator's `configprops`
-endpoint; the tab only appears when there's at least one group to show.
+Config shows the values bound to `@ConfigurationProperties` beans, grouped by prefix. Nested
+values get one row each under their full dotted key, such as
+`registration.google.client-secret`, and list entries are indexed as `servers[0]`. The filter
+matches these keys and their values.
 
 ### Environment vs Config {#environment-vs-config}
 
-The two tabs look similar and answer different questions:
+- **Environment** shows the input: every property source and the raw value each one supplies.
+  It also shows properties nothing reads, which is how you find typos and dead config.
+- **Config** shows what the application uses, after relaxed binding and type conversion. It
+  includes defaults set in Java code, which appear in no property source.
 
-- **Environment** shows the *input*: every property source Spring knows about, in
-  resolution order, with the raw value each supplies. It answers "which source wins for
-  this key, and why isn't my property taking effect?" It also shows properties nothing
-  consumes, which is how you find typos and dead config.
-- **Config** shows the *output*: what the application actually uses, after relaxed binding
-  and type conversion, including defaults set in Java code that never appear in any
-  property source. It answers "what is this component really configured with?"
+A property in `application.yml` that feeds a `@ConfigurationProperties` bean appears in both.
+Code defaults appear only under Config. Unused or overridden values appear only under
+Environment. `@Value` injections are not in Config; look them up under Environment.
 
-A property in `application.yml` that feeds a `@ConfigurationProperties` bean appears in
-both; code defaults appear only under Config, unconsumed or shadowed values only under
-Environment. `@Value` injections aren't covered by Config; look those up under Environment.
-The same split exists in Actuator itself, as `/env` versus `/configprops`, which back these
-two tabs.
+Both tabs mask sensitive values by key name and by value shape. Your
+`management.endpoint.*.show-values` settings do not affect this. The rules are under
+[what gets masked and how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
 
-Both tabs mask sensitive values by default, by key name and by value shape. This is
-Peekaboot's own masking, independent of anything your application configures; your
-`management.endpoint.*.show-values` settings do not apply to it. The rules are on the
-security page: [what gets masked and
-how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
-
-Both tabs carry a "Show secrets" toggle, present only when the server allows unmasking.
-Toggling it reveals real values on both tabs at once, and the state isn't persisted across
-a reload.
+The **Show secrets** toggle appears on both tabs when `peekaboot.enable-unmasking` is on. It
+reveals real values on both tabs at once and resets on reload.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Masking here isn't exhaustive. See
-[Security, masking]({{ '/docs/security/' | relative_url }}#masking) for what's covered,
-what isn't, and the two-opt-in design behind the toggle.
+Masking is not exhaustive. See
+[Security, masking]({{ '/docs/security/' | relative_url }}#masking) for what is covered and
+what is not.
 </div>
 
 ## Scheduled Tasks {#scheduled-tasks}
@@ -320,31 +261,38 @@ what isn't, and the two-opt-in design behind the toggle.
        loading="lazy">
 </figure>
 
-**Answers:** what runs on a timer, and how is it scheduled?
+Scheduled Tasks lists `@Scheduled` methods grouped by type: cron, fixed delay and fixed rate.
+Each group expands to its tasks. Cron expressions come with a description in the dashboard's
+language.
 
-`@Scheduled` methods grouped by schedule type (cron, fixed delay, fixed rate), each
-expandable to its individual task rows. Backed by Actuator's `scheduledtasks` endpoint; the
-tab only appears when at least one scheduled task exists.
+## Which tabs appear {#conditionally-shown-tabs}
 
-## Conditionally shown tabs {#conditionally-shown-tabs}
+Overview, Lifecycle and Environment always appear. The others depend on your application:
 
-Loggers, Flyway, Config and Scheduled Tasks appear only once the main payload contains data
-for them. An app with no Flyway migrations has no Flyway tab. Overview, Lifecycle and
-Environment are always shown. Lifecycle is deliberately among them rather than gated:
-`peekaboot.lifecycle.enabled: false` removes its endpoint outright and the tab says so
-instead of vanishing, on the grounds that whoever set that flag will not be puzzled by
-it.
+| Tab | Shown when | Property |
+|---|---|---|
+| Insights | A Micrometer `MeterRegistry` bean exists | `peekaboot.insights.enabled` |
+| Traces | The trace store exists. It stays empty without the OpenTelemetry SDK on the classpath | `peekaboot.tracing.enabled` |
+| Meters | A Micrometer `MeterRegistry` bean exists | none |
+| Flyway | At least one Flyway migration exists | none |
+| Loggers | Logger data is available | none |
+| Config | At least one `@ConfigurationProperties` group exists | none |
+| Scheduled Tasks | At least one scheduled task exists | none |
 
-Insights, Meters and Traces are gated on a separate call, `GET /peekaboot/api/features`,
-whose flags are `{tracing, tracingSpansPossible, metrics, devToolbar, unmaskingEnabled,
-insights}`. It also carries the UI's duration thresholds and the mask literal; see
-[HTTP API]({{ '/docs/api/' | relative_url }}). Meters needs a `MeterRegistry` bean, which
-Spring Boot Actuator provides automatically. Insights needs that same bean plus
-`peekaboot.insights.enabled` (on by default). Traces needs the in-memory trace store
-(`peekaboot.tracing.enabled`, on by default): the tab is shown whenever the store is, and
-without the OpenTelemetry SDK on the classpath it is empty rather than absent.
-`unmaskingEnabled` gates a control, not a tab, as described under
-[Environment vs Config](#environment-vs-config). See
-[Quick start]({{ '/docs/quick-start/' | relative_url }}) for the full dependency picture.
+Spring Boot Actuator provides the `MeterRegistry`. See
+[Quick start]({{ '/docs/quick-start/' | relative_url }}) for the dependencies.
 
-Note the flag behind the Meters tab is named `metrics`, not `meters`.
+## Settings {#settings}
+
+| Property | Default | Effect |
+|---|---|---|
+| `peekaboot.enabled` | on for a local run | Turns the dashboard and its API on. Every other switch needs it |
+| `peekaboot.insights.enabled` | `true` | The Insights tab and the Overview stat tiles |
+| `peekaboot.tracing.enabled` | `true` | The Traces tab |
+| `peekaboot.lifecycle.enabled` | `true` | The run history on the Lifecycle tab |
+| `peekaboot.storage.enabled` | on for a local run | Lifecycle and Insights history across restarts |
+| `peekaboot.enable-unmasking` | `false` | The Show secrets toggle on Environment and Config |
+| `peekaboot.ui.tracing.*` | `100`, `500`, `50` ms | The thresholds for the SLOW, VERY_SLOW and SLOW_QUERY badges on Traces |
+
+All properties are listed under
+[Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
