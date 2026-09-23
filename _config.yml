@@ -1,8 +1,8 @@
 title: Peekaboot
-tagline: Embedded application introspection for Spring Boot
+tagline: Peekaboot lets you peek inside your Spring Boot application while it runs.
 description: >-
-  A Spring Boot starter that gives you health, config, traces, queries and logs
-  in a local dashboard - with no collector, no agent and no external service.
+  A Spring Boot starter that shows health, config, traces, queries and logs of
+  your running application in a local dashboard and a dev toolbar.
 url: https://www.peekaboot.org
 baseurl: ""
 

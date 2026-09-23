@@ -1,4 +1,4 @@
-{%- capture page_title -%}{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} · {{ site.tagline }}{% endif %}{%- endcapture -%}
+{%- capture page_title -%}{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.tagline }}{% endif %}{%- endcapture -%}
 {%- assign page_title = page_title | escape -%}
 {%- assign page_description = page.description | default: page.lead | default: site.description | escape -%}
 {%- assign social_image = '/assets/img/social/og.png' | absolute_url -%}

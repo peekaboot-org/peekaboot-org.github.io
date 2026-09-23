@@ -10,12 +10,6 @@ layout: home
       </figure>
       <h1 class="title is-1">Peekaboot</h1>
       <p class="subtitle is-4">{{ site.tagline }}</p>
-      <p class="subtitle is-6">
-        Add one dependency and run your app. A dev toolbar appears on every page it renders,
-        with the request, its trace and its logs. It links to a local dashboard holding health,
-        config, environment, live metric charts, Flyway migrations and the traces your app has
-        served, all in memory inside your own process.
-      </p>
       <div class="buttons is-centered mt-5">
         <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Quick start</a>
         <a class="button is-medium" href="{{ site.repository_url }}">GitHub</a>
@@ -24,22 +18,35 @@ layout: home
   </div>
 </section>
 
+<section class="section pt-0">
+  <div class="container">
+    <div class="pk-callout pk-callout--warning">
+      <p>
+        Peekaboot is beta software and may expose security-relevant settings. Use it at your
+        own risk.
+      </p>
+    </div>
+  </div>
+</section>
+
 <section class="section">
   <div class="container">
     <h2 class="title is-3 has-text-centered">Add the dependency</h2>
-    <p class="subtitle is-6 has-text-centered">One starter. Nothing else to install or run.</p>
+    <p class="subtitle is-6 has-text-centered">
+      Requires Java 25, Spring Boot 4.1 and a servlet web application.
+    </p>
     <div class="columns">
       <div class="column">
         <p class="heading">Maven</p>
         <pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;org.peekaboot&lt;/groupId&gt;
-    &lt;artifactId&gt;peekaboot-spring-boot-starter&lt;/artifactId&gt;
+    &lt;groupId&gt;{{ site.maven_group }}&lt;/groupId&gt;
+    &lt;artifactId&gt;{{ site.maven_artifact }}&lt;/artifactId&gt;
     &lt;version&gt;{{ site.peekaboot_version }}&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
       </div>
       <div class="column">
         <p class="heading">Gradle</p>
-        <pre><code>implementation("org.peekaboot:peekaboot-spring-boot-starter:{{ site.peekaboot_version }}")</code></pre>
+        <pre><code>implementation("{{ site.maven_group }}:{{ site.maven_artifact }}:{{ site.peekaboot_version }}")</code></pre>
       </div>
     </div>
   </div>
@@ -47,57 +54,77 @@ layout: home
 
 <section class="section">
   <div class="container">
-    <div class="columns is-multiline">
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="card">
-          <div class="card-content">
-            <p class="title is-5">On the page you're testing</p>
-            <p class="content">
-              The dev toolbar docks to the bottom of every page your app renders locally, on by
-              default. Open it for request and response detail, the span tree with its timings
-              and queries, and every log line that request produced. It works from Swagger UI too.
-            </p>
-          </div>
-        </div>
+    <div class="columns is-vcentered">
+      <div class="column is-5">
+        <h2 class="title is-4">Dev toolbar</h2>
+        <p class="content">
+          A bar at the bottom of every page your app renders. Click it for request and response
+          detail, the span tree with timings and queries, and the log lines of that request. It
+          also works in Swagger UI. In place of Spring Boot's whitelabel page, errors show the
+          stack trace with framework frames folded.
+          <a href="{{ '/docs/dev-toolbar/' | relative_url }}">Dev toolbar</a>
+        </p>
       </div>
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="card">
-          <div class="card-content">
-            <p class="title is-5">A dashboard, too</p>
-            <p class="content">
-              The toolbar links to a full dashboard: health, config, environment, charts of CPU,
-              memory, HTTP and pool metrics over time, Flyway migrations, and the last thousand
-              traces your app has served. Not just the one on your screen.
-            </p>
-          </div>
-        </div>
+      <div class="column is-7">
+        <figure class="image">
+          <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
+               alt="The collapsed dev toolbar docked at the bottom of the page, showing a 200 status badge, GET /orders, the controller method, duration, query count and duration, and a copyable trace id"
+               loading="lazy">
+        </figure>
       </div>
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="card">
-          <div class="card-content">
-            <p class="title is-5">No infrastructure</p>
-            <p class="content">
-              Traces, config and everything else live in memory inside your own process. No
-              collector, no agent, nothing to stand up before you can see the first request. A
-              backend you have to start first is a backend you won't start.
-            </p>
-          </div>
-        </div>
+    </div>
+
+    <div class="columns is-vcentered">
+      <div class="column is-5">
+        <h2 class="title is-4">Dashboard</h2>
+        <p class="content">
+          Health, build and Git info, environment, configuration properties, Flyway migrations,
+          logger levels and scheduled tasks, at <code>/peekaboot</code> in your running app.
+          <a href="{{ '/docs/dashboard/' | relative_url }}">The dashboard</a>
+        </p>
       </div>
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="card">
-          <div class="card-content">
-            <p class="title is-5">Off in production by default</p>
-            <p class="content">
-              Both the toolbar and the dashboard key off the same local-launch detection: an IDE
-              run, <code>spring-boot:run</code> or <code>bootRun</code>. A <code>java -jar</code>
-              of the packaged jar, a war, a native image, a container and every test run get
-              nothing. What it costs while it is on, and what to do if you want it somewhere
-              shared: <a href="{{ '/docs/in-production/' | relative_url }}">Do I want this in
-              production?</a>
-            </p>
-          </div>
-        </div>
+      <div class="column is-7">
+        <figure class="image">
+          <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
+               alt="The Peekaboot dashboard's Overview tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards for a running application"
+               loading="lazy">
+        </figure>
+      </div>
+    </div>
+
+    <div class="columns is-vcentered">
+      <div class="column is-5">
+        <h2 class="title is-4">Traces with SQL queries</h2>
+        <p class="content">
+          The last 1000 requests your app served, each with its span tree, SQL queries and
+          timings. Errors and slow requests are kept in buckets of their own.
+          <a href="{{ '/docs/traces/' | relative_url }}">Traces</a>
+        </p>
+      </div>
+      <div class="column is-7">
+        <figure class="image">
+          <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
+               alt="The Queries tab for a GET /orders request, listing 26 PostgreSQL statements with their duration and row count, each showing the actual SQL text"
+               loading="lazy">
+        </figure>
+      </div>
+    </div>
+
+    <div class="columns is-vcentered">
+      <div class="column is-5">
+        <h2 class="title is-4">Insights</h2>
+        <p class="content">
+          Charts of CPU, memory, HTTP, connection pool and JDBC query metrics over time, from the
+          meters your app already publishes.
+          <a href="{{ '/docs/insights/' | relative_url }}">Insights</a>
+        </p>
+      </div>
+      <div class="column is-7">
+        <figure class="image">
+          <img src="{{ '/assets/img/screenshots/dashboard-insights-light.png' | relative_url }}"
+               alt="The Insights tab, live line charts of CPU usage and system load with an aggregation level switch and toggles for percentiles and restart markers"
+               loading="lazy">
+        </figure>
       </div>
     </div>
   </div>
@@ -105,24 +132,33 @@ layout: home
 
 <section class="section">
   <div class="container">
-    <figure class="image">
-      <img src="{{ '/assets/img/screenshots/trace-detail-light.png' | relative_url }}"
-           alt="The dev toolbar's expanded trace detail overlay for a GET /orders request, showing a span tree with nested CLIENT and SERVER spans, database connection and query spans, and timing bars"
-           loading="lazy">
-    </figure>
+    <h2 class="title is-3">Off outside a local run</h2>
+    <p class="content">
+      Peekaboot is active when you start your app from the IDE, with
+      <code>spring-boot:run</code> or with <code>bootRun</code>. It stays off for
+      <code>java -jar</code>, wars, native images, containers and tests, unless you
+      <a href="{{ '/docs/configuration/' | relative_url }}#local-run">turn it on explicitly</a>.
+      <a href="{{ '/docs/in-production/' | relative_url }}">Do I want this in production?</a>
+      covers what it costs while it is on and how to keep it out of the artifact.
+    </p>
   </div>
 </section>
 
 <section class="section">
-  <div class="container has-text-centered">
-    <h2 class="title is-3">Add it, run your app, the toolbar is on the page.</h2>
-    <div class="buttons is-centered">
-      <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Get started</a>
-      <a class="button is-medium" href="{{ site.repository_url }}">View on GitHub</a>
+  <div class="container">
+    <h2 class="title is-3">Why Peekaboot?</h2>
+    <div class="content">
+      <p>
+        Peek, because that's what it does — a look inside a running application. Boot, because
+        that's where it lives. And peek-a-boo, because that's how it behaves: add one dependency
+        and your app's internals are suddenly there; package the jar and they're gone again.
+      </p>
+      <p>
+        In short: Peekaboot lets you peek inside your Spring Boot application while it runs.
+      </p>
     </div>
-    <p class="subtitle is-6">
-      Peekaboot builds on ideas from Symfony's profiler, Spring Boot Admin and this category's
-      other pioneers. See the
+    <p class="mt-5">
+      Peekaboot builds on ideas from Symfony's profiler, Spring Boot Admin and others. See the
       <a href="{{ '/docs/acknowledgements/' | relative_url }}">acknowledgements</a>.
     </p>
   </div>
