@@ -1,264 +1,225 @@
 ---
 title: Traces
-lead: In-memory request traces on the OpenTelemetry stack Spring Boot already gives you, with nothing to run first.
+lead: The last thousand requests, jobs and messages your application handled, with their spans, SQL and logs, held in memory.
 permalink: /docs/traces/
 redirect_from:
   - /docs/tracing/
   - /docs/concepts/
 ---
 
-Tracing is on by default (`peekaboot.tracing.enabled: true`). Spans your application
-already produces are copied into an in-memory store as the OpenTelemetry SDK exports them.
-Nothing to install, no collector to run, no endpoint to configure.
+Peekaboot keeps a copy of every span your application exports in an in-memory store. The
+dashboard's Traces tab lists them, and the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }})
+shows the trace of the page you are looking at.
 
-<div class="pk-callout" markdown="1">
-Peekaboot's store is one more destination, registered as an ordinary span exporter beside
-whatever else you have configured. An existing OTLP, Zipkin or Jaeger pipeline keeps
-working unchanged, and turning `peekaboot.tracing.enabled` off leaves it exactly as it
-was.
+The store is one more span exporter next to the ones you configured. An existing OTLP,
+Zipkin or Jaeger pipeline keeps working unchanged. Peekaboot adds no exporter that sends data
+out of the process, and it turns Micrometer's OTLP metrics export off.
 
-Peekaboot itself pushes nothing out of the process: it adds no exporter of its own and
-turns Micrometer's OTLP metrics export off.
-</div>
+## Requirements {#requirements}
 
-<div class="pk-callout pk-callout--warning" markdown="1">
-**Peekaboot raises three observations of its own.** Two around each request
-(`spring.handler`, `spring.view.render`) and one around each task handed to a Spring task
-executor (`peekaboot.async.task`). They are ordinary Micrometer observations, so they reach
-every exporter you have configured, not only Peekaboot's store.
+- `peekaboot.enabled=true`. It defaults to true only for a [local
+  run]({{ '/docs/configuration/' | relative_url }}#local-run).
+- `peekaboot.tracing.enabled`, which defaults to `true`.
+- A servlet web application. A WebFlux application records no traces.
+- The OpenTelemetry SDK, which the starter brings. An application that uses the Brave bridge
+  instead gets an empty Traces tab.
 
-[What gets captured](#what-gets-captured) names all three with their tags.
-`peekaboot.tracing.async` turns the async one off on its own;
-`peekaboot.tracing.enabled: false` removes all three. Everything else in the store is a span
-your application already produced.
-</div>
+Queries appear for JDBC only. The starter adds `datasource-micrometer`, which instruments your
+`DataSource` beans. If you instrument your `DataSource` yourself, exclude the starter's copy or
+set `jdbc.datasource-proxy.enabled=false`. R2DBC is not instrumented.
 
-## The vocabulary {#the-vocabulary}
+## What gets recorded {#what-gets-captured}
 
-**Trace.** Everything Peekaboot recorded for one unit of work: one HTTP request, one run of
-a scheduled job, one message handled off a queue. Every trace has an id, shown throughout
-the UI, to copy and search your logs with.
+Every span your application exports: HTTP requests, scheduled jobs, message consumers, and
+the database queries and outbound calls they make.
 
-**Span.** One unit of work inside a trace: handling the request, each database query, each
-outbound call to another service. Spans nest into the tree the overlay's Spans tab draws.
+Peekaboot sets `management.tracing.sampling.probability` to `1.0` (Spring Boot's default is
+`0.1`). Your own setting wins, and Peekaboot sees only sampled spans. Sample at 10% and it
+records 10%.
 
-**Query span.** A client-side span carrying `db.*` or `jdbc.query*` tags, the client half
-of a database call, tagged either by the OpenTelemetry conventions or by datasource-proxy.
-That one definition drives the Queries tab, every query count, and the SLOW_QUERY issue
-below. A span whose name merely looks like SQL is not a query span, and neither are
-datasource-proxy's connection and result-set spans, which carry `jdbc.` tags without a
-query.
+Requests under these path prefixes are never recorded: `/static/`, `/webjars/`,
+`/peekaboot/`, `/error/`, and the management base path (`/actuator/` by default, following
+`management.endpoints.web.base-path`). With the base path set to `/` there is no prefix to
+exclude, and actuator requests are recorded like any other.
 
-**Root span.** The span at the top of the tree, the one nothing else is nested under: the
-request itself for an HTTP request, the job invocation for a scheduled job.
+With the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) on, each trace also holds
+the request and response headers and parameters and the log lines written while handling it.
+Without the toolbar, traces hold spans only.
 
-**Root operation.** The root span's name, shown in the trace list exactly as the
-instrumentation wrote it: `http get /orders`, `http get /api/orders/{id}/report`, or, for a
-`@Scheduled` method, `task orderReconciler.reconcileOrders`.
+## Spans Peekaboot adds {#spans-peekaboot-adds}
 
-## What gets captured {#what-gets-captured}
+Peekaboot raises three observations of its own. They are ordinary Micrometer observations, so
+every exporter you configured receives them too.
 
-Every span the OpenTelemetry SDK exports is copied into the store: HTTP requests, scheduled
-jobs, message consumers, and the database queries they run. The starter instruments JDBC out
-of the box, so queries show up without wiring anything up. A host that instruments its own
-`DataSource` excludes the starter's copy, or sets `jdbc.datasource-proxy.enabled=false`.
+| Span | Around | Tags |
+|---|---|---|
+| `spring.handler` | The controller method | `handler.type`, `handler.name` |
+| `spring.view.render` | View rendering, only when the handler resolved a view | `view.type`, `view.name` |
+| `async task` (observation `peekaboot.async.task`) | A task run on one of Spring's task executors, see [background work](#background-work) | `peekaboot.async`, `peekaboot.async.thread` |
 
-Three things bound what gets captured:
-
-- **The OpenTelemetry SDK has to be on the classpath.** There is no Brave bridge, so an
-  application wired to Brave instead gets a Traces tab that is present and empty.
-- **Only sampled spans reach any exporter.** Peekaboot sets
-  `management.tracing.sampling.probability` to `1.0` where Spring's own default is `0.1`,
-  as a default your own setting overrides. Sample at 10% and Peekaboot sees 10%.
-- **Some path prefixes are never captured at all:** `/static/`, `/webjars/`, `/peekaboot/`,
-  `/error/`, and the management base path (`/actuator/` at Spring Boot's default, following
-  `management.endpoints.web.base-path`). Excluding a request's root span discards the whole
-  trace, which is why Peekaboot's own dashboard traffic never appears in its own list.
-
-Peekaboot contributes three spans of its own, only while `peekaboot.enabled` and
-`peekaboot.tracing.enabled` are both on. Two sit on the request path, under the same
-exclusions as everything else:
-
-- `spring.handler` around the controller method, tagged `handler.type` and `handler.name`.
-- `spring.view.render` around view rendering, tagged `view.type` and `view.name`, raised
-  only when the handler resolved a view, so a `@ResponseBody` controller produces none.
-
-The third sits outside it. `peekaboot.async.task` wraps each task handed to one of Spring's
-task executors, tagged `peekaboot.async` and `peekaboot.async.thread`, and is raised only
-when the thread that handed the task over already had a trace in scope.
-`peekaboot.tracing.async: false` turns that one off by itself. See [background
-work](#background-work) for what it needs from your application and what it changes in the
-UI.
-
-All three are ordinary observations, so every configured exporter sees them, and turning
-tracing off removes them from those exporters along with the store. The handler span stays
-current for the length of the controller method, so spans opened inside it (JDBC, HTTP
-clients) nest under it rather than under the HTTP server span.
-
-One trace holds at most `peekaboot.tracing.max-spans-per-trace` spans (default 500). Past
-that the oldest spans are dropped and the trace carries a **TRUNCATED** badge in the list.
-
-The SQL on the Queries tab is whatever the instrumentation recorded. A query span carrying
-no statement text is still listed, without SQL. A JDBC batch is one span and one entry,
-with its statements joined together.
-
-With the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) also on, a trace also
-carries correlated logs (up to `peekaboot.tracing.max-logs-per-trace`, default 500, oldest
-dropped first) and full header and parameter capture for request and response. That page
-has the detail, including what it does not capture.
-
-## Root action type {#root-action-type}
-
-The root action type classifies what started the trace. It supplies the icon next to each
-row and the type filter on the trace list. Peekaboot works it out from the root span alone,
-checking a fixed list of rules **in priority order** and stopping at the first match, not
-the most specific-sounding one.
-
-| Priority | Value | Icon | Means | Recognized by |
-|---|---|---|---|---|
-| 1 | Message Consumer | 📩 | A message picked off a queue or topic | The root span is consumer-side, or carries messaging tags without being producer-side. Checked first, so a consumer-side span whose name happens to contain "job" or "cron" is still Message Consumer. Messaging tags alone do not decide it: a span *sending* a message carries exactly the same ones |
-| 2 | HTTP Request | 🌐 | An inbound web request, recognized from its own tags | The root span is server-side **and** carries HTTP tags: any `http.` tag, or `method` and `uri` together |
-| 3 | RPC Call | 🔗 | An inbound remote-procedure call (gRPC, for example) | The root span is server-side **and** carries `rpc.` tags |
-| 4 | HTTP Request (fallback) | 🌐 | Any other inbound web request, one that carried no HTTP-specific tags | The root span is server-side, full stop. Rules 2 to 4 between them catch every server-side span, so no rule below ever sees one |
-| 5 | Async Task | ⚡ | Background work Peekaboot observed on one of Spring's task executors | The root span carries Peekaboot's own `peekaboot.async` tag. Checked ahead of every rule under it, being Peekaboot's own marker rather than an inference from someone else's convention. The entry span carries no span kind, so rule 9 would otherwise swallow it. See [background work](#background-work) |
-| 6 | Scheduled Job | 🕑 | A `@Scheduled` method Spring's scheduler actually fired | The root span carries the `code.function` and `code.namespace` tags Spring's scheduler sets when it dispatches a `@Scheduled` method. It sits above every rule below it because a scheduled invocation carries no span kind at all, and it wins over Database and Unknown on a client- or producer-side root too |
-| 7 | Database | 🗂 | A database call with nothing above it in the trace | The root span is client-side **and** carries `db.` tags. Rare: it means something queried a database with no request, job or message context around it that Peekaboot could see |
-| 8 | Connection Pool | 🔌 | The pool acquiring or validating a connection outside any traced work | The root span is client-side, named `connection`, carries the datasource tags, and has no parent in the trace. Checked after row 7, so a query span that also carries pool tags stays Database |
-| 9 | Internal | ⚙ | The trace has no inbound or outbound direction at all | The root span carries no span kind: not client, server, producer or consumer. Messaging tags still win, so a kind-less span carrying them is Message Consumer |
-| 10 | Unknown | ❓ | Nothing above matched | A producer-side span, meaning a message being sent rather than received; or a client-side span with no database tags. The second shape includes an outbound HTTP or RPC call that became the root only because its own caller's span has not reached Peekaboot |
-
-HTTP Request appears twice on purpose. The strict tag check sits at priority 2, the
-fallback at priority 4, sweeping up whatever server-side spans it left.
-
-<div class="pk-callout" markdown="1">
-**Scheduled Job only recognizes a `@Scheduled` method that Spring's own scheduler actually
-dispatched.** It matches on the tag pair that scheduler sets, never on a bean or method
-name.
-
-- **A scheduler Spring does not manage is not Scheduled Job.** Quartz, a raw
-  `ScheduledExecutorService`, or any other timer outside Spring's `@Scheduled` machinery
-  falls through to Internal, or to whatever else its tags match. Guessing from a name
-  containing "job", "cron" or "timer" would be wrong more often than right.
-- **Calling a `@Scheduled` method directly does not count either.** If the method is also
-  `@Observed`, that aspect's own span becomes the root, carrying `class` and `method` tags
-  no rule recognizes, and the trace classifies Internal.
-</div>
-
-### Connection Pool traces are hidden by default {#connection-pool-traces-hidden}
-
-The pool refills and validates connections on its own schedule, outside any traced work,
-and enough arrive to drown everything else. They stay in the store but are left out of the
-listing endpoint's unfiltered view, so the Traces tab hides them until you tick the
-Connection Pool filter. Over the API,
-[`rootActionType=*`]({{ '/docs/api/' | relative_url }}#endpoints) asks for every type at
-once.
-
-A pool acquisition *inside* traced work is an ordinary child span, never classified. Only a
-connection span with no parent in the trace reaches rule 8.
+Spans opened inside the controller method, such as JDBC and HTTP client calls, nest under
+`spring.handler`. `peekaboot.tracing.async=false` turns off the async span alone.
+`peekaboot.tracing.enabled=false` removes all three.
 
 ## Background work {#background-work}
 
-A task handed to one of Spring's task executors runs on another thread. The trace context
-does not follow it by default, so the work starts a trace of its own with nothing to say what
-triggered it. Turn `spring.task.execution.propagate-context` on and the context travels;
-Peekaboot then raises `peekaboot.async.task` around the task, and the work lands in the trace
-that submitted it.
+Work handed to a Spring task executor, for example an `@Async` method, runs on another thread.
+To see it inside the trace that started it, set:
+
+```yaml
+spring:
+  task:
+    execution:
+      propagate-context: true
+```
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**Peekaboot does not set `spring.task.execution.propagate-context`. Your application does.**
-Without it there is no trace on the executor thread to continue, so Peekaboot raises nothing
-and background work keeps starting traces of its own. An application that wants its own
-bounded pool for this needs `spring.task.execution.mode=force` as well. Both are covered
-under [`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing).
+**Peekaboot does not set `spring.task.execution.propagate-context`.** Spring Boot leaves it
+off. Without it, background work shows as separate traces with nothing linking them to the
+request that started them.
 </div>
 
-A `@Scheduled` run is untouched. It keeps its Scheduled Job type and gets no async span, even
-though Spring hands the same decorator to its scheduler.
+Peekaboot wraps tasks on executors that Spring Boot builds: the auto-configured
+`applicationTaskExecutor`, and any executor you create from Boot's
+`ThreadPoolTaskExecutorBuilder` or `SimpleAsyncTaskExecutorBuilder`. Declaring an `Executor`
+bean of your own makes Boot skip `applicationTaskExecutor`. Set
+`spring.task.execution.mode=force` to keep it. See
+[`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing).
 
-### The triggering trace is timed without it {#async-timing}
+With context propagation on:
 
-A request that returns in 50ms reports 50ms, however long the task it started runs
-afterwards. The trace's duration, the span-duration total on its Spans tab, the window those
-bars are measured against and admission to the Slow bucket all read the synchronous part
-alone.
+- Each task gets an `async task` span inside the trace that submitted it. A task submitted
+  with no trace in scope gets none.
+- The request's duration and the [Slow bucket](#the-three-buckets) check leave the
+  background work out. A request that returns in 50ms reports 50ms, however long its task
+  runs.
+- Errors and queries in background work still count. A failing task puts its trace in
+  Errors.
+- In the trace's Spans tab, the task starts collapsed and carries a background chip.
 
-Counts are not filtered the same way. A background task that fails still puts its trace in
-Errors and shows it as HAS_ERRORS, and its query spans still count on the Queries tab. Only
-the duration figures misrepresent what the caller waited for, so only those exclude the
-subtree.
+Each task is also listed as its own row of type Async Task, timed on its own. The row links to
+the trace that started it while that trace is still in the store. One trace can therefore
+produce several rows.
+{: #async-rows}
 
-### Background work gets its own row {#async-rows}
+Every async span is named `async task`. To see which method ran, put
+`@Observed(contextualName = "...")` on it. Its span then appears under `async task`.
 
-Each entry point is listed separately, typed Async Task and timed by its own subtree rather
-than by the trace around it. One trace can therefore produce several rows, and a type filter
-selects rows rather than traces: filter for HTTP Request and you get the request, filter for
-Async Task and you get the work it started. A row carries a ⤴ link to the trace that
-triggered it while that trace is still in the store; a task whose trace has already been
-evicted is listed on its own.
+`@Scheduled` runs get no async span and keep the Scheduled Job type.
 
-Opening an async row opens the Spans tab scoped to that subtree, timed against the subtree's
-own window. In the triggering trace's own Spans tab the same subtree starts collapsed and its
-entry span carries a **background** chip. Its spans are drawn against the subtree's own window
-rather than the trace's, so a four-minute task cannot crush a 50ms request into an invisible
-sliver.
+## Trace types {#root-action-type}
 
-### The span is named `async task` {#async-naming}
+Each row in the trace list shows what started the trace. The Traces tab filters by it.
 
-A `TaskDecorator` receives an opaque `Runnable`, so the method behind it is unrecoverable and
-every async entry span carries the same name. A name that says something has to come from
-the application, through `@Observed(contextualName = "...")` on the method or the child spans
-the task produces.
+| Value | Icon | Means |
+|---|---|---|
+| HTTP Request | 🌐 | An inbound web request |
+| Message Consumer | 📩 | A message picked off a queue or topic |
+| RPC Call | 🔗 | An inbound remote-procedure call, gRPC for example |
+| Scheduled Job | 🕑 | A `@Scheduled` method fired by Spring's scheduler |
+| Async Task | ⚡ | [Background work](#background-work) on a Spring task executor |
+| Database | 🗂 | A database call with no request, job or message around it |
+| Connection Pool | 🔌 | The pool acquiring or validating a connection outside any traced work |
+| Internal | ⚙ | A root span with no inbound or outbound direction |
+| Unknown | ❓ | Anything else, such as a message being sent or an outbound call whose caller was not traced |
 
-## Trace status {#trace-status}
+Only `@Scheduled` methods fired by Spring's scheduler show as Scheduled Job. Quartz, a plain
+`ScheduledExecutorService` or another timer shows as Internal or by whatever else its tags
+match.
 
-A trace's status is one of exactly two values: **OK**, or **HAS_ERRORS** when any span in
-the trace ended with an error. There is no third, slow status. Slowness is a span issue and
-the Slow bucket, both below.
+Connection Pool traces arrive often enough to drown everything else. The Traces tab hides them
+until you tick the Connection Pool filter. Over the HTTP API,
+[`rootActionType=*`]({{ '/docs/api/' | relative_url }}#endpoints) returns every type.
+{: #connection-pool-traces-hidden}
 
-## Issues {#issues}
+## The trace view {#the-trace-view}
 
-An issue is a problem Peekaboot detected on one span, shown as a coloured marker in the
-span tree.
+Click a row on the Traces tab, or click the dev toolbar, to open a trace. The view has four
+tabs and opens on Spans.
 
-Every threshold below binds under `peekaboot.ui.tracing.`; see
-[Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing) for the
-full property list.
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/trace-detail-light.png' | relative_url }}"
+       alt="The expanded trace detail overlay for a GET /orders request, showing a span tree with nested CLIENT and SERVER spans, database connection and query spans, and timing bars"
+       loading="lazy">
+</figure>
 
-| Type | Fires when | Threshold (default) | Severity |
+Spans shows the span tree with each span's kind, tags and duration, nested as they ran. Click
+a span's name for its details: kind, a copyable span id, and where they apply the error class
+and message, the SQL, and the full tags.
+
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
+       alt="The Queries tab for the same GET /orders request, listing 26 PostgreSQL statements with their duration and row count, each showing the actual lower-case select ... from SQL text rather than a span name"
+       loading="lazy">
+</figure>
+
+Queries lists the SQL the trace ran, one row per statement, with duration and row count where
+the instrumentation records it. A query at or above
+`peekaboot.ui.tracing.slow-query-threshold-ms` (default 50ms) is marked SLOW. A JDBC batch is
+one row with its statements joined. A query recorded without statement text is listed without
+SQL.
+
+Logs lists the log lines written while handling the request, filterable by text, level and
+span. Request shows the method, path, query string, status, duration, controller method,
+parameters, and request and response headers. Logs and Request are filled only while the dev
+toolbar is on. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) for what is masked
+and what is not.
+
+The tabs link to each other. A database span's details have a "Show in Queries tab" button,
+and a query or a log line jumps back to its span in the tree.
+
+## Status and issues {#trace-status}
+
+A trace is OK, or HAS_ERRORS when any span ended with an error. Slowness is not a status. It
+shows as span issues and the Slow bucket.
+
+### Issues {#issues}
+
+An issue marks one span in the tree. The thresholds live under `peekaboot.ui.tracing`, see
+[Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing).
+
+| Issue | Raised when | Property (default) | Severity |
 |---|---|---|---|
-| VERY_SLOW | The span's own duration reaches the threshold. Checked before SLOW, so a span carries one or the other, never both | `very-slow-span-threshold-ms` (500) | Error |
-| SLOW | The span's own duration reaches the threshold and it did not already raise VERY_SLOW | `slow-span-threshold-ms` (100) | Warning |
+| VERY_SLOW | The span's own duration reaches the threshold | `very-slow-span-threshold-ms` (500) | Error |
+| SLOW | The span's own duration reaches the threshold, and it is not VERY_SLOW | `slow-span-threshold-ms` (100) | Warning |
 | ERROR | The span ended with an error | none | Error |
-| SLOW_QUERY | A query span's duration reaches the threshold | `slow-query-threshold-ms` (50) | Warning |
+| SLOW_QUERY | A query's duration reaches the threshold | `slow-query-threshold-ms` (50) | Warning |
 
-SLOW, VERY_SLOW and SLOW_QUERY all fire at or above their threshold.
+"Reaches" means at or above the threshold.
 
-## The three buckets {#the-three-buckets}
+## Buckets, limits and memory {#the-three-buckets}
 
-Every trace lands in All, and in Errors or Slow too when it qualifies:
+Every trace is in All. A trace that qualifies is also in Errors, Slow, or both.
 
-- **All** holds every trace, capped at `peekaboot.tracing.max-traces` (default 1000).
-- **Errors** holds traces with at least one errored span, or at least one `ERROR`-level
-  correlated log, capped at `peekaboot.tracing.max-error-traces` (default 100). Logs are
-  only captured while the dev toolbar is on, so with it off this bucket admits on errored
-  spans alone.
-- **Slow** holds traces whose *total* wall-clock duration is at or above
-  `peekaboot.tracing.slow-trace-threshold-ms` (default 1000ms), capped at
-  `peekaboot.tracing.max-slow-traces` (default 100). [Background work](#background-work) is
-  not part of that duration, so a fast request that started a slow task stays out.
+| Bucket | Holds | Size property (default) |
+|---|---|---|
+| All | Every trace | `peekaboot.tracing.max-traces` (1000) |
+| Errors | Traces with an errored span or an `ERROR` log line | `peekaboot.tracing.max-error-traces` (100) |
+| Slow | Traces whose duration, [background work](#background-work) excluded, reaches `peekaboot.tracing.slow-trace-threshold-ms` (1000) | `peekaboot.tracing.max-slow-traces` (100) |
 
-Nothing expires on a clock. Each bucket evicts its own oldest entry once its own cap is
-full, where oldest means first admitted; a trace that keeps receiving spans does not move.
-A late span for an already-evicted trace puts it back at the newest end. The three are independent, so a trace can keep showing
-under Errors or Slow long after it aged out of All.
+Error log lines are captured only while the dev toolbar is on. Without it, Errors admits on
+errored spans alone.
 
-See [Configuration]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) for every
-other tracing default.
+When a bucket is full, it drops the trace it admitted first. The buckets evict independently,
+so a trace can stay under Errors or Slow after it has left All. Nothing expires on a timer,
+and everything is gone at restart.
 
-## The SLOW badge is not the Slow bucket {#slow-badge-vs-slow-bucket}
+A span that arrives after All dropped its trace brings the trace back to the top of All if
+Errors or Slow still holds it. Otherwise it appears as a new trace holding only the late spans.
 
-Two thresholds produce two similar-looking signals, and both can be true of the same trace
-at once.
+A trace can leave Slow before it is evicted. While a background task is still running, its
+spans can count toward the duration for a moment. Once the task's `async task` span arrives,
+the duration drops back to the request's own time, and the trace leaves Slow if that is under
+the threshold.
+
+One trace keeps at most `peekaboot.tracing.max-spans-per-trace` spans (500) and
+`peekaboot.tracing.max-logs-per-trace` log lines (500). Past either limit the oldest are
+dropped. A trace that lost spans carries a TRUNCATED badge. In the worst case the store holds 1000 traces in All
+plus up to 200 that only Errors or Slow still keep, each with 500 spans and 500 log lines.
+Lower the limits on a memory-constrained application, see
+[Configuration]({{ '/docs/configuration/' | relative_url }}#memory-constrained).
+
+### The SLOW badge and the Slow bucket {#slow-badge-vs-slow-bucket}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-traces-light.png' | relative_url }}"
@@ -266,69 +227,23 @@ at once.
        loading="lazy">
 </figure>
 
-- The **SLOW badge** on a trace row means *this trace contains at least one slow span*: a
-  single span reached `peekaboot.ui.tracing.slow-span-threshold-ms` (default 100ms). A span
-  past `very-slow-span-threshold-ms` (default 500ms) produces the same badge; that
-  threshold colours span, query and duration text in the trace detail overlay, never the
-  row badge.
-- The **Slow bucket** count means *this trace's total end-to-end duration*, background work
-  excluded, reached `peekaboot.tracing.slow-trace-threshold-ms` (default 1000ms), a
-  whole-trace check against a threshold ten times larger.
+The SLOW badge on a row means one span in the trace reached `slow-span-threshold-ms` (100ms).
+The Slow bucket counts traces whose whole duration reached `slow-trace-threshold-ms` (1000ms),
+so many more rows carry the badge than the bucket holds. A trace with an error shows the ERROR
+badge instead of SLOW, so counting SLOW badges misses slow traces that also failed.
 
-In the screenshot, four rows carry a SLOW badge while the Slow bucket reports one trace:
-only one of the four was past 1000ms end to end. The smaller badge threshold fires far more
-often.
+## Limitations {#tracing-vs-distributed-tracing}
 
-One caveat when counting badges. **A trace that errored shows the ERROR badge instead of
-the SLOW badge**, never both. A slow trace that also failed is invisible to a count of SLOW
-badges, which undercounts slow traces whenever any errored. The TRUNCATED badge is separate
-and can sit beside either.
+Peekaboot sees only the spans of the process it runs in. Two services that call each other
+show two partial traces under the same trace id, on two dashboards. It reads the W3C
+`traceparent` header and never changes it, so propagation works as [Spring Boot's tracing
+support](https://docs.spring.io/spring-boot/reference/actuator/tracing.html) configures it.
 
-## Tracing vs distributed tracing {#tracing-vs-distributed-tracing}
+It keeps no history past the limits above or past a restart, does not aggregate across
+instances, and does not alert. The percentiles on
+[Insights]({{ '/docs/insights/' | relative_url }}#percentiles-of-aggregates) are percentiles
+of aggregates.
 
-Peekaboot's store and a tracing backend answer different questions. Past one application
-you want both.
-
-### One word, two jobs {#one-word-two-jobs}
-
-In OpenTelemetry's vocabulary a **trace** is one logical operation across however many
-processes take part in it, stitched together by a trace id that travels in a
-[W3C `traceparent` header](https://www.w3.org/TR/trace-context/).
-
-Peekaboot's store holds only the spans **this process** exported. It reads trace context
-and never writes it, so your application sends and accepts `traceparent` exactly as
-[Spring Boot's tracing support](https://docs.spring.io/spring-boot/reference/actuator/tracing.html)
-configures it, with or without Peekaboot. It cannot fetch the other services' halves. Run
-it in two services that call each other and you get two partial traces, under one shared
-trace id, on two dashboards that cannot join them. That follows from running in-process
-with no backend. It is not a defect awaiting a fix.
-
-### What a real backend is for {#what-a-real-backend-is-for}
-
-Every one of these needs infrastructure Peekaboot deliberately does not have:
-
-- **Joining a request across services.** One waterfall spanning every process it touched.
-- **Retention past the process.** Peekaboot's traces are capped, evicted oldest-first, and
-  gone at restart. Anything from before last Tuesday's deploy needs storage that outlives
-  the JVM.
-- **Aggregation across instances.** Twelve pods behave differently from one, and you need
-  all twelve at once.
-- **Alerting.** Nothing in-process is going to page anyone.
-- **True percentiles.** Real percentiles need retained samples, which is why the aggregated
-  levels on
-  [Insights]({{ '/docs/insights/' | relative_url }}#percentiles-of-aggregates)
-  are explicit about being percentiles *of aggregates*.
-
-The [Grafana stack](https://grafana.com/oss/grafana/) is the usual open-source answer,
-split along the same lines: [Tempo](https://grafana.com/oss/tempo/) for traces,
-[Loki](https://grafana.com/oss/loki/) for logs, [Mimir](https://grafana.com/oss/mimir/) or
-[Prometheus](https://prometheus.io/) for metrics, with Grafana over the top.
-[Jaeger](https://www.jaegertracing.io/) and [Zipkin](https://zipkin.io/) are the
-long-standing trace-only options, [SigNoz](https://signoz.io/) bundles the three signals
-into one product, and the [OpenTelemetry
-Collector](https://opentelemetry.io/docs/collector/) sits in the middle so you can change
-your mind without touching application code.
-[docker-otel-lgtm](https://github.com/grafana/docker-otel-lgtm) packs the whole Grafana
-stack into one container for a local trial.
-
-Spring Boot already speaks to all of them, and adding Peekaboot costs you none of it.
+For tracing across services, retention or alerting, export to an OTLP backend such as
+[Grafana Tempo](https://grafana.com/oss/tempo/) or [Jaeger](https://www.jaegertracing.io/)
+next to Peekaboot.

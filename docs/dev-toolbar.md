@@ -1,61 +1,8 @@
 ---
 title: Dev toolbar
-lead: Request detail, the trace view and correlated logs, injected into the page you're already looking at.
+lead: A bar at the bottom of every HTML page your app renders, with the request, its trace and its logs.
 permalink: /docs/dev-toolbar/
 ---
-
-The dev toolbar is on for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
-and off elsewhere, detected independently of `peekaboot.enabled`. Set it explicitly either
-direction to override the detection:
-
-```yaml
-peekaboot:
-  dev-toolbar: true
-```
-
-It also needs a Micrometer `Tracer` bean, which the starter provides by default. See
-[Quick start]({{ '/docs/quick-start/' | relative_url }}) for what happens without one.
-
-## Where the bar appears {#where-the-bar-appears}
-
-A small bar docks to the bottom of the HTML pages your app renders. Injection needs a
-`text/html` response containing a `</body>` tag; anything else goes out untouched. Further
-rules skip a response that would otherwise qualify:
-
-- Peekaboot's own paths and the management endpoints: `/peekaboot/**`, `/static/`,
-  `/webjars/`, `/error/`, and the actuator. This exclusion follows
-  `management.endpoints.web.base-path`, so a relocated actuator stays excluded.
-- An extension blocklist on the path: `.css`, `.js`, `.ico`, `.png`, `.jpg`, `.jpeg`,
-  `.gif`, `.svg`, `.woff`, `.woff2`, `.ttf`, `.eot`.
-- The header `X-Requested-With: XMLHttpRequest`, the only AJAX signal the filter looks at.
-  A plain `fetch()` doesn't send it, so a `fetch` returning HTML with a `</body>` gets the
-  bar injected like any page navigation.
-- An async-started request. The handler keeps writing after the filter returns, so the
-  response is handed over untouched and an endpoint that returns asynchronously gets no bar.
-
-If generating the bar fails, the original page goes out unmodified rather than a broken one.
-
-The bar also appears on the error page Peekaboot renders in place of Boot's whitelabel page
-(see [Configuration, the error
-page]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage)), reporting the request
-that failed rather than the `/error` dispatch that renders the page. A direct request to
-`/error/` is still excluded, as listed above.
-
-The bar is server-rendered; everything on it is fetched from `/peekaboot/**`. Put Spring
-Security in front of those paths and a reader outside the role gets the bar with a notice
-instead of the numbers:
-
-```
-Peekaboot toolbar could not start — sign in, or check that its script is allowed to load
-```
-
-See [Security, the dev toolbar asks the reader to sign
-in]({{ '/docs/security/' | relative_url }}#toolbar-requires-sign-in).
-
-It mounts in its own shadow root: your CSS can't restyle it, and its styles can't leak into
-your page.
-
-## Request and response detail {#request-and-response-detail}
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
@@ -63,103 +10,112 @@ your page.
        loading="lazy">
 </figure>
 
-The collapsed bar is the first look: response status (colour-coded), method and path, the
-resolved controller method, request duration, the span count, database query count and
-total query time, the log count, an error-log and a warn-log count when the request
-produced either, and the trace id, copyable with one click. The numbers fill in
-asynchronously: the bar re-fetches the trace four times over the first five seconds, so a
-span finishing after the response still gets counted. With the toolbar's 200 ms export
-delay (see [Configuration, what Peekaboot
-sets]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)),
-they are usually final on the first attempt or two.
+The bar shows the response status, method and path, controller method, duration, span count,
+query count and total query time, log count, error and warning log counts when there are any,
+and the trace id, which copies on click. The logo opens the dashboard in a new tab. Click
+anywhere else on the bar, or press Enter or Space while it has focus, to open the
+[trace view](#the-trace-view).
 
-The status pill has one tier per response family. 4xx and 5xx are deliberately held apart,
-a soft red that recedes for the caller's mistake and the full one for yours; anything
-unrecognised stays grey rather than borrowing the 5xx tier. The bar shows the number alone,
-the overlay spells it out.
+The numbers fill in during the first few seconds, so spans that end after the response are
+counted too. Numbers are formatted in the language chosen on the dashboard.
 
-Click the bar, anywhere but the trace id and the dashboard link, or press Enter or Space
-while it has focus. The Request tab then shows the whole exchange on one scrolling page.
-First the request line: method, path, query string when there is one, status spelled out
-as `404 Not Found`, and duration. Then the controller method, query and form parameters,
-and last the two header tables, request before response. Sections below the request line
-appear only when there is something in them. The header tables render either
-way: "no headers captured" is an answer, where a vanished section reads as a missing
-feature.
+## Turn it on or off {#turn-it-on-or-off}
 
-Headers and parameters are masked before they leave the server, by key name and by a few
-value-shape patterns. There is no reveal control here: unlike the dashboard's Environment
-and Config tabs, a masked value stays masked. See [Security,
-Masking]({{ '/docs/security/' | relative_url }}#masking) for the rules and what they miss.
-Bodies and uploaded file names aren't captured yet; a field is reserved for them that
-nothing populates.
+The toolbar needs:
+
+- `peekaboot.enabled=true` and `peekaboot.dev-toolbar=true`. Both default to true only for a
+  [local run]({{ '/docs/configuration/' | relative_url }}#local-run).
+- A servlet web application.
+- A Micrometer `Tracer` bean, which the starter provides. See [Quick
+  start]({{ '/docs/quick-start/' | relative_url }}) for what happens without one.
+
+```yaml
+peekaboot:
+  dev-toolbar: false
+```
+
+| Property | Default | Effect |
+|---|---|---|
+| `peekaboot.dev-toolbar` | `true` for a local run, else `false` | Injects the bar and captures request detail and logs into traces. |
+| `peekaboot.ui.tracing.slow-query-threshold-ms` | `50` | Queries at or above this are marked SLOW. |
+| `management.opentelemetry.tracing.export.schedule-delay` | `200ms` while the toolbar is on (Spring Boot: `5s`) | How soon a finished span reaches the bar. Your own value wins. |
+
+See [Configuration]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
+for everything Peekaboot changes in your application.
+
+## Pages that get the bar {#where-the-bar-appears}
+
+A response gets the bar when its content type is `text/html` and it contains `</body>`. It
+does not get the bar when:
+
+- The path starts with `/peekaboot/`, `/static/`, `/webjars/`, `/error/` or the management
+  base path (`/actuator/` by default, following `management.endpoints.web.base-path`).
+- The path ends in `.css`, `.js`, `.ico`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.woff`,
+  `.woff2`, `.ttf` or `.eot`.
+- The request sends `X-Requested-With: XMLHttpRequest`. A plain `fetch()` does not send it,
+  so HTML fetched that way gets the bar.
+- The handler responds asynchronously.
+- The HTML body is larger than 2 MiB. It is served unchanged.
+
+To inject the bar, Peekaboot holds each HTML response in memory, up to 2 MiB. If generating
+the bar fails, the page is served unchanged. Your page's CSS does not affect the bar.
+
+## Request and response detail {#request-and-response-detail}
+
+The Request tab of the trace view shows the method, path, query string, status, duration,
+controller method, query and form parameters, and the request and response headers.
+
+Headers and parameters are masked on the server, by key name and by value patterns. There is
+no reveal control, so a masked value stays masked. See
+[Security]({{ '/docs/security/' | relative_url }}#masking) for the rules and what they miss.
+Request bodies and uploaded file names are not captured.
 
 ## The trace view {#the-trace-view}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/trace-detail-light.png' | relative_url }}"
-       alt="The expanded trace detail overlay for a GET /orders request, showing a span tree with nested CLIENT and SERVER spans, database connection and query spans, and timing bars"
-       loading="lazy">
-</figure>
+Clicking the bar opens the same trace view the dashboard's Traces tab uses, on top of your
+page. [Traces]({{ '/docs/traces/' | relative_url }}#the-trace-view) describes its Spans,
+Queries, Logs and Request tabs.
 
-The same click opens the full trace, the view the dashboard's Traces tab uses, without
-leaving the page you're testing. It opens on the Spans tab, shown above: the whole tree,
-every span's kind, tags and duration, nested exactly as they nested at runtime. Click a
-span's name to open a details panel below its row, with the kind spelled out, a copyable
-span id, and, where they apply, the error class and message, the SQL, and the tags with
-full keys.
+## Logs for the request {#logs-correlated-to-the-request}
 
-The Queries tab lists the SQL those spans ran, with duration and, where your
-instrumentation provides them, row counts. A query at or above
-`peekaboot.ui.tracing.slow-query-threshold-ms` (default 50ms) is labelled SLOW, on the
-query threshold rather than the span thresholds. Peekaboot reads the SQL from
-`db.query.text`, `db.statement` or datasource-proxy's `jdbc.query[N]`, whichever your
-instrumentation sets, and falls back to the span's own name only when that already looks
-like SQL.
+The Logs tab lists every log line your app wrote while handling the request, with timestamp,
+level, message and the active span.
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
-       alt="The Queries tab for the same GET /orders request, listing 26 PostgreSQL statements with their duration and row count, each showing the actual lower-case select ... from SQL text rather than a span name"
-       loading="lazy">
-</figure>
+<div class="pk-callout pk-callout--warning" markdown="1">
+**Log lines are not masked.** A log statement that includes a secret or personal data is
+stored and shown exactly as written. See [Security]({{ '/docs/security/' | relative_url }})
+for what is exposed while the toolbar is on.
+</div>
 
-That's the extracted text: lower-case, parameterized, one row per statement. The tree above
-shows span *names* instead, which is why a database span there reads `SELECT customer_order`.
-See [Traces]({{ '/docs/traces/' | relative_url }}#what-gets-captured) for what lands in the
-store, and [trace status]({{ '/docs/traces/' | relative_url }}#trace-status) for what a
-span, a root span and a trace status mean.
+## Swagger UI {#it-also-works-from-swagger-ui}
 
-The tabs link into each other both ways. A database span's details panel carries a "Show in
-Queries tab" button that jumps to that statement; a query, or a log line, jumps back to its
-span in the tree. Each jump switches the tab, scrolls the target into view, focuses it and
-highlights it briefly.
+On the Swagger UI page the bar starts idle with "Waiting for request…". Run an operation with
+"Try it out" and the bar shows that call's status, duration and query count. Click it for the
+trace view.
 
-## Logs correlated to the request {#logs-correlated-to-the-request}
+This works for any traced call, JSON APIs included. Calls to `/v3/api-docs`, `/swagger-ui/`,
+`/peekaboot/`, `/webjars/` and the actuator are not shown. With
+`management.endpoints.web.base-path=/`, actuator calls are traced and do show up.
 
-Every log line your app emitted while handling the request lands on the same overlay's Logs
-tab: timestamp, level and message, tagged with the span that was active, filterable by
-text, level or span. No grep, no correlation id to copy into another tool by hand. Log
-content is captured verbatim and, unlike headers and parameters, is **not masked**: a
-statement that includes a secret or PII is stored exactly as written. See
-[Security]({{ '/docs/security/' | relative_url }}) for what's exposed once the toolbar is on.
+A custom `springdoc.swagger-ui.path` is honoured.
 
-## It also works from Swagger UI {#it-also-works-from-swagger-ui}
+## The bar on the error page {#the-bar-on-the-error-page}
 
-Swagger UI's own page has no request worth reporting on until you call an endpoint. So
-there the toolbar loads idle, showing "Waiting for request…", and patches `window.fetch`.
-Every response it sees is checked for a `Server-Timing` header, and the trace id in it
-loads straight into the bar. Execute an operation through "Try it out" and the bar shows
-that call's status, duration and query count; click it for the same overlay.
+HTML error pages get the bar, including [Peekaboot's error
+page]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage). It reports the request
+that failed, not the `/error` dispatch that rendered the page. A request that Spring Security
+rejects before it reaches your application, such as a 401 or 403, gets no bar on its error
+page.
 
-Peekaboot sets that header on the responses it traces, JSON API calls included. Its own
-paths and the management endpoints aren't traced, so those never carry one, and neither
-does a request that reached no span.
+## With Spring Security {#with-spring-security}
 
-The `fetch` interceptor keeps a skip list of its own: `/v3/api-docs`, `/swagger-ui/`,
-`/peekaboot/`, `/webjars/` and `/actuator/`. That last entry is Spring Boot's default
-literal, hard-coded, so unlike the injection exclusion above this list does not follow
-`management.endpoints.web.base-path`. A relocated actuator falls outside the skip list,
-and Peekaboot doesn't trace it either, so no trace id lands on the bar.
+The bar loads its data from `/peekaboot/**`. A reader who is not allowed there sees the bar
+with this notice instead of the numbers:
 
-A customised `springdoc.swagger-ui.path` is honoured. Wherever you've moved that page, the
-UI is served from a `swagger-ui/` directory next to it, which is where the toolbar looks.
+```
+Peekaboot toolbar could not start — sign in, or check that its script is allowed to load
+```
+
+The same notice appears when a Content-Security-Policy blocks the bar's script. See [Security,
+the dev toolbar asks the reader to sign
+in]({{ '/docs/security/' | relative_url }}#toolbar-requires-sign-in).
