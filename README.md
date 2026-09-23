@@ -1,7 +1,19 @@
 # peekaboot.org
 
+> [!WARNING]
+> Peekaboot is beta software and may expose security-relevant settings. Use it at your own
+> risk.
+
 Source for the [Peekaboot](https://github.com/peekaboot-org/peekaboot) documentation site,
 built with Jekyll and published via GitHub Pages.
+
+## Why Peekaboot?
+
+Peek, because that's what it does — a look inside a running application. Boot, because
+that's where it lives. And peek-a-boo, because that's how it behaves: add one dependency and
+your app's internals are suddenly there; package the jar and they're gone again.
+
+In short: Peekaboot lets you peek inside your Spring Boot application while it runs.
 
 ## Local preview
 
