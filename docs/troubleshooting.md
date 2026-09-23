@@ -11,7 +11,7 @@ permalink: /docs/troubleshooting/
 | Cause | Fix |
 |---|---|
 | Peekaboot is off. It is off by default for `java -jar`, wars, native images, AOT builds, containers and tests. | Set `peekaboot.enabled=true` in `application.yml`, an environment variable or a system property. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on). |
-| You develop inside a devcontainer or GitHub Codespaces. Those count as containers. | Set `peekaboot.enabled=true` and the feature switches you want, such as `peekaboot.dev-toolbar`, explicitly. See [Configuration, container markers]({{ '/docs/configuration/' | relative_url }}#container-markers). |
+| You develop inside a devcontainer or GitHub Codespaces. Those count as containers. | Set `peekaboot.enabled=true` and the feature switches you want, such as `peekaboot.dev-toolbar`, explicitly. See [Configuration, containers]({{ '/docs/configuration/' | relative_url }}#container-markers). |
 | The application sets `server.servlet.context-path`. | Open the dashboard under that path, for example `/my-app/peekaboot`. The `/peekaboot` part cannot be changed. |
 | The application is reactive (WebFlux) or not a web application. | None. Peekaboot's dashboard needs a servlet web application. |
 | Spring Boot Actuator is not on the class path. | Keep `spring-boot-starter-actuator`, which the Peekaboot starter brings in. |
@@ -24,7 +24,7 @@ and it is missing where no dashboard is served.
 ## Peekaboot is off in `@SpringBootTest` {#disabled-in-springboottest}
 
 **Cause:** tests never count as a local run, so Peekaboot stays off in CI. See [Configuration,
-what counts as a local run]({{ '/docs/configuration/' | relative_url }}#local-run).
+where it turns itself on]({{ '/docs/configuration/' | relative_url }}#local-run).
 
 **Fix:** switch it on for the test that needs it.
 
@@ -80,7 +80,7 @@ application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application
   trace id are kept. For `@Async` methods, see the next entry.
 
 **Fix:** set `peekaboot.dev-toolbar: true`. See [Traces, what gets
-captured]({{ '/docs/traces/' | relative_url }}#what-gets-captured).
+recorded]({{ '/docs/traces/' | relative_url }}#what-gets-captured).
 
 ## `@Async` work is missing or shows up as separate traces {#async-work-missing}
 
@@ -109,10 +109,10 @@ background work]({{ '/docs/traces/' | relative_url }}#background-work).
 - `peekaboot.dev-toolbar` is off. It is on only for a local run. Setting `peekaboot.enabled=true`
   does not switch it on.
 - The response is not HTML with a `</body>` tag. JSON responses and redirects never get a bar.
-- The HTML response is larger than 2 MB.
+- The HTML response is larger than 2 MiB.
 - The request matches an injection exclusion: an excluded path prefix, a blocked file
-  extension, an `X-Requested-With` header or an async dispatch. See [Dev toolbar, where the
-  bar appears]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears).
+  extension, an `X-Requested-With` header or an async dispatch. See [Dev toolbar, pages that get
+  the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears).
 
 **Fix:** set `peekaboot.dev-toolbar: true` where you want the toolbar outside a local run.
 
@@ -137,8 +137,8 @@ in]({{ '/docs/security/' | relative_url }}#toolbar-requires-sign-in).
 `metrics: false`. The Insights tab and the stat tiles on Overview are missing too.
 
 **Fix:** find what excludes Spring Boot Actuator's metrics auto-configuration and remove it.
-See [The dashboard, conditionally shown
-tabs]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs).
+See [The dashboard, which tabs
+appear]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs).
 
 ## The Insights tab is missing or a panel says "No data" {#insights-tab-missing-or-no-data}
 
@@ -148,7 +148,8 @@ tabs]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs).
 | Your panels are replaced by the default ones | Your `peekaboot-insights.yml` is invalid. The startup log has an `ERROR` containing `is invalid; discarding it entirely`. | Fix the file as the log message says. |
 | A panel says "No data" | The panel's meters are not registered, for example there is no HikariCP, Hibernate or `datasource-micrometer`. | Look the meter up on the Meters tab. A meter that is not there cannot be charted. |
 
-See [Insights, when the tab isn't there]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).
+See [Insights, when the tab
+appears]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).
 
 ## Values show as `******` {#values-show-as-asterisks}
 
@@ -158,8 +159,8 @@ how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
 
 **Fix:** set `peekaboot.enable-unmasking: true`. Then use the "Show secrets" toggle on the
 Environment and Config tabs, or add `?unmask=true` to `GET /peekaboot/api/actuator/all/insights`.
-You need both. See [Security, two independent
-opt-ins]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
+You need both. See [Security, two opt-ins before a real value is
+shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ## The dashboard returns 401 {#dashboard-401}
 

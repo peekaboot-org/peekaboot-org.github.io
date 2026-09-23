@@ -49,7 +49,7 @@ What that means for access:
 | `peekaboot.security.enabled` | detected | Arms the HTTP Basic fallback guard. |
 | `peekaboot.security.username` | `<artifact>-admin` | The guard's username. |
 | `peekaboot.security.password` | unset | The guard's password. Unset, one is generated. |
-| `peekaboot.security.credentials-file` | unset | Where the generated password's hash is stored, independent of `storage.enabled`. |
+| `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
 | `peekaboot.storage.enabled` | detected | Whether Peekaboot writes any file. |
 | `peekaboot.storage.dir` | `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where those files go. |
 | `peekaboot.error-page.enabled` | detected | Serves the error page with exception and stack trace. |
@@ -137,8 +137,9 @@ or without it. Don't use `management.endpoints.web.exposure` to protect Peekaboo
 effect on `/peekaboot/**`.
 
 Peekaboot does set `management.info.env`, `.java`, `.os` and `.process.enabled` to `true` while
-it is on. If you expose `/actuator/info`, it carries that extra content. See [What Peekaboot
-sets in your application]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
+it is on. If you expose `/actuator/info`, it carries that extra content. See [Configuration,
+Spring Boot defaults Peekaboot
+changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
 
 With Peekaboot off, nothing is served under `/peekaboot/**`, the UI assets included.
 

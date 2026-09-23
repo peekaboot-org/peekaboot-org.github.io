@@ -137,7 +137,7 @@ With tracing off, the response has no traces and zero counts.
 | `INTERNAL` | Other in-process work. |
 | `UNKNOWN` | Nothing identifies it, for example while the parent span has not arrived yet. |
 
-See [Traces, root action type]({{ '/docs/traces/' | relative_url }}#root-action-type).
+See [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type).
 
 ### Response {#trace-list-response}
 

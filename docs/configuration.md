@@ -153,7 +153,7 @@ Peekaboot carries on in memory.
 | `peekaboot.security.enabled` | detected | Whether Peekaboot's HTTP Basic guard protects `/peekaboot/**`. |
 | `peekaboot.security.username` | `<artifact>-admin` | The username the guard accepts. |
 | `peekaboot.security.password` | unset | A fixed password. Nothing is generated or written to disk. |
-| `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored, whatever `peekaboot.storage.enabled` says. |
+| `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
 
 `enabled` is on for a deployment launch and off for local runs and tests. Only `true` and
 `false` count. Any other value, `yes` for example, leaves the guard off.
@@ -167,7 +167,7 @@ the `Peekaboot Security` block of the startup log and stores only its hash. The 
 default outside local development, nothing is written and the password changes on every restart.
 The startup log says so. Set `credentials-file` or `password` to keep it stable.
 
-Failed logins are not throttled. See [Security: securing the
+Failed logins are not throttled. See [Security, securing the
 dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 
 ### Error page {#peekabooterrorpage}
@@ -191,7 +191,7 @@ renders your error page, and the whitelabel setting no longer applies. Requests 
 JSON are left alone.
 
 The error page carries the dev toolbar, which reports the failed request. See [Dev toolbar,
-where the bar appears]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
+pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
 [Security, the error page]({{ '/docs/security/' | relative_url }}#the-error-page).
 
 ### Stack-trace folding {#peekabootstacktrace}
@@ -235,7 +235,8 @@ Use `fold: false` instead.
 
 A captured stack trace is cut at 1000 lines, whatever `fold` says, and ends with a
 `... N lines omitted` marker. A `StackOverflowError` is the usual case. The worst case for the
-whole trace store is 1000 lines &times; `max-logs-per-trace` &times; `max-traces`.
+whole trace store is 1000 lines &times; `max-logs-per-trace` &times; (`max-traces` +
+`max-error-traces` + `max-slow-traces`).
 
 ### Lifecycle {#peekabootlifecycle}
 
@@ -383,7 +384,7 @@ production?]({{ '/docs/in-production/' | relative_url }}).
 
 ### A longer, coarser insights history {#a-longer-coarser-insights-history}
 
-Drop the hourly level and lengthen the minute level to follow a long local session:
+Replace the minute and hourly levels with one two-minute level to follow a long local session:
 
 ```yaml
 peekaboot:

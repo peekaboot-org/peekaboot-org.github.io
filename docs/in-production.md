@@ -38,14 +38,15 @@ Everything Peekaboot sets sits below your own configuration, so a value you set 
 | Handler and view spans | A span around each controller method and each rendered view, sent to every exporter | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 | Async task spans | A span around each task a Spring task executor runs inside a trace, sent to every exporter. Turn off with `peekaboot.tracing.async=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 | `management.opentelemetry.tracing.export.schedule-delay` | `200ms` instead of `5s`: spans reach every exporter about 25 times as often | Dev toolbar on |
-| HTML response buffering | `text/html` responses are buffered up to 2 MB so the toolbar can be injected. Larger pages stream through without it. | Dev toolbar on |
+| HTML response buffering | `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. | Dev toolbar on |
 | `Server-Timing` header | Every response carries its trace id | Dev toolbar on |
 | Log capture | A Logback appender receives every log event | Dev toolbar on |
 
 An Actuator endpoint that keeps failing is logged once at WARN with its stack trace, then at
 DEBUG. Peekaboot adds no `/actuator` exposure. See [Security, Peekaboot leaves `/actuator`
-alone]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do) and [What Peekaboot
-sets in your application]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
+alone]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do) and [Configuration,
+Spring Boot defaults Peekaboot
+changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
 
 ## Memory {#memory}
 

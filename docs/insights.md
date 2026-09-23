@@ -266,7 +266,7 @@ The charts update live and keep updating while the dashboard's auto-refresh is p
 The percentiles on the aggregated levels are percentiles of samples, not of individual
 requests. Use them to see trends and spot leaks or a saturating pool. Do not use them for SLOs;
 that needs a real metrics backend. See
-[Traces: tracing vs distributed tracing]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing).
+[Traces, limitations]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing).
 
 - At `1m`, each entry covers six 10-second samples. p90, p95 and p99 all equal the maximum.
 - At `1h`, percentiles are taken over the sixty one-minute averages. A single slow request is

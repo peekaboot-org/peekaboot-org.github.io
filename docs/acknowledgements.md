@@ -6,8 +6,8 @@ permalink: /docs/acknowledgements/
 
 ## Spring Boot and its OpenTelemetry support {#spring-boot-and-its-opentelemetry-support}
 
-Peekaboot's tracing runs on the OpenTelemetry support that
-[Spring Boot](https://spring.io/projects/spring-boot) 4 ships out of the box.
+Peekaboot's tracing runs on the OpenTelemetry support built into
+[Spring Boot](https://spring.io/projects/spring-boot) 4.
 
 ## Symfony's Web Profiler and Debug Toolbar {#symfonys-web-profiler-and-debug-toolbar}
 

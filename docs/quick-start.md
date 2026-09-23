@@ -63,9 +63,9 @@ Set `peekaboot.dev-toolbar: false` to turn the toolbar off and keep the dashboar
 </div>
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**Working in a devcontainer?** A container never counts as a local run, so Peekaboot stays
-off. Turn it on with the properties below; see [Configuration, container
-markers]({{ '/docs/configuration/' | relative_url }}#container-markers).
+**Peekaboot is off in a devcontainer.** A container never counts as a local run. Turn it on with
+the properties below; see [Configuration,
+containers]({{ '/docs/configuration/' | relative_url }}#container-markers).
 </div>
 
 ## Turn it on outside a local run {#turn-it-on-outside-a-local-run}
