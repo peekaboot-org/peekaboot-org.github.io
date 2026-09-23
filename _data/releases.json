@@ -44,19 +44,7 @@
         "title": "Bug fixes",
         "entries": [
           {
-            "text": "Close the defects the docs rewrite left",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
             "text": "Correct trace and span edge cases",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Harden the passthrough writer hand-over",
             "scope": null,
             "breaking": false,
             "detail": null
@@ -108,12 +96,6 @@
             "scope": null,
             "breaking": false,
             "detail": null
-          },
-          {
-            "text": "Fail the release-data render on a broken pipe",
-            "scope": null,
-            "breaking": false,
-            "detail": null
           }
         ]
       },
@@ -128,76 +110,6 @@
           },
           {
             "text": "Cache the bundled font for a year",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Dependency upgrades",
-        "entries": [
-          {
-            "text": "Bump org.apache.maven.plugins:maven-failsafe-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump io.github.git-commit-id:git-commit-id-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump org.apache.maven.plugins:maven-surefire-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.github.spotbugs:spotbugs-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-plugin-gradle",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump org.springdoc:springdoc-openapi-starter-webmvc-ui",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump actions/setup-java in /.github/actions/prepare-build",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump WyriHaximus/github-action-get-previous-tag",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Reverts",
-        "entries": [
-          {
-            "text": "Restore the URL query masking rule",
             "scope": null,
             "breaking": false,
             "detail": null
