@@ -60,8 +60,7 @@ layout: home
         <p class="content">
           A bar at the bottom of every HTML page your app renders. Click it for request and response
           detail, the span tree with timings and queries, and the log lines of that request. It
-          also works in Swagger UI. In place of Spring Boot's whitelabel page, errors show the
-          stack trace with framework frames folded.
+          also works in Swagger UI.
           <a href="{{ '/docs/dev-toolbar/' | relative_url }}">Dev toolbar</a>
         </p>
       </div>
@@ -69,6 +68,24 @@ layout: home
         <figure class="image">
           <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
                alt="The collapsed dev toolbar docked at the bottom of the page, showing a 200 status badge, GET /orders, the controller method, duration, query count and duration, and a copyable trace id"
+               loading="lazy">
+        </figure>
+      </div>
+    </div>
+
+    <div class="columns is-vcentered">
+      <div class="column is-5">
+        <h2 class="title is-4">Error page</h2>
+        <p class="content">
+          In place of Spring Boot's whitelabel page, errors show the exception, its message and
+          the stack trace with framework frames folded.
+          <a href="{{ '/docs/configuration/' | relative_url }}#peekabooterrorpage">Error page</a>
+        </p>
+      </div>
+      <div class="column is-7">
+        <figure class="image">
+          <img src="{{ '/assets/img/screenshots/error-page-light.png' | relative_url }}"
+               alt="Peekaboot's error page for GET /boom: status 500, the IllegalStateException and its message, and the stack trace with the application frame in bold and framework frames folded"
                loading="lazy">
         </figure>
       </div>
@@ -97,7 +114,9 @@ layout: home
         <h2 class="title is-4">Traces with SQL queries</h2>
         <p class="content">
           The last 1000 requests your app served, each with its span tree, SQL queries and
-          timings. Errors and slow requests are kept in buckets of their own.
+          timings. With <a href="{{ '/docs/traces/' | relative_url }}#background-work">context
+          propagation</a> on, work your <code>@Async</code> methods run shows up inside the request
+          that started it. Errors and slow requests are kept in buckets of their own.
           <a href="{{ '/docs/traces/' | relative_url }}">Traces</a>
         </p>
       </div>

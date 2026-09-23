@@ -97,6 +97,12 @@ With context propagation on:
   Errors.
 - In the trace's Spans tab, the task starts collapsed and carries a background chip.
 
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/trace-detail-async-light.png' | relative_url }}"
+       alt="The Spans tab for a GET /orders/enrich request that returned in 13ms, with an async task span under the handler carrying a background chip and 2 logs, which ran for 153ms"
+       loading="lazy">
+</figure>
+
 Each task is also listed as its own row of type Async Task, timed on its own. The row links to
 the trace that started it while that trace is still in the store. One trace can therefore
 produce several rows.

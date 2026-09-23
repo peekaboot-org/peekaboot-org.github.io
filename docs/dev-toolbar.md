@@ -107,6 +107,12 @@ that failed, not the `/error` dispatch that rendered the page. A request that Sp
 rejects before it reaches your application, such as a 401 or 403, gets no bar on its error
 page.
 
+<figure class="image">
+  <img src="{{ '/assets/img/screenshots/error-page-light.png' | relative_url }}"
+       alt="Peekaboot's error page for GET /boom: status 500, the IllegalStateException and its message, the stack trace with the application frame in bold and framework frames folded, and the dev toolbar reporting the failed request"
+       loading="lazy">
+</figure>
+
 ## With Spring Security {#with-spring-security}
 
 The bar loads its data from `/peekaboot/**`. A reader who is not allowed there sees the bar
