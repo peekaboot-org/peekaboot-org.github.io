@@ -1,5 +1,369 @@
 [
   {
+    "version": "0.3.0",
+    "date": "2026-09-26",
+    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.3.0",
+    "initial": false,
+    "groups": [
+      {
+        "title": "Features",
+        "entries": [
+          {
+            "text": "Open span details from the span tree",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mark span kinds with coloured dots",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Make span tree rows easier to scan",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Size the span name column to its names",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show span errors in span details",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Copy a span id from span details",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show or hide all span details at once",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop the counts the overlay tabs repeat",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop Content-Type from the Request section",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Count spans and logs in the trace stat line",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show query row counts as neutral chips",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add the error-page switch",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Render a Peekaboot error page",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve the error page in place of whitelabel",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Put the toolbar on error pages",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add an error-page override switch",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Beat a ControllerAdvice's own error page",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Resolve the stack-trace exclusion list",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Decide which stack-trace frames fold away",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add the stack-trace folding properties",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold framework frames on the error page",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Reveal the full trace on the error page",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture the stack trace of a logged error",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show a logged error's trace, folded",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify async tasks as their own action",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Observe tasks handed to task executors",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Register the async task decorator",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Track async subtrees in the trace bundle",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep async work out of a trace's duration",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep async spans out of the span summary",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Map a trace subtree as its own tree",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "List async subtrees as their own rows",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Link, distinguish and open async rows",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold async work out of a trace's timeline",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Remove a trace from Slow when it is not slow",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give an async row its own logs and status",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Single-space the error page stack trace",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Bug fixes",
+        "entries": [
+          {
+            "text": "Tolerate other filter registrations",
+            "scope": "security",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show span tag keys in full",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Group every count in the reader's locale",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Render buttons in the UI font",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the jump highlight on a hovered row",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Move the testing app off isbn-scanner's port",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture a failed request as a server error",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop the dependabot merge waiting on itself",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify suppressed frames",
+            "scope": "stack-trace",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Merge adjacent application runs",
+            "scope": "stack-trace",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ask FoldedTrace what to reveal",
+            "scope": "error-page",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Dependency upgrades",
+        "entries": [
+          {
+            "text": "Bump org.apache.maven.plugins:maven-deploy-plugin",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-install-plugin",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.codehaus.mojo:exec-maven-plugin",
+            "scope": "deps-dev",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.microsoft.playwright:playwright",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump net.ttddyy.observation:datasource-micrometer-opentelemetry",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump net.ttddyy.observation:datasource-micrometer-spring-boot",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Use jdbc-url-parser 0.1.2",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Reverts",
+        "entries": [
+          {
+            "text": "Failed 0.3.0 release preparation",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.2.0",
     "date": "2026-09-14",
     "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.2.0",
@@ -44,7 +408,19 @@
         "title": "Bug fixes",
         "entries": [
           {
+            "text": "Close the defects the docs rewrite left",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
             "text": "Correct trace and span edge cases",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Harden the passthrough writer hand-over",
             "scope": null,
             "breaking": false,
             "detail": null
@@ -96,6 +472,12 @@
             "scope": null,
             "breaking": false,
             "detail": null
+          },
+          {
+            "text": "Fail the release-data render on a broken pipe",
+            "scope": null,
+            "breaking": false,
+            "detail": null
           }
         ]
       },
@@ -110,6 +492,76 @@
           },
           {
             "text": "Cache the bundled font for a year",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Dependency upgrades",
+        "entries": [
+          {
+            "text": "Bump org.apache.maven.plugins:maven-failsafe-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump io.github.git-commit-id:git-commit-id-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.apache.maven.plugins:maven-surefire-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.github.spotbugs:spotbugs-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.diffplug.spotless:spotless-plugin-gradle",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump org.springdoc:springdoc-openapi-starter-webmvc-ui",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump actions/setup-java in /.github/actions/prepare-build",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump WyriHaximus/github-action-get-previous-tag",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Reverts",
+        "entries": [
+          {
+            "text": "Restore the URL query masking rule",
             "scope": null,
             "breaking": false,
             "detail": null
