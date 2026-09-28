@@ -111,7 +111,7 @@ produce several rows.
 Every async span is named `async task`. To see which method ran, put
 `@Observed(contextualName = "...")` on it. Its span then appears under `async task`.
 
-`@Scheduled` runs get no async span and keep the Scheduled Job type.
+`@Scheduled` runs get no async span and keep the Scheduled type.
 
 ## Trace types {#root-action-type}
 
@@ -119,22 +119,21 @@ Each row in the trace list shows what started the trace. The Traces tab filters 
 
 | Value | Icon | Means |
 |---|---|---|
-| HTTP Request | 🌐 | An inbound web request |
-| Message Consumer | 📩 | A message picked off a queue or topic |
+| HTTP | 🌐 | An inbound web request |
+| Messaging | 📩 | A message picked off a queue or topic |
 | RPC Call | 🔗 | An inbound remote-procedure call, gRPC for example |
-| Scheduled Job | 🕑 | A `@Scheduled` method fired by Spring's scheduler |
+| Scheduled | 🕑 | A `@Scheduled` method fired by Spring's scheduler |
 | Async Task | ⚡ | [Background work](#background-work) on a Spring task executor |
 | Database | 🗂 | A database call with no request, job or message around it |
 | Connection Pool | 🔌 | The pool acquiring or validating a connection outside any traced work |
-| Internal | ⚙ | A root span with no inbound or outbound direction |
-| Unknown | ❓ | Anything else, such as a message being sent or an outbound call whose caller was not traced |
+| Unknown | ❓ | Anything else, such as in-process work, a message being sent or an outbound call whose caller was not traced |
 
-Only `@Scheduled` methods fired by Spring's scheduler show as Scheduled Job. Quartz, a plain
-`ScheduledExecutorService` or another timer shows as Internal or by whatever else its tags
+Only `@Scheduled` methods fired by Spring's scheduler show as Scheduled. Quartz, a plain
+`ScheduledExecutorService` or another timer shows as Unknown or by whatever else its tags
 match.
 
-Connection Pool traces arrive often enough to drown everything else. The Traces tab hides them
-until you tick the Connection Pool filter. Over the HTTP API,
+Connection Pool traces arrive often enough to drown everything else. The Traces tab excludes
+them until you untick Connection Pool under Excluded. Over the HTTP API,
 [`rootActionType=*`]({{ '/docs/api/' | relative_url }}#endpoints) returns every type.
 {: #connection-pool-traces-hidden}
 

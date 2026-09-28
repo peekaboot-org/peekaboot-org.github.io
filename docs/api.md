@@ -134,8 +134,7 @@ With tracing off, the response has no traces and zero counts.
 | `DATABASE` | A database query outside any other work. |
 | `CONNECTION_POOL` | Connection pool maintenance, such as a HikariCP refill. |
 | `ASYNC_TASK` | A task run on a Spring task executor, such as an `@Async` method. |
-| `INTERNAL` | Other in-process work. |
-| `UNKNOWN` | Nothing identifies it, for example while the parent span has not arrived yet. |
+| `UNKNOWN` | Anything else, such as other in-process work, or a span whose parent has not arrived yet. |
 
 See [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type).
 
