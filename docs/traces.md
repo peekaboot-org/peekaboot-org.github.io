@@ -150,7 +150,8 @@ tabs and opens on Spans.
 
 Spans shows the span tree with each span's kind, tags and duration, nested as they ran. Click
 a span's name for its details: kind, a copyable span id, and where they apply the error class
-and message, the query's statement, and the full tags.
+and message, the query's statement, and the full tags. A span that logged lists its logs there
+too, stack traces folded as on the Logs tab, with a "Show in Logs tab" button.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
