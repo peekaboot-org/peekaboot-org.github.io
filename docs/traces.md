@@ -150,8 +150,9 @@ tabs and opens on Spans.
 
 Spans shows the span tree with each span's kind, tags and duration, nested as they ran. Click
 a span's name for its details: kind, a copyable span id, and where they apply the error class
-and message, the query's statement, and the full tags. A span that logged lists its logs there
-too, stack traces folded as on the Logs tab, with a "Show in Logs tab" button.
+and message, and the full tags. A query span also carries a "1 query" button, and a span that
+logged an "N logs" button; each opens its own panel in place - the statement with its row
+count, or that span's own logs, stack traces folded as on the Logs tab.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
@@ -178,8 +179,8 @@ parameters, and request and response headers. Logs and Request are filled only w
 toolbar is on. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) for what is masked
 and what is not.
 
-The tabs link to each other. A database span's details have a "Show in Queries tab" button,
-and a query or a log line jumps back to its span in the tree.
+A query or a log line jumps back to its span in the tree; a span's own query and logs sit
+beside its attributes instead of linking out to the other tabs.
 
 ## Status and issues {#trace-status}
 
