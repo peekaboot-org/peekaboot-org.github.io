@@ -76,12 +76,14 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Start and stop history with version, branch, commit and build time per run, unclean shutdowns | Lifecycle tab, `/peekaboot/api/lifecycle/**` | No |
 | Micrometer meters: names, tags, measurements | Meters tab | Tag values by key and by value shape |
 | Up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event history, and the list of collected meters | Insights tab, `/peekaboot/api/insights/**` | No |
-| Request traces: span tree, span names, timings, tags, error messages, SQL text | Traces tab, toolbar | Tags, error messages and SQL by value shape only |
+| Request traces: span tree, span names, timings, tags, error messages, SQL text and bind parameters | Traces tab, toolbar | Tags, error messages, SQL and bind parameters by value shape only |
 | With the toolbar on: request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape |
 | With the toolbar on: the message of every log event emitted inside a trace | Logs tab of a trace | No |
 
 SQL text is shown as your JDBC instrumentation records it, literal values included where the
-statement or the instrumentation carries them. Request and response bodies are never captured.
+statement carries them. Bind parameters are shown too, recorded on the query's span. An
+application that also exports its traces, over OTLP say, sends them along unmasked. Request
+and response bodies are never captured.
 A log event emitted outside a trace is dropped.
 
 With the toolbar on, every response carries
@@ -157,7 +159,7 @@ Masking is on by default and has nothing to configure. It replaces a value with 
 - environment and `@ConfigurationProperties` values
 - health details, `info.build` and datasource connection parameters
 - Micrometer meter tags
-- captured headers, query and form parameters, span tags, span error messages and SQL text
+- captured headers, query and form parameters, span tags, span error messages, SQL text and bind parameters
 - the last failure message of a scheduled task
 - the database connection parameters in Peekaboot's startup log line
 

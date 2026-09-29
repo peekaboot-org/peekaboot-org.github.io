@@ -150,11 +150,11 @@ tabs and opens on Spans.
 
 Spans shows the span tree with each span's kind, tags and duration, nested as they ran. Click
 a span's name for its details: kind, a copyable span id, and where they apply the error class
-and message, the SQL, and the full tags.
+and message, the query's statement, and the full tags.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
-       alt="The Queries tab for the same GET /orders request, listing 26 PostgreSQL statements with their duration and row count, each showing the actual lower-case select ... from SQL text rather than a span name"
+       alt="The Queries tab for the same GET /orders request, listing 26 PostgreSQL statements, each with duration and row count, highlighted SQL, Formatted and Substitute parameters toggles, a Copy SQL button, and a numbered Parameters list"
        loading="lazy">
 </figure>
 
@@ -163,6 +163,13 @@ the instrumentation records it. A query at or above
 `peekaboot.ui.tracing.slow-query-threshold-ms` (default 50ms) is marked SLOW. A JDBC batch is
 one row with its statements joined. A query recorded without statement text is listed without
 SQL.
+
+A statement shows as captured, highlighted. With Hibernate on the classpath, Formatted lays it
+out the way Hibernate's `format_sql` log does. Its bind parameters are listed under it, one list
+per batch entry, masked like the SQL. Substitute parameters puts them in place of the `?`
+placeholders when there is one set and it fits. The copy button copies the SQL as shown. A bind
+value over 1000 characters is cut with a comment like `/* 7 characters omitted */`; a batch
+records at most 100 parameter sets.
 
 Logs lists the log lines written while handling the request, filterable by text, level and
 span. Request shows the method, path, query string, status, duration, controller method,
