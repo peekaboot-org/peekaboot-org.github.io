@@ -1,5 +1,136 @@
 [
   {
+    "version": "1.0.0",
+    "date": "2026-09-30",
+    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.0.0",
+    "initial": false,
+    "groups": [
+      {
+        "title": "Breaking changes",
+        "entries": [
+          {
+            "text": "Fold the Internal trace type into Unknown",
+            "scope": null,
+            "breaking": true,
+            "detail": "Traces with a kindless root span now report UNKNOWN; filter on rootActionType=UNKNOWN where you used INTERNAL."
+          }
+        ]
+      },
+      {
+        "title": "Features",
+        "entries": [
+          {
+            "text": "Exclude pool traces with a checkbox",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold the Internal trace type into Unknown",
+            "scope": null,
+            "breaking": true,
+            "detail": "Traces with a kindless root span now report UNKNOWN; filter on rootActionType=UNKNOWN where you used INTERNAL."
+          },
+          {
+            "text": "Fit the trace type filter on one row",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture the bind parameters of JDBC queries",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Format queries and serve their parameters",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add person view and edit pages",
+            "scope": "testing-app",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Tokenize SQL for highlighting",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Copy the text a view shows at click time",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Highlight SQL and substitute its parameters",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show a span's logs in its details",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Expand a span's query and logs in place",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Dependency upgrades",
+        "entries": [
+          {
+            "text": "Bump org.slf4j:slf4j-api from 2.0.19 to 2.0.20",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump net.sourceforge.pmd:pmd-core from 7.27.0 to 7.28.0",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump net.osslabz:jdbc-url-parser from 0.1.1 to 0.1.2",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump com.diffplug.spotless:spotless-plugin-gradle",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bump gradle-wrapper from 9.7.1 to 9.8.0",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.3.0",
     "date": "2026-09-26",
     "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.3.0",
