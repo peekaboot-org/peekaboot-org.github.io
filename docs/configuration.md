@@ -187,8 +187,9 @@ bean, an `error` template or a static `error/*.html`. It also stays off while
 To keep a branded error page in production and see Peekaboot's page while developing, set
 `peekaboot.error-page.override: true` in your local profile. Peekaboot's page then wins wherever
 `enabled` is `true`. It also wins over an `@ControllerAdvice` or `@ExceptionHandler` that
-renders your error page, and the whitelabel setting no longer applies. Requests that ask for
-JSON are left alone.
+renders your error page, and the whitelabel setting no longer applies. Only a request whose
+`Accept` header names `text/html` gets the page. Swagger UI, curl and `fetch()` send `*/*` and
+keep your application's own error response.
 
 The error page carries the dev toolbar, which reports the failed request. See [Dev toolbar,
 pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
