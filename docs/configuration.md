@@ -228,6 +228,7 @@ never fold.
    org.zalando.logbook
    net.ttddyy.dsproxy
    com.mysql
+   org.peekaboot
    ```
 
 `exclude: []` does not stop folding. It counts as unset and falls through to the next source.
