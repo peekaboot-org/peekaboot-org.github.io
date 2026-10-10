@@ -93,8 +93,12 @@ With context propagation on:
 - The request's duration and the [Slow bucket](#the-three-buckets) check leave the
   background work out. A request that returns in 50ms reports 50ms, however long its task
   runs.
-- Errors and queries in background work still count. A failing task puts its trace in
-  Errors.
+- Errors and queries in background work still count. An `@Async` method that throws fails
+  its `async task` span and puts its trace in Errors, whether it returns `void` or a
+  `Future`, and so does a task passed to `execute()`. Your `AsyncUncaughtExceptionHandler`
+  still runs. A task passed to `submit()` keeps its exception in the returned `Future`, so
+  its span ends OK, as does an `@Async` method under
+  `@EnableAsync(mode = AdviceMode.ASPECTJ)`.
 - In the trace's Spans tab, the task starts collapsed and carries a background chip.
 
 <figure class="image">
