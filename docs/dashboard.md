@@ -50,8 +50,8 @@ The URL hash holds the tab, the open trace and the filters. Copy the address bar
 view.
 
 - `#environment` opens that tab. The ids are `overview`, `insights`, `lifecycle`, `traces`,
-  `meters`, `environment`, `flyway`, `loggers`, `config` and `scheduled-tasks`. Any other id
-  opens Overview.
+  `meters`, `environment`, `flyway`, `liquibase`, `loggers`, `config` and `scheduled-tasks`.
+  Any other id opens Overview.
 - `#traces/<traceId>` opens that trace's detail on its Spans page. Append `/request`,
   `/spans`, `/queries` or `/logs` to open another page.
 - `#traces/<traceId>/spans?root=<spanId>` opens one background task's own subtree of that
@@ -275,6 +275,7 @@ Overview, Lifecycle and Environment always appear. The others depend on your app
 | Traces | The trace store exists. It stays empty without the OpenTelemetry SDK on the classpath | `peekaboot.tracing.enabled` |
 | Meters | A Micrometer `MeterRegistry` bean exists | none |
 | Flyway | At least one Flyway migration exists | none |
+| Liquibase | At least one Liquibase change set exists | none |
 | Loggers | Logger data is available | none |
 | Config | At least one `@ConfigurationProperties` group exists | none |
 | Scheduled Tasks | At least one scheduled task exists | none |
