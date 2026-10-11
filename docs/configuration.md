@@ -98,6 +98,18 @@ insights and none of the Spring Boot defaults. The startup summary and run histo
 `spring.main.web-application-type` decides this, whether you set it as a property or through
 `SpringApplicationBuilder.web(...)`. See [Quick start]({{ '/docs/quick-start/' | relative_url }}).
 
+### Switch values {#switch-values}
+
+These switches take `true` or `false`, in any case, and nothing else:
+
+`peekaboot.enabled`, `peekaboot.dev-toolbar`, `peekaboot.error-page.enabled`,
+`peekaboot.error-page.override`, `peekaboot.security.enabled`, `peekaboot.lifecycle.enabled`,
+`peekaboot.tracing.enabled`, `peekaboot.tracing.async`, `peekaboot.tracing.event-listeners`,
+`peekaboot.insights.enabled`.
+
+Any other value, `yes`, `on`, `1` or an empty string, stops startup with a report that names
+the property and its value. In YAML a bare `yes` or `on` already reads as `true` and passes.
+
 ## Properties {#properties}
 
 ### General {#peekaboot}
@@ -156,7 +168,7 @@ Peekaboot carries on in memory.
 | `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
 
 `enabled` is on for a deployment launch and off for local runs and tests. Only `true` and
-`false` count. Any other value, `yes` for example, leaves the guard off.
+`false` count. Any other value, `yes` for example, [stops startup](#switch-values).
 
 `username` uses the build's artifact id, then `spring.application.name`, then `peekaboot`. The
 suffix `-admin` is always appended.
