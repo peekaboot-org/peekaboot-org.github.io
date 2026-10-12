@@ -100,15 +100,18 @@ insights and none of the Spring Boot defaults. The startup summary and run histo
 
 ### Switch values {#switch-values}
 
-These switches take `true` or `false`, in any case, and nothing else:
+These switches turn on only with `true`, in any case:
 
 `peekaboot.enabled`, `peekaboot.dev-toolbar`, `peekaboot.error-page.enabled`,
 `peekaboot.error-page.override`, `peekaboot.security.enabled`, `peekaboot.lifecycle.enabled`,
 `peekaboot.tracing.enabled`, `peekaboot.tracing.async`, `peekaboot.tracing.event-listeners`,
 `peekaboot.insights.enabled`.
 
-Any other value, `yes`, `on`, `1` or an empty string, stops startup with a report that names
-the property and its value. In YAML a bare `yes` or `on` already reads as `true` and passes.
+`false`, `no`, `off` and `0` turn them off. `yes`, `on`, `1`, `true` with spaces around it, an
+empty string or an unknown word stops startup with a report that names the property and its
+value, because Spring would read the first four as on while the feature stayed off.
+`peekaboot.error-page.override` is stricter and turns off only with `false`, since `no` would
+drop the error page altogether. In YAML a bare `yes` or `on` already reads as `true` and passes.
 
 ## Properties {#properties}
 
@@ -167,8 +170,8 @@ Peekaboot carries on in memory.
 | `peekaboot.security.password` | unset | A fixed password. Nothing is generated or written to disk. |
 | `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
 
-`enabled` is on for a deployment launch and off for local runs and tests. Only `true` and
-`false` count. Any other value, `yes` for example, [stops startup](#switch-values).
+`enabled` is on for a deployment launch and off for local runs and tests. `false`, `no`,
+`off` and `0` turn it off, while `yes`, `on` or `1` [stops startup](#switch-values).
 
 `username` uses the build's artifact id, then `spring.application.name`, then `peekaboot`. The
 suffix `-admin` is always appended.
