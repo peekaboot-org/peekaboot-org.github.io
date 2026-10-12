@@ -133,7 +133,7 @@ With tracing off, the response has no traces and zero counts.
 | `RPC_CALL` | An incoming RPC call. |
 | `DATABASE` | A database query outside any other work. |
 | `CONNECTION_POOL` | Connection pool maintenance, such as a HikariCP refill. |
-| `ASYNC_TASK` | A task run on a Spring task executor, such as an `@Async` method. |
+| `ASYNC_TASK` | A task run on a Spring task executor, such as an `@Async` method. Only with `spring.task.execution.propagate-context` on. |
 | `UNKNOWN` | Anything else, such as other in-process work, or a span whose parent has not arrived yet. |
 
 See [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type).

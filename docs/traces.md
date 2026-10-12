@@ -75,8 +75,9 @@ spring:
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 **Peekaboot does not set `spring.task.execution.propagate-context`.** Spring Boot leaves it
-off. Without it, background work shows as separate traces with nothing linking them to the
-request that started them.
+off. Without it, Peekaboot records no `async task` span and no row is of type Async Task. The
+queries and outbound calls a task makes become traces of their own, typed by the call, with
+nothing linking them to the request that started them.
 </div>
 
 Peekaboot wraps tasks on executors that Spring Boot builds: the auto-configured
@@ -128,7 +129,7 @@ Each row in the trace list shows what started the trace. The Traces tab filters 
 | Messaging | 📩 | A message picked off a queue or topic |
 | RPC Call | 🔗 | An inbound remote-procedure call, gRPC for example |
 | Scheduled | 🕑 | A `@Scheduled` method fired by Spring's scheduler |
-| Async Task | ⚡ | [Background work](#background-work) on a Spring task executor |
+| Async Task | ⚡ | [Background work](#background-work) on a Spring task executor, only with context propagation on |
 | Database | 🗂 | A database call with no request, job or message around it |
 | Connection Pool | 🔌 | The pool acquiring or validating a connection outside any traced work |
 | Unknown | ❓ | Anything else, such as in-process work, a message being sent or an outbound call whose caller was not traced |
