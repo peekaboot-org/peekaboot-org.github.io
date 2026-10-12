@@ -96,9 +96,9 @@ With context propagation on:
 - Errors and queries in background work still count. An `@Async` method that throws fails
   its `async task` span and puts its trace in Errors, whether it returns `void` or a
   `Future`, and so does a task passed to `execute()`. Your `AsyncUncaughtExceptionHandler`
-  still runs. A task passed to `submit()` keeps its exception in the returned `Future`, so
-  its span ends OK, as does an `@Async` method under
-  `@EnableAsync(mode = AdviceMode.ASPECTJ)`.
+  still runs. A failing task passed to `submit()` fails its span too. Two paths are not
+  covered and leave the span OK: `submitCompletable()`, and a `void` or `CompletableFuture`
+  `@Async` method under `@EnableAsync(mode = AdviceMode.ASPECTJ)`.
 - In the trace's Spans tab, the task starts collapsed and carries a background chip.
 
 <figure class="image">
@@ -107,9 +107,10 @@ With context propagation on:
        loading="lazy">
 </figure>
 
-Each task is also listed as its own row of type Async Task, timed on its own. The row links to
-the trace that started it while that trace is still in the store. One trace can therefore
-produce several rows.
+Each task is also listed as its own row of type Async Task, timed on its own. The row appears
+when the task ends and goes to the top of the list, even if its trace is older. It links to the
+trace that started it while that trace is still in the store. One trace can therefore produce
+several rows.
 {: #async-rows}
 
 Every async span is named `async task`. To see which method ran, put
