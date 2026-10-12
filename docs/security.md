@@ -102,9 +102,11 @@ line, the exception class, its message and the full stack trace. None of it is m
 `spring.web.error.include-*` settings do not limit it. Requests that ask for JSON get Spring
 Boot's normal error response instead.
 
-It is on for a local run and off everywhere else. By default it replaces only Spring Boot's
-whitelabel page, so an application with its own error page keeps it unless you set
-`peekaboot.error-page.override=true`. `peekaboot.error-page.enabled=false` turns it off. See
+It is on for a local run and off everywhere else. By default it takes the place of Spring Boot's
+whitelabel page and backs off where the application has an error page of its own. With
+`peekaboot.error-page.override=true` it also outranks that page, including one rendered from a
+`@ControllerAdvice`, for any request that accepts `text/html`. The override cannot switch the page
+on; `peekaboot.error-page.enabled=false` turns it off. See
 [Configuration, `peekaboot.error-page`]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage).
 
 ## What stays in memory and what goes to disk {#what-peekaboot-writes-to-disk}

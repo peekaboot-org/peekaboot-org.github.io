@@ -57,6 +57,9 @@ does not get the bar when:
 - The handler responds asynchronously.
 - The HTML body is larger than 2 MiB. It is served unchanged.
 
+HTML error pages get the bar too. See [the bar on the error
+page](#the-bar-on-the-error-page).
+
 To inject the bar, Peekaboot holds each HTML response in memory, up to 2 MiB. If generating
 the bar fails, the page is served unchanged. Your page's CSS does not affect the bar.
 
