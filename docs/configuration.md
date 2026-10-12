@@ -289,6 +289,7 @@ Actuator and `peekaboot.enabled=true`.
 |---|---|---|
 | `peekaboot.tracing.enabled` | `true` | Whether the in-memory trace store exists. |
 | `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors, failed when an `@Async` method or a task passed to `execute()` throws. Needs `spring.task.execution.propagate-context`, below. |
+| `peekaboot.tracing.event-listeners` | `true` | Records a span for each call of an `@EventListener` method. An `@Async` listener also needs `spring.task.execution.propagate-context`. See [Traces, event listeners]({{ '/docs/traces/' | relative_url }}#event-listeners). |
 | `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. |
 | `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped and the trace is marked `TRUNCATED`. |
 | `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. |

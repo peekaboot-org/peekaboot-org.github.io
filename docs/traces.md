@@ -48,7 +48,7 @@ Without the toolbar, traces hold spans only.
 
 ## Spans Peekaboot adds {#spans-peekaboot-adds}
 
-Peekaboot raises three observations of its own. They are ordinary Micrometer observations, so
+Peekaboot raises four observations of its own. They are ordinary Micrometer observations, so
 every exporter you configured receives them too.
 
 | Span | Around | Tags |
@@ -56,10 +56,12 @@ every exporter you configured receives them too.
 | `spring.handler` | The controller method | `handler.type`, `handler.name` |
 | `spring.view.render` | View rendering, only when the handler resolved a view | `view.type`, `view.name` |
 | `async task` (observation `peekaboot.async.task`) | A task run on one of Spring's task executors, see [background work](#background-work) | `peekaboot.async`, `peekaboot.async.thread` |
+| `<Class>#<method>` (observation `peekaboot.event.listener`) | An event listener method, see [event listeners](#event-listeners) | `peekaboot.event.type`, `peekaboot.event.listener.class`, `peekaboot.event.listener.method` |
 
 Spans opened inside the controller method, such as JDBC and HTTP client calls, nest under
-`spring.handler`. `peekaboot.tracing.async=false` turns off the async span alone.
-`peekaboot.tracing.enabled=false` removes all three.
+`spring.handler`. `peekaboot.tracing.async=false` turns off the async span alone, and
+`peekaboot.tracing.event-listeners=false` the listener spans. `peekaboot.tracing.enabled=false`
+removes all four.
 
 ## Background work {#background-work}
 
@@ -118,6 +120,31 @@ Every async span is named `async task`. To see which method ran, put
 `@Observed(contextualName = "...")` on it. Its span then appears under `async task`.
 
 `@Scheduled` runs get no async span and keep the Scheduled type.
+
+## Event listeners {#event-listeners}
+
+Each call of an `@EventListener` or `@TransactionalEventListener` method gets a span named after
+the method, such as `OrderConfirmationListener#onOrderPlaced`. It nests under the work that
+published the event. A transactional listener's span starts when the listener runs, after the
+commit, and a listener whose `condition` rejects the event gets none.
+
+A listener gets a span only inside a trace. One called with no trace in scope, on
+`ApplicationReadyEvent` for example, gets none. An `@Async` listener runs on an executor thread,
+so it needs `spring.task.execution.propagate-context`, like any [background
+work](#background-work). Its span then sits inside the `async task` span.
+
+These listeners get no span:
+
+- Listeners in `org.springframework.` packages.
+- Methods or classes you annotate with `@Observed`. Your own span already covers them.
+- Static listener methods.
+- Classes a proxy would break: final or sealed classes, classes with only private constructors,
+  a private listener method, or any non-private final instance method. Kotlin classes are final
+  by default. Peekaboot logs each one it skips at debug.
+
+Peekaboot observes a listener through a proxy around its bean. Calling the method directly,
+without an event, also produces a span. `getClass()` on the injected bean returns the proxy's
+class; use `ClassUtils.getUserClass` for the declared one.
 
 ## Trace types {#root-action-type}
 

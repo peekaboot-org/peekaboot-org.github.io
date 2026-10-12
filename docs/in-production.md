@@ -37,6 +37,7 @@ Everything Peekaboot sets sits below your own configuration, so a value you set 
 | `management.observations.annotations.enabled` | `true`: `@Observed`, `@Timed` and `@Counted` take effect | `peekaboot.enabled`, servlet application |
 | Handler and view spans | A span around each controller method and each rendered view, sent to every exporter | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 | Async task spans | A span around each task a Spring task executor runs inside a trace, sent to every exporter. Turn off with `peekaboot.tracing.async=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
+| Event listener spans | A span around each `@EventListener` call inside a trace, sent to every exporter. Listener beans become proxies. Turn off with `peekaboot.tracing.event-listeners=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 | `management.opentelemetry.tracing.export.schedule-delay` | `200ms` instead of `5s`: spans reach every exporter about 25 times as often | Dev toolbar on |
 | HTML response buffering | `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. | Dev toolbar on |
 | `Server-Timing` header | Every response carries its trace id | Dev toolbar on |
