@@ -37,6 +37,10 @@ where it turns itself on]({{ '/docs/configuration/' | relative_url }}#local-run)
 **Cause:** nothing feeds the trace store. Check `tracingSpansPossible` in
 `GET /peekaboot/api/features`.
 
+With `tracingSpansPossible` false the tab shows no list. It says that no OpenTelemetry SDK is on
+the class path and names `org.springframework.boot:spring-boot-starter-opentelemetry` as the
+dependency to add.
+
 | `tracingSpansPossible` | Cause | Fix |
 |---|---|---|
 | `false` | No OpenTelemetry SDK on the class path. | Keep `spring-boot-starter-opentelemetry`, which the Peekaboot starter brings in. See [Quick start]({{ '/docs/quick-start/' | relative_url }}#what-the-starter-brings). |

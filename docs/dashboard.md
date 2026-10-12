@@ -272,7 +272,7 @@ Overview, Lifecycle and Environment always appear. The others depend on your app
 | Tab | Shown when | Property |
 |---|---|---|
 | Insights | A Micrometer `MeterRegistry` bean exists | `peekaboot.insights.enabled` |
-| Traces | The trace store exists. It stays empty without the OpenTelemetry SDK on the classpath | `peekaboot.tracing.enabled` |
+| Traces | The trace store exists. Without the OpenTelemetry SDK on the classpath the tab explains what to add instead of listing traces | `peekaboot.tracing.enabled` |
 | Meters | A Micrometer `MeterRegistry` bean exists | none |
 | Flyway | At least one Flyway migration exists | none |
 | Liquibase | At least one Liquibase change set exists | none |
