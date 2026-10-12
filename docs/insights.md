@@ -236,7 +236,10 @@ tile over a plain gauge that holds milliseconds shows a value a thousand times t
 Peekaboot validates your file at startup. Every panel needs a unique id. Every series needs a
 `meter` and an id unique within its panel. `chart`, `unit`, `stat` and `format` must be one of
 the values above, and `subtract-meter` needs `stat: value`. Meter names are not checked, so an
-unknown meter shows a permanent gap.
+unknown meter shows a permanent gap. A series of yours whose `meter` or `subtract-meter` stays
+unresolved for three sampling ticks logs a `WARN` naming it. If the meter resolves and later
+disappears again, the warning repeats. Shipped series log the same case at `DEBUG`, since an
+application may simply lack one of their meters.
 
 If your file is invalid, Peekaboot ignores the whole file and shows the bundled panels. Your
 application still starts. The startup log has an `ERROR` with the stack trace:
