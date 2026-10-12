@@ -201,7 +201,6 @@ An issue marks one span in the tree. The thresholds live under `peekaboot.ui.tra
 |---|---|---|---|
 | VERY_SLOW | The span's own duration reaches the threshold | `very-slow-span-threshold-ms` (500) | Error |
 | SLOW | The span's own duration reaches the threshold, and it is not VERY_SLOW | `slow-span-threshold-ms` (100) | Warning |
-| ERROR | The span ended with an error | none | Error |
 | SLOW_QUERY | A query's duration reaches the threshold | `slow-query-threshold-ms` (50) | Warning |
 
 "Reaches" means at or above the threshold.

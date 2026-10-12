@@ -184,7 +184,7 @@ asyncEntry}`.
 | Field | Meaning |
 |---|---|
 | `status` | `OK` or `ERROR`. |
-| `issues` | `[{type, message, severity}]`. `type` is `SLOW`, `VERY_SLOW`, `ERROR` or `SLOW_QUERY`; `severity` is `warning` or `error`. See [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues). |
+| `issues` | `[{type, message, severity}]`. `type` is `SLOW`, `VERY_SLOW` or `SLOW_QUERY`; `severity` is `warning` or `error`. See [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues). |
 | `errorClass` | Fully qualified class of the last exception recorded on the span. `ERROR` when the span failed without one. `null` on spans that did not fail. |
 | `errorMessage` | The span's error description, or the exception message when that is empty. `null` on spans that did not fail. |
 | `remoteServiceName` | The remote service the span called, if the instrumentation named one. |
