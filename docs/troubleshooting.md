@@ -192,8 +192,8 @@ for credentials on whatever page is open.
 
 ## The generated password changes on every restart {#password-changes-on-restart}
 
-**Cause:** `peekaboot.storage.enabled` is `false`, the default outside a local run. The
-generated password is not saved.
+**Cause:** `peekaboot.storage.enabled` is `false`, the default on a deployment. The generated
+password is not saved.
 
 **Fix:** one of these.
 
@@ -214,7 +214,7 @@ See [Configuration, `peekaboot.security`]({{ '/docs/configuration/' | relative_u
 - The request's `Accept` header does not name `text/html`. A bare `*/*`, as Swagger UI, curl
   and `fetch()` send, does not count. These clients get the usual JSON error.
 
-**Fix:** set `peekaboot.error-page.enabled: true` outside a local run. To show Peekaboot's page
+**Fix:** set `peekaboot.error-page.enabled: true` on a deployment. To show Peekaboot's page
 in place of your own, set `peekaboot.error-page.override: true`, typically in your local
 profile. The override does not work when the application excludes `ErrorMvcAutoConfiguration`
 or maps its own `ErrorController` to `/error`. See [Configuration,
