@@ -6,8 +6,6 @@ permalink: /docs/troubleshooting/
 
 ## `/peekaboot` returns 404 {#peekaboot-returns-404}
 
-**Cause:** one of these.
-
 | Cause | Fix |
 |---|---|
 | Peekaboot is off. It is off by default for a deployment or a test. | Set `peekaboot.enabled=true` in `application.yml`, an environment variable or a system property. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on). |
@@ -44,7 +42,7 @@ dependency to add.
 | `tracingSpansPossible` | Cause | Fix |
 |---|---|---|
 | `false` | No OpenTelemetry SDK on the class path. | Keep `spring-boot-starter-opentelemetry`, which the Peekaboot starter brings in. See [Quick start]({{ '/docs/quick-start/' | relative_url }}#what-the-starter-brings). |
-| `true` | Your configuration sets `management.tracing.sampling.probability` below `1.0`. Peekaboot's default of `1.0` loses to any value you set. | Check the effective value on the Environment tab and remove or raise your setting. |
+| `true` | Your configuration sets `management.tracing.sampling.probability` to `0`. Peekaboot's default of `1.0` loses to any value you set, and a value between `0` and `1` records only that share of requests. | Check the effective value on the Environment tab and remove or raise your setting. |
 
 A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 
@@ -52,10 +50,12 @@ A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 
 **Cause:** spans are exported in batches. The delay is 200 ms while the dev toolbar is on and
 Spring Boot's 5 s otherwise, and tests do not turn the toolbar on. A test that reads
-`/peekaboot/api/traces/**` right after its request runs before the spans are there. Until they
-are, `/peekaboot/api/traces/{traceId}/insights` answers `200` with `rootSpan: null`.
+`/peekaboot/api/traces/**` right after its request runs before the spans are there. Until the
+first one arrives, `/peekaboot/api/traces/{traceId}/insights` answers `404`. With the toolbar on
+it answers `200` with `rootSpan: null` instead.
 
-**Fix:** shorten the export delay in the test profile, or poll until `rootSpan` is set.
+**Fix:** shorten the export delay in the test profile, or poll until the response carries a
+`rootSpan`.
 
 ```yaml
 management:
@@ -76,15 +76,13 @@ application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application
 
 ## A trace has no logs {#trace-has-no-logs}
 
-**Cause:** one of these.
+| Cause | Fix |
+|---|---|
+| The dev toolbar is off. Logs are captured only while `peekaboot.dev-toolbar` is on. | Set `peekaboot.dev-toolbar: true`. |
+| The application does not log through Logback. | None. Log capture works with Logback only. |
+| The log line was written on a thread without the trace context. Only lines that carry the trace id are kept. | For `@Async` and other executor work, see [the next entry](#async-work-missing). |
 
-- The dev toolbar is off. Logs are captured only while `peekaboot.dev-toolbar` is on.
-- The application does not log through Logback. Capture works with Logback only.
-- The log line was written on a thread without the trace context. Only lines that carry the
-  trace id are kept. For `@Async` methods, see the next entry.
-
-**Fix:** set `peekaboot.dev-toolbar: true`. See [Traces, what gets
-recorded]({{ '/docs/traces/' | relative_url }}#what-gets-captured).
+See [Traces, what gets recorded]({{ '/docs/traces/' | relative_url }}#what-gets-captured).
 
 ## `@Async` work is missing or shows up as separate traces {#async-work-missing}
 
@@ -108,17 +106,12 @@ background work]({{ '/docs/traces/' | relative_url }}#background-work).
 
 ## The toolbar does not appear {#toolbar-never-appears}
 
-**Cause:** one of these.
-
-- `peekaboot.dev-toolbar` is off. It is on only for a local run. Setting `peekaboot.enabled=true`
-  does not switch it on.
-- The response is not HTML with a `</body>` tag. JSON responses and redirects never get a bar.
-- The HTML response is larger than 2 MiB.
-- The request matches an injection exclusion: an excluded path prefix, a blocked file
-  extension, an `X-Requested-With` header or an async dispatch. See [Dev toolbar, pages that get
-  the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears).
-
-**Fix:** set `peekaboot.dev-toolbar: true` where you want the toolbar outside a local run.
+| Cause | Fix |
+|---|---|
+| `peekaboot.dev-toolbar` is off. It is on only for a local run, and `peekaboot.enabled=true` does not switch it on. | Set `peekaboot.dev-toolbar: true` where you want the toolbar. |
+| The response is not HTML with a `</body>` tag. JSON responses and redirects never get a bar. | Open the request's trace on the Traces tab. Calls made from Swagger UI show in its bar. |
+| The HTML response is larger than 2 MiB. | Open the request's trace on the Traces tab. |
+| The request matches an injection exclusion: an excluded path prefix, a blocked file extension, an `X-Requested-With` header or an async dispatch. | Open the request's trace on the Traces tab, if it is traced. See [Dev toolbar, pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears). |
 
 ## The toolbar says "could not start" {#toolbar-could-not-start}
 
@@ -177,7 +170,10 @@ That process counts as a deployment, not a test.
 
 **Fix:** one of these.
 
-- Use the user name and password from the `Peekaboot Security` block in the startup log.
+- Use the user name and the generated password from the `Peekaboot Security` block in the
+  startup log. With storage on, only the first start prints the password. Later starts print
+  `Password: unchanged since <date>`. If nobody kept it, delete the credentials file named on
+  that line and restart for a new one.
 - Set your own password with `peekaboot.security.password`.
 - Set `peekaboot.security.enabled=false` where your own security protects the dashboard. If
   that security also uses the `Authorization` header, as HTTP Basic and bearer tokens do, the
