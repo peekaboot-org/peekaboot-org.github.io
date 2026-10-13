@@ -26,12 +26,6 @@
             "detail": null
           },
           {
-            "text": "Fold the Internal trace type into Unknown",
-            "scope": null,
-            "breaking": true,
-            "detail": "Traces with a kindless root span now report UNKNOWN; filter on rootActionType=UNKNOWN where you used INTERNAL."
-          },
-          {
             "text": "Fit the trace type filter on one row",
             "scope": null,
             "breaking": false,
@@ -46,12 +40,6 @@
           {
             "text": "Format queries and serve their parameters",
             "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Add person view and edit pages",
-            "scope": "testing-app",
             "breaking": false,
             "detail": null
           },
@@ -82,47 +70,6 @@
           {
             "text": "Expand a span's query and logs in place",
             "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Dependency upgrades",
-        "entries": [
-          {
-            "text": "Bump org.slf4j:slf4j-api from 2.0.19 to 2.0.20",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump net.sourceforge.pmd:pmd-core from 7.27.0 to 7.28.0",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump net.osslabz:jdbc-url-parser from 0.1.1 to 0.1.2",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-plugin-gradle",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump gradle-wrapper from 9.7.1 to 9.8.0",
-            "scope": "deps",
             "breaking": false,
             "detail": null
           }
@@ -433,64 +380,6 @@
             "detail": null
           }
         ]
-      },
-      {
-        "title": "Dependency upgrades",
-        "entries": [
-          {
-            "text": "Bump org.apache.maven.plugins:maven-deploy-plugin",
-            "scope": "deps-dev",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump org.apache.maven.plugins:maven-install-plugin",
-            "scope": "deps-dev",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump org.codehaus.mojo:exec-maven-plugin",
-            "scope": "deps-dev",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.microsoft.playwright:playwright",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump net.ttddyy.observation:datasource-micrometer-opentelemetry",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump net.ttddyy.observation:datasource-micrometer-spring-boot",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Use jdbc-url-parser 0.1.2",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Reverts",
-        "entries": [
-          {
-            "text": "Failed 0.3.0 release preparation",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
       }
     ]
   },
@@ -623,76 +512,6 @@
           },
           {
             "text": "Cache the bundled font for a year",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Dependency upgrades",
-        "entries": [
-          {
-            "text": "Bump org.apache.maven.plugins:maven-failsafe-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump io.github.git-commit-id:git-commit-id-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump org.apache.maven.plugins:maven-surefire-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.github.spotbugs:spotbugs-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-plugin-gradle",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump org.springdoc:springdoc-openapi-starter-webmvc-ui",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump actions/setup-java in /.github/actions/prepare-build",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump WyriHaximus/github-action-get-previous-tag",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Reverts",
-        "entries": [
-          {
-            "text": "Restore the URL query masking rule",
             "scope": null,
             "breaking": false,
             "detail": null
