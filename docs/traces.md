@@ -182,10 +182,10 @@ tabs and opens on Spans.
 </figure>
 
 Spans shows the span tree with each span's kind, tags and duration, nested as they ran. Click
-a span's name for its details: kind, a copyable span id, and where they apply the error class
-and message, and the full tags. A query span also carries a "1 query" button, and a span that
-logged an "N logs" button; each opens its own panel in place - the statement with its row
-count, or that span's own logs, stack traces folded as on the Logs tab.
+a span's name for its details: kind, a copyable span id, the full tags, and the error class and
+message where the span failed. A query span carries a "1 query" button that opens the
+statement with its row count. A span that logged carries an "N logs" button that opens its log
+lines, with stack traces folded as on the Logs tab. Both panels open in place.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
@@ -249,14 +249,6 @@ errored spans alone.
 When a bucket is full, it drops the trace it admitted first. The buckets evict independently,
 so a trace can stay under Errors or Slow after it has left All. Nothing expires on a timer,
 and everything is gone at restart.
-
-A span that arrives after All dropped its trace brings the trace back to the top of All if
-Errors or Slow still holds it. Otherwise it appears as a new trace holding only the late spans.
-
-A trace can leave Slow before it is evicted. While a background task is still running, its
-spans can count toward the duration for a moment. Once the task's `async task` span arrives,
-the duration drops back to the request's own time, and the trace leaves Slow if that is under
-the threshold.
 
 One trace keeps at most `peekaboot.tracing.max-spans-per-trace` spans (500) and
 `peekaboot.tracing.max-logs-per-trace` log lines (500). Past either limit the oldest are
