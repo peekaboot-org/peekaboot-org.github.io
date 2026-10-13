@@ -14,18 +14,9 @@ Peekaboot's guard is off there. If anyone other than you can reach that port, se
 
 ## Who can reach Peekaboot, and when it is on {#who-can-reach-peekaboot}
 
-Peekaboot switches itself on or off from the way the application was launched. An explicit
-property always wins.
-
-| Launch | `peekaboot.enabled` | `dev-toolbar`, `storage.enabled`, `error-page.enabled` | `security.enabled` |
-|---|---|---|---|
-| Local run: IDE, `spring-boot:run`, `bootRun`, `java -cp target/classes …` on a host that is not a container | `true` | `true` | `false` |
-| Deployment: `java -jar`, a war, a native image, anything in a container | `false` | `false` | `true` |
-| Test | `false` | `false` | `false` |
-
-Every switch except `peekaboot.enabled` itself also needs `peekaboot.enabled=true`.
-[What counts as a local run]({{ '/docs/configuration/' | relative_url }}#local-run) has the
-full detection rules.
+Peekaboot is on for a local run and off for a deployment or a test, unless you set it.
+[Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on)
+has the table and the detection rules.
 
 What that means for access:
 

@@ -12,11 +12,10 @@ details.
 
 ## When it is active {#what-happens-when-you-deploy}
 
-Peekaboot is on for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run) (IDE,
-`spring-boot:run`, `bootRun`) and off for `java -jar`, wars, native images, containers and
-tests. `peekaboot.dev-toolbar`, `peekaboot.storage.enabled`, `peekaboot.error-page.enabled` and
-`peekaboot.stack-trace.fold` follow the same rule. `peekaboot.security.enabled` is the reverse:
-on for a deployment launch, off for local runs and tests. An explicit value always wins.
+Peekaboot is on for a [local run]({{ '/docs/configuration/' | relative_url }}#local-run) and
+off for a deployment or a test. [Configuration, when Peekaboot is
+on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on) lists each switch and its
+default.
 
 Running your build output directly on a host that is not a container
 (`java -cp target/classes …`) counts as a local run. Set `peekaboot.enabled=false` there.

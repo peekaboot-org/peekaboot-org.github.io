@@ -10,7 +10,7 @@ permalink: /docs/troubleshooting/
 
 | Cause | Fix |
 |---|---|
-| Peekaboot is off. It is off by default for `java -jar`, wars, native images, AOT builds, containers and tests. | Set `peekaboot.enabled=true` in `application.yml`, an environment variable or a system property. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on). |
+| Peekaboot is off. It is off by default for a deployment or a test. | Set `peekaboot.enabled=true` in `application.yml`, an environment variable or a system property. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on). |
 | You develop inside a devcontainer or GitHub Codespaces. Those count as containers. | Set `peekaboot.enabled=true` and the feature switches you want, such as `peekaboot.dev-toolbar`, explicitly. See [Configuration, containers]({{ '/docs/configuration/' | relative_url }}#container-markers). |
 | The application sets `server.servlet.context-path`. | Open the dashboard under that path, for example `/my-app/peekaboot`. The `/peekaboot` part cannot be changed. |
 | The application is reactive (WebFlux) or not a web application. | None. Peekaboot's dashboard needs a servlet web application. |
@@ -23,8 +23,8 @@ and it is missing where no dashboard is served.
 
 ## Peekaboot is off in `@SpringBootTest` {#disabled-in-springboottest}
 
-**Cause:** tests never count as a local run, so Peekaboot stays off in CI. See [Configuration,
-where it turns itself on]({{ '/docs/configuration/' | relative_url }}#local-run).
+**Cause:** a test never counts as a local run, so Peekaboot stays off in CI. See [Configuration,
+what counts as a local run]({{ '/docs/configuration/' | relative_url }}#local-run).
 
 **Fix:** switch it on for the test that needs it.
 
@@ -168,7 +168,7 @@ shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ## The dashboard returns 401 {#dashboard-401}
 
-**Cause:** Peekaboot runs outside a local run, so its own HTTP Basic guard is on. It challenges
+**Cause:** Peekaboot runs on a deployment, so its HTTP Basic guard is on. It challenges
 every `/peekaboot/**` request, including one your own Spring Security chain signed in. A VPN,
 a proxy with basic auth, an IP allowlist or an API gateway in front does not satisfy it.
 
@@ -191,8 +191,7 @@ See [Security, securing the dashboard]({{ '/docs/security/' | relative_url }}#se
 requests to `/peekaboot/api/**` get a `401` with an HTTP Basic challenge, and the browser asks
 for credentials on whatever page is open.
 
-**Fix:** remove `peekaboot.dev-toolbar: true` outside local development. It is off there by
-default. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on).
+**Fix:** remove `peekaboot.dev-toolbar: true` from the deployment. It is off there by default. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on).
 
 ## The generated password changes on every restart {#password-changes-on-restart}
 

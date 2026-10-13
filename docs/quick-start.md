@@ -63,28 +63,10 @@ Set `peekaboot.dev-toolbar: false` to turn the toolbar off and keep the dashboar
 </div>
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**Peekaboot is off in a devcontainer.** A container never counts as a local run. Turn it on with
-the properties below; see [Configuration,
-containers]({{ '/docs/configuration/' | relative_url }}#container-markers).
+A devcontainer counts as a container, so Peekaboot is off there. See [Configuration,
+containers]({{ '/docs/configuration/' | relative_url }}#container-markers) for the properties
+that turn it on.
 </div>
-
-## Turn it on outside a local run {#turn-it-on-outside-a-local-run}
-
-These properties default to `true` for a local run and to `false` for `java -jar`, wars,
-native images, containers and tests. Any value you set wins.
-
-| Property | Default | Effect |
-|---|---|---|
-| `peekaboot.enabled` | local run only | The dashboard, its API and Peekaboot's Spring Boot defaults. Every other switch also needs it. |
-| `peekaboot.dev-toolbar` | local run only | The toolbar, log capture and request-detail capture. |
-| `peekaboot.storage.enabled` | local run only | Keeps the charts and the run history in `~/.peekaboot` across restarts. |
-| `peekaboot.error-page.enabled` | local run only | Peekaboot's error page in place of Spring Boot's whitelabel page. |
-| `peekaboot.stack-trace.fold` | local run only | Folds framework frames on the error page and in the Logs tab. |
-
-Outside a local run, Peekaboot also protects `/peekaboot/**` with HTTP Basic
-(`peekaboot.security.enabled`). Read [Do I want this in
-production?]({{ '/docs/in-production/' | relative_url }}) before you turn it on anywhere shared.
-All other properties are in [Configuration]({{ '/docs/configuration/' | relative_url }}#local-run).
 
 ## Open the dashboard {#open-the-dashboard}
 
@@ -113,6 +95,13 @@ logs once the application is ready. See
   [Insights]({{ '/docs/insights/' | relative_url }})
 - Traces with spans and SQL queries for the last 1000 requests, oldest evicted first
   (`peekaboot.tracing.max-traces`; see [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets))
+
+## Turn it on outside a local run {#turn-it-on-outside-a-local-run}
+
+Peekaboot is off for a deployment or a test until you set `peekaboot.enabled=true`.
+[Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on)
+lists every switch the launch decides. Read [Do I want this in
+production?]({{ '/docs/in-production/' | relative_url }}) before you turn it on anywhere shared.
 
 ## What the starter brings {#what-the-starter-brings}
 
