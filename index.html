@@ -33,7 +33,7 @@ layout: home
   <div class="container">
     <h2 class="title is-3 has-text-centered">Add the dependency</h2>
     <p class="subtitle is-6 has-text-centered">
-      Requires Java 25, Spring Boot 4.1 and a servlet web application.
+      Requires Java 25 or newer, Spring Boot 4.1 and a servlet web application.
     </p>
     <div class="columns">
       <div class="column">
@@ -95,8 +95,9 @@ layout: home
       <div class="column is-5">
         <h2 class="title is-4">Dashboard</h2>
         <p class="content">
-          Health, build and Git info, environment, configuration properties, Flyway migrations,
-          logger levels and scheduled tasks, at <code>/peekaboot</code> in your running app.
+          Health, build and Git info, environment, configuration properties, Flyway and
+          Liquibase migrations, logger levels and scheduled tasks, at <code>/peekaboot</code>
+          in your running app.
           <a href="{{ '/docs/dashboard/' | relative_url }}">The dashboard</a>
         </p>
       </div>
@@ -113,8 +114,9 @@ layout: home
       <div class="column is-5">
         <h2 class="title is-4">Traces with SQL queries</h2>
         <p class="content">
-          The last 1000 requests your app served, each with its span tree, SQL queries and
-          timings. With <a href="{{ '/docs/traces/' | relative_url }}#background-work">context
+          The last 1000 requests your app served, held in memory with no collector to run, each
+          with its span tree, SQL queries and timings. With
+          <a href="{{ '/docs/traces/' | relative_url }}#background-work">context
           propagation</a> on, work your <code>@Async</code> methods run shows up inside the request
           that started it. Errors and slow requests are kept in buckets of their own.
           <a href="{{ '/docs/traces/' | relative_url }}">Traces</a>
@@ -167,12 +169,9 @@ layout: home
     <h2 class="title is-3">Why Peekaboot?</h2>
     <div class="content">
       <p>
-        Peek, because that's what it does — a look inside a running application. Boot, because
-        that's where it lives. And peek-a-boo, because that's how it behaves: add one dependency
-        and your app's internals are suddenly there; package the jar and they're gone again.
-      </p>
-      <p>
-        In short: Peekaboot lets you peek inside your Spring Boot application while it runs.
+        Peek, because it lets you look inside a running application. Boot, because that's where
+        it lives. And peek-a-boo, because that's how it behaves. Add one dependency and your
+        app's internals show up on a local run. Deploy the same jar and Peekaboot stays off.
       </p>
     </div>
     <p class="mt-5">

@@ -9,11 +9,9 @@ built with Jekyll and published via GitHub Pages.
 
 ## Why Peekaboot?
 
-Peek, because that's what it does — a look inside a running application. Boot, because
-that's where it lives. And peek-a-boo, because that's how it behaves: add one dependency and
-your app's internals are suddenly there; package the jar and they're gone again.
-
-In short: Peekaboot lets you peek inside your Spring Boot application while it runs.
+Peek, because it lets you look inside a running application. Boot, because that's where it
+lives. And peek-a-boo, because that's how it behaves. Add one dependency and your app's
+internals show up on a local run. Deploy the same jar and Peekaboot stays off.
 
 ## Local preview
 
@@ -214,9 +212,9 @@ Everything in this repo is ready. What is left happens outside it:
 
 1. In the repo's Settings → Pages, **Source** must be *Deploy from a branch*, branch
    `main`, folder `/ (root)`. There is no Actions workflow to fall back on.
-2. The `www` host is live, served through Cloudflare in front of Pages. The apex resolves
-   to nothing and would need its own `A` and `AAAA` records first. Enable **Enforce HTTPS**
-   once a certificate covers whatever the final arrangement is.
+2. The `www` host is live, served through Cloudflare in front of Pages. The apex
+   `peekaboot.org` answers `301` to the `www` host. Enable **Enforce HTTPS** once a
+   certificate covers whatever the final arrangement is.
 
 ## License
 
