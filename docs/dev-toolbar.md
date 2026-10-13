@@ -60,8 +60,8 @@ does not get the bar when:
 HTML error pages get the bar too. See [the bar on the error
 page](#the-bar-on-the-error-page).
 
-To inject the bar, Peekaboot holds each HTML response in memory, up to 2 MiB. If generating
-the bar fails, the page is served unchanged. Your page's CSS does not affect the bar.
+To inject the bar, Peekaboot holds each HTML response in memory. If generating the bar fails,
+the page is served unchanged. Your page's CSS does not affect the bar.
 
 ## Request and response detail {#request-and-response-detail}
 
@@ -118,13 +118,7 @@ page.
 
 ## With Spring Security {#with-spring-security}
 
-The bar loads its data from `/peekaboot/**`. A reader who is not allowed there sees the bar
-with this notice instead of the numbers:
-
-```
-Peekaboot toolbar could not start — sign in, or check that its script is allowed to load
-```
-
-The same notice appears when a Content-Security-Policy blocks the bar's script. See [Security,
-the dev toolbar asks the reader to sign
+The bar loads its data from `/peekaboot/**`. A reader who is not allowed there, or a
+Content-Security-Policy that blocks the bar's script, leaves the bar on a "could not start"
+notice. See [Security, the dev toolbar asks the reader to sign
 in]({{ '/docs/security/' | relative_url }}#toolbar-requires-sign-in).
