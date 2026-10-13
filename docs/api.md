@@ -62,8 +62,8 @@ it uses. The dashboard shows or hides its tabs from it.
 ## Environment and configuration {#what-insights-adds}
 
 `GET /peekaboot/api/actuator/all/insights` returns what the Overview, Environment, Config,
-Loggers, Flyway and Scheduled Tasks tabs show:
-`{application, runtime, dataSources, health, environment, loggers, flyway, config,
+Loggers, Flyway, Liquibase and Scheduled Tasks tabs show:
+`{application, runtime, dataSources, health, environment, loggers, flyway, liquibase, config,
 scheduledTasks, server}`.
 
 It works without any Actuator endpoint exposed. `management.endpoints.*` exposure settings
@@ -188,12 +188,37 @@ asyncEntry}`.
 | `errorClass` | Fully qualified class of the last exception recorded on the span. `ERROR` when the span failed without one. `null` on spans that did not fail. |
 | `errorMessage` | The span's error description, or the exception message when that is empty. `null` on spans that did not fail. |
 | `remoteServiceName` | The remote service the span called, if the instrumentation named one. |
-| `query` | The masked SQL of a database query span. A batch is its statements joined by `;` and a newline. `null` on other spans and when no statement was recorded. |
+| `query` | The [statement](#statement-fields) of a database query span. `null` on other spans and when no statement was recorded. |
 | `rowCount` | Rows returned by a query, where the JDBC instrumentation reported it. |
 | `logs` | The span's log entries, without `stackTrace`. The full entries are in the trace's `logs`. |
 | `asyncEntry` | `true` on the span that starts an async task. |
 
-A query span without a recorded statement still appears in `queries`, with `sql: null`.
+### Query fields {#query-fields}
+
+Each entry in the trace's `queries` is `{spanId, statement, dbSystem, dataSourceName,
+durationMs, timestamp, rowCount, creationOrder}`.
+
+| Field | Meaning |
+|---|---|
+| `spanId` | The query's span. |
+| `statement` | The query's [statement](#statement-fields). `null` when no statement was recorded. The query is listed all the same. |
+| `dbSystem` | The database the span names, such as `postgresql`. `null` when nothing named one. |
+| `dataSourceName` | The HikariCP pool name, else the DataSource name. A generated pool name such as `HikariPool-1` is skipped. `null` when neither is known. |
+| `durationMs` | How long the query span took. |
+| `timestamp` | When the query started, as an ISO-8601 string. |
+| `rowCount` | Rows returned, where the JDBC instrumentation reported it. |
+| `creationOrder` | The order in which Peekaboot received the span. |
+
+### Statement fields {#statement-fields}
+
+A span's `query` and a query's `statement` share one shape, `{text, formatted, parameters}`.
+Every part is masked by value shape.
+
+| Field | Meaning |
+|---|---|
+| `text` | The SQL as captured. A batch is its statements joined by `;` and a newline. |
+| `formatted` | The same SQL laid out by Hibernate's formatter. `null` without Hibernate on the class path, or when the formatter could not lay it out. |
+| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. A value over 1000 characters is cut, and a batch records at most 100 sets. |
 
 ### Log fields {#log-fields}
 
@@ -211,11 +236,11 @@ is off.
 `GET /peekaboot/api/traces/{traceId}/insights` returns one whole trace with its request
 details, logs and queries.
 
-- `404` means the store does not hold the trace: the id is unknown or evicted, tracing is off,
-  or it was a request to Peekaboot itself.
-- `200` with `rootSpan: null` means the request is recorded and its spans are still on the
-  way. Poll until `rootSpan` is set. Spans are exported every 200 ms while the dev toolbar is
-  on, every 5 s (Spring Boot's default) otherwise.
+- `404` means the store does not hold the trace. The id is unknown or evicted, tracing is off,
+  it was a request to Peekaboot itself, or no span has arrived yet while the dev toolbar is off.
+- `200` with `rootSpan: null` means the dev toolbar recorded the request and its spans are
+  still on the way. Poll until `rootSpan` is set. Spans are exported every 200 ms while the
+  dev toolbar is on, every 5 s (Spring Boot's default) otherwise.
 
 ## Metric charts {#the-insights-endpoints}
 
@@ -249,7 +274,8 @@ Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the 
 | `tick` | Every level-0 interval | `{epochMs, values: {seriesId: v}}` |
 | `rollup` | When a higher level's interval closes | `{level, epochMs, entries: {seriesId: {min, max, avg, median, p90, p95, p99}}}` |
 
-- A comment heartbeat goes out every 15 seconds.
+- A comment heartbeat goes out once 15 seconds pass without an event. At the default
+  10-second tick none is sent.
 - At most 32 streams can be open. Further requests get `503`; retry later.
 - The server closes each stream after 30 minutes. `EventSource` reconnects on its own.
 - Events are not replayed. After a reconnect, fetch `/data` again for the levels you show.
