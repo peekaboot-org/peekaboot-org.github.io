@@ -87,7 +87,7 @@ Every feature also needs `peekaboot.enabled=true`.
 | Tracing | `peekaboot.tracing.enabled` (`true`) | A servlet web application. The starter brings the OpenTelemetry SDK that fills the trace store. |
 | Insights | `peekaboot.insights.enabled` (`true`) | A servlet web application and a Micrometer `MeterRegistry` bean. |
 | Error page | `peekaboot.error-page.enabled` (detected) | A servlet web application with Spring MVC. |
-| Dashboard login | `peekaboot.security.enabled` (detected) | A servlet web application. |
+| Peekaboot's guard | `peekaboot.security.enabled` (detected) | A servlet web application. |
 | Startup and shutdown summaries, run history | `peekaboot.lifecycle.enabled` (`true`) | Nothing else. The Lifecycle tab and `/peekaboot/api/lifecycle/**` need a servlet web application. |
 | Persisted history | `peekaboot.storage.enabled` (detected) | A writable directory. A failed write logs a warning and Peekaboot carries on in memory. |
 | Spring Boot defaults [below](#what-peekaboot-sets-in-your-application) | `peekaboot.enabled` | A servlet web application. |
@@ -160,7 +160,7 @@ Neither file can fail your application. A snapshot that is unreadable, older tha
 history starts empty. A failed write logs one warning per file and run, and
 Peekaboot carries on in memory.
 
-### Dashboard login {#peekabootsecurity}
+### Peekaboot's guard {#peekabootsecurity}
 
 | Property | Default | Effect |
 |---|---|---|

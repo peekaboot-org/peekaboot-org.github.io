@@ -8,7 +8,7 @@ permalink: /docs/security/
 On a [local run]({{ '/docs/configuration/' | relative_url }}#local-run) anyone who can reach
 your application's port can read everything under `/peekaboot/**` without signing in:
 configuration, environment values, health, logs, migrations and full request traces.
-Peekaboot's own guard is off there. If anyone other than you can reach that port, secure
+Peekaboot's guard is off there. If anyone other than you can reach that port, secure
 `/peekaboot/**` first or turn Peekaboot off.
 </div>
 
@@ -36,8 +36,8 @@ What that means for access:
   its full stack trace. That page is served on the failing URL, so anyone who can trigger the
   error sees it, not only someone who can reach `/peekaboot/**`.
 - **Deployment with `peekaboot.enabled=true`.** Peekaboot's HTTP Basic guard challenges every
-  `/peekaboot/**` request. Switch it off to use your own security. See [Peekaboot's own
-  guard](#if-nothing-else-secures-it).
+  `/peekaboot/**` request. Switch it off to use your own security. See [Peekaboot's
+  guard](#peekaboots-guard).
 
 ### Security-related properties {#security-properties}
 
@@ -363,9 +363,10 @@ If your application sends a `Content-Security-Policy`:
 - Without `style-src 'unsafe-inline'`, a reader outside the role sees the notice as unstyled
   text at the foot of the page. Readers inside the role are unaffected.
 
-### Peekaboot's own guard {#if-nothing-else-secures-it}
+### Peekaboot's guard {#peekaboots-guard}
 
-On a deployment launch with `peekaboot.enabled=true`, Peekaboot arms an HTTP Basic guard
+<span id="if-nothing-else-secures-it"></span>On a deployment launch with
+`peekaboot.enabled=true`, Peekaboot arms an HTTP Basic guard
 (realm `Peekaboot`) on `/peekaboot/**`. It challenges every request, whatever else
 authenticated it.
 
@@ -417,7 +418,7 @@ Read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}
 3. Restrict network reach as well: an internal-only ingress, a VPN, or a proxy that forwards
    `/peekaboot/**` only from trusted sources.
 4. Leave `peekaboot.enable-unmasking=false`.
-5. If you use Peekaboot's guard, keep its password stable (see [above](#if-nothing-else-secures-it)).
+5. If you use Peekaboot's guard, keep its password stable (see [above](#peekaboots-guard)).
 
 ## Production checklist {#production-checklist}
 

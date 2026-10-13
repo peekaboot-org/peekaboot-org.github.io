@@ -71,8 +71,8 @@ To size either down, see [Configuration, memory-constrained]({{ '/docs/configura
   aggregates]({{ '/docs/insights/' | relative_url }}#percentiles-of-aggregates).
 - **Minimal access control.** Outside local development its guard is HTTP Basic with
   one credential. It challenges every request, so switch it off once your own security covers
-  the dashboard. See [Security, Peekaboot's own
-  guard]({{ '/docs/security/' | relative_url }}#if-nothing-else-secures-it).
+  the dashboard. See [Security, Peekaboot's
+  guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
 
 ## The starter is on the class path even when Peekaboot is off {#class-path}
 

@@ -35,8 +35,8 @@ them anywhere else.
 | [`/peekaboot/api/lifecycle/events`](#restart-history) | none | `200`, `404` when lifecycle is off |
 | [`/peekaboot/api/lifecycle/runs`](#restart-history) | none | `200`, `404` when lifecycle is off |
 
-Where Peekaboot's own HTTP Basic guard is armed, every endpoint can also answer `401`. See
-[Security]({{ '/docs/security/' | relative_url }}#if-nothing-else-secures-it).
+Where Peekaboot's guard is armed, every endpoint can also answer `401`. See
+[Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
 
 `/peekaboot` and `/peekaboot/` redirect to the dashboard at
 `/peekaboot/ui/dashboard/index.html`. See [The
