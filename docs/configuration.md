@@ -11,29 +11,26 @@ redirect_from:
 
 Six properties default according to how the application was launched.
 
-| Property | Local run | Anywhere else | Turns on |
-|---|---|---|---|
-| `peekaboot.enabled` | `true` | `false` | The dashboard, its API, and Peekaboot's defaults. |
-| `peekaboot.dev-toolbar` | `true` | `false` | The toolbar, log capture and request-detail capture. |
-| `peekaboot.storage.enabled` | `true` | `false` | Writing the charts and the run history to disk. |
-| `peekaboot.error-page.enabled` | `true` | `false` | The error page in place of Boot's whitelabel page. |
-| `peekaboot.stack-trace.fold` | `true` | `false` | Folding framework frames on the error page and in the Logs tab. |
-| `peekaboot.security.enabled` | `false` | `true` | Peekaboot's HTTP Basic guard on `/peekaboot/**`. |
+| Property | Local run | Deployment | Test | Turns on |
+|---|---|---|---|---|
+| `peekaboot.enabled` | `true` | `false` | `false` | The dashboard, its API, and Peekaboot's defaults. |
+| `peekaboot.dev-toolbar` | `true` | `false` | `false` | The toolbar, log capture and request-detail capture. |
+| `peekaboot.storage.enabled` | `true` | `false` | `false` | Writing the charts and the run history to disk. |
+| `peekaboot.error-page.enabled` | `true` | `false` | `false` | The error page in place of Boot's whitelabel page. |
+| `peekaboot.stack-trace.fold` | `true` | `false` | `false` | Folding framework frames on the error page and in the Logs tab. |
+| `peekaboot.security.enabled` | `false` | `true` | `false` | Peekaboot's HTTP Basic guard on `/peekaboot/**`. |
 
 Any value you set wins, in either direction: `application.yml`, an environment variable or a
 system property. Each property is resolved on its own. Setting `peekaboot.enabled=true` on a
 shared server gives you the dashboard, but no toolbar and no files in that host's home directory.
 
-Tests resolve `peekaboot.security.enabled` to `false`, like a local run. See
-[`peekaboot.security`](#peekabootsecurity).
-
-### Where it turns itself on {#local-run}
+### What counts as a local run {#local-run}
 
 A local run is an IDE run, `mvn spring-boot:run` or `gradle bootRun` on your own machine.
 Spring Boot DevTools restarts keep counting as local.
 
-Everything else counts as not local, so the table above resolves to its "Anywhere else" column:
-`java -jar`, a war, a native image, an AOT run, a test, a Jib image, Spring Boot's `extract`
+A test launch is a JUnit or Cucumber run, or the AOT processing step of a build. Every other
+launch is a deployment: `java -jar`, a war, a native image, a Jib image, Spring Boot's `extract`
 layout, a `java -cp` of jars, and anything in a container.
 
 A `java -cp target/classes:…` launch on a host outside a container counts as local. If you
@@ -69,9 +66,10 @@ needs Peekaboot turns it on:
 ```
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-On a local run, the default, the dashboard and API have no authentication. Outside local
-development Peekaboot's guard challenges every `/peekaboot/**` request, until you switch it off
-to use your own security. Before setting `peekaboot.enabled=true` anywhere other people can reach,
+On a local run the dashboard and API have no authentication. On a deployment with
+`peekaboot.enabled=true`, Peekaboot's guard challenges every `/peekaboot/**` request until you
+switch it off to use your own security. Before setting `peekaboot.enabled=true` anywhere other
+people can reach,
 read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) and
 [Security]({{ '/docs/security/' | relative_url }}).
 </div>
@@ -169,8 +167,7 @@ Peekaboot carries on in memory.
 | `peekaboot.security.password` | unset | A fixed password. Nothing is generated or written to disk. |
 | `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
 
-`enabled` is on for a deployment launch and off for local runs and tests. `false`, `no`,
-`off` and `0` turn it off, while `yes`, `on` or `1` [stops startup](#switch-values).
+`enabled` defaults by launch. See [When Peekaboot is on](#when-peekaboot-is-on).
 
 `username` uses the build's artifact id, then `spring.application.name`, then `peekaboot`. The
 suffix `-admin` is always appended.
@@ -178,7 +175,7 @@ suffix `-admin` is always appended.
 With `password` unset, Peekaboot generates a 26-character password on first start, prints it in
 the `Peekaboot Security` block of the startup log and stores only its hash. The hash goes to
 `security.properties` in the [storage directory](#peekabootstorage). With storage off, the
-default outside local development, nothing is written and the password changes on every restart.
+default on a deployment, nothing is written and the password changes on every restart.
 The startup log says so. Set `credentials-file` or `password` to keep it stable.
 
 Failed logins are not throttled. See [Security, securing the
