@@ -104,11 +104,11 @@ These switches turn on only with `true`, in any case:
 `peekaboot.tracing.enabled`, `peekaboot.tracing.async`, `peekaboot.tracing.event-listeners`,
 `peekaboot.insights.enabled`.
 
-`false`, `no`, `off` and `0` turn them off. `yes`, `on`, `1`, `true` with spaces around it, an
-empty string or an unknown word stops startup with a report that names the property and its
-value, because Spring would read the first four as on while the feature stayed off.
-`peekaboot.error-page.override` is stricter and turns off only with `false`, since `no` would
-drop the error page altogether. In YAML a bare `yes` or `on` already reads as `true` and passes.
+`false`, `no`, `off` and `0` turn them off. Any other value, such as `yes`, `on`, `1`, `true`
+with spaces around it, an empty string or an unknown word, stops startup with a report that
+names the property and its value. `peekaboot.error-page.override` turns off only with `false`,
+and stops startup on `no`, `off` and `0` too. In YAML a bare `yes` or `on` already reads as
+`true` and passes.
 
 ## Properties {#properties}
 
@@ -246,11 +246,6 @@ never fold.
 `exclude: []` does not stop folding. It counts as unset and falls through to the next source.
 Use `fold: false` instead.
 
-A captured stack trace is cut at 1000 lines, whatever `fold` says, and ends with a
-`... N lines omitted` marker. A `StackOverflowError` is the usual case. The worst case for the
-whole trace store is 1000 lines &times; `max-logs-per-trace` &times; (`max-traces` +
-`max-error-traces` + `max-slow-traces`).
-
 ### Lifecycle {#peekabootlifecycle}
 
 | Property | Default | Effect |
@@ -284,7 +279,7 @@ Actuator and `peekaboot.enabled=true`.
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.tracing.enabled` | `true` | Whether the in-memory trace store exists. |
-| `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors, failed when an `@Async` method or a task passed to `execute()` throws. Needs `spring.task.execution.propagate-context`, below. |
+| `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors. The span fails when an `@Async` method, or a task passed to `execute()` or `submit()`, throws. Needs `spring.task.execution.propagate-context`, see [Traces, background work]({{ '/docs/traces/' | relative_url }}#background-work). |
 | `peekaboot.tracing.event-listeners` | `true` | Records a span for each call of an `@EventListener` method. An `@Async` listener also needs `spring.task.execution.propagate-context`. See [Traces, event listeners]({{ '/docs/traces/' | relative_url }}#event-listeners). |
 | `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. |
 | `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped and the trace is marked `TRUNCATED`. |
@@ -293,28 +288,13 @@ Actuator and `peekaboot.enabled=true`.
 | `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Total duration at or above which a trace enters the Slow bucket. |
 | `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. Only filled while the dev toolbar is on. |
 
+A stack trace in a captured log line is cut at 1000 lines and ends with a
+`... N lines omitted` marker. A `StackOverflowError` is the usual case. The error page shows
+the whole trace. The worst case for the whole trace store is 1000 lines &times;
+`max-logs-per-trace` &times; (`max-traces` + `max-error-traces` + `max-slow-traces`).
+
 See [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets) for the buckets and
 [background work]({{ '/docs/traces/' | relative_url }}#background-work) for what `async` shows.
-
-#### Background tasks: required Spring settings {#background-tasks-required-spring-settings}
-
-Peekaboot records no span for a background task until your application sets this:
-
-```yaml
-spring:
-  task:
-    execution:
-      propagate-context: true
-```
-
-<div class="pk-callout pk-callout--warning" markdown="1">
-Peekaboot does not set `spring.task.execution.propagate-context` for you. It changes what every
-task on the executor sees, so the decision stays with your application.
-
-If your application declares its own `Executor` bean, Spring Boot stops creating its own task
-executor, and neither context propagation nor Peekaboot reaches your tasks. Set
-`spring.task.execution.mode=force` to keep Boot's executor.
-</div>
 
 ### Issue thresholds {#peekabootuitracing}
 
@@ -380,7 +360,7 @@ on `/actuator/**`, and your endpoint settings do not affect what the dashboard s
 [Security]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**Some of these widen what is exposed, or cost something at runtime:**
+Some of these widen what is exposed or cost something at runtime:
 
 - `management.info.env.enabled: true` publishes `info.*` through `/actuator/info` if you
   expose that endpoint.
