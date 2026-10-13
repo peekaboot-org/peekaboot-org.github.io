@@ -170,9 +170,9 @@ them until you untick Connection Pool under Excluded. Over the HTTP API,
 [`rootActionType=*`]({{ '/docs/api/' | relative_url }}#endpoints) returns every type.
 {: #connection-pool-traces-hidden}
 
-## The trace view {#the-trace-view}
+## The trace detail {#the-trace-view}
 
-Click a row on the Traces tab, or click the dev toolbar, to open a trace. The view has four
+Click a row on the Traces tab, or click the dev toolbar, to open a trace's detail. It has four
 tabs and opens on Spans.
 
 <figure class="image">

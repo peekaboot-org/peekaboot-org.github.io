@@ -14,7 +14,7 @@ The bar shows the response status, method and path, controller method, duration,
 query count and total query time, log count, error and warning log counts when there are any,
 and the trace id, which copies on click. The logo opens the dashboard in a new tab. Click
 anywhere else on the bar, or press Enter or Space while it has focus, to open the
-[trace view](#the-trace-view).
+[trace detail](#the-trace-view).
 
 The numbers fill in during the first few seconds, so spans that end after the response are
 counted too. Numbers are formatted in the language chosen on the dashboard.
@@ -65,7 +65,7 @@ the bar fails, the page is served unchanged. Your page's CSS does not affect the
 
 ## Request and response detail {#request-and-response-detail}
 
-The Request tab of the trace view shows the method, path, query string, status, duration,
+The Request tab of the trace detail shows the method, path, query string, status, duration,
 controller method, query and form parameters, and the request and response headers.
 
 Headers and parameters are masked on the server, by key name and by value patterns. There is
@@ -73,9 +73,9 @@ no reveal control, so a masked value stays masked. See
 [Security]({{ '/docs/security/' | relative_url }}#masking) for the rules and what they miss.
 Request bodies and uploaded file names are not captured.
 
-## The trace view {#the-trace-view}
+## The trace detail {#the-trace-view}
 
-Clicking the bar opens the same trace view the dashboard's Traces tab uses, on top of your
+Clicking the bar opens the same trace detail the dashboard's Traces tab uses, on top of your
 page. [Traces]({{ '/docs/traces/' | relative_url }}#the-trace-view) describes its Spans,
 Queries, Logs and Request tabs.
 
@@ -94,7 +94,7 @@ for what is exposed while the toolbar is on.
 
 On the Swagger UI page the bar starts idle with "Waiting for request…". Run an operation with
 "Try it out" and the bar shows that call's status, duration and query count. Click it for the
-trace view.
+trace detail.
 
 This works for any traced call, JSON APIs included. Calls to `/v3/api-docs`, `/swagger-ui/`,
 `/peekaboot/`, `/webjars/` and the actuator are not shown. With

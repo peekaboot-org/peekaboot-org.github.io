@@ -52,8 +52,8 @@ view.
 - `#environment` opens that tab. The ids are `overview`, `insights`, `lifecycle`, `traces`,
   `meters`, `environment`, `flyway`, `liquibase`, `loggers`, `config` and `scheduled-tasks`.
   Any other id opens Overview.
-- `#traces/<traceId>` opens that trace's detail on its Spans page. Append `/request`,
-  `/spans`, `/queries` or `/logs` to open another page.
+- `#traces/<traceId>` opens that trace's detail on its Spans tab. Append `/request`,
+  `/spans`, `/queries` or `/logs` to open another tab.
 - `#traces/<traceId>/spans?root=<spanId>` opens one background task's own subtree of that
   trace.
 
@@ -66,7 +66,7 @@ Filters travel as a query string:
 | Loggers | `q` plus the configured-only checkbox (`#loggers?q=peekaboot&configured=1`) |
 | Insights | `level`, the `percentiles` and `restarts` toggles, and `panels` for per-panel level overrides |
 | Lifecycle | `page` |
-| An open trace's Logs page | `q`, `level` and `span` (`#traces/<traceId>/logs?level=WARN&q=timeout`) |
+| An open trace's Logs tab | `q`, `level` and `span` (`#traces/<traceId>/logs?level=WARN&q=timeout`) |
 
 An invalid bucket, level or page in a link falls back to the default. Theme, language and
 timezone are never part of a link.

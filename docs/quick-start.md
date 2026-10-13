@@ -55,8 +55,8 @@ The toolbar docks to the bottom of every HTML page your app renders.
        loading="lazy">
 </figure>
 
-Click the bar for request and response detail, the trace view and the request's logs. See
-[Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
+Click the bar for the request's trace detail, with its request and response, spans, queries and
+logs. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
 
 <div class="pk-callout" markdown="1">
 Set `peekaboot.dev-toolbar: false` to turn the toolbar off and keep the dashboard.
@@ -84,8 +84,8 @@ logs once the application is ready. See
 
 ## What you get immediately {#what-you-get-immediately}
 
-- The dev toolbar on every page: request and response detail, the trace view, and the
-  request's logs
+- The [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) on every HTML page your app
+  renders
 - Overview: build and Git info, Spring Boot and Java versions, system and JVM details, and
   datasource status
 - Environment and Config: every property source Spring resolved, and every
