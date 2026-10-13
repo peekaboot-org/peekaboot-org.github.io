@@ -41,8 +41,7 @@ The strip above the tabs is the same on every tab.
   to the list when it is none of the four.
 - **Theme** is light or dark. The toolbar and the trace detail follow it.
 
-Timezone, language and theme are remembered per browser. The Environment and Config tabs'
-**Show secrets** toggle is not: a reload always starts masked.
+Timezone, language and theme are remembered per browser.
 
 ## Share a view with a link {#deep-links}
 
@@ -61,7 +60,7 @@ Filters travel as a query string:
 
 | View | Query string |
 |---|---|
-| Traces | `bucket`, `type`, `op` (`#traces?bucket=errors`). Without `type` the list shows every type except Connection Pool; selecting that chip writes `type=CONNECTION_POOL` |
+| Traces | `bucket`, `type` and `op` (`#traces?bucket=errors`). Without `type` the list shows every type except Connection Pool. Unticking Connection Pool under Excluded adds `excluded=none`. `type=CONNECTION_POOL` in a link is ignored |
 | Meters, Environment, Config | `q`, the text filter (`#config?q=datasource`) |
 | Loggers | `q` plus the configured-only checkbox (`#loggers?q=peekaboot&configured=1`) |
 | Insights | `level`, the `percentiles` and `restarts` toggles, and `panels` for per-panel level overrides |
@@ -204,6 +203,13 @@ shown above the list. Use it to find which source wins for a key.
 Flyway shows one row per migration: version, description, script, type, duration, install
 time and status.
 
+## Liquibase {#liquibase}
+
+Liquibase shows one row per change set in the order they ran, with the order, id, author,
+change log, description, execution date and status. The status is `EXECUTED`, `FAILED`,
+`SKIPPED`, `RERAN`, `MARK_RAN` or `UNKNOWN`, and a failed change set is highlighted. Change sets
+from every Liquibase bean share one table. Liquibase records no duration.
+
 ## Loggers {#loggers}
 
 <figure class="image">
@@ -237,8 +243,7 @@ matches these keys and their values.
   includes defaults set in Java code, which appear in no property source.
 
 A property in `application.yml` that feeds a `@ConfigurationProperties` bean appears in both.
-Code defaults appear only under Config. Unused or overridden values appear only under
-Environment. `@Value` injections are not in Config; look them up under Environment.
+`@Value` injections are not in Config. Look them up under Environment.
 
 Both tabs mask sensitive values by key name and by value shape. Your
 `management.endpoint.*.show-values` settings do not affect this. The rules are under
