@@ -35,9 +35,9 @@ What that means for access:
 - **Local run, error page.** A browser request that fails gets the exception, its message and
   its full stack trace. That page is served on the failing URL, so anyone who can trigger the
   error sees it, not only someone who can reach `/peekaboot/**`.
-- **Deployment with `peekaboot.enabled=true`.** Peekaboot's HTTP Basic guard challenges any
-  `/peekaboot/**` request your own security has not authenticated. See [If nothing else
-  secures it](#if-nothing-else-secures-it).
+- **Deployment with `peekaboot.enabled=true`.** Peekaboot's HTTP Basic guard challenges every
+  `/peekaboot/**` request. Switch it off to use your own security. See [Peekaboot's own
+  guard](#if-nothing-else-secures-it).
 
 ### Security-related properties {#security-properties}
 
@@ -46,7 +46,7 @@ What that means for access:
 | `peekaboot.enabled` | detected | Serves the dashboard and its API. Off, nothing exists under `/peekaboot/**`. |
 | `peekaboot.dev-toolbar` | detected | Injects the toolbar and captures headers, parameters and log messages into traces. |
 | `peekaboot.enable-unmasking` | `false` | Allows `?unmask=true` to return real values. See [Masking opt-ins](#masking-opt-ins). |
-| `peekaboot.security.enabled` | detected | Arms the HTTP Basic fallback guard. |
+| `peekaboot.security.enabled` | detected | Arms Peekaboot's HTTP Basic guard. |
 | `peekaboot.security.username` | `<artifact>-admin` | The guard's username. |
 | `peekaboot.security.password` | unset | The guard's password. Unset, one is generated. |
 | `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
@@ -278,7 +278,8 @@ starts masked. See [The dashboard]({{ '/docs/dashboard/' | relative_url }}#envir
 
 ## Securing the dashboard with Spring Security {#securing-the-dashboard}
 
-Put a `SecurityFilterChain` in front of `/peekaboot/**` that requires a specific role:
+Set `peekaboot.security.enabled=false`, then put a `SecurityFilterChain` in front of
+`/peekaboot/**` that requires a specific role:
 
 ```java
 import org.springframework.context.annotation.Bean;
@@ -362,12 +363,11 @@ If your application sends a `Content-Security-Policy`:
 - Without `style-src 'unsafe-inline'`, a reader outside the role sees the notice as unstyled
   text at the foot of the page. Readers inside the role are unaffected.
 
-### If nothing else secures it {#if-nothing-else-secures-it}
+### Peekaboot's own guard {#if-nothing-else-secures-it}
 
 On a deployment launch with `peekaboot.enabled=true`, Peekaboot arms an HTTP Basic guard
-(realm `Peekaboot`) on `/peekaboot/**`. It challenges every request that does not already carry
-an authenticated, non-anonymous Spring Security principal. Without Spring Security on the class
-path, it challenges every request.
+(realm `Peekaboot`) on `/peekaboot/**`. It challenges every request, whatever else
+authenticated it.
 
 The credentials:
 
@@ -389,20 +389,20 @@ On a deployment, storage is off by default, so the generated password is not sav
 
 Rules to know:
 
-- A Spring Security chain that authenticates the request satisfies the guard. A VPN, an nginx
-  basic-auth layer, an IP allowlist or an API gateway does not, because none of them puts a
-  principal on the request. The guard still challenges behind them.
+- The guard challenges even a user your own security already signed in. With both active they
+  lock each other out, so switch one off.
+- A VPN, an nginx basic-auth layer, an IP allowlist or an API gateway in front does not
+  satisfy the guard. It still challenges behind them.
 - There is no rate limit on failed attempts. Rate-limit at the proxy in front of the
   application.
-- The `Peekaboot Security` block logs at WARN when Spring Security is not on the class path or
-  the toolbar is on, and at INFO otherwise. With the toolbar on, its requests make ordinary
-  pages raise a credential dialog.
+- The `Peekaboot Security` block logs at INFO, and at WARN with the toolbar on. With the
+  toolbar on, its requests make ordinary pages raise a credential dialog.
 - The first challenged request logs one WARN. Later failed attempts log at DEBUG.
 - `peekaboot.security.enabled=false` turns the guard off. On a deployment launch Peekaboot then
-  logs a WARN at startup that nothing authenticates `/peekaboot/**`.
+  logs a WARN at startup that your own security must authenticate `/peekaboot/**`.
 
-Use the `SecurityFilterChain` above instead of relying on this guard. It has one flat
-credential and no roles.
+The guard has one flat credential and no roles. For roles, switch it off and use the
+[`SecurityFilterChain`](#securing-the-dashboard) above.
 
 ## Running it on a shared or deployed server {#running-it-in-a-deployed-environment}
 
@@ -410,13 +410,14 @@ Read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}
 
 1. Set `peekaboot.enabled=true`. The toolbar, storage and error page stay off unless you set
    them too.
-2. Put the [`SecurityFilterChain`](#securing-the-dashboard) in front of `/peekaboot/**` before
-   you deploy. Gate on a role, because whoever passes it reads everything under [What the
-   dashboard and API show](#what-the-dashboard-and-api-expose).
+2. Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password (step 5), or set
+   `peekaboot.security.enabled=false` and put the [`SecurityFilterChain`](#securing-the-dashboard)
+   in front. Use the chain if you need roles. Whoever passes reads everything under
+   [What the dashboard and API show](#what-the-dashboard-and-api-expose).
 3. Restrict network reach as well: an internal-only ingress, a VPN, or a proxy that forwards
    `/peekaboot/**` only from trusted sources.
 4. Leave `peekaboot.enable-unmasking=false`.
-5. If you rely on the fallback guard, keep its password stable (see [above](#if-nothing-else-secures-it)).
+5. If you use Peekaboot's guard, keep its password stable (see [above](#if-nothing-else-secures-it)).
 
 ## Production checklist {#production-checklist}
 
@@ -428,7 +429,8 @@ Read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}
 - [ ] <span id="keeping-it-out-of-production-entirely"></span>If Peekaboot must never ship,
       keep the starter out of the production artifact. See [Keeping it out of the artifact
       entirely]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely).
-- [ ] If you turn it on somewhere reachable, put a `SecurityFilterChain` in front of
+- [ ] If you turn it on somewhere reachable, keep Peekaboot's guard with a stable password, or
+      set `peekaboot.security.enabled=false` and put a `SecurityFilterChain` in front of
       `/peekaboot/**` first.
 - [ ] Don't rely on `management.endpoints.web.exposure`. It does not affect `/peekaboot/**`.
 - [ ] Leave `peekaboot.enable-unmasking=false`. With it on, anyone who can reach

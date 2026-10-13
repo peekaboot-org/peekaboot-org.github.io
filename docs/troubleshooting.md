@@ -168,9 +168,9 @@ shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ## The dashboard returns 401 {#dashboard-401}
 
-**Cause:** Peekaboot runs outside a local run, and nothing it can detect protects
-`/peekaboot/**`. Its own HTTP Basic guard is then on. It cannot see protection outside Spring
-Security, such as a VPN, a proxy with basic auth, an IP allowlist or an API gateway.
+**Cause:** Peekaboot runs outside a local run, so its own HTTP Basic guard is on. It challenges
+every `/peekaboot/**` request, including one your own Spring Security chain signed in. A VPN,
+a proxy with basic auth, an IP allowlist or an API gateway in front does not satisfy it.
 
 This also hits smoke tests that start the packaged jar with Testcontainers or docker-compose.
 That process counts as a deployment, not a test.
@@ -179,8 +179,9 @@ That process counts as a deployment, not a test.
 
 - Use the user name and password from the `Peekaboot Security` block in the startup log.
 - Set your own password with `peekaboot.security.password`.
-- Set `peekaboot.security.enabled=false` where something else already protects the dashboard,
-  or for the smoke-test container.
+- Set `peekaboot.security.enabled=false` where your own security protects the dashboard. With
+  both active they lock each other out.
+- For the smoke-test container, set `peekaboot.security.enabled=false`.
 
 See [Security, securing the dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 

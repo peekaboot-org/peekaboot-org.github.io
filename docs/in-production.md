@@ -69,10 +69,10 @@ To size either down, see [Configuration, memory-constrained]({{ '/docs/configura
   at its default [levels]({{ '/docs/insights/' | relative_url }}#levels), and above the first
   level its percentiles are [percentiles of
   aggregates]({{ '/docs/insights/' | relative_url }}#percentiles-of-aggregates).
-- **Minimal access control.** Outside local development its fallback guard is HTTP Basic with
-  one credential. It stands down for any request your own Spring Security chain has already
-  authenticated. See [Security, if nothing else secures
-  it]({{ '/docs/security/' | relative_url }}#if-nothing-else-secures-it).
+- **Minimal access control.** Outside local development its guard is HTTP Basic with
+  one credential. It challenges every request, so switch it off once your own security covers
+  the dashboard. See [Security, Peekaboot's own
+  guard]({{ '/docs/security/' | relative_url }}#if-nothing-else-secures-it).
 
 ## The starter is on the class path even when Peekaboot is off {#class-path}
 

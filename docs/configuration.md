@@ -70,10 +70,9 @@ needs Peekaboot turns it on:
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 On a local run, the default, the dashboard and API have no authentication. Outside local
-development Peekaboot's guard challenges every `/peekaboot/**` request that your own security
-has not already authenticated. The guard is a stop-gap for when nothing else protects the
-dashboard. Before setting `peekaboot.enabled=true` anywhere other people can reach, read [Do I
-want this in production?]({{ '/docs/in-production/' | relative_url }}) and
+development Peekaboot's guard challenges every `/peekaboot/**` request, until you switch it off
+to use your own security. Before setting `peekaboot.enabled=true` anywhere other people can reach,
+read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) and
 [Security]({{ '/docs/security/' | relative_url }}).
 </div>
 
