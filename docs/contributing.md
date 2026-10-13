@@ -16,8 +16,6 @@ next to the code it describes.
 - [`BUILD.md`]({{ site.repository_url }}/blob/HEAD/BUILD.md): building with Maven or Gradle,
   the quality gates, and how a release is cut.
 
-`peekaboot-test-support` only supports the other modules' tests and is never published.
-
 Report bugs and proposals in the [issue tracker]({{ site.repository_url }}/issues). Commit
 messages follow [Conventional Commits](https://www.conventionalcommits.org/); the prefix decides
 the next version number.

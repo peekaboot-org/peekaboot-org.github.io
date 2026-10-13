@@ -239,7 +239,7 @@ the values above, and `subtract-meter` needs `stat: value`. Meter names are not 
 unknown meter shows a permanent gap. A series of yours whose `meter` or `subtract-meter` stays
 unresolved for three sampling ticks logs a `WARN` naming it. If the meter resolves and later
 disappears again, the warning repeats. Shipped series log the same case at `DEBUG`, since an
-application may simply lack one of their meters.
+application may lack one of their meters.
 
 If your file is invalid, Peekaboot ignores the whole file and shows the bundled panels. Your
 application still starts. The startup log has an `ERROR` with the stack trace:
