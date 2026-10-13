@@ -63,6 +63,7 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Machine: CPU count and model, physical memory, max heap, container runtime, every non-local IP address and its hostname | Overview, `runtime.machine` in the API | No |
 | Logger levels, configured and effective | Loggers tab | Nothing to mask. The API is GET-only, so levels cannot be changed. |
 | Flyway migrations: version, description, script, type, duration, install time, status | Flyway tab | No |
+| Liquibase change sets: execution order, id, author, change log, description, execution date, status | Liquibase tab | No |
 | `@Scheduled` tasks: schedule, last and next run, last failure's exception type and message | Scheduled Tasks tab | Failure text by value shape |
 | Start and stop history with version, branch, commit and build time per run, unclean shutdowns | Lifecycle tab, `/peekaboot/api/lifecycle/**` | No |
 | Micrometer meters: names, tags, measurements | Meters tab | Tag values by key and by value shape |
@@ -71,11 +72,11 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | With the toolbar on: request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape |
 | With the toolbar on: the message of every log event emitted inside a trace | Logs tab of a trace | No |
 
-SQL text is shown as your JDBC instrumentation records it, literal values included where the
-statement carries them. Bind parameters are shown too, recorded on the query's span. An
-application that also exports its traces, over OTLP say, sends them along unmasked. Request
-and response bodies are never captured.
-A log event emitted outside a trace is dropped.
+SQL text is shown as your JDBC instrumentation records it, with any literal values in the
+statement. Bind parameters are shown too. Masking applies to what Peekaboot shows. An
+application that also exports its traces, over OTLP for example, sends the SQL and the bind
+parameters unmasked. Request and response bodies are never captured. A log event emitted
+outside a trace is dropped.
 
 With the toolbar on, every response carries
 `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"`, JSON API calls included.
@@ -93,11 +94,11 @@ line, the exception class, its message and the full stack trace. None of it is m
 `spring.web.error.include-*` settings do not limit it. Requests that ask for JSON get Spring
 Boot's normal error response instead.
 
-It is on for a local run and off everywhere else. By default it takes the place of Spring Boot's
-whitelabel page and backs off where the application has an error page of its own. With
-`peekaboot.error-page.override=true` it also outranks that page, including one rendered from a
-`@ControllerAdvice`, for any request that accepts `text/html`. The override cannot switch the page
-on; `peekaboot.error-page.enabled=false` turns it off. See
+It is on for a local run and off for a deployment or a test. By default it takes the place of
+Spring Boot's whitelabel page and backs off where the application has an error page of its own.
+With `peekaboot.error-page.override=true` it also outranks that page, including one rendered
+from a `@ControllerAdvice`, for a request whose `Accept` header names `text/html`. The override
+works only while `peekaboot.error-page.enabled` is on. See
 [Configuration, `peekaboot.error-page`]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage).
 
 ## What stays in memory and what goes to disk {#what-peekaboot-writes-to-disk}
@@ -320,14 +321,14 @@ public class PeekabootSecurityConfig {
 
 Two rules make this work:
 
-1. **The Peekaboot chain goes first.** Give it `securityMatcher("/peekaboot/**")` and
-   `@Order(Ordered.HIGHEST_PRECEDENCE)`. Leave your application's chain without `@Order`. Don't
-   add a `/peekaboot/**` rule to your general chain instead, and don't give that chain a lower
-   order. Either way it matches `/peekaboot/**` first and the role check never runs.
-2. **Don't paste `applicationSecurityFilterChain`.** It permits every request. If your
-   application already has a chain, keep it and add only the first bean. If it has none, note
-   that declaring any `SecurityFilterChain` switches off Spring Boot's default chain: every
-   request outside `/peekaboot/**` then passes unsecured unless you add a chain for it.
+1. Give the Peekaboot chain `securityMatcher("/peekaboot/**")` and
+   `@Order(Ordered.HIGHEST_PRECEDENCE)`, and leave your application's chain without `@Order`.
+   A `/peekaboot/**` rule in your general chain, or a lower order on that chain, matches
+   `/peekaboot/**` first, and the role check never runs.
+2. Copy only `peekabootSecurityFilterChain`. `applicationSecurityFilterChain` permits every
+   request. In an application with no chain yet, declaring any `SecurityFilterChain` switches
+   off Spring Boot's default chain, so every request outside `/peekaboot/**` passes unsecured
+   unless you add a chain for it.
 
 Replace `httpBasic` with whatever your application uses: form login, OAuth2, a gateway header.
 Use `.authenticated()` instead of `.hasRole(...)` only if every signed-in user may read
@@ -371,7 +372,7 @@ The credentials:
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 On a deployment, storage is off by default, so the generated password is not saved and
-**changes on every restart**. Keep it stable with one of these:
+changes on every restart. Keep it stable with one of these:
 
 - `peekaboot.security.password`, set from a secret
 - `peekaboot.storage.enabled=true` on a persistent home directory
@@ -388,8 +389,8 @@ Rules to know:
   satisfy the guard. It still challenges behind them.
 - There is no rate limit on failed attempts. Rate-limit at the proxy in front of the
   application.
-- The `Peekaboot Security` block logs at INFO, and at WARN with the toolbar on. With the
-  toolbar on, its requests make ordinary pages raise a credential dialog.
+- The `Peekaboot Security` block logs at INFO. With the toolbar on it logs at WARN, because the
+  toolbar's requests then raise a credential dialog on ordinary pages.
 - The first challenged request logs one WARN. Later failed attempts log at DEBUG.
 - `peekaboot.security.enabled=false` turns the guard off. On a deployment launch Peekaboot then
   logs a WARN at startup that your own security must authenticate `/peekaboot/**`.
@@ -399,37 +400,31 @@ The guard has one flat credential and no roles. For roles, switch it off and use
 
 ## Running it on a shared or deployed server {#running-it-in-a-deployed-environment}
 
-Read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) first. Then:
+Read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) first. Then
+work through this list.
+{: #production-checklist}
 
-1. Set `peekaboot.enabled=true`. The toolbar, storage and error page stay off unless you set
-   them too.
-2. Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password (step 5), or set
-   `peekaboot.security.enabled=false` and put the [`SecurityFilterChain`](#securing-the-dashboard)
-   in front. Use the chain if you need roles. Whoever passes reads everything under
-   [What the dashboard and API show](#what-the-dashboard-and-api-expose).
-3. Restrict network reach as well: an internal-only ingress, a VPN, or a proxy that forwards
-   `/peekaboot/**` only from trusted sources.
-4. Leave `peekaboot.enable-unmasking=false`.
-5. If you use Peekaboot's guard, keep its password stable (see [above](#peekaboots-guard)).
-
-## Production checklist {#production-checklist}
-
-- [ ] Verify `peekaboot.enabled` resolves to `false` in your deployed environment. The startup
-      summary has no `Peekaboot Dashboard:` line when the dashboard is off.
+- [ ] Verify `peekaboot.enabled` resolves to `false` wherever you do not want the dashboard.
+      The startup summary has no `Peekaboot Dashboard:` line when the dashboard is off.
 - [ ] Set `peekaboot.enabled=false` explicitly if you run your build output directly on a host
       that is not a container (`java -cp target/classes …`). Peekaboot counts that as a local
       run. See [What counts as a local run]({{ '/docs/configuration/' | relative_url }}#local-run).
 - [ ] <span id="keeping-it-out-of-production-entirely"></span>If Peekaboot must never ship,
       keep the starter out of the production artifact. See [Keeping it out of the artifact
       entirely]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely).
-- [ ] If you turn it on somewhere reachable, keep Peekaboot's guard with a stable password, or
-      set `peekaboot.security.enabled=false` and put a `SecurityFilterChain` in front of
-      `/peekaboot/**` first.
+- [ ] Where you turn it on, leave `peekaboot.dev-toolbar` off unless you need header, parameter
+      and log capture. On a deployment the toolbar, storage and the error page stay off unless
+      you set them.
+- [ ] Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password, see [Peekaboot's
+      guard](#peekaboots-guard), or set `peekaboot.security.enabled=false` and put the
+      [`SecurityFilterChain`](#securing-the-dashboard) in front first. Use the chain if you need
+      roles. Whoever passes reads everything under [What the dashboard and API
+      show](#what-the-dashboard-and-api-expose).
+- [ ] Restrict network reach as well, with an internal-only ingress, a VPN, or a proxy that
+      forwards `/peekaboot/**` only from trusted sources.
 - [ ] Don't rely on `management.endpoints.web.exposure`. It does not affect `/peekaboot/**`.
 - [ ] Leave `peekaboot.enable-unmasking=false`. With it on, anyone who can reach
       `/peekaboot/**` can add `?unmask=true`.
 - [ ] Don't treat masking as complete. Log messages are never masked, and SQL and request data
       are masked only where a rule recognises them. Don't point Peekaboot at traffic whose
       secrets must not be held in memory and displayed.
-- [ ] Leave `peekaboot.dev-toolbar` off outside a local run unless you need header, parameter
-      and log capture. `peekaboot.enabled=false` turns it off too.
