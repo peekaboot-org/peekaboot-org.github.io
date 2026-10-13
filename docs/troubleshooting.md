@@ -179,8 +179,9 @@ That process counts as a deployment, not a test.
 
 - Use the user name and password from the `Peekaboot Security` block in the startup log.
 - Set your own password with `peekaboot.security.password`.
-- Set `peekaboot.security.enabled=false` where your own security protects the dashboard. With
-  both active they lock each other out.
+- Set `peekaboot.security.enabled=false` where your own security protects the dashboard. If
+  that security also uses the `Authorization` header, as HTTP Basic and bearer tokens do, the
+  two lock each other out.
 - For the smoke-test container, set `peekaboot.security.enabled=false`.
 
 See [Security, securing the dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).

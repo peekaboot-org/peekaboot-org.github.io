@@ -381,8 +381,9 @@ On a deployment, storage is off by default, so the generated password is not sav
 
 Rules to know:
 
-- The guard challenges even a user your own security already signed in. With both active they
-  lock each other out, so switch one off.
+- The guard challenges even a user your own security already signed in. If your security also
+  reads the `Authorization` header, as HTTP Basic and bearer tokens do, the two lock each other
+  out, so switch one off. With form login or a session cookie the reader signs in twice.
 - A VPN, an nginx basic-auth layer, an IP allowlist or an API gateway in front does not
   satisfy the guard. It still challenges behind them.
 - There is no rate limit on failed attempts. Rate-limit at the proxy in front of the
