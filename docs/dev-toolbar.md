@@ -6,7 +6,7 @@ permalink: /docs/dev-toolbar/
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
-       alt="The collapsed dev toolbar docked at the bottom of the page, showing a 200 status badge, GET /orders, the controller method, duration, query count and duration, and a copyable trace id"
+       alt="The collapsed dev toolbar at the bottom of an orders page, showing a 200 status badge, GET /orders, the controller method, the duration, 84 spans, 26 queries in 29ms, 1 log and a copyable trace id"
        loading="lazy">
 </figure>
 

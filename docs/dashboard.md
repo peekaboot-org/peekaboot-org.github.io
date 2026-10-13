@@ -74,7 +74,7 @@ timezone are never part of a link.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
-       alt="The Overview tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards, plus memory meters and a health banner"
+       alt="The Overview tab with the Started at, Startup, Ready after and Uptime tiles, a health banner reading UP, and the Build, Git, Spring, Java, System and Machine cards"
        loading="lazy">
 </figure>
 

@@ -51,7 +51,7 @@ The toolbar docks to the bottom of every HTML page your app renders.
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
-       alt="The collapsed dev toolbar docked at the bottom of the page, showing a 200 status badge, GET /orders, the controller method, duration, query count and duration, and a copyable trace id"
+       alt="The collapsed dev toolbar at the bottom of an orders page, showing a 200 status badge, GET /orders, the controller method, the duration, 84 spans, 26 queries in 29ms, 1 log and a copyable trace id"
        loading="lazy">
 </figure>
 
@@ -78,7 +78,7 @@ logs once the application is ready. See
 
 <figure class="image">
   <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
-       alt="The Peekaboot dashboard's Overview tab, showing Build, Git, Spring, Java, System, JVM Defaults and Datasource cards for a running application"
+       alt="The Overview tab with the Started at, Startup, Ready after and Uptime tiles, a health banner reading UP, and the Build, Git, Spring, Java, System and Machine cards"
        loading="lazy">
 </figure>
 
