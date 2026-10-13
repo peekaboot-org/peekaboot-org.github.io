@@ -25,3 +25,13 @@ Other ecosystems had debug toolbars first, among them [Laravel
 Debugbar](https://github.com/fruitcake/laravel-debugbar), [Django Debug
 Toolbar](https://django-debug-toolbar.readthedocs.io/) and
 [rack-mini-profiler](https://github.com/MiniProfiler/rack-mini-profiler) for Ruby.
+
+## Bundled and pulled-in projects {#bundled-projects}
+
+The Insights charts are drawn with [uPlot](https://github.com/leeoniya/uPlot), under the MIT
+License. Peekaboot's UI uses the [Geist and Geist Mono](https://github.com/vercel/geist-font)
+fonts, under the SIL Open Font License 1.1. Both ship inside Peekaboot's jar. The
+[`NOTICE`]({{ site.repository_url }}/blob/HEAD/NOTICE) file lists their versions and licences.
+
+The starter brings [datasource-micrometer](https://github.com/jdbc-observations/datasource-micrometer),
+under the Apache License 2.0. It records the JDBC queries the Traces tab shows.
