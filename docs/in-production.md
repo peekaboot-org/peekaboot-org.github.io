@@ -26,20 +26,17 @@ line only while the dashboard is served.
 ## What it changes while it is on {#what-it-costs-while-it-is-on}
 
 Everything Peekaboot sets sits below your own configuration, so a value you set wins.
+[Configuration, Spring Boot defaults Peekaboot
+changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
+lists the properties it changes and what each one costs. It also adds these:
 
-| Change | Value | Applied when |
+| Change | Effect | Applied when |
 |---|---|---|
-| `management.otlp.metrics.export.enabled` | `false` | Always, even with Peekaboot off |
-| `management.tracing.sampling.probability` | `1.0`: every request is sampled, for every exporter you have | `peekaboot.enabled`, servlet application |
-| `spring.jpa.properties.[hibernate.generate_statistics]` | `true`: Hibernate collects statistics | `peekaboot.enabled`, servlet application |
-| `management.info.env`, `.java`, `.os`, `.process.enabled` | `true`: `/actuator/info` carries that content if you expose it | `peekaboot.enabled`, servlet application |
-| `management.observations.annotations.enabled` | `true`: `@Observed`, `@Timed` and `@Counted` take effect | `peekaboot.enabled`, servlet application |
 | Handler and view spans | A span around each controller method and each rendered view, sent to every exporter | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 | Async task spans | A span around each task a Spring task executor runs inside a trace, sent to every exporter. Turn off with `peekaboot.tracing.async=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 | Event listener spans | A span around each `@EventListener` call inside a trace, sent to every exporter. Listener beans become proxies. Turn off with `peekaboot.tracing.event-listeners=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
-| `management.opentelemetry.tracing.export.schedule-delay` | `200ms` instead of `5s`: spans reach every exporter about 25 times as often | Dev toolbar on |
 | HTML response buffering | `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. | Dev toolbar on |
-| `Server-Timing` header | Every response carries its trace id | Dev toolbar on |
+| `Server-Timing` header | Every response carries its trace id, except under `/peekaboot/**`, the management base path, `/static/**`, `/webjars/**` and `/error/**` | Dev toolbar on |
 | Log capture | A Logback appender receives every log event | Dev toolbar on |
 
 An Actuator endpoint that keeps failing is logged once at WARN with its stack trace, then at
@@ -68,9 +65,10 @@ To size either down, see [Configuration, memory-constrained]({{ '/docs/configura
   at its default [levels]({{ '/docs/insights/' | relative_url }}#levels), and above the first
   level its percentiles are [percentiles of
   aggregates]({{ '/docs/insights/' | relative_url }}#percentiles-of-aggregates).
-- **Minimal access control.** Outside local development its guard is HTTP Basic with
-  one credential. It challenges every request, so switch it off once your own security covers
-  the dashboard. See [Security, Peekaboot's
+- **Minimal access control.** On a deployment its guard is HTTP Basic with one credential. It
+  challenges every request, whatever else signed the reader in. Switch it off only once your
+  own security requires a login on `/peekaboot/**`. Otherwise the dashboard is open to anyone
+  who reaches it. See [Security, Peekaboot's
   guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
 
 ## The starter is on the class path even when Peekaboot is off {#class-path}
@@ -80,9 +78,9 @@ With `peekaboot.enabled=false` the starter still brings:
 - `spring-boot-starter-actuator`. Spring Boot's default exposure serves `/actuator` and
   `/actuator/health` over HTTP.
 - A `MeterRegistry` with Spring Boot's JVM, system and Logback meters.
-- The OpenTelemetry SDK and OTLP exporters. Nothing is sent: metrics export is off (see the
-  table above), and Spring Boot creates trace and log exporters only once you configure an
-  endpoint.
+- The OpenTelemetry SDK and OTLP exporters. Nothing is sent. Metrics export is off, see
+  [Configuration]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application),
+  and Spring Boot creates trace and log exporters only once you configure an endpoint.
 - Peekaboot's own jars, unused.
 
 If that is not acceptable, keep the starter out of the artifact.
