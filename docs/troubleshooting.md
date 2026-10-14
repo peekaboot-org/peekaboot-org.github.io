@@ -230,7 +230,7 @@ entirely, set `peekaboot.error-page.enabled: false`.
 
 ## Stack frames are hidden {#stack-frames-hidden}
 
-**Cause:** stack-trace folding is on, the default for a local run. Framework frames collapse
+**Cause:** stack-trace folding is on, which is the default. Framework frames collapse
 behind a toggle on the error page and in the Logs tab. Your own frames are never folded.
 
 **Fix:** click the toggle to expand them. To stop folding, set

@@ -9,7 +9,7 @@ redirect_from:
 
 ## When Peekaboot is on {#when-peekaboot-is-on}
 
-Six properties default according to how the application was launched.
+Five properties default according to how the application was launched.
 
 | Property | Local run | Deployment | Test | Turns on |
 |---|---|---|---|---|
@@ -17,7 +17,6 @@ Six properties default according to how the application was launched.
 | `peekaboot.dev-toolbar` | `true` | `false` | `false` | The toolbar, log capture and request-detail capture. |
 | `peekaboot.storage.enabled` | `true` | `false` | `false` | Writing the charts and the run history to disk. |
 | `peekaboot.error-page.enabled` | `true` | `false` | `false` | The error page in place of Boot's whitelabel page. |
-| `peekaboot.stack-trace.fold` | `true` | `false` | `false` | Folding framework frames on the error page and in the Logs tab. |
 | `peekaboot.security.enabled` | `false` | `true` | `false` | Peekaboot's HTTP Basic guard on `/peekaboot/**`. |
 
 Any value you set wins, in either direction: `application.yml`, an environment variable or a
@@ -52,8 +51,6 @@ peekaboot:
     enabled: true
   error-page:
     enabled: true
-  stack-trace:
-    fold: true
 ```
 
 ### Turning it on in tests {#turning-it-on-in-tests}
@@ -210,7 +207,7 @@ pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-
 
 | Property | Default | Effect |
 |---|---|---|
-| `peekaboot.stack-trace.fold` | detected | Collapses framework frames behind a disclosure on the error page and in the Logs tab. Off, every frame is shown. |
+| `peekaboot.stack-trace.fold` | `true` | Collapses framework frames behind a disclosure on the error page and in the Logs tab. Off, every frame is shown. |
 | `peekaboot.stack-trace.exclude` | unset | Patterns for the frames that fold. A non-empty list replaces the default list. |
 
 A frame folds when its line contains a pattern as a substring. Your application's own frames
