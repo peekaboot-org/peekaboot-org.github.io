@@ -98,7 +98,8 @@ It is on for a local run and off for a deployment or a test. By default it takes
 Spring Boot's whitelabel page and backs off where the application has an error page of its own.
 With `peekaboot.error-page.override=true` it also outranks that page, including one rendered
 from a `@ControllerAdvice`, for a request whose `Accept` header names `text/html`. The override
-works only while `peekaboot.error-page.enabled` is on. See
+works only while `peekaboot.error-page.enabled` is on. Turned on for a deployment, the page is
+outside Peekaboot's guard, and the startup report logs a WARN saying so. See
 [Configuration, `peekaboot.error-page`]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage).
 
 ## What stays in memory and what goes to disk {#what-peekaboot-writes-to-disk}
@@ -360,7 +361,10 @@ If your application sends a `Content-Security-Policy`:
 <span id="if-nothing-else-secures-it"></span>On a deployment launch with
 `peekaboot.enabled=true`, Peekaboot arms an HTTP Basic guard
 (realm `Peekaboot`) on `/peekaboot/**`. It challenges every request, whatever else
-authenticated it.
+authenticated it. With `spring.mvc.servlet.path` set, it guards the dashboard under that prefix,
+such as `/app/peekaboot/**`. It also checks requests your application forwards or includes into
+the dashboard, and async dispatches. With Spring MVC on the class path but no
+`DispatcherServletPath` bean, Peekaboot logs a WARN at startup and assumes `/peekaboot/*`.
 
 The credentials:
 
@@ -390,8 +394,10 @@ Rules to know:
 - There is no rate limit on failed attempts. Rate-limit at the proxy in front of the
   application.
 - The `Peekaboot Security` block logs at INFO. With the toolbar on it logs at WARN, because the
-  toolbar's requests then raise a credential dialog on ordinary pages.
-- The first challenged request logs one WARN. Later failed attempts log at DEBUG.
+  toolbar's requests then raise a credential dialog on ordinary pages. With
+  `peekaboot.error-page.enabled=true` on a deployment it also logs at WARN, because the error
+  page serves full stack traces with no guard in front.
+- Failed attempts log at DEBUG.
 - `peekaboot.security.enabled=false` turns the guard off. On a deployment launch Peekaboot then
   logs a WARN at startup that your own security must authenticate `/peekaboot/**`.
 
