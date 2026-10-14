@@ -115,9 +115,21 @@ a:hover,
 /* Wide content must scroll inside its own box, never the page body. */
 .pk-content .highlight,
 .pk-content pre,
-.pk-content .table-container {
+.pk-content .table-container,
+.pk-content table {
     overflow-x: auto;
     max-width: 100%;
+}
+
+/* Markdown tables carry no wrapper element, so the table itself becomes the scroll box. */
+.pk-content table {
+    display: block;
+}
+
+/* Not in table cells, where breaking anywhere shrinks columns until values wrap mid-word. */
+.pk-content p code,
+.pk-content li code {
+    overflow-wrap: anywhere;
 }
 
 .pk-content img {
