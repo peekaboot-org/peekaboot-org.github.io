@@ -102,10 +102,15 @@ These switches turn on only with `true`, in any case:
 `peekaboot.insights.enabled`.
 
 `false`, `no`, `off` and `0` turn them off. Any other value, such as `yes`, `on`, `1`, `true`
-with spaces around it, an empty string or an unknown word, stops startup with a report that
-names the property and its value. `peekaboot.error-page.override` turns off only with `false`,
-and stops startup on `no`, `off` and `0` too. In YAML a bare `yes` or `on` already reads as
-`true` and passes.
+with spaces around it or an unknown word, stops startup with a report that names the property
+and its value. `peekaboot.error-page.override` turns off only with `false`, and stops startup on
+`no`, `off` and `0` too. In YAML a bare `yes` or `on` already reads as `true` and passes.
+
+An empty value counts as unset, as a compose file or Helm chart leaves one for a missing
+variable. This also holds for `peekaboot.storage.enabled`. The value from the next source down
+wins, with placeholders resolved. Without one, the launch decides as in [When Peekaboot is
+on](#when-peekaboot-is-on), and otherwise the property's default applies. A `yes` beneath an
+empty value still stops startup.
 
 ## Properties {#properties}
 
