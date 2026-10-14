@@ -203,8 +203,9 @@ A statement shows as captured, highlighted. With Hibernate on the classpath, For
 out the way Hibernate's `format_sql` log does. Its bind parameters are listed under it, one list
 per batch entry, masked like the SQL. Substitute parameters puts them in place of the `?`
 placeholders when there is one set and it fits. The copy button copies the SQL as shown. A bind
-value over 1000 characters is cut with a comment like `/* 7 characters omitted */`; a batch
-records at most 100 parameter sets.
+value over 1000 characters is cut with a comment like `/* 7 characters omitted */`. A batch
+records at most 100 parameter sets, and a note after the last one says how many were left
+out, such as "5 parameter sets omitted".
 
 Logs lists the log lines written while handling the request, filterable by text, level and
 span. Request shows the method, path, query string, status, duration, controller method,

@@ -204,6 +204,14 @@ renders your error page, and the whitelabel setting no longer applies. Only a re
 `Accept` header names `text/html` gets the page. Swagger UI, curl and `fetch()` send `*/*` and
 keep your application's own error response.
 
+With the override on, the page keeps the status, headers and reason Spring would send: `400`
+for a type mismatch, `405` with its `Allow` header, the headers of a `ResponseStatusException`,
+and an `@ResponseStatus` reason with its message code resolved. An exception Spring maps to
+nothing renders as `500` and logs `Request processing failed: <exception>` at ERROR, the line
+the servlet container would have logged. That includes an exception your own
+`@ExceptionHandler` maps, since the override answers first. A response already committed is
+left alone.
+
 The error page carries the dev toolbar, which reports the failed request. See [Dev toolbar,
 pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
 [Security, the error page]({{ '/docs/security/' | relative_url }}#the-error-page).
