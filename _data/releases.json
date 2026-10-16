@@ -79,37 +79,7 @@
         "title": "Dependency upgrades",
         "entries": [
           {
-            "text": "Bump org.slf4j:slf4j-api from 2.0.19 to 2.0.20",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump net.sourceforge.pmd:pmd-core from 7.27.0 to 7.28.0",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
             "text": "Bump net.osslabz:jdbc-url-parser from 0.1.1 to 0.1.2",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-plugin-gradle",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump gradle-wrapper from 9.7.1 to 9.8.0",
             "scope": "deps",
             "breaking": false,
             "detail": null
@@ -385,19 +355,7 @@
             "detail": null
           },
           {
-            "text": "Move the testing app off isbn-scanner's port",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
             "text": "Capture a failed request as a server error",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Stop the dependabot merge waiting on itself",
             "scope": null,
             "breaking": false,
             "detail": null
@@ -425,12 +383,6 @@
       {
         "title": "Dependency upgrades",
         "entries": [
-          {
-            "text": "Bump com.microsoft.playwright:playwright",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
           {
             "text": "Bump net.ttddyy.observation:datasource-micrometer-opentelemetry",
             "scope": "deps",
@@ -562,12 +514,6 @@
             "scope": null,
             "breaking": false,
             "detail": null
-          },
-          {
-            "text": "Fail the release-data render on a broken pipe",
-            "scope": null,
-            "breaking": false,
-            "detail": null
           }
         ]
       },
@@ -583,65 +529,6 @@
           {
             "text": "Cache the bundled font for a year",
             "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Dependency upgrades",
-        "entries": [
-          {
-            "text": "Bump org.apache.maven.plugins:maven-failsafe-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump io.github.git-commit-id:git-commit-id-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump org.apache.maven.plugins:maven-surefire-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.github.spotbugs:spotbugs-maven-plugin",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump com.diffplug.spotless:spotless-plugin-gradle",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump org.springdoc:springdoc-openapi-starter-webmvc-ui",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump actions/setup-java in /.github/actions/prepare-build",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump WyriHaximus/github-action-get-previous-tag",
-            "scope": "deps",
             "breaking": false,
             "detail": null
           }
