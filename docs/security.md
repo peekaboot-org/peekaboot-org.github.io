@@ -99,7 +99,9 @@ Spring Boot's whitelabel page and backs off where the application has an error p
 With `peekaboot.error-page.override=true` it also outranks that page, including one rendered
 from a `@ControllerAdvice`, for a request whose `Accept` header names `text/html`. The override
 works only while `peekaboot.error-page.enabled` is on. Turned on for a deployment, the page is
-outside Peekaboot's guard, and the startup report logs a WARN saying so. See
+outside Peekaboot's guard, and the startup report logs a WARN saying so whenever Peekaboot's page
+is served. Without the override, an application's own error page backs Peekaboot's off, and the
+WARN with it. See
 [Configuration, `peekaboot.error-page`]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage).
 
 ## What stays in memory and what goes to disk {#what-peekaboot-writes-to-disk}
@@ -395,11 +397,12 @@ Rules to know:
   application.
 - The `Peekaboot Security` block logs at INFO. With the toolbar on it logs at WARN, because the
   toolbar's requests then raise a credential dialog on ordinary pages. With
-  `peekaboot.error-page.enabled=true` on a deployment it also logs at WARN, because the error
-  page serves full stack traces with no guard in front.
+  `peekaboot.error-page.enabled=true` on a deployment it also logs at WARN while Peekaboot's error
+  page is served, because that page serves full stack traces with no guard in front.
 - Failed attempts log at DEBUG.
 - `peekaboot.security.enabled=false` turns the guard off. On a deployment launch Peekaboot then
-  logs a WARN at startup that your own security must authenticate `/peekaboot/**`.
+  logs a WARN at startup that your own security must authenticate `/peekaboot/**`, or the
+  dashboard path under `spring.mvc.servlet.path`, such as `/app/peekaboot/**`.
 
 The guard has one flat credential and no roles. For roles, switch it off and use the
 [`SecurityFilterChain`](#securing-the-dashboard) above.

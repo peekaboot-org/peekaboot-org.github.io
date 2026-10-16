@@ -72,8 +72,8 @@ that turn it on.
 
 The dashboard is at [`http://localhost:8080/peekaboot/`](http://localhost:8080/peekaboot/),
 its API under [`http://localhost:8080/peekaboot/api/`](http://localhost:8080/peekaboot/api/).
-On another port or context path, use the URL on the `Peekaboot Dashboard:` line Peekaboot
-logs once the application is ready. See
+On another port, context path or servlet path, use the URL on the `Peekaboot Dashboard:` line
+Peekaboot logs once the application is ready. See
 [Configuration]({{ '/docs/configuration/' | relative_url }}#the-urls-in-the-summary).
 
 <figure class="image">

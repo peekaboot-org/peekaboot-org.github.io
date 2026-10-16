@@ -209,8 +209,10 @@ for a type mismatch, `405` with its `Allow` header, the headers of a `ResponseSt
 and an `@ResponseStatus` reason with its message code resolved. An exception Spring maps to
 nothing renders as `500` and logs `Request processing failed: <exception>` at ERROR, the line
 the servlet container would have logged. That includes an exception your own
-`@ExceptionHandler` maps, since the override answers first. A response already committed is
-left alone.
+`@ExceptionHandler` maps, since the override answers first. With
+`spring.mvc.log-resolved-exception=true`, a `ResponseStatusException` or an exception carrying
+`@ResponseStatus` also logs at WARN, as Spring's own resolver logs it. A response already
+committed is left alone.
 
 The error page carries the dev toolbar, which reports the failed request. See [Dev toolbar,
 pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears) and
@@ -282,7 +284,8 @@ The scheme is `https` when Spring Boot considers TLS on. A key store or an SSL b
 
 Swagger UI appears when springdoc is on the classpath and honours `springdoc.swagger-ui.path`.
 Peekaboot Dashboard appears only where the dashboard is served: a servlet application with
-Actuator and `peekaboot.enabled=true`.
+Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`, so with
+`/app` the dashboard line reads `http://localhost:8080/app/peekaboot/`.
 
 ### Tracing {#peekaboottracing}
 
