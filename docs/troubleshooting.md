@@ -101,9 +101,8 @@ spring:
 
 Also check that `peekaboot.tracing.async` and `peekaboot.tracing.enabled` are not set to
 `false`. An application that declares its own `Executor` bean also needs
-`spring.task.execution.mode=force`. See [Configuration,
-`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) and [Traces,
-background work]({{ '/docs/traces/' | relative_url }}#background-work).
+`spring.task.execution.mode=force`. See [Traces, background
+work]({{ '/docs/traces/' | relative_url }}#background-work).
 
 ## The toolbar does not appear {#toolbar-never-appears}
 

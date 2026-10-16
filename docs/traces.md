@@ -86,8 +86,7 @@ Peekaboot wraps tasks on executors that Spring Boot builds: the auto-configured
 `applicationTaskExecutor`, and any executor you create from Boot's
 `ThreadPoolTaskExecutorBuilder` or `SimpleAsyncTaskExecutorBuilder`. Declaring an `Executor`
 bean of your own makes Boot skip `applicationTaskExecutor`. Set
-`spring.task.execution.mode=force` to keep it. See
-[`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing).
+`spring.task.execution.mode=force` to keep it.
 
 With context propagation on:
 
