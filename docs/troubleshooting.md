@@ -11,6 +11,7 @@ permalink: /docs/troubleshooting/
 | Peekaboot is off. It is off by default for a deployment or a test. | Set `peekaboot.enabled=true` in `application.yml`, an environment variable or a system property. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on). |
 | You develop inside a devcontainer or GitHub Codespaces. Those count as containers. | Set `peekaboot.enabled=true` and the feature switches you want, such as `peekaboot.dev-toolbar`, explicitly. See [Configuration, containers]({{ '/docs/configuration/' | relative_url }}#container-markers). |
 | The application sets `server.servlet.context-path`. | Open the dashboard under that path, for example `/my-app/peekaboot`. The `/peekaboot` part cannot be changed. |
+| The application sets `spring.mvc.servlet.path`. | Open the dashboard under the DispatcherServlet's path, for example `/app/peekaboot/`. The startup summary prints the right URL. The `/peekaboot` part cannot be changed. |
 | The application is reactive (WebFlux) or not a web application. | None. Peekaboot's dashboard needs a servlet web application. |
 | Spring Boot Actuator is not on the class path. | Keep `spring-boot-starter-actuator`, which the Peekaboot starter brings in. |
 
