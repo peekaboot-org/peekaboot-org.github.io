@@ -217,7 +217,7 @@ Every part is masked by value shape.
 |---|---|
 | `text` | The SQL as captured. A batch is its statements joined by `;` and a newline. |
 | `formatted` | The same SQL laid out by Hibernate's formatter. `null` without Hibernate on the class path, or when the formatter could not lay it out. |
-| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. A value over 1000 characters is cut. A batch records at most 100 sets, and a capped batch ends with one more list holding only the comment `/* N parameter sets omitted */`. |
+| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. A value over 1000 characters is cut. A batch records at most 100 sets, and a capped batch ends with one more list holding only the comment `/* N parameter sets omitted */`, or `/* 1 parameter set omitted */` for a single one. |
 
 ### Log fields {#log-fields}
 
