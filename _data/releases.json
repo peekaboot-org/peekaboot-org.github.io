@@ -1,5 +1,400 @@
 [
   {
+    "version": "1.1.0",
+    "date": "2026-10-17",
+    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.1.0",
+    "initial": false,
+    "groups": [
+      {
+        "title": "Features",
+        "entries": [
+          {
+            "text": "Label queries with their DataSource name",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Map Liquibase change sets into insights",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read Liquibase through its actuator endpoint",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Add the Liquibase dashboard tab",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Trace event listener invocations",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold Peekaboot's own frames by default",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Warn when an insights series never resolves",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Warn about the error page on a deployment",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read a blank switch value as unset",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Warn only about an error page that is served",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Rename the pool trace type to maintenance",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Classify redis upkeep traces as maintenance",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Bug fixes",
+        "entries": [
+          {
+            "text": "Render span toggle buttons in the bundled font",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "List non-default-candidate DataSources",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show Flyway for non-default-candidate beans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve the error page only to clients asking for HTML",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fail the async task span when @Async throws",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop startup on a non-boolean switch value",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Record submitted task failures on async spans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "List a late async row at the top of the list",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Warn on every subtract-meter outage",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop the ERROR span issue nothing renders",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ignore an empty manifest Class-Path",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Open a trace from anywhere on its row",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep timeline tick labels distinct",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep info apart from pink for protanopes",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Explain why the Traces tab cannot fill",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the overlay's Escape inside the overlay",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Let the keyboard scroll overlay tab content",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop warning when shutdown cuts a write short",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Challenge every dashboard request",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Write each insights tick under one lock",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Open the subtree hiding a cross-link target",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep span toggle focus rings inside the row",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name the pool checkbox by what it does",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep toggle labels fixed and state in ARIA",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep truncated traces in the Slow bucket",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep async descendants out of the sync window",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep Spring's status on the override page",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Log the exception the override page renders",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard the dashboard under the servlet path",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard requests forwarded into the dashboard",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop the WARN on a dashboard challenge",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold stack traces by default on every launch",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mark a truncated parameter batch",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read every roll-up window under one lock",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Never write a capture taken before restore",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show the error when the recovery reload stalls",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Put the servlet path in the banner URLs",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name the guarded path in the security posture",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Honour spring.mvc.log-resolved-exception",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Escape the base path in page URLs",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read listing roots under one lock",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Count one omitted character or byte singular",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Count one omitted stack-trace line singular",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep insights time labels from overlapping",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep insights deltas that race a snapshot",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Performance",
+        "entries": [
+          {
+            "text": "Build span panels when first opened",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Map only the async subtree for its row",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop sending span logs twice",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Resolve listener names once per method",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Pair row counts with queries in one pass",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.0.0",
     "date": "2026-09-30",
     "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.0.0",
