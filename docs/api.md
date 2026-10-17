@@ -112,10 +112,10 @@ Tag values that look like secrets are masked. Without a `MeterRegistry` the resp
 |---|---|---|---|
 | `limit` | 0 to 10000 | `100` | Out of range is clamped. Not a number: `400`. |
 | `bucket` | `all`, `errors`, `slow`, any case | `all` | Treated as `all`. |
-| `rootActionType` | Comma-separated [root action types](#root-action-types), any case, or `*` | Every type except `CONNECTION_POOL` | Unknown names are dropped. Nothing left means the default. |
+| `rootActionType` | Comma-separated [root action types](#root-action-types), any case, or `*` | Every type except `MAINTENANCE` | Unknown names are dropped. Nothing left means the default. |
 | `rootOperation` | Part of the name of the row's root span, any case | none | none |
 
-`rootActionType=*` includes `CONNECTION_POOL`. See [Traces, trace
+`rootActionType=*` includes `MAINTENANCE`. See [Traces, trace
 types]({{ '/docs/traces/' | relative_url }}#root-action-type).
 
 A `rootOperation` with more than two dot-separated segments also matches on its last two. So
@@ -132,7 +132,7 @@ With tracing off, the response has no traces and zero counts.
 | `MESSAGE_CONSUMER` | A consumed message. |
 | `RPC_CALL` | An incoming RPC call. |
 | `DATABASE` | A database query outside any other work. |
-| `CONNECTION_POOL` | Connection pool maintenance, such as a HikariCP refill. |
+| `MAINTENANCE` | Upkeep outside any other work, such as a HikariCP refill or a Redis connection handshake or health check. |
 | `ASYNC_TASK` | A task run on a Spring task executor, such as an `@Async` method. Only with `spring.task.execution.propagate-context` on. |
 | `UNKNOWN` | Anything else, such as other in-process work, or a span whose parent has not arrived yet. |
 

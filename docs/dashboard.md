@@ -60,7 +60,7 @@ Filters travel as a query string:
 
 | View | Query string |
 |---|---|
-| Traces | `bucket`, `type` and `op` (`#traces?bucket=errors`). Without `type` the list shows every type except Connection Pool. Unticking Connection Pool under Excluded adds `excluded=none`. `type=CONNECTION_POOL` in a link is ignored |
+| Traces | `bucket`, `type` and `op` (`#traces?bucket=errors`). Without `type` the list shows every type except Maintenance. Unticking Maintenance under Excluded adds `excluded=none`. `type=MAINTENANCE` in a link is ignored |
 | Meters, Environment, Config | `q`, the text filter (`#config?q=datasource`) |
 | Loggers | `q` plus the configured-only checkbox (`#loggers?q=peekaboot&configured=1`) |
 | Insights | `level`, the `percentiles` and `restarts` toggles, and `panels` for per-panel level overrides |

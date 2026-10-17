@@ -157,17 +157,17 @@ Each row in the trace list shows what started the trace. The Traces tab filters 
 | Scheduled | 🕑 | A `@Scheduled` method fired by Spring's scheduler |
 | Async Task | ⚡ | [Background work](#background-work) on a Spring task executor, only with context propagation on |
 | Database | 🗂 | A database call with no request, job or message around it |
-| Connection Pool | 🔌 | The pool acquiring or validating a connection outside any traced work |
+| Maintenance | 🔧 | Upkeep outside any traced work: a pool acquiring or validating a connection, a Redis connection handshake or health check |
 | Unknown | ❓ | Anything else, such as in-process work, a message being sent or an outbound call whose caller was not traced |
 
 Only `@Scheduled` methods fired by Spring's scheduler show as Scheduled. Quartz, a plain
 `ScheduledExecutorService` or another timer shows as Unknown or by whatever else its tags
 match.
 
-Connection Pool traces arrive often enough to drown everything else. The Traces tab excludes
-them until you untick Connection Pool under Excluded. Over the HTTP API,
+Maintenance traces arrive often enough to drown everything else. The Traces tab excludes
+them until you untick Maintenance under Excluded. Over the HTTP API,
 [`rootActionType=*`]({{ '/docs/api/' | relative_url }}#endpoints) returns every type.
-{: #connection-pool-traces-hidden}
+{: #maintenance-traces-hidden}
 
 ## The trace detail {#the-trace-view}
 
