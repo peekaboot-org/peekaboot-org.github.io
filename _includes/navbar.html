@@ -14,11 +14,20 @@
 
   <div id="navbar-menu" class="navbar-menu">
     <div class="navbar-start">
-      <a class="navbar-item" href="{{ '/docs/quick-start/' | relative_url }}">Quick start</a>
-      <a class="navbar-item" href="{{ '/docs/dashboard/' | relative_url }}">Features</a>
-      <a class="navbar-item" href="{{ '/docs/configuration/' | relative_url }}">Reference</a>
-      <a class="navbar-item" href="{{ '/docs/security/' | relative_url }}">Security</a>
-      <a class="navbar-item" href="{{ '/releases/' | relative_url }}">Releases</a>
+      {%- for section in site.data.nav %}
+      {%- if section.navbar %}
+      {%- assign first = section.pages | first %}
+      {%- assign section_urls = section.pages | map: "url" %}
+      <a class="navbar-item{% if section_urls contains page.url %} is-current{% endif %}"
+         href="{{ first.url | relative_url }}"{% if page.url == first.url %} aria-current="page"{% endif %}>{{ section.navbar }}</a>
+      {%- endif %}
+      {%- for item in section.pages %}
+      {%- if item.navbar %}
+      <a class="navbar-item{% if page.url == item.url %} is-current{% endif %}"
+         href="{{ item.url | relative_url }}"{% if page.url == item.url %} aria-current="page"{% endif %}>{{ item.navbar }}</a>
+      {%- endif %}
+      {%- endfor %}
+      {%- endfor %}
     </div>
     <div class="navbar-end">
       <div class="navbar-item">

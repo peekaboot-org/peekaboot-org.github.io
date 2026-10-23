@@ -47,7 +47,9 @@ Two things you may notice, neither a problem:
 - `_config.yml`: site settings. `theme: null` is required to disable GitHub Pages' implicit
   default theme (`jekyll-theme-primer`), which otherwise ships its own unused CSS alongside
   ours.
-- `_data/nav.yml`: the documentation sidebar, grouped into sections.
+- `_data/nav.yml`: the documentation sidebar, grouped into sections, and the navbar. An
+  entry with a `navbar:` label also appears in the navbar; a section with one links to its
+  first page.
 - `_layouts/default.html`, `page.html`, `doc.html`: page shells. `page.html` wraps a page
   that lays itself out, as `index.html` and `releases.html` do. `doc.html` renders the
   sidebar and a page's `title`/`lead` front matter.

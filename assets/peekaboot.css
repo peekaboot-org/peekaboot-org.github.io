@@ -96,6 +96,11 @@ a:hover {
     font-weight: 600;
 }
 
+.navbar-item.is-current {
+    color: var(--pk-link);
+    font-weight: 600;
+}
+
 .pk-content {
     flex: 1 1 auto;
     min-width: 0;

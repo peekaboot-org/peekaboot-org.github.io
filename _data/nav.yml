@@ -2,10 +2,12 @@
   pages:
     - title: Quick start
       url: /docs/quick-start/
+      navbar: Quick start
     - title: Do I want this in production?
       url: /docs/in-production/
 
-- title: What you get
+- title: Features
+  navbar: Features
   pages:
     - title: Dev toolbar
       url: /docs/dev-toolbar/
@@ -17,6 +19,7 @@
       url: /docs/insights/
 
 - title: Reference
+  navbar: Reference
   pages:
     - title: Configuration
       url: /docs/configuration/
@@ -27,6 +30,7 @@
   pages:
     - title: Security
       url: /docs/security/
+      navbar: Security
     - title: Troubleshooting
       url: /docs/troubleshooting/
 
@@ -34,6 +38,7 @@
   pages:
     - title: Releases
       url: /releases/
+      navbar: Releases
     - title: Acknowledgements
       url: /docs/acknowledgements/
     - title: Contributing
