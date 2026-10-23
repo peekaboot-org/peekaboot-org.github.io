@@ -52,7 +52,6 @@ it uses. The dashboard shows or hides its tabs from it.
 | `tracing` | The trace store exists (`peekaboot.tracing.enabled`). |
 | `tracingSpansPossible` | An OpenTelemetry SDK is on the classpath to feed the store. `false` means no span can ever arrive. `true` does not promise that one will, since your sampling settings still apply. Ignore it while `tracing` is `false`. |
 | `metrics` | A `MeterRegistry` bean exists. Drives the Meters tab. |
-| `devToolbar` | `peekaboot.dev-toolbar` is on. |
 | `unmaskingEnabled` | `peekaboot.enable-unmasking` is on. The "Show secrets" toggle depends on it. |
 | `insights` | The Insights endpoints exist. |
 | `slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs` | The effective thresholds from [`peekaboot.ui.tracing`]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing). |
@@ -74,8 +73,8 @@ missing (no Flyway, say) or fails leaves the rest of the response intact.
 
 `locale` is a language tag such as `de-DE`. `de_DE` works too. Omitted or blank means English.
 
-It changes only the cron descriptions of scheduled tasks and the display names of the server's
-time zone and default locale. The dashboard sends `en-US`, `de-DE`, `fr-FR` or `es-ES`; see
+It changes only the cron descriptions of scheduled tasks and the display name of the server's
+default locale. The dashboard sends `en-US`, `de-DE`, `fr-FR` or `es-ES`; see
 [The dashboard, the header]({{ '/docs/dashboard/' | relative_url }}#the-header).
 
 ### The `unmask` parameter {#the-unmask-parameter}
@@ -96,13 +95,12 @@ carry `intervalMs` instead.
 `GET /peekaboot/api/metrics` returns every meter in the registry, grouped by name:
 
 ```
-{metricCount, measurementCount,
- metrics: [{name, description, baseUnit, type,
+{metrics: [{name, description, baseUnit, type,
             measurements: [{tags, statistics: [{name, value}]}]}]}
 ```
 
 Tag values that look like secrets are masked. Without a `MeterRegistry` the response is
-`{metricCount: 0, measurementCount: 0, metrics: []}`.
+`{metrics: []}`.
 
 ## Trace list {#trace-list}
 
