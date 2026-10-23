@@ -29,14 +29,12 @@ case "${1:-}" in
 esac
 
 if ! docker info >/dev/null 2>&1; then
-    echo "Docker isn't running (or isn't reachable) — this script needs it." >&2
+    echo "Docker isn't running or isn't reachable. This script needs it." >&2
     exit 1
 fi
 
-# Running the container as root (as the raw docker commands in the README once did)
-# leaves root-owned files in the generated directories, which a later non-root run
-# then can't write to — and which you can't delete without sudo either. Repair it
-# from inside a container, since that's the only place we have root.
+# A container run as root leaves files in the generated directories that a non-root run
+# can't write and you can't delete without sudo. Only a container has root to repair them.
 reclaim_generated_dirs() {
     local stray
     stray=$(find _site vendor .jekyll-cache -not -user "$(id -un)" -print -quit 2>/dev/null || true)
@@ -49,19 +47,10 @@ reclaim_generated_dirs() {
     echo
 }
 
-# RubyGems marks a compiled extension done by dropping an empty gem.build_complete
-# beside the object it built. It trusts that marker alone: a directory holding the marker
-# but no compiled object counts as built, so `bundle install` skips the gem and Jekyll
-# then dies loading a .so that was never produced — with an error naming the gem rather
-# than the half-built tree, which is what makes it hard to place. Bundler recovers on its
-# own when an extension directory is missing outright (it falls back to the default gem
-# and rebuilds), but not from this state. Interrupted installs and partial copies between
-# machines both produce it; this checkout has extension trees for two architectures, so it
-# is copied between machines.
-#
-# Dropping the directory is enough — bundler rebuilds what it can no longer find. Looking
-# for *.so is correct on every host: the build always happens inside the Linux container,
-# whatever this machine is.
+# Bundler trusts a gem.build_complete marker alone, so an interrupted install or a partial
+# copy between machines leaves a marker with no .so, and Jekyll dies loading it. Dropping the
+# directory makes bundler rebuild it. The build runs in a Linux container, so *.so is right
+# on every host.
 rebuild_half_built_extensions() {
     local marker dir repaired=false
 
@@ -70,7 +59,7 @@ rebuild_half_built_extensions() {
         [ -z "$(find "$dir" -name "*.so" -print -quit)" ] || continue
 
         if [ "$repaired" = false ]; then
-            echo "Found half-built native extensions — a build marker with nothing built"
+            echo "Found half-built native extensions, a build marker with nothing built"
             echo "beside it. Removing them so bundler rebuilds:"
             repaired=true
         fi
@@ -81,25 +70,16 @@ rebuild_half_built_extensions() {
     [ "$repaired" = false ] || echo
 }
 
-# The same sync brings the other half of this problem: extension trees for two
-# architectures, where the marker and the compiled object are both present but the
-# object was built for the other machine. Ruby reports a wrong-architecture .so as
-# "cannot open shared object file: No such file or directory" — a missing-file error
-# naming a file that is right there, which is what makes this one hard to place too,
-# and the check above passes straight over it because it only looks for *presence*.
-#
-# Which tree is the usable one can't be decided from here: this script runs on the
-# host, the build runs in a Linux container, and on a Mac those two don't even agree
-# on the architecture's name. So when there is more than one tree, drop all of them
-# along with every object already copied out into the gem directories, and let bundler
-# rebuild the one that belongs to this machine. That leaves a single tree, so the next
-# run passes straight through.
+# A copy from another machine can bring a .so built for the other architecture, which Ruby
+# reports as "cannot open shared object file" although the file is there. The host can't tell
+# which tree the container needs, so with more than one, drop them all and every .so copied
+# out of them, and let bundler rebuild.
 rebuild_foreign_architecture_extensions() {
     local trees
     trees=$(find vendor/bundle -type d -path "*/extensions/*" -mindepth 4 -maxdepth 4 2>/dev/null || true)
     [ "$(echo "$trees" | grep -c .)" -gt 1 ] || return 0
 
-    echo "Found native extensions built for more than one architecture — this checkout"
+    echo "Found native extensions built for more than one architecture. This checkout"
     echo "has been copied between machines. Removing them so bundler rebuilds for this one:"
     echo "$trees" | sed 's/^/  /'
     echo "$trees" | while IFS= read -r tree; do rm -rf "$tree"; done
@@ -125,7 +105,7 @@ if [ "$build_only" = true ]; then
     exit 0
 fi
 
-echo "Starting Jekyll on http://localhost:${PORT} — Ctrl-C to stop."
+echo "Starting Jekyll on http://localhost:${PORT}. Press Ctrl-C to stop."
 echo "Edits to any page rebuild automatically; the browser reloads itself."
 echo
 

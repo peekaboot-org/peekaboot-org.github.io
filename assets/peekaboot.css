@@ -1,7 +1,5 @@
-/* Peekaboot brand mapping over Bulma 1.0.4.
-   Bulma derives its whole colour system from HSL components, so re-branding is a matter
-   of three numbers: the mark's green, hsl(93 64% 43%) - the same value
-   peekaboot-frontend's tokens.css documents as "straight off the artwork". */
+/* Peekaboot brand mapping over Bulma 1.0.4. Bulma derives its colours from these three HSL
+   numbers, the mark's green as peekaboot-frontend's tokens.css records it. */
 :root {
     --bulma-primary-h: 93;
     --bulma-primary-s: 64%;
@@ -13,20 +11,15 @@
     --bulma-radius: 6px;
     --bulma-radius-large: 8px;
 
-    /* The brand green is a FILL colour: white on it is 2.6:1 and it is 2.6:1 on white.
-       Anything drawn as text on the page background uses these instead - the same split
-       tokens.css makes between --pk-primary and --pk-primary-text. */
+    /* The brand green is a fill colour, 2.6:1 against white, so text uses these, as
+       tokens.css splits --pk-primary from --pk-primary-text. */
     --pk-link: #487e1b;         /* 4.91:1 on white */
     --pk-link-hover: #3a6516;
 }
 
 [data-theme="dark"] {
-    /* On the dark surface the green clears AA outright, so fill and text tone converge -
-       again mirroring tokens.css. This site renders on Bulma's own dark scheme background
-       (hsl(221 14% 9%) = #14161a), not the product's #0d1117 - overriding
-       --bulma-scheme-h/s/main-l to chase that four-hex-value difference would re-tune every
-       grey Bulma derives in dark mode (borders, alt backgrounds, muted text) and risk its
-       internal contrast guarantees, for a difference that is imperceptible side by side. */
+    /* The green clears AA on the dark surface, so fill and text converge, as in tokens.css.
+       The background stays Bulma's #14161a; see "Decisions taken deliberately" in README.md. */
     --pk-link: #84cf3d;         /* 9.46:1 on Bulma's dark scheme background, hsl(221 14% 9%) */
     --pk-link-hover: #9bdb5e;
 }
@@ -55,7 +48,7 @@ a:hover {
     left: 0.5rem;
 }
 
-/* Layout: fixed navbar, sticky sidebar, readable measure for prose. */
+/* Layout: content beside a sidebar that sticks while the page scrolls. */
 .pk-layout {
     display: flex;
     gap: 2rem;
@@ -150,7 +143,7 @@ h4:hover .pk-heading-anchor,
     color: var(--pk-link);
 }
 
-/* Callouts. Coloured left rule plus a tinted ground - never coloured body text. */
+/* Callouts: a coloured left rule on a tinted ground, so the body text keeps its colour. */
 .pk-callout {
     border-left: 4px solid var(--bulma-primary);
     background: var(--bulma-background);
@@ -171,13 +164,9 @@ h4:hover .pk-heading-anchor,
     margin-bottom: 0;
 }
 
-/* The mark is two-tone: its slate magnifier is 1.4:1 on the dark ground and vanishes.
-   Same swap peekaboot-frontend does, same reason.
-   The url()s below are root-relative, not run through Liquid's relative_url filter like
-   everywhere else on the site — this file has no front matter, so Jekyll doesn't process
-   it and {{ }} would ship as literal text. Correct today only because _config.yml's
-   baseurl is "". If baseurl ever becomes non-empty, these two paths break and must be
-   made front-matter-and-relative_url or otherwise site-root-aware. */
+/* The mark's slate magnifier is 1.4:1 on the dark ground, so dark mode swaps in a light
+   variant, as peekaboot-frontend does. Jekyll does not process this file, so the url()s are
+   root-relative and break if _config.yml's baseurl ever stops being "". */
 .pk-logo {
     height: 28px;
     width: 28px;
