@@ -3,6 +3,7 @@ title: Quick start
 lead: Add the starter, run your app, open the toolbar and the dashboard.
 permalink: /docs/quick-start/
 redirect_from:
+  - /docs/
   - /docs/requirements/
 ---
 
