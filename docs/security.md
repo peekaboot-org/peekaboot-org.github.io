@@ -349,7 +349,7 @@ If your application sends a `Content-Security-Policy`:
 (realm `Peekaboot`) on `/peekaboot/**`. It challenges every request, whatever else
 authenticated it. With `spring.mvc.servlet.path` set, it guards the dashboard under that prefix,
 such as `/app/peekaboot/**`. It also checks requests your application forwards or includes into
-the dashboard, and async dispatches. With Spring MVC on the class path but no
+the dashboard, and async dispatches. With Spring MVC on the classpath but no
 `DispatcherServletPath` bean, Peekaboot logs a WARN at startup and assumes `/peekaboot/*`.
 
 The credentials:

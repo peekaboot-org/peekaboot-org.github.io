@@ -1,6 +1,6 @@
 ---
 title: Traces
-lead: The last thousand requests, jobs and messages your application handled, with their spans, SQL and logs, held in memory.
+lead: The last 1,000 requests, jobs and messages your application handled, with their spans, SQL and logs, held in memory.
 permalink: /docs/traces/
 redirect_from:
   - /docs/tracing/
@@ -190,7 +190,7 @@ A statement shows as captured, highlighted. With Hibernate on the classpath, For
 out the way Hibernate's `format_sql` log does. Its bind parameters are listed under it, one list
 per batch entry, masked like the SQL. Substitute parameters puts them in place of the `?`
 placeholders when there is one set and it fits. The copy button copies the SQL as shown. A bind
-value over 1000 characters is cut with a comment like `/* 7 characters omitted */`. A batch
+value over 1,000 characters is cut with a comment like `/* 7 characters omitted */`. A batch
 records at most 100 parameter sets, and a note after the last one says how many were left
 out, such as "5 parameter sets omitted".
 

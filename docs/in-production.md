@@ -66,7 +66,7 @@ To size either down, see [Configuration, memory-constrained]({{ '/docs/configura
   who reaches it. See [Security, Peekaboot's
   guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
 
-## The starter is on the class path even when Peekaboot is off {#class-path}
+## The starter is on the classpath even when Peekaboot is off {#class-path}
 
 With `peekaboot.enabled=false` the starter still brings:
 

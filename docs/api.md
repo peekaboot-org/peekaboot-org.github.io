@@ -50,7 +50,7 @@ it uses. The dashboard shows or hides its tabs from it.
 | Field | Meaning |
 |---|---|
 | `tracing` | The trace store exists (`peekaboot.tracing.enabled`). |
-| `tracingSpansPossible` | An OpenTelemetry SDK is on the class path to feed the store. `false` means no span can ever arrive. `true` does not promise that one will, since your sampling settings still apply. Ignore it while `tracing` is `false`. |
+| `tracingSpansPossible` | An OpenTelemetry SDK is on the classpath to feed the store. `false` means no span can ever arrive. `true` does not promise that one will, since your sampling settings still apply. Ignore it while `tracing` is `false`. |
 | `metrics` | A `MeterRegistry` bean exists. Drives the Meters tab. |
 | `devToolbar` | `peekaboot.dev-toolbar` is on. |
 | `unmaskingEnabled` | `peekaboot.enable-unmasking` is on. The "Show secrets" toggle depends on it. |
@@ -205,8 +205,8 @@ Every part is masked by value shape.
 | Field | Meaning |
 |---|---|
 | `text` | The SQL as captured. A batch is its statements joined by `;` and a newline. |
-| `formatted` | The same SQL laid out by Hibernate's formatter. `null` without Hibernate on the class path, or when the formatter could not lay it out. |
-| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. A value over 1000 characters is cut. A batch records at most 100 sets, and a capped batch ends with one more list holding only the comment `/* N parameter sets omitted */`, or `/* 1 parameter set omitted */` for a single one. |
+| `formatted` | The same SQL laid out by Hibernate's formatter. `null` without Hibernate on the classpath, or when the formatter could not lay it out. |
+| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. A value over 1,000 characters is cut. A batch records at most 100 sets, and a capped batch ends with one more list holding only the comment `/* N parameter sets omitted */`, or `/* 1 parameter set omitted */` for a single one. |
 
 ### Log fields {#log-fields}
 

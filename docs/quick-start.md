@@ -26,7 +26,7 @@ implementation("{{ site.maven_group }}:{{ site.maven_artifact }}:{{ site.peekabo
 ```
 
 To keep Peekaboot out of the executable jar in Gradle, declare it `developmentOnly` instead.
-Spring Boot's Gradle plugin still puts it on the `bootRun` class path:
+Spring Boot's Gradle plugin still puts it on the `bootRun` classpath:
 
 ```groovy
 developmentOnly("{{ site.maven_group }}:{{ site.maven_artifact }}:{{ site.peekaboot_version }}")

@@ -13,7 +13,7 @@ permalink: /docs/troubleshooting/
 | The application sets `server.servlet.context-path`. | Open the dashboard under that path, for example `/my-app/peekaboot`. The `/peekaboot` part cannot be changed. |
 | The application sets `spring.mvc.servlet.path`. | Open the dashboard under the DispatcherServlet's path, for example `/app/peekaboot/`. The startup summary prints the right URL. The `/peekaboot` part cannot be changed. |
 | The application is reactive (WebFlux) or not a web application. | None. Peekaboot's dashboard needs a servlet web application. |
-| Spring Boot Actuator is not on the class path. | Keep `spring-boot-starter-actuator`, which the Peekaboot starter brings in. |
+| Spring Boot Actuator is not on the classpath. | Keep `spring-boot-starter-actuator`, which the Peekaboot starter brings in. |
 
 The startup log helps to tell these apart. Peekaboot logs a startup summary with the
 application name, build, server and datasource details whenever it is on, unless you set
@@ -37,12 +37,12 @@ what counts as a local run]({{ '/docs/configuration/' | relative_url }}#local-ru
 `GET /peekaboot/api/features`.
 
 With `tracingSpansPossible` false the tab shows no list. It says that no OpenTelemetry SDK is on
-the class path and names `org.springframework.boot:spring-boot-starter-opentelemetry` as the
+the classpath and names `org.springframework.boot:spring-boot-starter-opentelemetry` as the
 dependency to add.
 
 | `tracingSpansPossible` | Cause | Fix |
 |---|---|---|
-| `false` | No OpenTelemetry SDK on the class path. | Keep `spring-boot-starter-opentelemetry`, which the Peekaboot starter brings in. See [Quick start]({{ '/docs/quick-start/' | relative_url }}#what-the-starter-brings). |
+| `false` | No OpenTelemetry SDK on the classpath. | Keep `spring-boot-starter-opentelemetry`, which the Peekaboot starter brings in. See [Quick start]({{ '/docs/quick-start/' | relative_url }}#what-the-starter-brings). |
 | `true` | Your configuration sets `management.tracing.sampling.probability` to `0`. Peekaboot's default of `1.0` loses to any value you set, and a value between `0` and `1` records only that share of requests. | Check the effective value on the Environment tab and remove or raise your setting. |
 
 A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
@@ -171,7 +171,7 @@ That process counts as a deployment, not a test.
 
 **Fix:** one of these.
 
-- Use the user name and the generated password from the `Peekaboot Security` block in the
+- Use the username and the generated password from the `Peekaboot Security` block in the
   startup log. With storage on, only the first start prints the password. Later starts print
   `Password: unchanged since <date>`. If nobody kept it, delete the credentials file named on
   that line and restart for a new one.

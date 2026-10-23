@@ -149,7 +149,7 @@ directory overwrite each other's history. Set `dir` in both cases. Every charact
 | File | Contents | Size |
 |---|---|---|
 | `insights.snapshot` | The insights history, written every `peekaboot.insights.persistence.interval` and at shutdown. | About 5 MB at the default levels. |
-| `lifecycle.jsonl` | The start and stop history, capped at 1000 events (about 500 runs), oldest dropped first. | Typically well under 400 KB. |
+| `lifecycle.jsonl` | The start and stop history, capped at 1,000 events (about 500 runs), oldest dropped first. | Typically well under 400 KB. |
 
 On a POSIX file system Peekaboot creates the directory `rwx------` and both files `rw-------`.
 An existing directory keeps its permissions. On Windows the platform defaults apply.
