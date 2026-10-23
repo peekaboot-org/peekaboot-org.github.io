@@ -18,7 +18,6 @@
        tokens.css makes between --pk-primary and --pk-primary-text. */
     --pk-link: #487e1b;         /* 4.91:1 on white */
     --pk-link-hover: #3a6516;
-    --pk-sidebar-active: #487e1b;
 }
 
 [data-theme="dark"] {
@@ -30,16 +29,13 @@
        internal contrast guarantees, for a difference that is imperceptible side by side. */
     --pk-link: #84cf3d;         /* 9.46:1 on Bulma's dark scheme background, hsl(221 14% 9%) */
     --pk-link-hover: #9bdb5e;
-    --pk-sidebar-active: #84cf3d;
 }
 
-a,
-.content a {
+a {
     color: var(--pk-link);
 }
 
-a:hover,
-.content a:hover {
+a:hover {
     color: var(--pk-link-hover);
 }
 
@@ -103,7 +99,7 @@ a:hover,
 
 .pk-sidebar__link.is-current {
     background: var(--bulma-background);
-    color: var(--pk-sidebar-active);
+    color: var(--pk-link);
     font-weight: 600;
 }
 
@@ -112,18 +108,10 @@ a:hover,
     min-width: 0;
 }
 
-/* Wide content must scroll inside its own box, never the page body. */
-.pk-content .highlight,
-.pk-content pre,
-.pk-content .table-container,
-.pk-content table {
-    overflow-x: auto;
-    max-width: 100%;
-}
-
 /* Markdown tables carry no wrapper element, so the table itself becomes the scroll box. */
 .pk-content table {
     display: block;
+    overflow-x: auto;
 }
 
 /* Not in table cells, where breaking anywhere shrinks columns until values wrap mid-word. */
@@ -139,12 +127,9 @@ a:hover,
     border-radius: var(--bulma-radius-large);
 }
 
-/* Deep-link affordance appended to every heading id in .pk-content (see site.js). Stays in
-   flow at all times so revealing it never shifts the line; opacity, not display, is what
-   toggles it so a keyboard user tabbing onto it still sees it appear. Selectors carry an
-   extra .pk-content so they outrank the sitewide ".content a" rule above, which would
-   otherwise paint this the same saturated link colour at all times. */
-.pk-content .pk-heading-anchor {
+/* Deep-link affordance from site.js. Opacity, not display, hides it, so the line never
+   shifts and a keyboard user tabbing onto it still sees it. */
+.pk-heading-anchor {
     margin-left: 0.4em;
     font-size: 0.75em;
     font-weight: 400;
@@ -154,14 +139,14 @@ a:hover,
     white-space: nowrap;
 }
 
-.pk-content h2:hover .pk-heading-anchor,
-.pk-content h3:hover .pk-heading-anchor,
-.pk-content h4:hover .pk-heading-anchor,
-.pk-content .pk-heading-anchor:focus {
+h2:hover .pk-heading-anchor,
+h3:hover .pk-heading-anchor,
+h4:hover .pk-heading-anchor,
+.pk-heading-anchor:focus {
     opacity: 1;
 }
 
-.pk-content .pk-heading-anchor:hover {
+.pk-heading-anchor:hover {
     color: var(--pk-link);
 }
 
