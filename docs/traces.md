@@ -145,16 +145,16 @@ class; use `ClassUtils.getUserClass` for the declared one.
 
 Each row in the trace list shows what started the trace. The Traces tab filters by it.
 
-| Value | Icon | Means |
-|---|---|---|
-| HTTP | 🌐 | An inbound web request |
-| Messaging | 📩 | A message picked off a queue or topic |
-| RPC Call | 🔗 | An inbound remote-procedure call, gRPC for example |
-| Scheduled | 🕑 | A `@Scheduled` method fired by Spring's scheduler |
-| Async Task | ⚡ | [Background work](#background-work) on a Spring task executor, only with context propagation on |
-| Database | 🗂 | A database call with no request, job or message around it |
-| Maintenance | 🔧 | Upkeep outside any traced work: a pool acquiring or validating a connection, a Redis connection handshake or health check |
-| Unknown | ❓ | Anything else, such as in-process work, a message being sent or an outbound call whose caller was not traced |
+| Type | API value | Icon | Means |
+|---|---|---|---|
+| HTTP | `HTTP_REQUEST` | 🌐 | An inbound web request |
+| Messaging | `MESSAGE_CONSUMER` | 📩 | A message picked off a queue or topic |
+| RPC Call | `RPC_CALL` | 🔗 | An inbound remote-procedure call, gRPC for example |
+| Scheduled | `SCHEDULED_JOB` | 🕑 | A `@Scheduled` method fired by Spring's scheduler |
+| Async Task | `ASYNC_TASK` | ⚡ | [Background work](#background-work) on a Spring task executor, only with context propagation on |
+| Database | `DATABASE` | 🗂 | A database call with no request, job or message around it |
+| Maintenance | `MAINTENANCE` | 🔧 | Upkeep outside any traced work: a pool acquiring or validating a connection, a Redis connection handshake or health check |
+| Unknown | `UNKNOWN` | ❓ | Anything else, such as in-process work, a message being sent, or an outbound call whose caller was not traced or has not arrived yet |
 
 Only `@Scheduled` methods fired by Spring's scheduler show as Scheduled. Quartz, a plain
 `ScheduledExecutorService` or another timer shows as Unknown or by whatever else its tags
