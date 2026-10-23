@@ -9,7 +9,7 @@ layout: home
         <img src="{{ '/assets/img/logo-full.png' | relative_url }}" alt="The Peekaboot logo">
       </figure>
       <h1 class="title is-1">Peekaboot</h1>
-      <p class="subtitle is-4">{{ site.tagline }}</p>
+      <p class="subtitle is-4">{{ site.description }}</p>
       <div class="buttons is-centered mt-5">
         <a class="button is-primary is-medium" href="{{ '/docs/quick-start/' | relative_url }}">Quick start</a>
         <a class="button is-medium" href="{{ site.repository_url }}">GitHub</a>
@@ -33,7 +33,7 @@ layout: home
   <div class="container">
     <h2 class="title is-3 has-text-centered">Add the dependency</h2>
     <p class="subtitle is-6 has-text-centered">
-      Requires Java 25 or newer, Spring Boot 4.1 and a servlet web application.
+      Requires Java {{ site.java_version }} or newer, Spring Boot {{ site.spring_boot_version }} and a servlet web application.
     </p>
     <div class="columns">
       <div class="column">

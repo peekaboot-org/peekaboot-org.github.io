@@ -36,8 +36,8 @@ artifact]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-arti
 
 ## What your application needs {#what-your-application-needs}
 
-- Java 25 or newer.
-- Spring Boot 4.1. Earlier 4.x releases are untested.
+- Java {{ site.java_version }} or newer.
+- Spring Boot {{ site.spring_boot_version }}. Earlier 4.x releases are untested.
 - A servlet web application.
 
 Peekaboot serves the dashboard and the toolbar on servlet (Spring MVC) applications only. On
