@@ -165,7 +165,7 @@ A row for an async task carries that task's own start time, duration, status and
 ### Span fields {#span-fields}
 
 Each span is `{spanId, name, kind, startTimeMs, durationMs, status, children, tags, events,
-issues, errorMessage, errorClass, query, rowCount, asyncEntry}`.
+issues, errorMessage, errorClass, statement, rowCount, asyncEntry}`.
 
 | Field | Meaning |
 |---|---|
@@ -173,14 +173,14 @@ issues, errorMessage, errorClass, query, rowCount, asyncEntry}`.
 | `issues` | `[{type, severity}]`. `type` is `SLOW`, `VERY_SLOW` or `SLOW_QUERY`; `severity` is `warning` or `error`. See [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues). |
 | `errorClass` | Fully qualified class of the last exception recorded on the span. `ERROR` when the span failed without one. `null` on spans that did not fail. |
 | `errorMessage` | The span's error description, or the exception message when that is empty. `null` on spans that did not fail. |
-| `query` | The [statement](#statement-fields) of a database query span. `null` on other spans and when no statement was recorded. |
+| `statement` | The [statement](#statement-fields) of a database query span. `null` on other spans and when no statement was recorded. |
 | `rowCount` | Rows returned by a query, where the JDBC instrumentation reported it. |
 | `asyncEntry` | `true` on the span that starts an async task. |
 
 ### Query fields {#query-fields}
 
 Each entry in the trace's `queries` is `{spanId, dbSystem, dataSourceName, durationMs, rowCount}`.
-Its statement is the [`query`](#statement-fields) of the span that `spanId` names. A query whose
+Its statement is the [`statement`](#statement-fields) of the span that `spanId` names. A query whose
 span recorded no statement is listed all the same.
 
 | Field | Meaning |
@@ -193,7 +193,7 @@ span recorded no statement is listed all the same.
 
 ### Statement fields {#statement-fields}
 
-A span's `query` is `{text, formatted, parameters, omittedParameterSets}`. Every part is masked
+A span's `statement` is `{text, formatted, parameters, omittedParameterSets}`. Every part is masked
 by value shape.
 
 | Field | Meaning |
