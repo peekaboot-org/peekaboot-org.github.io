@@ -58,7 +58,7 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Build and Git metadata (`info.build`) | Overview | By key and by value shape |
 | Datasource host, port, database name, user, product and driver version | Overview | Connection parameters only. User, host and database name are shown as is. |
 | Process identity: OS user, uid, gid, pid, parent-process chain with command names | Overview | No |
-| Machine: CPU count and model, physical memory, max heap, container runtime, every non-local IP address and its hostname | Overview, `runtime.machine` in the API | No |
+| Machine: CPU count and model, physical memory, max heap, container runtime, every non-local IP address and its hostname | Overview, `runtime.machine` and `runtime.memory` in the API | No |
 | Logger levels, configured and effective | Loggers tab | Nothing to mask. The API is GET-only, so levels cannot be changed. |
 | Flyway migrations: version, description, script, type, duration, install time, status | Flyway tab | No |
 | Liquibase change sets: execution order, id, author, change log, description, execution date, status | Liquibase tab | No |
