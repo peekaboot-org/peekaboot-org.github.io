@@ -42,9 +42,8 @@ Requests under these path prefixes are never recorded: `/static/`, `/webjars/`,
 `management.endpoints.web.base-path`). With the base path set to `/` there is no prefix to
 exclude, and actuator requests are recorded like any other.
 
-With the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) on, each trace also holds
-the request and response headers and parameters and the log lines written while handling it.
-Without the toolbar, traces hold spans only.
+Each trace also holds the request and response headers and parameters and the log lines
+written while handling it.
 
 ## Spans Peekaboot adds {#spans-peekaboot-adds}
 
@@ -196,8 +195,8 @@ out, such as "5 parameter sets omitted".
 
 Logs lists the log lines written while handling the request, filterable by text, level and
 span. Request shows the method, path, query string, status, duration, controller method,
-parameters, and request and response headers. Logs and Request are filled only while the dev
-toolbar is on. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) for what is masked
+parameters, and request and response headers. See [Dev
+toolbar]({{ '/docs/dev-toolbar/' | relative_url }}#request-and-response-detail) for what is masked
 and what is not.
 
 A query or a log line jumps back to its span in the tree; a span's own query and logs sit
@@ -230,9 +229,6 @@ Every trace is in All. A trace that qualifies is also in Errors, Slow, or both.
 | All | Every trace | `peekaboot.tracing.max-traces` (1000) |
 | Errors | Traces with an errored span or an `ERROR` log line | `peekaboot.tracing.max-error-traces` (100) |
 | Slow | Traces whose duration, [background work](#background-work) excluded, reaches `peekaboot.tracing.slow-trace-threshold-ms` (1000) | `peekaboot.tracing.max-slow-traces` (100) |
-
-Error log lines are captured only while the dev toolbar is on. Without it, Errors admits on
-errored spans alone.
 
 When a bucket is full, it drops the trace it admitted first. The buckets evict independently,
 so a trace can stay under Errors or Slow after it has left All. Nothing expires on a timer,

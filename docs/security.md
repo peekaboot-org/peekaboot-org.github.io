@@ -35,8 +35,8 @@ What that means for access:
 These properties change what Peekaboot exposes. Their defaults are under
 [Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
 
-- `peekaboot.enabled` serves the dashboard and its API, and `peekaboot.dev-toolbar.enabled` captures
-  headers, parameters and log messages. See [General]({{ '/docs/configuration/' | relative_url }}#peekaboot).
+- `peekaboot.enabled` serves the dashboard and its API, and `peekaboot.tracing.enabled` captures
+  headers, parameters and log messages. See [Tracing]({{ '/docs/configuration/' | relative_url }}#peekaboottracing).
 - `peekaboot.unmasking.enabled` allows real values. See [two opt-ins](#masking-opt-ins).
 - `peekaboot.security.*` arms and configures [Peekaboot's
   guard]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
@@ -67,8 +67,8 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Micrometer meters: names, tags, measurements | Meters tab | Tag values by key and by value shape |
 | Up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event history, and the list of collected meters | Insights tab, `/peekaboot/api/insights/**` | No |
 | Request traces: span tree, span names, timings, tags, error messages, SQL text and bind parameters | Traces tab, toolbar | Tags, error messages, SQL and bind parameters by value shape only |
-| With the toolbar on: request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape |
-| With the toolbar on: the message of every log event emitted inside a trace | Logs tab of a trace | No |
+| Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape |
+| The message of every log event emitted inside a trace | Logs tab of a trace | No |
 
 SQL text is shown as your JDBC instrumentation records it, with any literal values in the
 statement. Bind parameters are shown too. Masking applies to what Peekaboot shows. An
@@ -76,7 +76,7 @@ application that also exports its traces, over OTLP for example, sends the SQL a
 parameters unmasked. Request and response bodies are never captured. A log event emitted
 outside a trace is dropped.
 
-With the toolbar on, every response carries
+With tracing on, every response carries
 `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"`, JSON API calls included.
 Anyone who reads that header and can reach `/peekaboot/**` can open that request's trace at
 `GET /peekaboot/api/traces/{traceId}/insights`. Responses on the [paths Peekaboot never
@@ -406,9 +406,9 @@ work through this list.
 - [ ] <span id="keeping-it-out-of-production-entirely"></span>If Peekaboot must never ship,
       keep the starter out of the production artifact. See [Keeping it out of the artifact
       entirely]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely).
-- [ ] Where you turn it on, leave `peekaboot.dev-toolbar.enabled` off unless you need header, parameter
-      and log capture. On a deployment the toolbar, storage and the error page stay off unless
-      you set them.
+- [ ] Where you turn it on, set `peekaboot.tracing.enabled=false` unless you need traces with
+      their headers, parameters and logs. On a deployment the toolbar, storage and the error
+      page stay off unless you set them.
 - [ ] Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password, see [Peekaboot's
       guard](#peekaboots-guard), or set `peekaboot.security.enabled=false` and put the
       [`SecurityFilterChain`](#securing-the-dashboard) in front first. Use the chain if you need

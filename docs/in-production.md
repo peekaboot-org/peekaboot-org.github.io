@@ -35,8 +35,8 @@ lists the properties it changes and what each one costs. It also adds these:
 | Async task spans | A span around each task a Spring task executor runs inside a trace, sent to every exporter. Turn off with `peekaboot.tracing.async=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 | Event listener spans | A span around each `@EventListener` call inside a trace, sent to every exporter. Listener beans become proxies. Turn off with `peekaboot.tracing.event-listeners=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 | HTML response buffering | `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. | Dev toolbar on |
-| `Server-Timing` header | Every response carries its trace id, except on the [paths Peekaboot never records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) | Dev toolbar on |
-| Log capture | A Logback appender receives every log event | Dev toolbar on |
+| `Server-Timing` header | Every response carries its trace id, except on the [paths Peekaboot never records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
+| Log capture | A Logback appender receives every log event | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
 
 An Actuator endpoint that keeps failing is logged once at WARN with its stack trace, then at
 DEBUG. Peekaboot adds no `/actuator` exposure. See [Security, Peekaboot leaves `/actuator`

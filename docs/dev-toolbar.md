@@ -80,7 +80,7 @@ level, message and the active span.
 <div class="pk-callout pk-callout--warning" markdown="1">
 **Log lines are not masked.** A log statement that includes a secret or personal data is
 stored and shown exactly as written. See [Security]({{ '/docs/security/' | relative_url }})
-for what is exposed while the toolbar is on.
+for what tracing exposes.
 </div>
 
 ## Swagger UI {#it-also-works-from-swagger-ui}

@@ -14,7 +14,7 @@ Five properties default according to how the application was launched.
 | Property | Local run | Deployment | Test | Turns on |
 |---|---|---|---|---|
 | `peekaboot.enabled` | `true` | `false` | `false` | The dashboard, its API, and Peekaboot's defaults. |
-| `peekaboot.dev-toolbar.enabled` | `true` | `false` | `false` | The toolbar, log capture and request-detail capture. |
+| `peekaboot.dev-toolbar.enabled` | `true` | `false` | `false` | The toolbar on your HTML pages. |
 | `peekaboot.storage.enabled` | `true` | `false` | `false` | Writing the charts and the run history to disk. |
 | `peekaboot.error-page.enabled` | `true` | `false` | `false` | The error page in place of Boot's whitelabel page. |
 | `peekaboot.security.enabled` | `false` | `true` | `false` | Peekaboot's HTTP Basic guard on `/peekaboot/**`. |
@@ -79,8 +79,8 @@ Every feature also needs `peekaboot.enabled=true`.
 | Feature | Switch | Also needs |
 |---|---|---|
 | Dashboard and API | `peekaboot.enabled` | A servlet web application and Actuator. The starter brings Actuator. |
-| Dev toolbar | `peekaboot.dev-toolbar.enabled` (detected) | A servlet web application. Request-detail and log capture also need tracing on. |
-| Tracing | `peekaboot.tracing.enabled` (`true`) | A servlet web application. The starter brings the OpenTelemetry SDK that fills the trace store. |
+| Dev toolbar | `peekaboot.dev-toolbar.enabled` (detected) | A servlet web application. The request details and logs it shows need tracing on. |
+| Tracing | `peekaboot.tracing.enabled` (`true`) | A servlet web application. The starter brings the OpenTelemetry SDK that fills the trace store. Request-detail and log capture come with it. |
 | Insights | `peekaboot.insights.enabled` (`true`) | A servlet web application and a Micrometer `MeterRegistry` bean. |
 | Error page | `peekaboot.error-page.enabled` (detected) | A servlet web application with Spring MVC. |
 | Peekaboot's guard | `peekaboot.security.enabled` (detected) | A servlet web application. |
@@ -120,11 +120,11 @@ empty value still stops startup.
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.enabled` | detected | Master switch for the dashboard, its API and Peekaboot's Spring Boot defaults. |
-| `peekaboot.dev-toolbar.enabled` | detected | The dev toolbar, correlated-log capture and request-detail capture. |
+| `peekaboot.dev-toolbar.enabled` | detected | The dev toolbar on your HTML pages. |
 | `peekaboot.unmasking.enabled` | `false` | Allows `unmask=true` to reveal real values from the Environment and Config data. |
 
-The toolbar captures headers, query and form parameters and the resolved controller. It does not
-capture request or response bodies. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
+The toolbar shows what tracing captures for the request. See [Dev
+toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
 
 `unmasking.enabled` changes nothing on its own. See [Security, two opt-ins before a real value
 is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
@@ -256,7 +256,7 @@ Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`,
 
 | Property | Default | Effect |
 |---|---|---|
-| `peekaboot.tracing.enabled` | `true` | Whether the in-memory trace store exists. |
+| `peekaboot.tracing.enabled` | `true` | Whether the in-memory trace store exists, and with it the capture of each request's headers, parameters, resolved controller and log lines. Request and response bodies are not captured. |
 | `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors. The span fails when an `@Async` method, or a task passed to `execute()` or `submit()`, throws. Needs `spring.task.execution.propagate-context`, see [Traces, background work]({{ '/docs/traces/' | relative_url }}#background-work). |
 | `peekaboot.tracing.event-listeners` | `true` | Records a span for each call of an `@EventListener` method. An `@Async` listener also needs `spring.task.execution.propagate-context`. See [Traces, event listeners]({{ '/docs/traces/' | relative_url }}#event-listeners). |
 | `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. |
@@ -264,7 +264,7 @@ Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`,
 | `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. |
 | `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. |
 | `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Duration in milliseconds, background async work excluded, at or above which a trace enters the Slow bucket. |
-| `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. Only filled while the dev toolbar is on. |
+| `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. |
 
 See [Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)
 for what these limits hold and the worst case, and [background

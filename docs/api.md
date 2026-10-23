@@ -224,8 +224,8 @@ is off.
 details, logs and queries.
 
 - `404` means the store does not hold the trace. The id is unknown or evicted, tracing is off,
-  it was a request to Peekaboot itself, or no span has arrived yet while the dev toolbar is off.
-- `200` with `rootSpan: null` means the dev toolbar recorded the request and its spans are
+  or it was a request to Peekaboot itself.
+- `200` with `rootSpan: null` means Peekaboot recorded the request and its spans are
   still on the way. Poll until `rootSpan` is set. How long that takes is the span export
   delay, see [Spring Boot defaults Peekaboot
   changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).

@@ -53,8 +53,7 @@ A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 Spring Boot's longer [export
 delay]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application). A test that reads
 `/peekaboot/api/traces/**` right after its request runs before the spans are there. Until the
-first one arrives, `/peekaboot/api/traces/{traceId}/insights` answers `404`. With the toolbar on
-it answers `200` with `rootSpan: null` instead.
+first one arrives, `/peekaboot/api/traces/{traceId}/insights` answers `200` with `rootSpan: null`.
 
 **Fix:** shorten the export delay in the test profile, or poll until the response carries a
 `rootSpan`.
@@ -80,7 +79,7 @@ application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application
 
 | Cause | Fix |
 |---|---|
-| The dev toolbar is off. Logs are captured only while `peekaboot.dev-toolbar.enabled` is on. | Set `peekaboot.dev-toolbar.enabled: true`. |
+| Tracing is off. Logs are captured only while `peekaboot.tracing.enabled` is on. | Remove `peekaboot.tracing.enabled: false`. |
 | The application does not log through Logback. | None. Log capture works with Logback only. |
 | The log line was written on a thread without the trace context. Only lines that carry the trace id are kept. | For `@Async` and other executor work, see [the next entry](#async-work-missing). |
 
