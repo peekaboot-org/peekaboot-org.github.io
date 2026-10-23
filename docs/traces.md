@@ -254,9 +254,10 @@ application, see [Configuration]({{ '/docs/configuration/' | relative_url }}#mem
 {% include screenshot.html name="dashboard-traces" alt="The Traces tab with a Slow bucket count lower than the number of rows carrying a SLOW badge" %}
 
 The SLOW badge on a row means one span in the trace reached `slow-span-threshold-ms` (100ms).
-The Slow bucket counts traces whose whole duration reached `slow-trace-threshold-ms` (1000ms),
-so many more rows carry the badge than the bucket holds. A trace with an error shows the ERROR
-badge instead of SLOW, so counting SLOW badges misses slow traces that also failed.
+The Slow bucket counts traces whose duration, background work excluded, reached
+`slow-trace-threshold-ms` (1000ms), so many more rows carry the badge than the bucket holds. A
+trace with an error shows the ERROR badge instead of SLOW, so counting SLOW badges misses slow
+traces that also failed.
 
 ## Limitations {#tracing-vs-distributed-tracing}
 

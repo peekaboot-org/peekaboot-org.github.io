@@ -262,7 +262,7 @@ Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`,
 | `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped and the trace is marked `TRUNCATED`. |
 | `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. |
 | `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. |
-| `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Total duration at or above which a trace enters the Slow bucket. |
+| `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Duration in milliseconds, background async work excluded, at or above which a trace enters the Slow bucket. |
 | `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. Only filled while the dev toolbar is on. |
 
 See [Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)
