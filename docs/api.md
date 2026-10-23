@@ -181,13 +181,13 @@ issues, errorMessage, errorClass, query, rowCount, asyncEntry}`.
 
 ### Query fields {#query-fields}
 
-Each entry in the trace's `queries` is `{spanId, statement, dbSystem, dataSourceName,
-durationMs, rowCount}`.
+Each entry in the trace's `queries` is `{spanId, dbSystem, dataSourceName, durationMs, rowCount}`.
+Its statement is the [`query`](#statement-fields) of the span that `spanId` names. A query whose
+span recorded no statement is listed all the same.
 
 | Field | Meaning |
 |---|---|
 | `spanId` | The query's span. |
-| `statement` | The query's [statement](#statement-fields). `null` when no statement was recorded. The query is listed all the same. |
 | `dbSystem` | The database the span names, such as `postgresql`. `null` when nothing named one. |
 | `dataSourceName` | The HikariCP pool name, else the DataSource name. A generated pool name such as `HikariPool-1` is skipped. `null` when neither is known. |
 | `durationMs` | How long the query span took. |
@@ -195,8 +195,7 @@ durationMs, rowCount}`.
 
 ### Statement fields {#statement-fields}
 
-A span's `query` and a query's `statement` share one shape, `{text, formatted, parameters}`.
-Every part is masked by value shape.
+A span's `query` is `{text, formatted, parameters}`. Every part is masked by value shape.
 
 | Field | Meaning |
 |---|---|
