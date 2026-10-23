@@ -288,7 +288,7 @@ the history survives a restart is [`peekaboot.storage.enabled`](#peekabootstorag
 
 | Property | Default | Effect |
 |---|---|---|
-| `peekaboot.insights.enabled` | `true` | The collector, the `/api/insights/**` endpoints and the Insights tab. |
+| `peekaboot.insights.enabled` | `true` | The collector, the `/peekaboot/api/insights/**` endpoints and the Insights tab. |
 | `peekaboot.insights.levels[n].interval` | `10s`, `1m`, `1h` | The sampling tick (level 0) and each coarser aggregation window. |
 | `peekaboot.insights.levels[n].size` | `90`, `1440`, `720` | Entries kept per series at that level. `interval` &times; `size` is how far back the charts reach. |
 | `peekaboot.insights.config-location` | unset, so `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file. Peekaboot's bundled panels are still merged underneath. |
