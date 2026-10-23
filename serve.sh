@@ -17,6 +17,8 @@ readonly IMAGE="ruby:3.3"          # verified to resolve and build the github-pa
 readonly PORT="${PORT:-4000}"
 readonly LIVERELOAD_PORT=35729
 readonly ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+readonly -a SITE_MOUNT=(-v "$ROOT":/srv/jekyll -w /srv/jekyll)
+readonly -a JEKYLL_RUN=(docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp "${SITE_MOUNT[@]}")
 
 build_only=false
 case "${1:-}" in
@@ -42,7 +44,7 @@ reclaim_generated_dirs() {
 
     echo "Found root-owned files in the generated directories, left by an earlier"
     echo "container run. Taking ownership of them so this run can write..."
-    docker run --rm -v "$ROOT":/srv/jekyll -w /srv/jekyll "$IMAGE" \
+    docker run --rm "${SITE_MOUNT[@]}" "$IMAGE" \
         sh -c "chown -R $(id -u):$(id -g) _site vendor .jekyll-cache 2>/dev/null; true"
     echo
 }
@@ -117,11 +119,7 @@ readonly SETUP='bundle config set --local path vendor/bundle \
 
 if [ "$build_only" = true ]; then
     echo "Building into _site/ ..."
-    docker run --rm \
-        --user "$(id -u):$(id -g)" \
-        -e HOME=/tmp \
-        -v "$ROOT":/srv/jekyll -w /srv/jekyll \
-        "$IMAGE" sh -c "$SETUP && bundle exec jekyll build --trace"
+    "${JEKYLL_RUN[@]}" "$IMAGE" sh -c "$SETUP && bundle exec jekyll build --trace"
     echo
     echo "Built. Open _site/index.html, or run ./serve.sh to browse it."
     exit 0
@@ -140,10 +138,7 @@ fi
 
 # --force_polling: inotify doesn't propagate from a bind mount into the container
 # on every platform, so Jekyll would miss edits without it.
-exec docker run --rm "${tty_flags[@]}" --init \
-    --user "$(id -u):$(id -g)" \
-    -e HOME=/tmp \
-    -v "$ROOT":/srv/jekyll -w /srv/jekyll \
+exec "${JEKYLL_RUN[@]}" "${tty_flags[@]}" --init \
     -p "${PORT}:${PORT}" -p "${LIVERELOAD_PORT}:${LIVERELOAD_PORT}" \
     "$IMAGE" sh -c "$SETUP && bundle exec jekyll serve \
         --host 0.0.0.0 --port ${PORT} --livereload --force_polling --trace"
