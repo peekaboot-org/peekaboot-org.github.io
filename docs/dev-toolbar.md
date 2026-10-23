@@ -4,11 +4,7 @@ lead: A bar at the bottom of every HTML page your app renders, with the request,
 permalink: /docs/dev-toolbar/
 ---
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
-       alt="The collapsed dev toolbar at the bottom of an orders page, showing a 200 status badge, GET /orders, the controller method, the duration, 84 spans, 26 queries in 29ms, 1 log and a copyable trace id"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="toolbar-collapsed" %}
 
 The bar shows the response status, method and path, controller method, duration, span count,
 query count and total query time, log count, error and warning log counts when there are any,
@@ -110,11 +106,7 @@ that failed, not the `/error` dispatch that rendered the page. A request that Sp
 rejects before it reaches your application, such as a 401 or 403, gets no bar on its error
 page.
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/error-page-light.png' | relative_url }}"
-       alt="Peekaboot's error page for GET /boom: status 500, the IllegalStateException and its message, the stack trace with the application frame in bold and framework frames folded, and the dev toolbar reporting the failed request"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="error-page" %}
 
 ## With Spring Security {#with-spring-security}
 

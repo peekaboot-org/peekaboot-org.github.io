@@ -49,11 +49,7 @@ Start it from your IDE, with `mvn spring-boot:run` or with `gradle bootRun`. Pee
 itself and the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) on for these launches.
 The toolbar docks to the bottom of every HTML page your app renders.
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
-       alt="The collapsed dev toolbar at the bottom of an orders page, showing a 200 status badge, GET /orders, the controller method, the duration, 84 spans, 26 queries in 29ms, 1 log and a copyable trace id"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="toolbar-collapsed" %}
 
 Click the bar for the request's trace detail, with its request and response, spans, queries and
 logs. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
@@ -76,11 +72,7 @@ On another port, context path or servlet path, use the URL on the `Peekaboot Das
 Peekaboot logs once the application is ready. See
 [Configuration]({{ '/docs/configuration/' | relative_url }}#the-urls-in-the-summary).
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
-       alt="The Overview tab with the Started at, Startup, Ready after and Uptime tiles, a health banner reading UP, and the Build, Git, Spring, Java, System and Machine cards"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-overview" %}
 
 ## What you get immediately {#what-you-get-immediately}
 

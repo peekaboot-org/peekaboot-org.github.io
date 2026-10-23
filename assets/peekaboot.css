@@ -125,6 +125,11 @@ a:hover {
     border-radius: var(--bulma-radius-large);
 }
 
+.pk-content figcaption {
+    color: var(--bulma-text-weak);
+    font-size: 0.75rem;
+}
+
 /* Deep-link affordance from site.js. Opacity, not display, hides it, so the line never
    shifts and a keyboard user tabbing onto it still sees it. */
 .pk-heading-anchor {

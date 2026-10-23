@@ -65,11 +65,7 @@ layout: page
         </p>
       </div>
       <div class="column is-7">
-        <figure class="image">
-          <img src="{{ '/assets/img/screenshots/toolbar-collapsed-light.png' | relative_url }}"
-               alt="The collapsed dev toolbar at the bottom of an orders page, showing a 200 status badge, GET /orders, the controller method, the duration, 84 spans, 26 queries in 29ms, 1 log and a copyable trace id"
-               loading="lazy">
-        </figure>
+        {% include screenshot.html name="toolbar-collapsed" %}
       </div>
     </div>
 
@@ -83,11 +79,7 @@ layout: page
         </p>
       </div>
       <div class="column is-7">
-        <figure class="image">
-          <img src="{{ '/assets/img/screenshots/error-page-light.png' | relative_url }}"
-               alt="Peekaboot's error page for GET /boom: status 500, the IllegalStateException and its message, and the stack trace with the application frame in bold and framework frames folded"
-               loading="lazy">
-        </figure>
+        {% include screenshot.html name="error-page" %}
       </div>
     </div>
 
@@ -102,11 +94,7 @@ layout: page
         </p>
       </div>
       <div class="column is-7">
-        <figure class="image">
-          <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
-               alt="The Overview tab with the Started at, Startup, Ready after and Uptime tiles, a health banner reading UP, and the Build, Git, Spring, Java, System and Machine cards"
-               loading="lazy">
-        </figure>
+        {% include screenshot.html name="dashboard-overview" %}
       </div>
     </div>
 
@@ -123,11 +111,7 @@ layout: page
         </p>
       </div>
       <div class="column is-7">
-        <figure class="image">
-          <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
-               alt="The Queries tab for a GET /orders request, listing 26 PostgreSQL statements with their duration and row count, each showing the actual SQL text"
-               loading="lazy">
-        </figure>
+        {% include screenshot.html name="trace-detail-queries" %}
       </div>
     </div>
 
@@ -141,11 +125,7 @@ layout: page
         </p>
       </div>
       <div class="column is-7">
-        <figure class="image">
-          <img src="{{ '/assets/img/screenshots/dashboard-insights-light.png' | relative_url }}"
-               alt="The Insights tab, live line charts of CPU usage and system load with an aggregation level switch and toggles for percentiles and restart markers"
-               loading="lazy">
-        </figure>
+        {% include screenshot.html name="dashboard-insights" %}
       </div>
     </div>
   </div>

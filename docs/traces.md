@@ -103,11 +103,7 @@ With context propagation on:
   `@Async` method under `@EnableAsync(mode = AdviceMode.ASPECTJ)`.
 - In the trace's Spans tab, the task starts collapsed and carries a background chip.
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/trace-detail-async-light.png' | relative_url }}"
-       alt="The Spans tab for a GET /orders/enrich request that returned in 13ms, with an async task span under the handler carrying a background chip and 2 logs, which ran for 153ms"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="trace-detail-async" %}
 
 Each task is also listed as its own row of type Async Task, timed on its own. The row appears
 when the task ends and goes to the top of the list, even if its trace is older. It links to the
@@ -174,11 +170,7 @@ them until you untick Maintenance under Excluded. Over the HTTP API,
 Click a row on the Traces tab, or click the dev toolbar, to open a trace's detail. It has four
 tabs and opens on Spans.
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/trace-detail-light.png' | relative_url }}"
-       alt="The expanded trace detail overlay for a GET /orders request, showing a span tree with nested CLIENT and SERVER spans, database connection and query spans, and timing bars"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="trace-detail" %}
 
 Spans shows the span tree with each span's kind, tags and duration, nested as they ran. Click
 a span's name for its details: kind, a copyable span id, the full tags, and the error class and
@@ -186,11 +178,7 @@ message where the span failed. A query span carries a "1 query" button that open
 statement with its row count. A span that logged carries an "N logs" button that opens its log
 lines, with stack traces folded as on the Logs tab. Both panels open in place.
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/trace-detail-queries-light.png' | relative_url }}"
-       alt="The Queries tab for the same GET /orders request, listing 26 PostgreSQL statements, each with duration and row count, highlighted SQL, Formatted and Substitute parameters toggles, a Copy SQL button, and a numbered Parameters list"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="trace-detail-queries" %}
 
 Queries lists the SQL the trace ran, one row per statement, with duration and row count where
 the instrumentation records it. A query at or above
@@ -259,11 +247,7 @@ Lower the limits on a memory-constrained application, see
 
 ### The SLOW badge and the Slow bucket {#slow-badge-vs-slow-bucket}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-traces-light.png' | relative_url }}"
-       alt="The Traces tab showing a Slow (1) bucket count while four separate trace rows carry a SLOW badge"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-traces" alt="The Traces tab with a Slow bucket count lower than the number of rows carrying a SLOW badge" %}
 
 The SLOW badge on a row means one span in the trace reached `slow-span-threshold-ms` (100ms).
 The Slow bucket counts traces whose whole duration reached `slow-trace-threshold-ms` (1000ms),

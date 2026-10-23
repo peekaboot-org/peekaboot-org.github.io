@@ -1,0 +1,19 @@
+# Alt text for each screenshot, keyed by its file name without the -light/-dark suffix.
+# Describe what each shot shows without counts or timings, which change with every recapture.
+toolbar-collapsed: The collapsed dev toolbar at the bottom of an orders page, showing the status badge, GET /orders, the controller method, the duration, the span count, the query count with total query time, the log count and the trace id
+error-page: Peekaboot's error page for GET /boom with status 500, the IllegalStateException and its message, the stack trace with the application frame in bold and framework frames folded, and the dev toolbar reporting the failed request
+dashboard-overview: The Overview tab with the stat tiles, a health banner reading UP, and the Build, Git, Spring, Java, System and Machine cards
+dashboard-insights: The Insights tab, live line charts of CPU usage and system load with an aggregation level switch and toggles for percentiles and restart markers
+dashboard-lifecycle: The Lifecycle tab, a table of application runs newest first with start, duration, stop, downtime and build columns, showing Running, Unclean exit and Deployment badges
+dashboard-traces: The Traces tab, a bucketed list of recent traces with duration, status and query count, filterable by root action type
+dashboard-meters: The Meters tab, a filterable list of Micrometer meters, each with its type, unit and measurement count
+dashboard-environment: The Environment tab with a property source expanded, its values shown in full except spring.datasource.password, rendered as ******, with a Show secrets toggle above the list
+dashboard-environment-revealed: The same property source after clicking Show secrets, spring.datasource.password now rendered as sample_app_db_pwd instead of ******
+dashboard-flyway: The Flyway tab, one row per migration with version, description, script, type, duration, installed time and status
+dashboard-loggers: The Loggers tab, packages grouped and expandable, each logger showing its effective level, with a filter for configured-only loggers
+dashboard-config: The Config tab with the spring.datasource group expanded, its password rendered as ****** alongside real values for the other properties, with a Show secrets toggle above the list
+dashboard-config-revealed: The same spring.datasource group after clicking Show secrets, its password now reading sample_app_db_pwd instead of ******, with everything else on the tab unchanged
+dashboard-scheduled-tasks: The Scheduled Tasks tab, grouped into Cron Tasks, Fixed Delay Tasks and Fixed Rate Tasks, each expandable, with summary counts above
+trace-detail: The expanded trace detail overlay for a GET /orders request, showing a span tree with nested CLIENT and SERVER spans, database connection and query spans, and timing bars
+trace-detail-queries: The Queries tab for a GET /orders request, listing its PostgreSQL statements, each with duration and row count, highlighted SQL, Formatted and Substitute parameters toggles, a Copy SQL button, and a numbered Parameters list
+trace-detail-async: The Spans tab for a GET /orders/enrich request, with an async task span under the handler that carries a background chip and 2 logs and runs longer than the request itself

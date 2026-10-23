@@ -9,11 +9,7 @@ JDBC, repositories, transactions, disk space and log events. It keeps up to 30 d
 at three resolutions, in memory, inside your application. You can switch on more panels or add
 your own.
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-insights-light.png' | relative_url }}"
-       alt="The Insights tab, live line charts of CPU usage and system load with an aggregation level switch and toggles for percentiles and restart markers"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-insights" %}
 
 ## When the tab appears {#when-the-tab-isnt-there}
 

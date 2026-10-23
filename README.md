@@ -155,8 +155,10 @@ state.
 The tool's file names are canonical: `dashboard-<tab id>-<theme>.png` for the dashboard
 tabs, plus the revealed, trace-detail and toolbar shots (the product repo's
 `peekaboot-testing-app/README.md` lists them all). This repo uses those names verbatim in
-`assets/img/screenshots/` and in every `<img>` reference. When a tab id changes in the
-product, the files and references here are renamed to follow.
+`assets/img/screenshots/` and as the keys of `_data/screenshots.yml`, which holds each shot's
+alt text. A page shows a shot with `{% include screenshot.html name="dashboard-overview" %}`,
+plus an optional `caption`, or an `alt` where the page describes the shot differently on
+purpose. When a tab id changes in the product, the files and keys here are renamed to follow.
 
 ## Social images
 

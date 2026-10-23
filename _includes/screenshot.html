@@ -1,0 +1,12 @@
+{%- comment -%}
+  A screenshot from assets/img/screenshots/. Parameters: name (the file name without its
+  -light/-dark suffix), caption (optional, HTML), alt (optional, overrides _data/screenshots.yml).
+{%- endcomment -%}
+{%- assign shot_alt = include.alt | default: site.data.screenshots[include.name] -%}
+{%- assign shot_path = '/assets/img/screenshots/' | append: include.name -%}
+<figure class="image">
+  <img src="{{ shot_path | append: '-light.png' | relative_url }}" alt="{{ shot_alt | escape }}" loading="lazy">
+  {%- if include.caption %}
+  <figcaption>{{ include.caption }}</figcaption>
+  {%- endif %}
+</figure>

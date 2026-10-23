@@ -256,20 +256,11 @@ The parameter alone does nothing. With unmasking enabled, the Environment and Co
 a "Show secrets" toggle. It is absent otherwise. Its state is not kept: a reload or a new tab
 starts masked. See [The dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config).
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-config-light.png' | relative_url }}"
-       alt="The Config tab with the spring.datasource group expanded, its password value rendered as ****** alongside real values for its other properties, with a Show secrets toggle above the group list."
-       loading="lazy">
-  <figcaption class="has-text-grey is-size-7">Masked, the default.</figcaption>
-</figure>
+{% capture caption %}Masked, the default.{% endcapture %}
+{% include screenshot.html name="dashboard-config" caption=caption %}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-config-revealed-light.png' | relative_url }}"
-       alt="The same spring.datasource group after clicking Show secrets. Its password value now reads sample_app_db_pwd instead of ******, and everything else on the tab is unchanged."
-       loading="lazy">
-  <figcaption class="has-text-grey is-size-7">Revealed, with
-  <code>enable-unmasking</code> on and Show secrets clicked.</figcaption>
-</figure>
+{% capture caption %}Revealed, with <code>enable-unmasking</code> on and Show secrets clicked.{% endcapture %}
+{% include screenshot.html name="dashboard-config-revealed" caption=caption %}
 
 ## Securing the dashboard with Spring Security {#securing-the-dashboard}
 

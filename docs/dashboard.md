@@ -72,11 +72,7 @@ timezone are never part of a link.
 
 ## Overview {#overview}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-overview-light.png' | relative_url }}"
-       alt="The Overview tab with the Started at, Startup, Ready after and Uptime tiles, a health banner reading UP, and the Build, Git, Spring, Java, System and Machine cards"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-overview" %}
 
 Overview shows the application's health and what is running. It holds the health banner with
 its per-component breakdown, build and Git metadata, Spring Boot and Java versions, OS and JVM
@@ -101,11 +97,7 @@ The row is hidden when Insights is off or has no `MeterRegistry`.
 
 ## Insights {#insights}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-insights-light.png' | relative_url }}"
-       alt="The Insights tab, live line charts of CPU usage and system load with an aggregation level switch and toggles for percentiles and restart markers"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-insights" %}
 
 Insights shows live charts of CPU, memory, threads, HTTP, the connection pool and more, over
 the last minutes, hours or days. [Insights]({{ '/docs/insights/' | relative_url }}) covers
@@ -113,11 +105,7 @@ the default panels, adding your own, the memory cost and the limits of the perce
 
 ## Lifecycle {#lifecycle}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-lifecycle-light.png' | relative_url }}"
-       alt="The Lifecycle tab, a table of application runs newest first with start, duration, stop, downtime and build columns, showing Running, Unclean exit and Deployment badges"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-lifecycle" %}
 
 Lifecycle lists every run of the application, newest first, 20 to a page.
 
@@ -139,11 +127,7 @@ on by default for a local run. Without it the tab shows the current run only. Wi
 
 ## Traces {#traces}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-traces-light.png' | relative_url }}"
-       alt="The Traces tab, a bucketed list of recent traces with duration, status and query count, filterable by root action type"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-traces" %}
 
 Traces lists recent requests, jobs and messages in three buckets: All, Errors and Slow. You
 can filter by root action type and root operation. The list shows the 50 newest matches, so
@@ -157,11 +141,7 @@ and [background work]({{ '/docs/traces/' | relative_url }}#background-work).
 
 ## Meters {#meters}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-meters-light.png' | relative_url }}"
-       alt="The Meters tab, a filterable list of Micrometer meters, each with its type, unit and measurement count"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-meters" %}
 
 Meters lists every meter in the Micrometer `MeterRegistry` with its current measurements,
 filterable by name or tag. A meter name from this list is what you put in a
@@ -170,35 +150,20 @@ Insights.
 
 ## Environment {#environment}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-environment-light.png' | relative_url }}"
-       alt="The Environment tab with a property source expanded, its values shown in full except spring.datasource.password, rendered as ******, with a Show secrets toggle above the list"
-       loading="lazy">
-  <figcaption class="has-text-grey is-size-7">Masked by default.</figcaption>
-</figure>
+{% capture caption %}Masked by default.{% endcapture %}
+{% include screenshot.html name="dashboard-environment" caption=caption %}
 
 Environment lists every property source Spring resolved, in resolution order, with its raw
 keys and values. Command-line arguments, OS environment, system properties,
 `application.yml` and Peekaboot's own defaults all appear here. The active profiles are
 shown above the list. Use it to find which source wins for a key.
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-environment-revealed-light.png' | relative_url }}"
-       alt="The same property source after clicking Show secrets: spring.datasource.password now rendered as sample_app_db_pwd instead of ******"
-       loading="lazy">
-  <figcaption class="has-text-grey is-size-7">Revealed, after
-  <code>peekaboot.enable-unmasking</code> is on <em>and</em> Show secrets is clicked. See
-  <a href="{{ '/docs/security/' | relative_url }}#masking">Security: masking</a> for the
-  two opt-ins and why this particular value is safe to publish.</figcaption>
-</figure>
+{% capture caption %}Revealed, after <code>peekaboot.enable-unmasking</code> is on <em>and</em> Show secrets is clicked. See <a href="{{ '/docs/security/' | relative_url }}#masking">Security: masking</a> for the two opt-ins and why this particular value is safe to publish.{% endcapture %}
+{% include screenshot.html name="dashboard-environment-revealed" caption=caption %}
 
 ## Flyway {#flyway}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-flyway-light.png' | relative_url }}"
-       alt="The Flyway tab, one row per migration: version, description, script, type, duration, installed time and status"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-flyway" %}
 
 Flyway shows one row per migration: version, description, script, type, duration, install
 time and status.
@@ -212,11 +177,7 @@ from every Liquibase bean share one table. Liquibase records no duration.
 
 ## Loggers {#loggers}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-loggers-light.png' | relative_url }}"
-       alt="The Loggers tab, packages grouped and expandable, each logger showing its effective level, with a filter for configured-only loggers"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-loggers" %}
 
 Loggers shows each logger's effective and configured level, grouped by package. You can
 filter by name and show only loggers with an explicit level. The tab is read-only. It cannot
@@ -224,11 +185,7 @@ change a level.
 
 ## Config {#config}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-config-light.png' | relative_url }}"
-       alt="The Config tab with the spring.datasource group expanded, its password rendered as ****** alongside real values for the other properties, with a Show secrets toggle above the list"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-config" %}
 
 Config shows the values bound to `@ConfigurationProperties` beans, grouped by prefix. Nested
 values get one row each under their full dotted key, such as
@@ -260,11 +217,7 @@ what is not.
 
 ## Scheduled Tasks {#scheduled-tasks}
 
-<figure class="image">
-  <img src="{{ '/assets/img/screenshots/dashboard-scheduled-tasks-light.png' | relative_url }}"
-       alt="The Scheduled Tasks tab, grouped into Cron Tasks, Fixed Delay Tasks and Fixed Rate Tasks, each expandable, with summary counts above"
-       loading="lazy">
-</figure>
+{% include screenshot.html name="dashboard-scheduled-tasks" %}
 
 Scheduled Tasks lists `@Scheduled` methods grouped by type: cron, fixed delay and fixed rate.
 Each group expands to its tasks. Cron expressions come with a description in the dashboard's
