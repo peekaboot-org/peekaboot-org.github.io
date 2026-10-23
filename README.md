@@ -53,8 +53,9 @@ Two things you may notice, neither a problem:
 - `assets/peekaboot.css`: the brand mapping over vendored Bulma
   (`assets/bulma.min.css`, whose banner names the version).
 - `assets/site.js`: theme resolution (shared `peekaboot-theme` localStorage key and
-  `data-theme` attribute with Peekaboot's own dashboard) and the navbar burger. Loaded
-  synchronously in `<head>`, without `defer`, so the theme applies before first paint.
+  `data-theme` attribute with Peekaboot's own dashboard), the navbar burger, and the `#`
+  anchor on each doc heading. Loaded synchronously in `<head>`, without `defer`, so the theme
+  applies before first paint.
 
 ## Adding a page
 
@@ -79,7 +80,6 @@ sidebar's current-page highlight (`aria-current="page"`, driven by `page.url == 
 
 When a page is merged into another, keep its old URL alive with `redirect_from` in the
 surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml`).
-`docs/quick-start.md`, `docs/traces.md` and `docs/configuration.md` all use it.
 
 ## Decisions taken deliberately
 

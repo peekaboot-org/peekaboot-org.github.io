@@ -1,4 +1,5 @@
-// The entire client-side surface of this site: theme resolution and the navbar burger.
+// The entire client-side surface of this site: theme resolution, the navbar burger and the
+// heading anchors.
 // The storage key and the [data-theme] attribute are shared with Peekaboot's own UI
 // (peekaboot-frontend/.../shared/theme.js), so a visitor who set a theme in a running
 // dashboard sees this site match it.
@@ -32,13 +33,17 @@
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
 
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
+    function labelToggle(theme) {
         var button = document.getElementById('theme-toggle');
         if (button) {
             button.setAttribute('aria-label',
                 theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
         }
+    }
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        labelToggle(theme);
     }
 
     applyTheme(resolveTheme());
@@ -60,7 +65,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        applyTheme(resolveTheme());
+        labelToggle(document.documentElement.getAttribute('data-theme'));
         addHeadingAnchors();
 
         var toggle = document.getElementById('theme-toggle');
