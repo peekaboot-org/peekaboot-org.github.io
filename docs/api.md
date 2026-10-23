@@ -193,13 +193,15 @@ span recorded no statement is listed all the same.
 
 ### Statement fields {#statement-fields}
 
-A span's `query` is `{text, formatted, parameters}`. Every part is masked by value shape.
+A span's `query` is `{text, formatted, parameters, omittedParameterSets}`. Every part is masked
+by value shape.
 
 | Field | Meaning |
 |---|---|
 | `text` | The SQL as captured. A batch is its statements joined by `;` and a newline. |
 | `formatted` | The same SQL laid out by Hibernate's formatter. `null` without Hibernate on the classpath, or when the formatter could not lay it out. |
-| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. A value over 1,000 characters is cut. A batch records at most 100 sets, and a capped batch ends with one more list holding only the comment `/* N parameter sets omitted */`, or `/* 1 parameter set omitted */` for a single one. |
+| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. A value over 1,000 characters is cut. A batch records at most 100 sets. |
+| `omittedParameterSets` | How many parameter sets a batch past 100 left out of `parameters`. `0` for every other statement. |
 
 ### Log fields {#log-fields}
 
