@@ -167,8 +167,7 @@ A row for an async task carries that task's own start time, duration, status and
 ### Span fields {#span-fields}
 
 Each span is `{spanId, name, kind, startTimeMs, durationMs, status, children, tags, events,
-issues, creationOrder, errorMessage, errorClass, remoteServiceName, query, rowCount,
-asyncEntry}`.
+issues, creationOrder, errorMessage, errorClass, query, rowCount, asyncEntry}`.
 
 | Field | Meaning |
 |---|---|
@@ -176,7 +175,6 @@ asyncEntry}`.
 | `issues` | `[{type, message, severity}]`. `type` is `SLOW`, `VERY_SLOW` or `SLOW_QUERY`; `severity` is `warning` or `error`. See [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues). |
 | `errorClass` | Fully qualified class of the last exception recorded on the span. `ERROR` when the span failed without one. `null` on spans that did not fail. |
 | `errorMessage` | The span's error description, or the exception message when that is empty. `null` on spans that did not fail. |
-| `remoteServiceName` | The remote service the span called, if the instrumentation named one. |
 | `query` | The [statement](#statement-fields) of a database query span. `null` on other spans and when no statement was recorded. |
 | `rowCount` | Rows returned by a query, where the JDBC instrumentation reported it. |
 | `asyncEntry` | `true` on the span that starts an async task. |
