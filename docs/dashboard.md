@@ -246,5 +246,5 @@ Spring Boot Actuator provides the `MeterRegistry`. See
 
 Every property is under [Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
 The table above names the switch behind each tab. The [issue
-thresholds]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing) set the SLOW,
+thresholds]({{ '/docs/configuration/' | relative_url }}#issue-thresholds) set the SLOW,
 VERY_SLOW and SLOW_QUERY badges on Traces.

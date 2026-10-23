@@ -182,7 +182,7 @@ lines, with stack traces folded as on the Logs tab. Both panels open in place.
 
 Queries lists the SQL the trace ran, one row per statement, with duration and row count where
 the instrumentation records it. A query at or above
-`peekaboot.ui.tracing.slow-query-threshold-ms` (default 50ms) is marked SLOW. A JDBC batch is
+`peekaboot.tracing.slow-query-threshold-ms` (default 50ms) is marked SLOW. A JDBC batch is
 one row with its statements joined. A query recorded without statement text is listed without
 SQL.
 
@@ -210,8 +210,8 @@ shows as span issues and the Slow bucket.
 
 ### Issues {#issues}
 
-An issue marks one span in the tree. The thresholds live under `peekaboot.ui.tracing`, see
-[Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing).
+An issue marks one span in the tree. The thresholds live under `peekaboot.tracing`, see
+[Configuration]({{ '/docs/configuration/' | relative_url }}#issue-thresholds).
 
 | Issue | Raised when | Property (default) | Severity |
 |---|---|---|---|

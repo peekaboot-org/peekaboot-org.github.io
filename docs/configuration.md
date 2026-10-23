@@ -269,16 +269,16 @@ See [Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#th
 for what these limits hold and the worst case, and [background
 work]({{ '/docs/traces/' | relative_url }}#background-work) for what `async` shows.
 
-### Issue thresholds {#peekabootuitracing}
+#### Issue thresholds {#issue-thresholds}
 
 These decide the dashboard's issues and badges. They do not change what is captured. See
 [Issues]({{ '/docs/traces/' | relative_url }}#issues).
 
 | Property | Default | Effect |
 |---|---|---|
-| `peekaboot.ui.tracing.slow-span-threshold-ms` | `100` | A span whose own duration is at or above this gets SLOW, and its trace row a SLOW badge. |
-| `peekaboot.ui.tracing.very-slow-span-threshold-ms` | `500` | At or above this a span gets VERY_SLOW instead of SLOW. |
-| `peekaboot.ui.tracing.slow-query-threshold-ms` | `50` | A database query at or above this gets SLOW_QUERY and a SLOW label in the Queries tab. |
+| `peekaboot.tracing.slow-span-threshold-ms` | `100` | A span whose own duration is at or above this gets SLOW, and its trace row a SLOW badge. |
+| `peekaboot.tracing.very-slow-span-threshold-ms` | `500` | At or above this a span gets VERY_SLOW instead of SLOW. |
+| `peekaboot.tracing.slow-query-threshold-ms` | `50` | A database query at or above this gets SLOW_QUERY and a SLOW label in the Queries tab. |
 
 ### Insights {#peekabootinsights}
 
