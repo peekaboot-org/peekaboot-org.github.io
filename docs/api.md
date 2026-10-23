@@ -19,6 +19,10 @@ them anywhere else.
   settings do not change them, and Peekaboot does not change your application's JSON.
 - All endpoints are `GET`. A parameter that is not a number or boolean where one is expected
   gets Spring's `400`.
+- A point in time Peekaboot records is an ISO-8601 string in UTC, such as
+  `2026-10-23T10:15:30.123456Z`, with as many fractional digits as the clock gave.
+  `server.currentTime` keeps the JVM's own offset. Only the Insights series positions are
+  epoch milliseconds, named `...EpochMs`. Any other field ending in `Ms` is a duration.
 
 ## Endpoints {#endpoints}
 
@@ -144,7 +148,7 @@ for itself and once more for each async task it started. Those extra rows count 
 List rows and the [single trace](#single-trace) share one shape:
 
 ```
-{traceId, startTimeMs, durationMs, status, slow, rootActionType, rootOperation,
+{traceId, startTime, durationMs, status, slow, rootActionType, rootOperation,
  rootSpan, summary, httpExchange, logs, queries, subtree, truncated}
 ```
 
@@ -164,7 +168,7 @@ A row for an async task carries that task's own start time, duration, status and
 
 ### Span fields {#span-fields}
 
-Each span is `{spanId, name, kind, startTimeMs, durationMs, status, children, tags, events,
+Each span is `{spanId, name, kind, startTime, durationMs, status, children, tags, events,
 issues, errorMessage, errorClass, statement, rowCount, asyncEntry}`.
 
 | Field | Meaning |
@@ -274,10 +278,10 @@ off they cover only the current run.
 `GET /peekaboot/api/lifecycle/events` returns every start and stop, oldest first:
 
 ```
-{events: [{type, epochMs, version, branch, commitId, shortCommitId, buildTimeEpochMs, uncleanPrevious}]}
+{events: [{type, timestamp, version, branch, commitId, shortCommitId, buildTime, uncleanPrevious}]}
 ```
 
-- `type` is `start` or `stop`. A stop carries only `type` and `epochMs`.
+- `type` is `start` or `stop`. A stop carries only `type` and `timestamp`.
 - A start carries the build fields that changed since the previous start. The first start
   carries all of them.
 - `uncleanPrevious` is `true` when the previous run recorded no stop.
@@ -285,16 +289,16 @@ off they cover only the current run.
 `GET /peekaboot/api/lifecycle/runs` returns one entry per run, newest first:
 
 ```
-{runs: [{startedAtEpochMs, stoppedAtEpochMs, ranForMs, downForMs, version, branch,
-         shortCommitId, buildTimeEpochMs, changed, running, uncleanExit}]}
+{runs: [{startedAt, stoppedAt, ranForMs, downForMs, version, branch,
+         shortCommitId, buildTime, changed, running, uncleanExit}]}
 ```
 
 - Each row carries its full build info.
 - `changed` lists which of `version`, `branch` and `commit` differ from the run before. It is
   `[]` for the oldest run.
-- `uncleanExit: true` means the run recorded no stop. `stoppedAtEpochMs` and `ranForMs` are
+- `uncleanExit: true` means the run recorded no stop. `stoppedAt` and `ranForMs` are
   then `null`.
-- On the `running` row, `stoppedAtEpochMs` is `null` and `ranForMs` is the time so far.
+- On the `running` row, `stoppedAt` is `null` and `ranForMs` is the time so far.
 - `downForMs` is `null` when the gap to the previous run is unknown.
 
 See [The dashboard, Lifecycle]({{ '/docs/dashboard/' | relative_url }}#lifecycle).
