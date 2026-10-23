@@ -63,22 +63,13 @@ and Hibernate activity panels have data. Hibernate statistics add overhead to ev
 Set it to `false` in your own configuration to turn it off; those panels then show "No data".
 </div>
 
-## Settings and memory cost {#levels}
+## Levels and memory cost {#levels}
 
-| Property | Default | Effect |
-|---|---|---|
-| `peekaboot.insights.enabled` | `true` | Turns the collector, the Insights tab and the Overview stat tiles on or off |
-| `peekaboot.insights.levels` | `10s` &times; 90, `1m` &times; 1440, `1h` &times; 720 | The resolutions kept, as `interval` and `size` (entries per series) |
-| `peekaboot.insights.config-location` | unset | Another location for your panel file. See [Customise the panels](#configuring-panels) |
-| `peekaboot.insights.persistence.interval` | the coarsest level's interval (`1h`) | How often history is written to disk while storage is on |
-| `peekaboot.insights.persistence.max-age` | the coarsest level's interval &times; size (30 days) | The oldest saved history that is still loaded at startup |
-
-The default levels cover 15 minutes at 10 seconds, 24 hours at 1 minute and 30 days at
-1 hour. Setting `levels` replaces the whole list. Each interval must be a whole multiple of
-the one before it and fit inside that level's ring. A `1m` level over `10s` needs the `10s`
-level's `size` to be at least 6. A broken rule fails startup with a message naming both
-intervals. See
-[Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootinsights).
+Insights keeps each series at several levels, each an `interval` and a `size` (entries per
+series). The default levels cover 15 minutes at 10 seconds, 24 hours at 1 minute and 30 days at
+1 hour. `peekaboot.insights.levels` replaces them, and the rules a list of levels must follow
+are under [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabootinsights), with
+the other `peekaboot.insights.*` properties.
 
 ### What it costs {#what-it-costs}
 

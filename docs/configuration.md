@@ -306,7 +306,7 @@ the history survives a restart is [`peekaboot.storage.enabled`](#peekabootstorag
 | `peekaboot.insights.enabled` | `true` | The collector, the `/api/insights/**` endpoints and the Insights tab. |
 | `peekaboot.insights.levels[n].interval` | `10s`, `1m`, `1h` | The sampling tick (level 0) and each coarser aggregation window. |
 | `peekaboot.insights.levels[n].size` | `90`, `1440`, `720` | Entries kept per series at that level. `interval` &times; `size` is how far back the charts reach. |
-| `peekaboot.insights.config-location` | `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file. Peekaboot's bundled panels are still merged underneath. |
+| `peekaboot.insights.config-location` | unset, so `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file. Peekaboot's bundled panels are still merged underneath. |
 | `peekaboot.insights.persistence.interval` | the coarsest level's `interval` (`1h`) | How often the history is written to `insights.snapshot`. Does nothing while storage is off. |
 | `peekaboot.insights.persistence.max-age` | the coarsest level's span (30 days) | The oldest snapshot that is still loaded at startup. |
 
@@ -317,7 +317,7 @@ all of these hold:
 - Every `interval` and `size` is greater than zero, and every `size` is at most 1,000,000.
 - Each `interval` is a whole multiple of the one before it.
 - Each `interval` fits in the level below it. A `1m` level over a `10s` level spans six entries,
-  so the `10s` level needs a `size` of at least 6.
+  so the `10s` level needs a `size` of at least 6. The startup failure names both intervals.
 - `persistence.interval` and `persistence.max-age`, when set, are greater than zero.
 
 Memory follows `size`, not `interval`. Level 0 stores one number per series per entry. Every
@@ -334,7 +334,7 @@ you define your own. Peekaboot sets no `spring.task.execution.*` property.
 |---|---|---|---|---|
 | `management.otlp.metrics.export.enabled` | `true` | `false` | always | The starter brings Micrometer's OTLP registry, which would otherwise push metrics to `localhost:4318`. Nothing leaves the process unless you opt in. |
 | `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled`, servlet web application | Every request reaches the Traces tab. |
-| `spring.jpa.properties.[hibernate.generate_statistics]` | `false` (Hibernate's own) | `true` | `peekaboot.enabled`, servlet web application | The `hibernate.*` panels on Insights need Hibernate's statistics. |
+| `spring.jpa.properties[hibernate.generate_statistics]` | `false` (Hibernate's own) | `true` | `peekaboot.enabled`, servlet web application | The `hibernate.*` panels on Insights need Hibernate's statistics. |
 | `management.info.env.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | Your `info.*` properties show on the Overview tab. OS environment variables are on the Environment tab. |
 | `management.info.java.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | The Java card on Overview. |
 | `management.info.os.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | The System card on Overview. |

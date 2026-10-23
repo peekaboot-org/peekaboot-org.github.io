@@ -243,15 +243,7 @@ Spring Boot Actuator provides the `MeterRegistry`. See
 
 ## Settings {#settings}
 
-| Property | Default | Effect |
-|---|---|---|
-| `peekaboot.enabled` | on for a local run | Turns the dashboard and its API on. Every other switch needs it |
-| `peekaboot.insights.enabled` | `true` | The Insights tab and the Overview stat tiles |
-| `peekaboot.tracing.enabled` | `true` | The Traces tab |
-| `peekaboot.lifecycle.enabled` | `true` | The run history on the Lifecycle tab |
-| `peekaboot.storage.enabled` | on for a local run | Lifecycle and Insights history across restarts |
-| `peekaboot.enable-unmasking` | `false` | The Show secrets toggle on Environment and Config |
-| `peekaboot.ui.tracing.*` | `100`, `500`, `50` ms | The thresholds for the SLOW, VERY_SLOW and SLOW_QUERY badges on Traces |
-
-All properties are listed under
-[Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
+Every property is under [Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
+The table above names the switch behind each tab. The [issue
+thresholds]({{ '/docs/configuration/' | relative_url }}#peekabootuitracing) set the SLOW,
+VERY_SLOW and SLOW_QUERY badges on Traces.

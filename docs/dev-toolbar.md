@@ -30,14 +30,10 @@ peekaboot:
   dev-toolbar: false
 ```
 
-| Property | Default | Effect |
-|---|---|---|
-| `peekaboot.dev-toolbar` | `true` for a local run, else `false` | Injects the bar and captures request detail and logs into traces. |
-| `peekaboot.ui.tracing.slow-query-threshold-ms` | `50` | Queries at or above this are marked SLOW. |
-| `management.opentelemetry.tracing.export.schedule-delay` | `200ms` while the toolbar is on (Spring Boot: `5s`) | How soon a finished span reaches the bar. Your own value wins. |
-
-See [Configuration]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
-for everything Peekaboot changes in your application.
+`peekaboot.dev-toolbar` is under [Configuration]({{ '/docs/configuration/' | relative_url }}#peekaboot).
+While the bar is on, Peekaboot shortens the span export delay so a finished span reaches the bar
+quickly. See [Spring Boot defaults Peekaboot
+changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
 
 ## Pages that get the bar {#where-the-bar-appears}
 

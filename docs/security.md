@@ -32,21 +32,19 @@ What that means for access:
 
 ### Security-related properties {#security-properties}
 
-| Property | Default | Effect |
-|---|---|---|
-| `peekaboot.enabled` | detected | Serves the dashboard and its API. Off, nothing exists under `/peekaboot/**`. |
-| `peekaboot.dev-toolbar` | detected | Injects the toolbar and captures headers, parameters and log messages into traces. |
-| `peekaboot.enable-unmasking` | `false` | Allows `?unmask=true` to return real values. See [Masking opt-ins](#masking-opt-ins). |
-| `peekaboot.security.enabled` | detected | Arms Peekaboot's HTTP Basic guard. |
-| `peekaboot.security.username` | `<artifact>-admin` | The guard's username. |
-| `peekaboot.security.password` | unset | The guard's password. Unset, one is generated. |
-| `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
-| `peekaboot.storage.enabled` | detected | Whether Peekaboot writes any file. |
-| `peekaboot.storage.dir` | `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where those files go. |
-| `peekaboot.error-page.enabled` | detected | Serves the error page with exception and stack trace. |
-| `peekaboot.error-page.override` | `false` | Serves it even where the application has an error page of its own. |
+These properties change what Peekaboot exposes. Their defaults are under
+[Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
 
-Types and the remaining details are in [Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
+- `peekaboot.enabled` serves the dashboard and its API, and `peekaboot.dev-toolbar` captures
+  headers, parameters and log messages. See [General]({{ '/docs/configuration/' | relative_url }}#peekaboot).
+- `peekaboot.enable-unmasking` allows real values. See [two opt-ins](#masking-opt-ins).
+- `peekaboot.security.*` arms and configures [Peekaboot's
+  guard]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
+- `peekaboot.storage.*` decides whether and where Peekaboot writes
+  [files]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
+- `peekaboot.error-page.*` serves the [error
+  page]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage) with exception and stack
+  trace.
 
 ## What the dashboard and API show {#what-the-dashboard-and-api-expose}
 
