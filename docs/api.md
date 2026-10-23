@@ -167,12 +167,12 @@ A row for an async task carries that task's own start time, duration, status and
 ### Span fields {#span-fields}
 
 Each span is `{spanId, name, kind, startTimeMs, durationMs, status, children, tags, events,
-issues, creationOrder, errorMessage, errorClass, query, rowCount, asyncEntry}`.
+issues, errorMessage, errorClass, query, rowCount, asyncEntry}`.
 
 | Field | Meaning |
 |---|---|
 | `status` | `OK` or `ERROR`. |
-| `issues` | `[{type, message, severity}]`. `type` is `SLOW`, `VERY_SLOW` or `SLOW_QUERY`; `severity` is `warning` or `error`. See [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues). |
+| `issues` | `[{type, severity}]`. `type` is `SLOW`, `VERY_SLOW` or `SLOW_QUERY`; `severity` is `warning` or `error`. See [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues). |
 | `errorClass` | Fully qualified class of the last exception recorded on the span. `ERROR` when the span failed without one. `null` on spans that did not fail. |
 | `errorMessage` | The span's error description, or the exception message when that is empty. `null` on spans that did not fail. |
 | `query` | The [statement](#statement-fields) of a database query span. `null` on other spans and when no statement was recorded. |
@@ -182,7 +182,7 @@ issues, creationOrder, errorMessage, errorClass, query, rowCount, asyncEntry}`.
 ### Query fields {#query-fields}
 
 Each entry in the trace's `queries` is `{spanId, statement, dbSystem, dataSourceName,
-durationMs, timestamp, rowCount, creationOrder}`.
+durationMs, rowCount}`.
 
 | Field | Meaning |
 |---|---|
@@ -191,9 +191,7 @@ durationMs, timestamp, rowCount, creationOrder}`.
 | `dbSystem` | The database the span names, such as `postgresql`. `null` when nothing named one. |
 | `dataSourceName` | The HikariCP pool name, else the DataSource name. A generated pool name such as `HikariPool-1` is skipped. `null` when neither is known. |
 | `durationMs` | How long the query span took. |
-| `timestamp` | When the query started, as an ISO-8601 string. |
 | `rowCount` | Rows returned, where the JDBC instrumentation reported it. |
-| `creationOrder` | The order in which Peekaboot received the span. |
 
 ### Statement fields {#statement-fields}
 
@@ -208,8 +206,8 @@ Every part is masked by value shape.
 
 ### Log fields {#log-fields}
 
-Each entry in the trace's `logs` is `{spanId, timestamp, level, loggerName, message, threadName,
-stackTrace, hiddenFrames, applicationFrames}`.
+Each entry in the trace's `logs` is `{spanId, timestamp, level, message, stackTrace, hiddenFrames,
+applicationFrames}`.
 
 `stackTrace` is `null` when the log event carried no exception. `hiddenFrames` and
 `applicationFrames` are lists of `{start, endExclusive}` line ranges into `stackTrace`. They
