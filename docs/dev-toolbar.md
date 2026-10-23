@@ -101,7 +101,7 @@ A custom `springdoc.swagger-ui.path` is honoured.
 ## The bar on the error page {#the-bar-on-the-error-page}
 
 HTML error pages get the bar, including [Peekaboot's error
-page]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage). It reports the request
+page]({{ '/docs/error-page/' | relative_url }}). It reports the request
 that failed, not the `/error` dispatch that rendered the page. A request that Spring Security
 rejects before it reaches your application, such as a 401 or 403, gets no bar on its error
 page.

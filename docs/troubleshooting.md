@@ -217,8 +217,8 @@ See [Configuration, `peekaboot.security`]({{ '/docs/configuration/' | relative_u
 **Fix:** set `peekaboot.error-page.enabled: true` on a deployment. To show Peekaboot's page
 in place of your own, set `peekaboot.error-page.override: true`, typically in your local
 profile. The override does not work when the application excludes `ErrorMvcAutoConfiguration`
-or maps its own `ErrorController` to `/error`. See [Configuration,
-`peekaboot.error-page`]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage).
+or maps its own `ErrorController` to `/error`. See [Error
+page]({{ '/docs/error-page/' | relative_url }}#override).
 
 ## Peekaboot's error page replaces your own {#error-page-replaces-own}
 

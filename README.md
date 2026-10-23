@@ -127,6 +127,7 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 | The startup summary's lines, or how a URL in it is built | `docs/configuration.md` (*The URLs in the summary*) |
 | Anything under `peekaboot.storage`, or what the two stores write | `docs/configuration.md`, `docs/security.md`, `docs/insights.md` |
 | The runs projection, its columns or its badges | `docs/dashboard.md` (*Lifecycle*) |
+| The error page, its back-off rules or the override | `docs/error-page.md` |
 
 `tokens.css` is not on that list. This site does not document theming; the product repo's
 `peekaboot-frontend/README.md` owns the token set.

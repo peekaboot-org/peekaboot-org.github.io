@@ -11,6 +11,8 @@
   pages:
     - title: Dev toolbar
       url: /docs/dev-toolbar/
+    - title: Error page
+      url: /docs/error-page/
     - title: The dashboard
       url: /docs/dashboard/
     - title: Traces
