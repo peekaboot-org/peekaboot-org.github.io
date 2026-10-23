@@ -158,7 +158,7 @@ keys and values. Command-line arguments, OS environment, system properties,
 `application.yml` and Peekaboot's own defaults all appear here. The active profiles are
 shown above the list. Use it to find which source wins for a key.
 
-{% capture caption %}Revealed, after <code>peekaboot.enable-unmasking</code> is on <em>and</em> Show secrets is clicked. See <a href="{{ '/docs/security/' | relative_url }}#masking">Security: masking</a> for the two opt-ins and why this particular value is safe to publish.{% endcapture %}
+{% capture caption %}Revealed, after <code>peekaboot.unmasking.enabled</code> is on <em>and</em> Show secrets is clicked. See <a href="{{ '/docs/security/' | relative_url }}#masking">Security: masking</a> for the two opt-ins and why this particular value is safe to publish.{% endcapture %}
 {% include screenshot.html name="dashboard-environment-revealed" caption=caption %}
 
 ## Flyway {#flyway}

@@ -56,7 +56,7 @@ it uses. The dashboard shows or hides its tabs from it.
 | `tracing` | The trace store exists (`peekaboot.tracing.enabled`). |
 | `tracingSpansPossible` | An OpenTelemetry SDK is on the classpath to feed the store. `false` means no span can ever arrive. `true` does not promise that one will, since your sampling settings still apply. Ignore it while `tracing` is `false`. |
 | `metrics` | A `MeterRegistry` bean exists. Drives the Meters tab. |
-| `unmaskingEnabled` | `peekaboot.enable-unmasking` is on. The "Show secrets" toggle depends on it. |
+| `unmaskingEnabled` | `peekaboot.unmasking.enabled` is on. The "Show secrets" toggle depends on it. |
 | `insights` | The Insights endpoints exist. |
 | `slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs` | The effective thresholds from [`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#issue-thresholds). |
 | `slowTraceThresholdMs` | The Slow bucket's threshold. `null` while tracing is off. |

@@ -35,9 +35,9 @@ What that means for access:
 These properties change what Peekaboot exposes. Their defaults are under
 [Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
 
-- `peekaboot.enabled` serves the dashboard and its API, and `peekaboot.dev-toolbar` captures
+- `peekaboot.enabled` serves the dashboard and its API, and `peekaboot.dev-toolbar.enabled` captures
   headers, parameters and log messages. See [General]({{ '/docs/configuration/' | relative_url }}#peekaboot).
-- `peekaboot.enable-unmasking` allows real values. See [two opt-ins](#masking-opt-ins).
+- `peekaboot.unmasking.enabled` allows real values. See [two opt-ins](#masking-opt-ins).
 - `peekaboot.security.*` arms and configures [Peekaboot's
   guard]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
 - `peekaboot.storage.*` decides whether and where Peekaboot writes
@@ -241,7 +241,7 @@ can contain plaintext SQL and plaintext request data.
 
 Masked values are revealed only when both are true:
 
-1. `peekaboot.enable-unmasking=true`. The default is `false`.
+1. `peekaboot.unmasking.enabled=true`. The default is `false`.
 2. The request is `GET /peekaboot/api/actuator/all/insights?unmask=true`. No other endpoint
    accepts `unmask`.
 
@@ -252,7 +252,7 @@ dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config).
 {% capture caption %}Masked, the default.{% endcapture %}
 {% include screenshot.html name="dashboard-config" caption=caption %}
 
-{% capture caption %}Revealed, with <code>enable-unmasking</code> on and Show secrets clicked.{% endcapture %}
+{% capture caption %}Revealed, with <code>unmasking.enabled</code> on and Show secrets clicked.{% endcapture %}
 {% include screenshot.html name="dashboard-config-revealed" caption=caption %}
 
 ## Securing the dashboard with Spring Security {#securing-the-dashboard}
@@ -406,7 +406,7 @@ work through this list.
 - [ ] <span id="keeping-it-out-of-production-entirely"></span>If Peekaboot must never ship,
       keep the starter out of the production artifact. See [Keeping it out of the artifact
       entirely]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely).
-- [ ] Where you turn it on, leave `peekaboot.dev-toolbar` off unless you need header, parameter
+- [ ] Where you turn it on, leave `peekaboot.dev-toolbar.enabled` off unless you need header, parameter
       and log capture. On a deployment the toolbar, storage and the error page stay off unless
       you set them.
 - [ ] Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password, see [Peekaboot's
@@ -417,7 +417,7 @@ work through this list.
 - [ ] Restrict network reach as well, with an internal-only ingress, a VPN, or a proxy that
       forwards `/peekaboot/**` only from trusted sources.
 - [ ] Don't rely on `management.endpoints.web.exposure`. It does not affect `/peekaboot/**`.
-- [ ] Leave `peekaboot.enable-unmasking=false`. With it on, anyone who can reach
+- [ ] Leave `peekaboot.unmasking.enabled=false`. With it on, anyone who can reach
       `/peekaboot/**` can add `?unmask=true`.
 - [ ] Don't treat masking as complete. Log messages are never masked, and SQL and request data
       are masked only where a rule recognises them. Don't point Peekaboot at traffic whose

@@ -19,7 +19,7 @@ counted too. Numbers are formatted in the language chosen on the dashboard.
 
 The toolbar needs:
 
-- `peekaboot.enabled=true` and `peekaboot.dev-toolbar=true`. Both default to true only for a
+- `peekaboot.enabled=true` and `peekaboot.dev-toolbar.enabled=true`. Both default to true only for a
   [local run]({{ '/docs/configuration/' | relative_url }}#local-run).
 - A servlet web application.
 - A Micrometer `Tracer` bean, which the starter provides. See [Quick
@@ -27,10 +27,11 @@ The toolbar needs:
 
 ```yaml
 peekaboot:
-  dev-toolbar: false
+  dev-toolbar:
+    enabled: false
 ```
 
-`peekaboot.dev-toolbar` is under [Configuration]({{ '/docs/configuration/' | relative_url }}#peekaboot).
+`peekaboot.dev-toolbar.enabled` is under [Configuration]({{ '/docs/configuration/' | relative_url }}#peekaboot).
 While the bar is on, Peekaboot shortens the span export delay so a finished span reaches the bar
 quickly. See [Spring Boot defaults Peekaboot
 changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).

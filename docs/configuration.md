@@ -14,7 +14,7 @@ Five properties default according to how the application was launched.
 | Property | Local run | Deployment | Test | Turns on |
 |---|---|---|---|---|
 | `peekaboot.enabled` | `true` | `false` | `false` | The dashboard, its API, and Peekaboot's defaults. |
-| `peekaboot.dev-toolbar` | `true` | `false` | `false` | The toolbar, log capture and request-detail capture. |
+| `peekaboot.dev-toolbar.enabled` | `true` | `false` | `false` | The toolbar, log capture and request-detail capture. |
 | `peekaboot.storage.enabled` | `true` | `false` | `false` | Writing the charts and the run history to disk. |
 | `peekaboot.error-page.enabled` | `true` | `false` | `false` | The error page in place of Boot's whitelabel page. |
 | `peekaboot.security.enabled` | `false` | `true` | `false` | Peekaboot's HTTP Basic guard on `/peekaboot/**`. |
@@ -46,7 +46,8 @@ devcontainer's own configuration:
 ```yaml
 peekaboot:
   enabled: true
-  dev-toolbar: true
+  dev-toolbar:
+    enabled: true
   storage:
     enabled: true
   error-page:
@@ -78,7 +79,7 @@ Every feature also needs `peekaboot.enabled=true`.
 | Feature | Switch | Also needs |
 |---|---|---|
 | Dashboard and API | `peekaboot.enabled` | A servlet web application and Actuator. The starter brings Actuator. |
-| Dev toolbar | `peekaboot.dev-toolbar` (detected) | A servlet web application. Request-detail and log capture also need tracing on. |
+| Dev toolbar | `peekaboot.dev-toolbar.enabled` (detected) | A servlet web application. Request-detail and log capture also need tracing on. |
 | Tracing | `peekaboot.tracing.enabled` (`true`) | A servlet web application. The starter brings the OpenTelemetry SDK that fills the trace store. |
 | Insights | `peekaboot.insights.enabled` (`true`) | A servlet web application and a Micrometer `MeterRegistry` bean. |
 | Error page | `peekaboot.error-page.enabled` (detected) | A servlet web application with Spring MVC. |
@@ -96,7 +97,7 @@ insights and none of the Spring Boot defaults. The startup summary and run histo
 
 These switches turn on only with `true`, in any case:
 
-`peekaboot.enabled`, `peekaboot.dev-toolbar`, `peekaboot.error-page.enabled`,
+`peekaboot.enabled`, `peekaboot.dev-toolbar.enabled`, `peekaboot.error-page.enabled`,
 `peekaboot.error-page.override`, `peekaboot.security.enabled`, `peekaboot.lifecycle.enabled`,
 `peekaboot.tracing.enabled`, `peekaboot.tracing.async`, `peekaboot.tracing.event-listeners`,
 `peekaboot.insights.enabled`.
@@ -119,13 +120,13 @@ empty value still stops startup.
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.enabled` | detected | Master switch for the dashboard, its API and Peekaboot's Spring Boot defaults. |
-| `peekaboot.dev-toolbar` | detected | The dev toolbar, correlated-log capture and request-detail capture. |
-| `peekaboot.enable-unmasking` | `false` | Allows `unmask=true` to reveal real values from the Environment and Config data. |
+| `peekaboot.dev-toolbar.enabled` | detected | The dev toolbar, correlated-log capture and request-detail capture. |
+| `peekaboot.unmasking.enabled` | `false` | Allows `unmask=true` to reveal real values from the Environment and Config data. |
 
 The toolbar captures headers, query and form parameters and the resolved controller. It does not
 capture request or response bodies. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
 
-`enable-unmasking` changes nothing on its own. See [Security, two opt-ins before a real value
+`unmasking.enabled` changes nothing on its own. See [Security, two opt-ins before a real value
 is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ### Storage {#peekabootstorage}

@@ -9,7 +9,7 @@ permalink: /docs/troubleshooting/
 | Cause | Fix |
 |---|---|
 | Peekaboot is off. It is off by default for a deployment or a test. | Set `peekaboot.enabled=true` in `application.yml`, an environment variable or a system property. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on). |
-| You develop inside a devcontainer or GitHub Codespaces. Those count as containers. | Set `peekaboot.enabled=true` and the feature switches you want, such as `peekaboot.dev-toolbar`, explicitly. See [Configuration, containers]({{ '/docs/configuration/' | relative_url }}#container-markers). |
+| You develop inside a devcontainer or GitHub Codespaces. Those count as containers. | Set `peekaboot.enabled=true` and the feature switches you want, such as `peekaboot.dev-toolbar.enabled`, explicitly. See [Configuration, containers]({{ '/docs/configuration/' | relative_url }}#container-markers). |
 | The application sets `server.servlet.context-path`. | Open the dashboard under that path, for example `/my-app/peekaboot`. The `/peekaboot` part cannot be changed. |
 | The application sets `spring.mvc.servlet.path`. | Open the dashboard under the DispatcherServlet's path, for example `/app/peekaboot/`. The startup summary prints the right URL. The `/peekaboot` part cannot be changed. |
 | The application is reactive (WebFlux) or not a web application. | None. Peekaboot's dashboard needs a servlet web application. |
@@ -80,7 +80,7 @@ application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application
 
 | Cause | Fix |
 |---|---|
-| The dev toolbar is off. Logs are captured only while `peekaboot.dev-toolbar` is on. | Set `peekaboot.dev-toolbar: true`. |
+| The dev toolbar is off. Logs are captured only while `peekaboot.dev-toolbar.enabled` is on. | Set `peekaboot.dev-toolbar.enabled: true`. |
 | The application does not log through Logback. | None. Log capture works with Logback only. |
 | The log line was written on a thread without the trace context. Only lines that carry the trace id are kept. | For `@Async` and other executor work, see [the next entry](#async-work-missing). |
 
@@ -109,7 +109,7 @@ work]({{ '/docs/traces/' | relative_url }}#background-work).
 
 | Cause | Fix |
 |---|---|
-| `peekaboot.dev-toolbar` is off. It is on only for a local run, and `peekaboot.enabled=true` does not switch it on. | Set `peekaboot.dev-toolbar: true` where you want the toolbar. |
+| `peekaboot.dev-toolbar.enabled` is off. It is on only for a local run, and `peekaboot.enabled=true` does not switch it on. | Set `peekaboot.dev-toolbar.enabled: true` where you want the toolbar. |
 | The response is not HTML with a `</body>` tag. JSON responses and redirects never get a bar. | Open the request's trace on the Traces tab. Calls made from Swagger UI show in its bar. |
 | The HTML response is larger than 2 MiB. | Open the request's trace on the Traces tab. |
 | The request matches an injection exclusion: an excluded path prefix, a blocked file extension, an `X-Requested-With` header or an async dispatch. | Open the request's trace on the Traces tab, if it is traced. See [Dev toolbar, pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears). |
@@ -155,7 +155,7 @@ appears]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).
 a secret or mask a harmless value. See [Security, what gets masked, and
 how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
 
-**Fix:** set `peekaboot.enable-unmasking: true`. Then use the "Show secrets" toggle on the
+**Fix:** set `peekaboot.unmasking.enabled: true`. Then use the "Show secrets" toggle on the
 Environment and Config tabs, or add `?unmask=true` to `GET /peekaboot/api/actuator/all/insights`.
 You need both. See [Security, two opt-ins before a real value is
 shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
@@ -185,11 +185,11 @@ See [Security, securing the dashboard]({{ '/docs/security/' | relative_url }}#se
 
 ## Users get a browser login dialog on application pages {#credential-dialog-on-toolbar-pages}
 
-**Cause:** `peekaboot.dev-toolbar: true` is set in a deployed environment. The toolbar's
+**Cause:** `peekaboot.dev-toolbar.enabled: true` is set in a deployed environment. The toolbar's
 requests to `/peekaboot/api/**` get a `401` with an HTTP Basic challenge, and the browser asks
 for credentials on whatever page is open.
 
-**Fix:** remove `peekaboot.dev-toolbar: true` from the deployment. It is off there by default. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on).
+**Fix:** remove `peekaboot.dev-toolbar.enabled: true` from the deployment. It is off there by default. See [Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on).
 
 ## The generated password changes on every restart {#password-changes-on-restart}
 

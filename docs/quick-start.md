@@ -56,7 +56,7 @@ Click the bar for the request's trace detail, with its request and response, spa
 logs. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
 
 <div class="pk-callout" markdown="1">
-Set `peekaboot.dev-toolbar: false` to turn the toolbar off and keep the dashboard.
+Set `peekaboot.dev-toolbar.enabled: false` to turn the toolbar off and keep the dashboard.
 </div>
 
 <div class="pk-callout pk-callout--warning" markdown="1">
