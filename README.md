@@ -48,7 +48,8 @@ Two things you may notice, neither a problem:
   default theme (`jekyll-theme-primer`), which otherwise ships its own unused CSS alongside
   ours.
 - `_data/nav.yml`: the documentation sidebar, grouped into sections.
-- `_layouts/default.html`, `home.html`, `doc.html`: page shells. `doc.html` renders the
+- `_layouts/default.html`, `page.html`, `doc.html`: page shells. `page.html` wraps a page
+  that lays itself out, as `index.html` and `releases.html` do. `doc.html` renders the
   sidebar and a page's `title`/`lead` front matter.
 - `assets/peekaboot.css`: the brand mapping over vendored Bulma
   (`assets/bulma.min.css`, whose banner names the version).
