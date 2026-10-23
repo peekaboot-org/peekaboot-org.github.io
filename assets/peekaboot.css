@@ -125,6 +125,24 @@ a:hover {
     border-radius: var(--bulma-radius-large);
 }
 
+/* Each screenshot ships in both themes; the page shows the one matching its own theme. */
+[data-theme="light"] .pk-screenshot--dark,
+[data-theme="dark"] .pk-screenshot--light {
+    display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .pk-screenshot--light {
+        display: none;
+    }
+}
+
+@media not all and (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .pk-screenshot--dark {
+        display: none;
+    }
+}
+
 .pk-content figcaption {
     color: var(--bulma-text-weak);
     font-size: 0.75rem;
