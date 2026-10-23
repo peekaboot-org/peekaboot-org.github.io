@@ -52,13 +52,13 @@ every exporter you configured receives them too.
 
 | Span | Around | Tags |
 |---|---|---|
-| `spring.handler` | The controller method | `handler.type`, `handler.name` |
-| `spring.view.render` | View rendering, only when the handler resolved a view | `view.type`, `view.name` |
+| `<Class>.<method>` (observation `spring.handler`) | The controller method | `handler.type`, `handler.name` |
+| `<view name>` (observation `spring.view.render`) | View rendering, only when the handler resolved a view | `view.type`, `view.name` |
 | `async task` (observation `peekaboot.async.task`) | A task run on one of Spring's task executors, see [background work](#background-work) | `peekaboot.async`, `peekaboot.async.thread` |
 | `<Class>#<method>` (observation `peekaboot.event.listener`) | An event listener method, see [event listeners](#event-listeners) | `peekaboot.event.type`, `peekaboot.event.listener.class`, `peekaboot.event.listener.method` |
 
 Spans opened inside the controller method, such as JDBC and HTTP client calls, nest under
-`spring.handler`. `peekaboot.tracing.async=false` turns off the async span alone, and
+the handler span. `peekaboot.tracing.async=false` turns off the async span alone, and
 `peekaboot.tracing.event-listeners=false` the listener spans. `peekaboot.tracing.enabled=false`
 removes all four.
 
