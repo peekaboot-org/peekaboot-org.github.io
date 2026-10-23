@@ -1,17 +1,7 @@
 # peekaboot.org
 
-> [!WARNING]
-> Peekaboot is beta software and may expose security-relevant settings. Use it at your own
-> risk.
-
 Source for the [Peekaboot](https://github.com/peekaboot-org/peekaboot) documentation site,
 built with Jekyll and published via GitHub Pages.
-
-## Why Peekaboot?
-
-Peek, because it lets you look inside a running application. Boot, because that's where it
-lives. And peek-a-boo, because that's how it behaves. Add one dependency and your app's
-internals show up on a local run. Deploy the same jar and Peekaboot stays off.
 
 ## Local preview
 
