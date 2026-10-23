@@ -79,14 +79,17 @@ Peekaboot logs once the application is ready. See
 
 - The [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) on every HTML page your app
   renders
+- The [error page]({{ '/docs/error-page/' | relative_url }}) in place of Spring Boot's
+  whitelabel page
 - Overview: build and Git info, Spring Boot and Java versions, system and JVM details, and
   datasource status
+- Lifecycle: every start and stop of the application, with its build
 - Environment and Config: every property source Spring resolved, and every
   `@ConfigurationProperties` bean's effective values
-- Flyway migration history, runtime logger levels, and scheduled tasks
+- Flyway and Liquibase migration history, runtime logger levels, and scheduled tasks
 - Every meter in Micrometer's registry on Meters, and the key ones charted over time on
   [Insights]({{ '/docs/insights/' | relative_url }})
-- Traces with spans and SQL queries for the last 1000 requests, oldest evicted first
+- Traces with spans and SQL queries for the last 1,000 requests, oldest evicted first
   (`peekaboot.tracing.max-traces`; see [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets))
 
 ## Turn it on outside a local run {#turn-it-on-outside-a-local-run}
