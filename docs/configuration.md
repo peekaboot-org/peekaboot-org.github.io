@@ -230,6 +230,7 @@ Use `fold: false` instead.
 | `peekaboot.lifecycle.enabled` | `true` | The startup and shutdown summaries and the run history behind the Lifecycle tab and `/peekaboot/api/lifecycle/**`. |
 
 The startup summary shows the application name, build info, server, dashboard and datasource.
+The name is the build's, from `build-info.properties`, else `spring.application.name`.
 The shutdown summary shows the uptime and the start and stop times.
 
 #### The URLs in the summary {#the-urls-in-the-summary}
