@@ -206,8 +206,9 @@ Both tabs mask sensitive values by key name and by value shape. Your
 `management.endpoint.*.show-values` settings do not affect this. The rules are under
 [what gets masked and how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
 
-The **Show secrets** toggle appears on both tabs when `peekaboot.enable-unmasking` is on. It
-reveals real values on both tabs at once and resets on reload.
+The **Show secrets** toggle appears on both tabs only with unmasking enabled. See [Security, two
+opt-ins before a real value is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
+It reveals real values on both tabs at once and resets on reload.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 Masking is not exhaustive. See

@@ -79,8 +79,8 @@ outside a trace is dropped.
 With the toolbar on, every response carries
 `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"`, JSON API calls included.
 Anyone who reads that header and can reach `/peekaboot/**` can open that request's trace at
-`GET /peekaboot/api/traces/{traceId}/insights`. Responses under `/peekaboot/**`, your
-management base path, `/static/**`, `/webjars/**` and `/error/**` get no header.
+`GET /peekaboot/api/traces/{traceId}/insights`. Responses on the [paths Peekaboot never
+records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) get no header.
 
 Every `/peekaboot/api/**` response carries `Cache-Control: no-store` and
 `X-Content-Type-Options: nosniff`, so a proxy or the browser's cache does not keep it.
@@ -246,8 +246,8 @@ Masked values are revealed only when both are true:
    accepts `unmask`.
 
 The parameter alone does nothing. With unmasking enabled, the Environment and Config tabs show
-a "Show secrets" toggle. It is absent otherwise. Its state is not kept: a reload or a new tab
-starts masked. See [The dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config).
+a "Show secrets" toggle that sends it. It is absent otherwise. See [The
+dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config).
 
 {% capture caption %}Masked, the default.{% endcapture %}
 {% include screenshot.html name="dashboard-config" caption=caption %}
@@ -357,12 +357,14 @@ The credentials:
 - **Username:** `peekaboot.security.username`, else your build's artifact id plus `-admin`,
   else `spring.application.name` plus `-admin`, else `peekaboot-admin`.
 - **Password:** `peekaboot.security.password`, else the hash stored in `security.properties`,
-  else a generated 26-character password printed in the startup log's `Peekaboot Security`
-  block.
+  else a 26-character password generated on first start, printed in the startup log's
+  `Peekaboot Security` block. Only its hash is stored, in `security.properties` in the [storage
+  directory]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) or at
+  `peekaboot.security.credentials-file`.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 On a deployment, storage is off by default, so the generated password is not saved and
-changes on every restart. Keep it stable with one of these:
+changes on every restart. The startup log says so. Keep it stable with one of these:
 
 - `peekaboot.security.password`, set from a secret
 - `peekaboot.storage.enabled=true` on a persistent home directory
@@ -399,9 +401,8 @@ work through this list.
 
 - [ ] Verify `peekaboot.enabled` resolves to `false` wherever you do not want the dashboard.
       The startup summary has no `Peekaboot Dashboard:` line when the dashboard is off.
-- [ ] Set `peekaboot.enabled=false` explicitly if you run your build output directly on a host
-      that is not a container (`java -cp target/classes …`). Peekaboot counts that as a local
-      run. See [What counts as a local run]({{ '/docs/configuration/' | relative_url }}#local-run).
+- [ ] Set `peekaboot.enabled=false` explicitly if you deploy with a launch that [counts as
+      local]({{ '/docs/configuration/' | relative_url }}#local-run).
 - [ ] <span id="keeping-it-out-of-production-entirely"></span>If Peekaboot must never ship,
       keep the starter out of the production artifact. See [Keeping it out of the artifact
       entirely]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely).

@@ -80,9 +80,9 @@ time zone and default locale. The dashboard sends `en-US`, `de-DE`, `fr-FR` or `
 
 ### The `unmask` parameter {#the-unmask-parameter}
 
-`unmask=true` returns secrets in clear text only while `peekaboot.enable-unmasking=true` is
-set on the server. Without that property the parameter is ignored. See [Security,
-masking]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
+`unmask=true` asks for real values in place of masked ones. It works only with the server's
+own opt-in. See [Security, two opt-ins before a real value is
+shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ### Scheduled tasks {#scheduled-tasks}
 
@@ -227,8 +227,9 @@ details, logs and queries.
 - `404` means the store does not hold the trace. The id is unknown or evicted, tracing is off,
   it was a request to Peekaboot itself, or no span has arrived yet while the dev toolbar is off.
 - `200` with `rootSpan: null` means the dev toolbar recorded the request and its spans are
-  still on the way. Poll until `rootSpan` is set. Spans are exported every 200 ms while the
-  dev toolbar is on, every 5 s (Spring Boot's default) otherwise.
+  still on the way. Poll until `rootSpan` is set. How long that takes is the span export
+  delay, see [Spring Boot defaults Peekaboot
+  changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
 
 ## Metric charts {#the-insights-endpoints}
 

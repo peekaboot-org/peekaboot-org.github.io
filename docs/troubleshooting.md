@@ -49,8 +49,9 @@ A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 
 ## Traces arrive late in tests {#traces-late-or-empty-in-tests}
 
-**Cause:** spans are exported in batches. The delay is 200 ms while the dev toolbar is on and
-Spring Boot's 5 s otherwise, and tests do not turn the toolbar on. A test that reads
+**Cause:** spans are exported in batches. Tests do not turn the dev toolbar on, so they keep
+Spring Boot's longer [export
+delay]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application). A test that reads
 `/peekaboot/api/traces/**` right after its request runs before the spans are there. Until the
 first one arrives, `/peekaboot/api/traces/{traceId}/insights` answers `404`. With the toolbar on
 it answers `200` with `rootSpan: null` instead.

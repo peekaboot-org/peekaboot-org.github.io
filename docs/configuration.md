@@ -125,9 +125,8 @@ empty value still stops startup.
 The toolbar captures headers, query and form parameters and the resolved controller. It does not
 capture request or response bodies. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
 
-`enable-unmasking` changes nothing on its own. It allows the `unmask=true` parameter on
-`GET /peekaboot/api/actuator/all/insights` and shows the "Show secrets" toggle. See
-[Masking]({{ '/docs/security/' | relative_url }}#masking).
+`enable-unmasking` changes nothing on its own. See [Security, two opt-ins before a real value
+is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ### Storage {#peekabootstorage}
 
@@ -169,19 +168,9 @@ Peekaboot carries on in memory.
 | `peekaboot.security.password` | unset | A fixed password. Nothing is generated or written to disk. |
 | `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
 
-`enabled` defaults by launch. See [When Peekaboot is on](#when-peekaboot-is-on).
-
-`username` uses the build's artifact id, then `spring.application.name`, then `peekaboot`. The
-suffix `-admin` is always appended.
-
-With `password` unset, Peekaboot generates a 26-character password on first start, prints it in
-the `Peekaboot Security` block of the startup log and stores only its hash. The hash goes to
-`security.properties` in the [storage directory](#peekabootstorage). With storage off, the
-default on a deployment, nothing is written and the password changes on every restart.
-The startup log says so. Set `credentials-file` or `password` to keep it stable.
-
-Failed logins are not throttled. See [Security, securing the
-dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
+`enabled` defaults by launch. See [When Peekaboot is on](#when-peekaboot-is-on). How the guard
+derives its username and password, and how to keep a generated password across restarts, is
+under [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
 
 ### Error page {#peekabooterrorpage}
 
@@ -276,13 +265,9 @@ Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`,
 | `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Total duration at or above which a trace enters the Slow bucket. |
 | `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. Only filled while the dev toolbar is on. |
 
-A stack trace in a captured log line is cut at 1000 lines and ends with a
-`... N lines omitted` marker. A `StackOverflowError` is the usual case. The error page shows
-the whole trace. The worst case for the whole trace store is 1000 lines &times;
-`max-logs-per-trace` &times; (`max-traces` + `max-error-traces` + `max-slow-traces`).
-
-See [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets) for the buckets and
-[background work]({{ '/docs/traces/' | relative_url }}#background-work) for what `async` shows.
+See [Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)
+for what these limits hold and the worst case, and [background
+work]({{ '/docs/traces/' | relative_url }}#background-work) for what `async` shows.
 
 ### Issue thresholds {#peekabootuitracing}
 
@@ -388,9 +373,9 @@ the memory.
 
 ### Memory-constrained {#memory-constrained}
 
-Spans and logs are capped separately per trace. The All bucket holds at most `max-traces`
-&times; (`max-spans-per-trace` + `max-logs-per-trace`) entries: 1,000,000 at the defaults. The
-Errors and Slow buckets can keep a trace after All has evicted it, so scale them down too:
+Every trace limit below trades memory for history. [Traces, buckets, limits and
+memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets) works out the worst case. Errors
+and Slow can keep a trace after All has evicted it, so scale them down with All:
 
 ```yaml
 peekaboot:

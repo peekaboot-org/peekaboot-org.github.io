@@ -240,10 +240,14 @@ and everything is gone at restart.
 
 One trace keeps at most `peekaboot.tracing.max-spans-per-trace` spans (500) and
 `peekaboot.tracing.max-logs-per-trace` log lines (500). Past either limit the oldest are
-dropped. A trace that lost spans carries a TRUNCATED badge. In the worst case the store holds 1000 traces in All
-plus up to 200 that only Errors or Slow still keep, each with 500 spans and 500 log lines.
-Lower the limits on a memory-constrained application, see
-[Configuration]({{ '/docs/configuration/' | relative_url }}#memory-constrained).
+dropped. A trace that lost spans carries a TRUNCATED badge. A stack trace in a captured log
+line is cut at 1,000 lines and ends with a `... N lines omitted` marker. A `StackOverflowError`
+is the usual case. The error page shows the whole trace.
+
+In the worst case the store holds 1,000 traces in All plus up to 200 that only Errors or Slow
+still keep, each with 500 spans and 500 log lines: about 1.2 million entries, and each log line
+can carry a stack trace of up to 1,000 lines. Lower the limits on a memory-constrained
+application, see [Configuration]({{ '/docs/configuration/' | relative_url }}#memory-constrained).
 
 ### The SLOW badge and the Slow bucket {#slow-badge-vs-slow-bucket}
 

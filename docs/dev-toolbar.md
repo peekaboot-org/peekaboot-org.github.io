@@ -40,8 +40,8 @@ changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your
 A response gets the bar when its content type is `text/html` and it contains `</body>`. It
 does not get the bar when:
 
-- The path starts with `/peekaboot/`, `/static/`, `/webjars/`, `/error/` or the management
-  base path (`/actuator/` by default, following `management.endpoints.web.base-path`).
+- The path starts with one of the prefixes Peekaboot never records. See [Traces, what gets
+  recorded]({{ '/docs/traces/' | relative_url }}#what-gets-captured).
 - The path ends in `.css`, `.js`, `.ico`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.woff`,
   `.woff2`, `.ttf` or `.eot`.
 - The request sends `X-Requested-With: XMLHttpRequest`. A plain `fetch()` does not send it,
