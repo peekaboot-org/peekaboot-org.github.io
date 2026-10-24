@@ -21,8 +21,9 @@ them anywhere else.
   gets Spring's `400`.
 - A point in time Peekaboot records is an ISO-8601 string in UTC, such as
   `2026-10-23T10:15:30.123456Z`, with as many fractional digits as the clock gave.
-  `server.currentTime` keeps the JVM's own offset. Only the Insights series positions are
-  epoch milliseconds, named `...EpochMs`. Any other field ending in `Ms` is a duration.
+  `server.currentTime` keeps the JVM's own offset. `application.git.commit.time` is the string
+  Actuator reports. Only the Insights series positions are epoch milliseconds, named
+  `...EpochMs`. Any other field ending in `Ms` is a duration.
 
 ## Endpoints {#endpoints}
 
