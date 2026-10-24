@@ -121,7 +121,7 @@ empty value still stops startup.
 |---|---|---|
 | `peekaboot.enabled` | detected | Master switch for the dashboard, its API and Peekaboot's Spring Boot defaults. |
 | `peekaboot.dev-toolbar.enabled` | detected | The dev toolbar on your HTML pages. |
-| `peekaboot.unmasking.enabled` | `false` | Allows `unmask=true` to reveal real values from the Environment and Config data. |
+| `peekaboot.unmasking.enabled` | `false` | Allows `unmask=true` on `/peekaboot/api/actuator/all/insights` to reveal every value that response masks: environment and config values, build info, health details and datasource connection parameters. |
 
 The toolbar shows what tracing captures for the request. See [Dev
 toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
