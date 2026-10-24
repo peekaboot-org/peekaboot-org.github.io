@@ -21,6 +21,8 @@ The toolbar needs:
 
 - `peekaboot.enabled=true` and `peekaboot.dev-toolbar.enabled=true`. Both default to true only for a
   [local run]({{ '/docs/configuration/' | relative_url }}#local-run).
+- `peekaboot.tracing.enabled`, `true` by default, for the trace, request details and logs the
+  bar shows.
 - A servlet web application.
 - A Micrometer `Tracer` bean, which the starter provides. See [Quick
   start]({{ '/docs/quick-start/' | relative_url }}) for what happens without one.
