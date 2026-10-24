@@ -90,11 +90,10 @@ On the Swagger UI page the bar starts idle with "Waiting for request…". Run an
 "Try it out" and the bar shows that call's status, duration and query count. Click it for the
 trace detail.
 
-This works for any traced call, JSON APIs included. Calls to `/v3/api-docs`, `/swagger-ui/`,
-`/peekaboot/`, `/webjars/` and the actuator are not shown. With
-`management.endpoints.web.base-path=/`, actuator calls are traced and do show up.
-
-A custom `springdoc.swagger-ui.path` is honoured.
+This works for any traced call, JSON APIs included. Swagger UI's own calls, under its UI path
+(`springdoc.swagger-ui.path`) and under `springdoc.api-docs.path`, are not shown. Peekaboot
+follows both properties when you customise them. Calls to the [paths Peekaboot never
+records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) are not shown either.
 
 ## The bar on the error page {#the-bar-on-the-error-page}
 
