@@ -60,7 +60,6 @@ it uses. The dashboard shows or hides its tabs from it.
 | `insights` | The Insights endpoints exist. |
 | `lifecycle` | The `/peekaboot/api/lifecycle/**` endpoints exist (`peekaboot.lifecycle.enabled`). Drives the Lifecycle tab. |
 | `slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs` | The effective thresholds from [`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#issue-thresholds). |
-| `slowTraceThresholdMs` | The Slow bucket's threshold. `null` while tracing is off. |
 | `maskLiteral` | The string masked values are replaced with, `******`. |
 
 ## Environment and configuration {#what-insights-adds}
