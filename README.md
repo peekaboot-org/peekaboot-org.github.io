@@ -95,8 +95,8 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
   applies before first paint. Do not add `defer`.
 - **Honest limits are stated on purpose.** Masking is not exhaustive and has no entropy
   detection. Peekaboot's dashboard guard is one HTTP Basic credential with no throttle on
-  failed attempts. It sees one process, captures log content unmasked, and its insights
-  percentiles are percentiles of aggregates rather than real percentiles. Every one of those
+  failed attempts. It sees one process, masks log content by value shape only, and its
+  insights percentiles are percentiles of aggregates rather than real percentiles. Every one of those
   caveats is load-bearing. Tighten the wording if you like; do not turn any of them into a
   promise.
 

@@ -68,7 +68,7 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event history, and the list of collected meters | Insights tab, `/peekaboot/api/insights/**` | No |
 | Request traces: span tree, span names, timings, tags, error messages, SQL text and bind parameters | Traces tab, toolbar | Tags, error messages, SQL and bind parameters by value shape only |
 | Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape |
-| The message of every log event emitted inside a trace | Logs tab of a trace | No |
+| The message and stack trace of every log event emitted inside a trace | Logs tab of a trace | By value shape only |
 
 SQL text is shown as your JDBC instrumentation records it, with any literal values in the
 statement. Bind parameters are shown too. Masking applies to what Peekaboot shows. An
@@ -150,6 +150,7 @@ Masking is on by default and has nothing to configure. It replaces a value with 
 - health details, `info.build` and datasource connection parameters
 - Micrometer meter tags
 - captured headers, query and form parameters, span tags, span error messages, SQL text and bind parameters
+- the message and stack trace of every log captured inside a trace
 - the last failure message of a scheduled task
 - the database connection parameters in Peekaboot's startup log line
 
@@ -229,7 +230,6 @@ can contain plaintext SQL and plaintext request data.
 
 ### What is left unmasked entirely {#what-is-left-unmasked-entirely}
 
-- log message content
 - process identity: OS user, uid, gid, pid, parent processes
 - machine facts, IP addresses and hostnames included
 - the datasource user, host and database name
@@ -419,6 +419,6 @@ work through this list.
 - [ ] Don't rely on `management.endpoints.web.exposure`. It does not affect `/peekaboot/**`.
 - [ ] Leave `peekaboot.unmasking.enabled=false`. With it on, anyone who can reach
       `/peekaboot/**` can add `?unmask=true`.
-- [ ] Don't treat masking as complete. Log messages are never masked, and SQL and request data
-      are masked only where a rule recognises them. Don't point Peekaboot at traffic whose
-      secrets must not be held in memory and displayed.
+- [ ] Don't treat masking as complete. Log messages, SQL and request data are masked only
+      where a rule recognises them. Don't point Peekaboot at traffic whose secrets must not be
+      held in memory and displayed.
