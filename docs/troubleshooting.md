@@ -148,6 +148,24 @@ appear]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs).
 See [Insights, when the tab
 appears]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).
 
+## Liquibase dates are hours off on MySQL {#liquibase-dates-off-on-mysql}
+
+**Cause:** MySQL stores `DATEEXECUTED` as a `DATETIME`, which has no zone, in the server's time
+zone. Liquibase reads it back in the JVM's zone, so every date on the Liquibase tab is off by
+the difference between the two.
+
+**Fix:** have MySQL Connector/J read `DATETIME` as a timestamp in the server's zone, on that
+DataSource:
+
+```yaml
+spring:
+  datasource:
+    hikari:
+      data-source-properties:
+        connectionTimeZone: SERVER
+        treatMysqlDatetimeAsTimestamp: true
+```
+
 ## Values show as `******` {#values-show-as-asterisks}
 
 **Cause:** Peekaboot masks values whose key or content looks like a secret. The rules can miss
