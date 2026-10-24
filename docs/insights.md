@@ -57,8 +57,9 @@ These ship switched off. Enable them by id, as shown under
 
 A meter no panel names is not collected.
 
-A JPA application gets the Transactions and Hibernate activity panels with no extra dependency:
-Peekaboot binds the `hibernate.*` meters they read from Hibernate's statistics. With
+A JPA application gets the meters behind Transactions and the opt-in Hibernate activity panel
+with no extra dependency. While `peekaboot.insights.enabled` is on, Peekaboot binds the
+`hibernate.*` meters they read from Hibernate's statistics. With
 `org.hibernate.orm:hibernate-micrometer` on the classpath, Spring Boot's binder provides the same
 meters instead.
 
