@@ -170,6 +170,8 @@ time and status.
 
 ## Liquibase {#liquibase}
 
+{% include screenshot.html name="dashboard-liquibase" %}
+
 Liquibase shows one row per change set in the order they ran, with the order, id, author,
 change log, description, execution date and status. The status is `EXECUTED`, `FAILED`,
 `SKIPPED`, `RERAN`, `MARK_RAN` or `UNKNOWN`, and a failed change set is highlighted. Change sets

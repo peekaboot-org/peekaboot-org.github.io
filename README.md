@@ -139,9 +139,9 @@ older install, and the tool then photographs that code. `-Dtest` applies to ever
 `-am` pulls in, and only one has the class, hence the second flag.
 
 It needs Docker running. The capture runs under the `screenshots` Spring profile, which
-starts real PostgreSQL via `spring-boot-docker-compose` and runs Flyway against it, so every
-dashboard tab (Flyway history, queries, traces) has genuine content instead of an empty
-state.
+starts real PostgreSQL and MySQL via `spring-boot-docker-compose` and runs Flyway and
+Liquibase against them, so every dashboard tab (Flyway and Liquibase history, queries,
+traces) has genuine content instead of an empty state.
 
 The tool's file names are canonical: `dashboard-<tab id>-<theme>.png` for the dashboard
 tabs, plus the revealed, trace-detail and toolbar shots (the product repo's

@@ -10,6 +10,7 @@ dashboard-meters: The Meters tab, a filterable list of Micrometer meters, each w
 dashboard-environment: The Environment tab with a property source expanded, its values shown in full except spring.datasource.password, rendered as ******, with a Show secrets toggle above the list
 dashboard-environment-revealed: The same property source after clicking Show secrets, spring.datasource.password now rendered as sample_app_db_pwd instead of ******
 dashboard-flyway: The Flyway tab, one row per migration with version, description, script, type, duration, installed time and status
+dashboard-liquibase: The Liquibase tab, one row per change set with order, id, author, change log, description, execution date and an EXECUTED status badge
 dashboard-loggers: The Loggers tab, packages grouped and expandable, each logger showing its effective level, with a filter for configured-only loggers
 dashboard-config: The Config tab with the spring.datasource group expanded, its password rendered as ****** alongside real values for the other properties, with a Show secrets toggle above the list
 dashboard-config-revealed: The same spring.datasource group after clicking Show secrets, its password now reading sample_app_db_pwd instead of ******, with everything else on the tab unchanged
