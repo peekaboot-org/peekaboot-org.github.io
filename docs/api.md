@@ -278,7 +278,7 @@ off they cover only the current run.
 `GET /peekaboot/api/lifecycle/events` returns every start and stop, oldest first:
 
 ```
-{events: [{type, timestamp, version, branch, commitId, shortCommitId, buildTime, uncleanPrevious}]}
+{events: [{type, timestamp, version, branch, shortCommitId, buildTime, uncleanPrevious}]}
 ```
 
 - `type` is `start` or `stop`. A stop carries only `type` and `timestamp`.
