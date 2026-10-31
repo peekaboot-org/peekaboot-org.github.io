@@ -14,11 +14,12 @@ them anywhere else.
 
 - Optional fields are always present. A missing value is `null`, never an absent key.
 - Every endpoint below answers with `Cache-Control: no-store` and
-  `X-Content-Type-Options: nosniff`. That includes its error responses and the event stream.
+  `X-Content-Type-Options: nosniff`. That includes the event stream and the errors under
+  [Errors](#errors), the guard's `401` among them.
 - Peekaboot serialises its responses with its own JSON converter. Your `spring.jackson.*`
   settings do not change them, and Peekaboot does not change your application's JSON.
-- All endpoints are `GET`. A parameter that is not a number or boolean where one is expected
-  gets Spring's `400`.
+- All endpoints are `GET`.
+- The errors under [Errors](#errors) answer with a problem body.
 - A point in time Peekaboot records is an ISO-8601 string in UTC, such as
   `2026-10-23T10:15:30.123456Z`, with as many fractional digits as the clock gave.
   `server.currentTime` keeps the JVM's own offset. `application.git.commit.time` is the string
@@ -30,9 +31,9 @@ them anywhere else.
 | Endpoint | Parameters | Status codes |
 |---|---|---|
 | [`/peekaboot/api/features`](#features) | none | `200` |
-| [`/peekaboot/api/actuator/all/insights`](#what-insights-adds) | `locale`, `unmask` | `200` |
+| [`/peekaboot/api/actuator/all/insights`](#what-insights-adds) | `locale`, `unmask` | `200`, `400` |
 | [`/peekaboot/api/metrics`](#meters) | none | `200` |
-| [`/peekaboot/api/traces/insights`](#trace-list) | `limit`, `bucket`, `rootActionType`, `rootOperation` | `200` |
+| [`/peekaboot/api/traces/insights`](#trace-list) | `limit`, `bucket`, `rootActionType`, `rootOperation` | `200`, `400` |
 | [`/peekaboot/api/traces/{traceId}/insights`](#single-trace) | none | `200`, `404` |
 | [`/peekaboot/api/insights/config`](#the-insights-endpoints) | none | `200`, `404` when Insights is off |
 | [`/peekaboot/api/insights/data`](#the-insights-endpoints) | `level` (required) | `200`, `400`, `404` when Insights is off |
@@ -46,6 +47,43 @@ Where Peekaboot's guard is armed, every endpoint can also answer `401`. See
 `/peekaboot` and `/peekaboot/` redirect to the dashboard at
 `/peekaboot/ui/dashboard/index.html`. See [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}).
+
+## Errors {#errors}
+
+The errors below answer with an RFC 9457 problem body, served as `application/problem+json`:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "Unknown bucket 'eror'. Accepted: ALL, ERRORS, SLOW.",
+  "parameter": "bucket"
+}
+```
+
+`type` is always `about:blank` and `title` is the status's own phrase. `detail` says what was
+wrong with this request. `parameter` names the request parameter at fault, and is `null` where
+no single parameter is.
+
+| Status | When | `parameter` |
+|---|---|---|
+| `400` | An unknown `bucket` or `rootActionType` value. `detail` lists the accepted values. | The parameter |
+| `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`. | The parameter |
+| `400` | A missing `level`, or one outside the configured levels. `detail` gives the accepted range. | `level` |
+| `404` | The store does not hold the [trace](#single-trace). | `null` |
+| `401` | [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) refused the request. | `null` |
+| `503` | The [insights stream](#the-insights-endpoints) already has 32 subscribers. | `null` |
+
+The guard's `401` keeps its challenge, `WWW-Authenticate: Basic realm="Peekaboot",
+charset="UTF-8"`. Where your own Spring Security refuses a request first, the `401` is Spring
+Security's, without Peekaboot's realm or body.
+
+A request your application includes into the dashboard gets nothing from it. An include cannot
+set the status, so the including response keeps its own.
+
+Any other error, such as the `404` while Insights or lifecycle is off, a `405` or an unexpected
+`500`, gets your application's usual error response.
 
 ## Features {#features}
 
@@ -114,8 +152,8 @@ Tag values that look like secrets are masked. Without a `MeterRegistry` the resp
 | Parameter | Values | Default | Invalid value |
 |---|---|---|---|
 | `limit` | 0 to 10000 | `100` | Out of range is clamped. Not a number: `400`. |
-| `bucket` | `all`, `errors`, `slow`, any case | `all` | Treated as `all`. |
-| `rootActionType` | Comma-separated [root action types]({{ '/docs/traces/' | relative_url }}#root-action-type), any case, or `*` | Every type except `MAINTENANCE` | Unknown names are dropped. Nothing left means the default. |
+| `bucket` | `all`, `errors`, `slow`, any case | `all` | `400`, see [Errors](#errors). |
+| `rootActionType` | Comma-separated [root action types]({{ '/docs/traces/' | relative_url }}#root-action-type), any case, or `*` alone | Every type except `MAINTENANCE` | An unknown name, an empty entry or `*` among names: `400`. |
 | `rootOperation` | Part of the name of the row's root span, any case | none | none |
 
 `rootActionType=*` includes `MAINTENANCE`.
@@ -144,21 +182,28 @@ A trace with [background work]({{ '/docs/traces/' | relative_url }}#background-w
 for itself and once more for each async task it started. Those extra rows count towards
 `limit`. The bucket counts count each trace once.
 
+The list leaves out a trace's own row while some of its spans have arrived and its root has not.
+Before any of its spans arrive, the trace lists with `complete: false`. Fetch the
+[single trace](#single-trace) to follow a trace still in flight.
+
 ### Trace fields {#trace-fields}
 
 List rows and the [single trace](#single-trace) share one shape:
 
 ```
-{traceId, startTime, durationMs, status, slow, rootActionType, rootOperation,
- rootSpan, summary, httpExchange, logs, queries, subtree, truncated}
+{traceId, startTime, durationMs, status, complete, outcome, slow, rootActionType, rootOperation,
+ rootSpan, orphans, summary, httpExchange, logs, queries, subtree, truncated}
 ```
 
 | Field | Meaning |
 |---|---|
 | `status` | `HAS_ERRORS` when any span failed, else `OK`. |
+| `complete` | `true` once the trace's root span has arrived. See [Single trace](#single-trace). A row for an async task is always `true`. |
+| `outcome` | `IN_PROGRESS` while `complete` is `false`, else `ERROR` when `status` is `HAS_ERRORS`, else `OK`. |
 | `slow` | `true` when any span has a `SLOW` or `VERY_SLOW` issue. This is the SLOW badge, which is independent of the Slow bucket. See [Traces]({{ '/docs/traces/' | relative_url }}#slow-badge-vs-slow-bucket). |
 | `rootOperation` | The name of the row's root span. |
-| `rootSpan` | The span tree. `null` until the first span has arrived. |
+| `rootSpan` | The span tree. `null` while `complete` is `false`, and on a complete trace whose root [`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) dropped. |
+| `orphans` | While `rootSpan` is `null`, every stored span as subtrees, earliest start first. `[]` when there is a `rootSpan`. |
 | `summary` | Counts and durations of the request, spans, queries and logs. |
 | `httpExchange` | Request and response details. Always `null` on list rows. |
 | `logs`, `queries` | Always arrays. Empty on list rows, filled on the single trace. |
@@ -170,17 +215,25 @@ A row for an async task carries that task's own start time, duration, status and
 ### Span fields {#span-fields}
 
 Each span is `{spanId, name, kind, startTime, durationMs, status, children, tags, events,
-issues, errorMessage, errorClass, statement, rowCount, asyncEntry}`.
+issues, exception, statement, rowCount, asyncEntry}`.
 
 | Field | Meaning |
 |---|---|
 | `status` | `OK` or `ERROR`. |
 | `issues` | `[{type, severity}]`. `type` is `SLOW`, `VERY_SLOW` or `SLOW_QUERY`; `severity` is `warning` or `error`. See [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues). |
-| `errorClass` | Fully qualified class of the last exception recorded on the span. `ERROR` when the span failed without one. `null` on spans that did not fail. |
-| `errorMessage` | The span's error description, or the exception message when that is empty. `null` on spans that did not fail. |
+| `exception` | Why the span failed, `{type, message, stackTrace, hiddenFrames, applicationFrames}`. `null` on spans that did not fail, also when they recorded an exception they handled. |
 | `statement` | The [statement](#statement-fields) of a database query span. `null` on other spans and when no statement was recorded. |
 | `rowCount` | Rows returned by a query, where the JDBC instrumentation reported it. |
 | `asyncEntry` | `true` on the span that starts an async task. |
+
+In `exception`, `type` is the canonical class name of the last exception recorded on the span,
+such as `com.acme.Outer.Inner`. It is `null` when the span failed without recording an
+exception, and for an anonymous or local class, which has no canonical name. `message` is the
+exception's message, else the span's error description, masked by value shape. It is `null`
+when neither is set.
+
+`stackTrace` is `null` when no exception was recorded, and is cut at 1,000 lines.
+`hiddenFrames` and `applicationFrames` index into it as they do on a [log entry](#log-fields).
 
 ### Query fields {#query-fields}
 
@@ -224,12 +277,20 @@ is off.
 `GET /peekaboot/api/traces/{traceId}/insights` returns one whole trace with its request
 details, logs and queries.
 
-- `404` means the store does not hold the trace. The id is unknown or evicted, tracing is off,
-  or it was a request to Peekaboot itself.
-- `200` with `rootSpan: null` means Peekaboot recorded the request and its spans are
-  still on the way. Poll until `rootSpan` is set. How long that takes is the span export
-  delay, see [Spring Boot defaults Peekaboot
+- `404` with a [problem body](#errors) means the store does not hold the trace. The id is
+  unknown or evicted, tracing is off, or it was a request to Peekaboot itself.
+- `200` with `complete: false` means spans are still arriving. `rootSpan` is `null` and the
+  spans that have arrived are under `orphans`. Poll until `complete` is `true`. How long that
+  takes is the span export delay, see [Spring Boot defaults Peekaboot
   changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
+
+A trace is complete once a span without a parent arrives. A request that continues a caller's
+trace through a `traceparent` header has its parent elsewhere, so its trace is complete once
+its own server span arrives.
+
+An application that calls itself over HTTP reads complete for a moment, rooted at the inner
+request's server span, until the outgoing call's client span arrives. It reads in progress
+again until the real root arrives.
 
 ## Metric charts {#the-insights-endpoints}
 
@@ -253,8 +314,9 @@ Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the 
   `p99`. `values` is `null`.
 - Arrays hold no timestamps. Derive each position's time from `endEpochMs` and
   `intervalMs`. A missing sample is `null`.
-- An unknown level answers `400` with `{"error": "Unknown insights level: 7"}`. A missing
-  `level` is a `400` too.
+- A missing `level`, or one outside the configured levels, answers `400` with a
+  [problem body](#errors) that names `level` and the accepted range. A non-numeric `level` is a
+  `400` problem too.
 
 `GET /peekaboot/api/insights/stream` is a Server-Sent Events stream with two events:
 

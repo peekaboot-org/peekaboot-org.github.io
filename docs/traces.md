@@ -42,6 +42,9 @@ Requests under these path prefixes are never recorded: `/static/`, `/webjars/`,
 `management.endpoints.web.base-path`). With the base path set to `/` there is no prefix to
 exclude, and actuator requests are recorded like any other.
 
+Requests to `/peekaboot/` are not observed at all. Your other exporters and the
+`http.server.requests` metrics do not see them either.
+
 Each trace also holds the request and response headers and parameters and the log lines
 written while handling it.
 
@@ -172,10 +175,11 @@ tabs and opens on Spans.
 {% include screenshot.html name="trace-detail" %}
 
 Spans shows the span tree with each span's kind, tags and duration, nested as they ran. Click
-a span's name for its details: kind, a copyable span id, the full tags, and the error class and
-message where the span failed. A query span carries a "1 query" button that opens the
-statement with its row count. A span that logged carries an "N logs" button that opens its log
-lines, with stack traces folded as on the Logs tab. Both panels open in place.
+a span's name for its details: kind, a copyable span id and the full tags. Where the span
+failed, they also show the exception's class, message and stack trace, folded as on the Logs
+tab. A query span carries a "1 query" button that opens the statement with its row count. A span that
+logged carries an "N logs" button that opens its log lines, with stack traces folded as on the
+Logs tab. Both panels open in place.
 
 {% include screenshot.html name="trace-detail-queries" %}
 
@@ -207,6 +211,9 @@ beside its attributes instead of linking out to the other tabs.
 A trace is OK, or HAS_ERRORS when any span ended with an error. Slowness is not a status. It
 shows as span issues and the Slow bucket.
 
+A trace whose root span has not arrived yet shows IN PROGRESS in its detail, with the spans that
+have arrived. The request may still be running.
+
 ### Issues {#issues}
 
 An issue marks one span in the tree. The thresholds live under `peekaboot.tracing`, see
@@ -237,12 +244,16 @@ and everything is gone at restart.
 One trace keeps at most `peekaboot.tracing.max-spans-per-trace` spans (500) and
 `peekaboot.tracing.max-logs-per-trace` log lines (500). Past either limit the oldest are
 dropped. A trace that lost spans carries a TRUNCATED badge. A stack trace in a captured log
-line is cut at 1,000 lines and ends with a `... N lines omitted` marker. A `StackOverflowError`
-is the usual case. The error page shows the whole trace.
+line or on a failed span is cut at 1,000 lines and ends with a `... N lines omitted` marker. A
+`StackOverflowError` is the usual case. The error page shows the whole trace.
+
+A span's stack trace is also cut by
+`management.opentelemetry.tracing.limits.max-attribute-value-length`, if you set it. The
+OpenTelemetry SDK then shortens it to that many characters. Spring Boot sets no limit.
 
 In the worst case the store holds 1,000 traces in All plus up to 200 that only Errors or Slow
 still keep, each with 500 spans and 500 log lines: about 1.2 million entries, and each log line
-can carry a stack trace of up to 1,000 lines. Lower the limits on a memory-constrained
+and each failed span can carry a stack trace of up to 1,000 lines. Lower the limits on a memory-constrained
 application, see [Configuration]({{ '/docs/configuration/' | relative_url }}#memory-constrained).
 
 ### The SLOW badge and the Slow bucket {#slow-badge-vs-slow-bucket}

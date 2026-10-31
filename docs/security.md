@@ -66,7 +66,7 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Start and stop history with version, branch, commit and build time per run, unclean shutdowns | Lifecycle tab, `/peekaboot/api/lifecycle/**` | No |
 | Micrometer meters: names, tags, measurements | Meters tab | Tag values by key and by value shape |
 | Up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event history, and the list of collected meters | Insights tab, `/peekaboot/api/insights/**` | No |
-| Request traces: span tree, span names, timings, tags, error messages, SQL text and bind parameters | Traces tab, toolbar | Tags, error messages, SQL and bind parameters by value shape only |
+| Request traces: span tree, span names, timings, tags, the exception and stack trace of a failed span, SQL text and bind parameters | Traces tab, toolbar | Tags, exceptions, SQL and bind parameters by value shape only |
 | Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape |
 | The message and stack trace of every log event emitted inside a trace | Logs tab of a trace | By value shape only |
 
@@ -149,7 +149,8 @@ Masking is on by default and has nothing to configure. It replaces a value with 
 - environment and `@ConfigurationProperties` values
 - health details, `info.build` and datasource connection parameters
 - Micrometer meter tags
-- captured headers, query and form parameters, span tags, span error messages, SQL text and bind parameters
+- captured headers, query and form parameters, span tags, SQL text and bind parameters
+- the message and stack trace of every failed span
 - the message and stack trace of every log captured inside a trace
 - the last failure message of a scheduled task
 - the database connection parameters in Peekaboot's startup log line
@@ -351,6 +352,14 @@ authenticated it. With `spring.mvc.servlet.path` set, it guards the dashboard un
 such as `/app/peekaboot/**`. It also checks requests your application forwards or includes into
 the dashboard, and async dispatches. With Spring MVC on the classpath but no
 `DispatcherServletPath` bean, Peekaboot logs a WARN at startup and assumes `/peekaboot/*`.
+
+A refused request gets a `401` with the challenge `WWW-Authenticate: Basic realm="Peekaboot",
+charset="UTF-8"` and a [problem body]({{ '/docs/api/' | relative_url }}#errors) saying which
+credentials it needs. A `401` your own Spring Security sends first is its own, without
+Peekaboot's realm or body.
+
+A request your application includes into the dashboard gets nothing from it. An include cannot
+set the status, so the including response keeps its own.
 
 The credentials:
 

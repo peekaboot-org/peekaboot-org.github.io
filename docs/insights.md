@@ -50,6 +50,9 @@ pool, no Hibernate, no `datasource-micrometer`) shows "No data".
 | Disk space | `disk` | Free, Used, Total | `disk.free`, `disk.total` |
 | Log events | `log-events` | Errors, Warnings | `logback.events` |
 
+The HTTP panels show only your application's own traffic. Peekaboot keeps its own requests
+out of `http.server.requests` and `http.server.requests.active`.
+
 These ship switched off. Enable them by id, as shown under
 [Customise the panels](#configuring-panels): `thread-states` (Thread states),
 `hibernate-activity` (Hibernate activity), `executors` (Executors), `open-files` (Open files),
@@ -202,7 +205,8 @@ series' `tags` apply to both meters. If either meter is missing, the line shows 
 
 Micrometer registers one `http.server.requests` meter per method, URI, status and outcome. A
 series naming it with no `tags` adds them all up, so HTTP throughput is the whole
-application's request rate. `tags: {outcome: SERVER_ERROR}` narrows the sum to server errors.
+application's request rate. Peekaboot's own requests are not among them.
+`tags: {outcome: SERVER_ERROR}` narrows the sum to server errors.
 A series cannot pick out a single endpoint. Use [Traces]({{ '/docs/traces/' | relative_url }})
 for per-endpoint questions.
 
