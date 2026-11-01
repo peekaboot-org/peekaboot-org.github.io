@@ -206,10 +206,19 @@ and what is not.
 A query or a log line jumps back to its span in the tree; a span's own query and logs sit
 beside its attributes instead of linking out to the other tabs.
 
-## Status and issues {#trace-status}
+## Outcome and issues {#trace-status}
 
-A trace is OK, or HAS_ERRORS when any span ended with an error. Slowness is not a status. It
-shows as span issues and the Slow bucket.
+A trace's outcome is OK, ERROR or IN PROGRESS. ERROR means a span failed, a server span
+answered with a 5xx, or a line was logged at `ERROR`. That is also what puts a trace in Errors.
+A 4xx answer is a CLIENT_ERROR issue and leaves the outcome OK.
+
+With [`peekaboot.error-page.override`]({{ '/docs/error-page/' | relative_url }}#override) on, an
+HTML request that ends in an exception reads ERROR and lands in Errors, whatever its status.
+That includes Spring's own `400`, `405` and the `404` for an unknown path. A view your own
+`@ExceptionHandler` renders does the same. Spring records the exception on the request's server
+span whenever a view answers it. Without either, the error page renders on the ERROR dispatch,
+which has no span, so a 4xx stays OK.
+{: #exception-views}
 
 A trace whose root span has not arrived yet shows IN PROGRESS in its detail, with the spans that
 have arrived. The request may still be running.
@@ -221,11 +230,24 @@ An issue marks one span in the tree. The thresholds live under `peekaboot.tracin
 
 | Issue | Raised when | Property (default) | Severity |
 |---|---|---|---|
-| VERY_SLOW | The span's own duration reaches the threshold | `very-slow-span-threshold-ms` (500) | Error |
-| SLOW | The span's own duration reaches the threshold, and it is not VERY_SLOW | `slow-span-threshold-ms` (100) | Warning |
+| VERY_SLOW | The span's self time, its duration minus the time its child spans cover, reaches the threshold | `very-slow-span-threshold-ms` (500) | Error |
+| SLOW | The span's self time reaches the threshold, and it is not VERY_SLOW | `slow-span-threshold-ms` (100) | Warning |
 | SLOW_QUERY | A query's duration reaches the threshold | `slow-query-threshold-ms` (50) | Warning |
+| REPEATED_QUERY | The span's direct children run the same statement, literals ignored, this many times or more | `repeated-query-threshold` (5) | Warning |
+| CLIENT_ERROR | The request was answered with a 4xx | none | Warning |
 
-"Reaches" means at or above the threshold.
+"Reaches" means at or above the threshold. Every issue carries its value and the threshold it
+reached, see [HTTP API, issue fields]({{ '/docs/api/' | relative_url }}#issue-fields).
+
+REPEATED_QUERY finds the N+1 pattern. It compares statements with their string and number
+literals replaced by `?` and their whitespace collapsed. A literal it leaves as written, such as
+`TRUE` or a hex number, keeps two runs apart. The queries count toward the span they ran
+under. `datasource-micrometer` records a JDBC connection span as their sibling, so a loop's
+queries stay under the loop's span. CLIENT_ERROR is raised on the root server span only, the
+request the trace answers.
+
+The Spans tab colours a span's duration by its SLOW, VERY_SLOW and SLOW_QUERY issues.
+REPEATED_QUERY and CLIENT_ERROR show only in the [HTTP API]({{ '/docs/api/' | relative_url }}#issue-fields).
 
 ## Buckets, limits and memory {#the-three-buckets}
 
@@ -234,7 +256,7 @@ Every trace is in All. A trace that qualifies is also in Errors, Slow, or both.
 | Bucket | Holds | Size property (default) |
 |---|---|---|
 | All | Every trace | `peekaboot.tracing.max-traces` (1000) |
-| Errors | Traces with an errored span or an `ERROR` log line | `peekaboot.tracing.max-error-traces` (100) |
+| Errors | Traces with an errored span, a 5xx answer or an `ERROR` log line | `peekaboot.tracing.max-error-traces` (100) |
 | Slow | Traces whose duration, [background work](#background-work) excluded, reaches `peekaboot.tracing.slow-trace-threshold-ms` (1000) | `peekaboot.tracing.max-slow-traces` (100) |
 
 When a bucket is full, it drops the trace it admitted first. The buckets evict independently,
@@ -258,13 +280,14 @@ application, see [Configuration]({{ '/docs/configuration/' | relative_url }}#mem
 
 ### The SLOW badge and the Slow bucket {#slow-badge-vs-slow-bucket}
 
-{% include screenshot.html name="dashboard-traces" alt="The Traces tab with a Slow bucket count lower than the number of rows carrying a SLOW badge" %}
+{% include screenshot.html name="dashboard-traces" %}
 
-The SLOW badge on a row means one span in the trace reached `slow-span-threshold-ms` (100ms).
-The Slow bucket counts traces whose duration, background work excluded, reached
-`slow-trace-threshold-ms` (1000ms), so many more rows carry the badge than the bucket holds. A
-trace with an error shows the ERROR badge instead of SLOW, so counting SLOW badges misses slow
-traces that also failed.
+The SLOW badge on a row means the trace's duration, background work excluded, reached
+`slow-trace-threshold-ms` (1000ms). That is the rule the Slow bucket admits by. On a row for
+[background work](#async-rows) it judges the task's own duration, so that row can show SLOW
+while its trace is outside Slow. A slow span
+inside a quick request shows as that span's own SLOW or VERY_SLOW issue in the Spans tab. A
+trace with an error shows the ERROR badge instead of SLOW.
 
 ## Limitations {#tracing-vs-distributed-tracing}
 

@@ -79,7 +79,7 @@ outside a trace is dropped.
 With tracing on, every response carries
 `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"`, JSON API calls included.
 Anyone who reads that header and can reach `/peekaboot/**` can open that request's trace at
-`GET /peekaboot/api/traces/{traceId}/insights`. Responses on the [paths Peekaboot never
+`GET /peekaboot/api/traces/{traceId}`. Responses on the [paths Peekaboot never
 records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) get no header.
 
 Every `/peekaboot/api/**` response carries `Cache-Control: no-store` and

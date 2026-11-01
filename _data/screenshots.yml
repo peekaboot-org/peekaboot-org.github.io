@@ -5,7 +5,7 @@ error-page: Peekaboot's error page for GET /boom with status 500, the IllegalSta
 dashboard-overview: The Overview tab with the stat tiles, a health banner reading UP, and the Build, Git, Spring, Java, System and Machine cards
 dashboard-insights: The Insights tab, live line charts of CPU usage and system load with an aggregation level switch and toggles for percentiles and restart markers
 dashboard-lifecycle: The Lifecycle tab, a table of application runs newest first with start, duration, stop, downtime and build columns, showing Running, Unclean exit and Deployment badges
-dashboard-traces: The Traces tab, a bucketed list of recent traces with duration, status and query count, filterable by root action type
+dashboard-traces: The Traces tab with its bucket counts and a list of traces, filterable by root action type
 dashboard-meters: The Meters tab, a filterable list of Micrometer meters, each with its type, unit and measurement count
 dashboard-environment: The Environment tab with a property source expanded, its values shown in full except spring.datasource.password, rendered as ******, with a Show secrets toggle above the list
 dashboard-environment-revealed: The same property source after clicking Show secrets, spring.datasource.password now rendered as sample_app_db_pwd instead of ******

@@ -53,10 +53,11 @@ A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 Spring Boot's longer [export
 delay]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application). A test that reads
 `/peekaboot/api/traces/**` right after its request runs before the spans are there. Until the
-trace's root span arrives, `/peekaboot/api/traces/{traceId}/insights` answers `200` with
-`complete: false`.
+trace's root span arrives, `/peekaboot/api/traces/{traceId}` answers `200` with
+`summary.complete` set to `false`.
 
-**Fix:** shorten the export delay in the test profile, or poll until `complete` is `true`.
+**Fix:** shorten the export delay in the test profile, or poll until `summary.complete` is
+`true`.
 
 ```yaml
 management:

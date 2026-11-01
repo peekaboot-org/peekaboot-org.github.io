@@ -33,8 +33,8 @@ them anywhere else.
 | [`/peekaboot/api/features`](#features) | none | `200` |
 | [`/peekaboot/api/actuator/all/insights`](#what-insights-adds) | `locale`, `unmask` | `200`, `400` |
 | [`/peekaboot/api/metrics`](#meters) | none | `200` |
-| [`/peekaboot/api/traces/insights`](#trace-list) | `limit`, `bucket`, `rootActionType`, `rootOperation` | `200`, `400` |
-| [`/peekaboot/api/traces/{traceId}/insights`](#single-trace) | none | `200`, `404` |
+| [`/peekaboot/api/traces`](#trace-list) | `limit`, `bucket`, `rootActionType`, `rootOperation`, `view` | `200`, `400` |
+| [`/peekaboot/api/traces/{traceId}`](#single-trace) | none | `200`, `404` |
 | [`/peekaboot/api/insights/config`](#the-insights-endpoints) | none | `200`, `404` when Insights is off |
 | [`/peekaboot/api/insights/data`](#the-insights-endpoints) | `level` (required) | `200`, `400`, `404` when Insights is off |
 | [`/peekaboot/api/insights/stream`](#the-insights-endpoints) | none | `200` (Server-Sent Events), `503`, `404` when Insights is off |
@@ -68,7 +68,7 @@ no single parameter is.
 
 | Status | When | `parameter` |
 |---|---|---|
-| `400` | An unknown `bucket` or `rootActionType` value. `detail` lists the accepted values. | The parameter |
+| `400` | An unknown `bucket`, `rootActionType` or `view` value. `detail` lists the accepted values. | The parameter |
 | `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`. | The parameter |
 | `400` | A missing `level`, or one outside the configured levels. `detail` gives the accepted range. | `level` |
 | `404` | The store does not hold the [trace](#single-trace). | `null` |
@@ -147,7 +147,7 @@ Tag values that look like secrets are masked. Without a `MeterRegistry` the resp
 
 ## Trace list {#trace-list}
 
-`GET /peekaboot/api/traces/insights` returns the newest traces first.
+`GET /peekaboot/api/traces` returns the newest traces first.
 
 | Parameter | Values | Default | Invalid value |
 |---|---|---|---|
@@ -155,6 +155,7 @@ Tag values that look like secrets are masked. Without a `MeterRegistry` the resp
 | `bucket` | `all`, `errors`, `slow`, any case | `all` | `400`, see [Errors](#errors). |
 | `rootActionType` | Comma-separated [root action types]({{ '/docs/traces/' | relative_url }}#root-action-type), any case, or `*` alone | Every type except `MAINTENANCE` | An unknown name, an empty entry or `*` among names: `400`. |
 | `rootOperation` | Part of the name of the row's root span, any case | none | none |
+| `view` | `summary` or `full`, any case | `summary` | `400`, see [Errors](#errors). |
 
 `rootActionType=*` includes `MAINTENANCE`.
 
@@ -171,8 +172,12 @@ types]({{ '/docs/traces/' | relative_url }}#root-action-type).
 ### Response {#trace-list-response}
 
 ```
-{traces: [...], bucketCounts: {all, errors, slow}, filteredBucketCounts: {all, errors, slow}}
+{traces: [{summary, data}], bucketCounts: {all, errors, slow},
+ filteredBucketCounts: {all, errors, slow}}
 ```
+
+Each row is a [trace resource](#trace-fields). With `view=summary`, the default, every row's
+`data` is `null`. Ask for `view=full` to get each row's spans, logs and queries.
 
 `bucketCounts` counts what the store holds. `filteredBucketCounts` counts the traces that
 match `rootActionType` and `rootOperation`. It is `null` for `rootActionType=*` without a
@@ -183,44 +188,118 @@ for itself and once more for each async task it started. Those extra rows count 
 `limit`. The bucket counts count each trace once.
 
 The list leaves out a trace's own row while some of its spans have arrived and its root has not.
-Before any of its spans arrive, the trace lists with `complete: false`. Fetch the
+Before any of its spans arrive, the trace lists with `summary.complete` set to `false`. Fetch the
 [single trace](#single-trace) to follow a trace still in flight.
 
-### Trace fields {#trace-fields}
+### The trace resource {#trace-fields}
 
-List rows and the [single trace](#single-trace) share one shape:
+List rows and the [single trace](#single-trace) share one shape, `{summary, data}`:
 
 ```
-{traceId, startTime, durationMs, status, complete, outcome, slow, rootActionType, rootOperation,
- rootSpan, orphans, summary, httpExchange, logs, queries, subtree, truncated}
+{summary: {traceId, startTime, durationMs, complete, rootActionType, rootOperation, request,
+           outcome, buckets, reasons, cause, issues, hotspots, counts, subtree},
+ data: {rootSpan, orphans, logs, queries, httpExchange}}
 ```
+
+`summary` says how the trace went. `data` holds the spans, logs and queries behind it.
+
+#### Summary fields {#summary-fields}
 
 | Field | Meaning |
 |---|---|
-| `status` | `HAS_ERRORS` when any span failed, else `OK`. |
+| `startTime` | When the trace started. `null` while no span with a start time has arrived. |
+| `durationMs` | How long the trace took, [background work]({{ '/docs/traces/' | relative_url }}#background-work) excluded. |
 | `complete` | `true` once the trace's root span has arrived. See [Single trace](#single-trace). A row for an async task is always `true`. |
-| `outcome` | `IN_PROGRESS` while `complete` is `false`, else `ERROR` when `status` is `HAS_ERRORS`, else `OK`. |
-| `slow` | `true` when any span has a `SLOW` or `VERY_SLOW` issue. This is the SLOW badge, which is independent of the Slow bucket. See [Traces]({{ '/docs/traces/' | relative_url }}#slow-badge-vs-slow-bucket). |
-| `rootOperation` | The name of the row's root span. |
-| `rootSpan` | The span tree. `null` while `complete` is `false`, and on a complete trace whose root [`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) dropped. |
-| `orphans` | While `rootSpan` is `null`, every stored span as subtrees, earliest start first. `[]` when there is a `rootSpan`. |
-| `summary` | Counts and durations of the request, spans, queries and logs. |
-| `httpExchange` | Request and response details. Always `null` on list rows. |
-| `logs`, `queries` | Always arrays. Empty on list rows, filled on the single trace. |
+| `rootActionType` | What started the trace, see [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type). `UNKNOWN` while the root is missing. |
+| `rootOperation` | The name of the row's root span. `null` while the root is missing. |
+| `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `route` is the matched pattern, such as `/persons/{id}`, and `null` where no handler matched. `request` is `null` when the root is missing or is no HTTP request. |
+| `outcome` | `IN_PROGRESS` while `complete` is `false`. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure. |
+| `buckets` | The buckets that hold the trace now: `ERRORS`, `SLOW`, both in that order, or none. `ALL` is never named. |
+| `reasons` | Why the trace failed or ran slow, `[{kind, spanId, detail}]`. See [reasons](#reasons). |
+| `cause` | Where to start reading a failed trace, `{type, message, applicationFrame, spanId}`. See [cause](#cause). |
+| `issues` | Every span's [issues](#issue-fields), in the order the Spans tab draws the tree. |
+| `hotspots` | The spans with the most self time, at most three, largest first: `[{spanId, name, selfMs}]`. A span with no self time is left out. |
+| `counts` | `{spans, queries: {count, totalDurationMs}, logs: {count, errorCount, warnCount}, droppedSpans, droppedLogs}`. See [counts](#counts). |
 | `subtree` | `null` for a whole trace. On a row for an async task: `{rootSpanId, enclosedByStoredTrace}`. `enclosedByStoredTrace` is `false` when the task's parent span is no longer in the store. |
-| `truncated` | `true` when [`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) dropped spans. Once set, it stays set. The dashboard shows a `TRUNCATED` badge. |
 
-A row for an async task carries that task's own start time, duration, status and summary.
+A failure stays on a whole trace. When the caps evict the span or the log line that failed
+it, `outcome` still reads `ERROR`, though no reason or cause names it.
+
+Some 4xx answers read `ERROR` too, see [Traces, outcome and
+issues]({{ '/docs/traces/' | relative_url }}#exception-views).
+
+A row for an async task reports the task's own work. Its `startTime`, `durationMs`, `outcome`,
+`reasons`, `cause`, `issues`, `hotspots`, logs and queries cover the task alone. So do
+`counts.spans`, `counts.queries` and `counts.logs`. `buckets`, `counts.droppedSpans` and
+`counts.droppedLogs` are its trace's. Its `request` is `null`.
+
+#### Reasons {#reasons}
+
+`reasons` lists the failing spans as `EXCEPTION`, then the server spans that answered with a
+5xx as `SERVER_ERROR`, each in tree order. The `ERROR` log lines follow as `ERROR_LOG`, in the
+order they were logged. Last comes `SLOW` when `durationMs` reached
+[`slow-trace-threshold-ms`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing).
+On a row for an async task that is the task's own duration, so the row can carry `SLOW` while
+its trace is not in Slow.
+
+`spanId` is the span a reason is about. On `SLOW` it is the root span, `null` while the root is
+missing. On `EXCEPTION`, `detail` names the span's exception by its type and message. On
+`ERROR_LOG` it is the line's masked message, and otherwise one plain sentence. The dashboard
+shows the SLOW badge on a trace with a `SLOW` reason.
+
+#### Cause {#cause}
+
+`cause` is the first of these the trace holds:
+
+1. A failing span with a stack trace.
+2. An `ERROR` log line with a stack trace. `type` and `message` come from the stack trace's
+   first line.
+3. A failing span that names its exception's type or message. It is reached only when no
+   failing span has a stack trace, so `applicationFrame` is `null`.
+4. The first `ERROR` log line without a stack trace. Its message is `message`, and `type` and
+   `applicationFrame` are `null`.
+5. The first server span that answered with a 5xx. `message` names the status, and `type` and
+   `applicationFrame` are `null`.
+
+Within steps 1 and 3 the deepest failing span wins. Of two at one depth, the one the tree lists
+first wins. Steps 2 and 4 take the first line logged.
+
+`applicationFrame` is the first stack frame `applicationFrames` marks, without its `at`, such as
+`com.acme.OrderService.place(OrderService.java:42)`. `null` when the stack trace has no frame of
+your application. `spanId` is the failing span, the span the line was logged on, or the server
+span that answered with the 5xx.
+
+`cause` is `null` when nothing failed, when the caps evicted what failed the trace, or when its
+only failure is a span that names no exception type or message.
+
+#### Counts {#counts}
+
+`spans` counts the stored spans and `queries` the database queries among them. `logs` counts the
+stored log lines by level. `droppedSpans` counts the spans
+[`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) evicted,
+which no other count includes. `droppedLogs` counts the lines `max-logs-per-trace` dropped. The
+dashboard shows a `TRUNCATED` badge when `droppedSpans` is above zero.
+
+#### Data fields {#data-fields}
+
+| Field | Meaning |
+|---|---|
+| `rootSpan` | The span tree, see [span fields](#span-fields). `null` while `summary.complete` is `false`, and on a complete trace whose root [`max-spans-per-trace`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) dropped. |
+| `orphans` | While `rootSpan` is `null`, every stored span as subtrees, earliest start first. `[]` when there is a `rootSpan`. |
+| `logs` | The trace's [log lines](#log-fields). |
+| `queries` | The trace's [queries](#query-fields). |
+| `httpExchange` | Request and response details. `null` on a row for an async task, and when none was captured. |
 
 ### Span fields {#span-fields}
 
-Each span is `{spanId, name, kind, startTime, durationMs, status, children, tags, events,
+Each span is `{spanId, name, kind, startTime, durationMs, selfMs, status, children, tags, events,
 issues, exception, statement, rowCount, asyncEntry}`.
 
 | Field | Meaning |
 |---|---|
+| `selfMs` | The part of `durationMs` no child span covered, each child cut to the span's own window. |
 | `status` | `OK` or `ERROR`. |
-| `issues` | `[{type, severity}]`. `type` is `SLOW`, `VERY_SLOW` or `SLOW_QUERY`; `severity` is `warning` or `error`. See [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues). |
+| `issues` | The span's [issues](#issue-fields). |
 | `exception` | Why the span failed, `{type, message, stackTrace, hiddenFrames, applicationFrames}`. `null` on spans that did not fail, also when they recorded an exception they handled. |
 | `statement` | The [statement](#statement-fields) of a database query span. `null` on other spans and when no statement was recorded. |
 | `rowCount` | Rows returned by a query, where the JDBC instrumentation reported it. |
@@ -235,11 +314,37 @@ when neither is set.
 `stackTrace` is `null` when no exception was recorded, and is cut at 1,000 lines.
 `hiddenFrames` and `applicationFrames` index into it as they do on a [log entry](#log-fields).
 
+### Issue fields {#issue-fields}
+
+Each issue is `{type, severity, spanId, value, threshold, unit, message}`. What raises each type
+is under [Traces, issues]({{ '/docs/traces/' | relative_url }}#issues).
+
+| Field | Meaning |
+|---|---|
+| `type` | `SLOW`, `VERY_SLOW`, `SLOW_QUERY`, `REPEATED_QUERY` or `CLIENT_ERROR`. |
+| `severity` | `error` for `VERY_SLOW`, `warning` for the others. |
+| `spanId` | The span the issue is on. |
+| `value` | What the span measured, in `unit`. |
+| `threshold` | The limit `value` reached. |
+| `unit` | `ms`, `queries` or `status`. |
+| `message` | One plain sentence that names the value. |
+
+`SLOW` and `VERY_SLOW` measure the span's `selfMs`, and `SLOW_QUERY` the query's `durationMs`,
+all in `ms`. `CLIENT_ERROR` carries the response status against a `threshold` of `400`, in
+`status`. `REPEATED_QUERY` counts in `queries`, one issue per statement that reached the
+threshold. Its `spanId` is the span the queries ran under, and it adds four fields:
+
+| Field | Meaning |
+|---|---|
+| `statement` | The statement with its literals replaced by `?` and its whitespace collapsed, masked. |
+| `count` | How many times it ran, the same number as `value`. |
+| `totalMs` | The queries' durations added up. |
+| `spanIds` | The query spans, earliest start first. |
+
 ### Query fields {#query-fields}
 
-Each entry in the trace's `queries` is `{spanId, dbSystem, dataSourceName, durationMs, rowCount}`.
-Its statement is the [`statement`](#statement-fields) of the span that `spanId` names. A query whose
-span recorded no statement is listed all the same.
+Each entry in the trace's `queries` is `{spanId, dbSystem, dataSourceName, durationMs, rowCount,
+statement}`. A query whose span recorded no statement is listed all the same.
 
 | Field | Meaning |
 |---|---|
@@ -248,6 +353,7 @@ span recorded no statement is listed all the same.
 | `dataSourceName` | The HikariCP pool name, else the DataSource name. A generated pool name such as `HikariPool-1` is skipped. `null` when neither is known. |
 | `durationMs` | How long the query span took. |
 | `rowCount` | Rows returned, where the JDBC instrumentation reported it. |
+| `statement` | The query's [statement](#statement-fields), the same one its span carries. `null` when the span recorded none. |
 
 ### Statement fields {#statement-fields}
 
@@ -274,13 +380,14 @@ is off.
 
 ## Single trace {#single-trace}
 
-`GET /peekaboot/api/traces/{traceId}/insights` returns one whole trace with its request
-details, logs and queries.
+`GET /peekaboot/api/traces/{traceId}` returns one whole trace with its summary and its data,
+as a [trace resource](#trace-fields).
 
 - `404` with a [problem body](#errors) means the store does not hold the trace. The id is
   unknown or evicted, tracing is off, or it was a request to Peekaboot itself.
-- `200` with `complete: false` means spans are still arriving. `rootSpan` is `null` and the
-  spans that have arrived are under `orphans`. Poll until `complete` is `true`. How long that
+- `200` with `summary.complete` set to `false` means spans are still arriving.
+  `data.rootSpan` is `null` and the spans that have arrived are under `data.orphans`. Poll
+  until `summary.complete` is `true`. How long that
   takes is the span export delay, see [Spring Boot defaults Peekaboot
   changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
 

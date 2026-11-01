@@ -261,10 +261,10 @@ Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`,
 | `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors. The span fails when an `@Async` method, or a task passed to `execute()` or `submit()`, throws. Needs `spring.task.execution.propagate-context`, see [Traces, background work]({{ '/docs/traces/' | relative_url }}#background-work). |
 | `peekaboot.tracing.event-listeners` | `true` | Records a span for each call of an `@EventListener` method. An `@Async` listener also needs `spring.task.execution.propagate-context`. See [Traces, event listeners]({{ '/docs/traces/' | relative_url }}#event-listeners). |
 | `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. |
-| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped and the trace is marked `TRUNCATED`. |
+| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped. The trace counts them in its `droppedSpans`, and the dashboard shows a `TRUNCATED` badge. |
 | `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. |
 | `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. |
-| `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Duration in milliseconds, background async work excluded, at or above which a trace enters the Slow bucket. |
+| `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Duration in milliseconds, background async work excluded, at or above which a trace enters the Slow bucket and shows a SLOW badge. |
 | `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. |
 
 See [Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)
@@ -273,14 +273,15 @@ work]({{ '/docs/traces/' | relative_url }}#background-work) for what `async` sho
 
 #### Issue thresholds {#issue-thresholds}
 
-These decide the dashboard's issues and badges. They do not change what is captured. See
+These decide the issues on a trace's spans. They do not change what is captured. See
 [Issues]({{ '/docs/traces/' | relative_url }}#issues).
 
 | Property | Default | Effect |
 |---|---|---|
-| `peekaboot.tracing.slow-span-threshold-ms` | `100` | A span whose own duration is at or above this gets SLOW, and its trace row a SLOW badge. |
-| `peekaboot.tracing.very-slow-span-threshold-ms` | `500` | At or above this a span gets VERY_SLOW instead of SLOW. |
+| `peekaboot.tracing.slow-span-threshold-ms` | `100` | A span whose self time is at or above this gets SLOW. |
+| `peekaboot.tracing.very-slow-span-threshold-ms` | `500` | At or above this a span's self time gets VERY_SLOW instead of SLOW. |
 | `peekaboot.tracing.slow-query-threshold-ms` | `50` | A database query at or above this gets SLOW_QUERY and a SLOW label in the Queries tab. |
+| `peekaboot.tracing.repeated-query-threshold` | `5` | A span that runs the same statement, literals ignored, this many times or more gets REPEATED_QUERY. At least `2`; a lower value stops startup. |
 
 ### Insights {#peekabootinsights}
 
