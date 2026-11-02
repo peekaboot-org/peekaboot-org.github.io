@@ -33,8 +33,10 @@ them anywhere else.
 | [`/peekaboot/api/features`](#features) | none | `200` |
 | [`/peekaboot/api/actuator/all/insights`](#what-insights-adds) | `locale`, `unmask` | `200`, `400` |
 | [`/peekaboot/api/metrics`](#meters) | none | `200` |
-| [`/peekaboot/api/traces`](#trace-list) | `limit`, `bucket`, `rootActionType`, `rootOperation`, `view` | `200`, `400` |
+| [`/peekaboot/api/traces`](#trace-list) | `limit`, `cursor`, `bucket`, `rootActionType`, `rootOperation`, `route`, `path`, `statusCode`, `outcome`, `minDurationMs`, `since`, `until`, `view` | `200`, `400` |
 | [`/peekaboot/api/traces/{traceId}`](#single-trace) | none | `200`, `404` |
+| [`/peekaboot/api/logs`](#log-search) | `level`, `q`, `logger`, `traceId`, `since`, `until`, `limit`, `cursor` | `200`, `400` |
+| [`/peekaboot/api/routes`](#routes) | none | `200` |
 | [`/peekaboot/api/insights/config`](#the-insights-endpoints) | none | `200`, `404` when Insights is off |
 | [`/peekaboot/api/insights/data`](#the-insights-endpoints) | `level` (required) | `200`, `400`, `404` when Insights is off |
 | [`/peekaboot/api/insights/stream`](#the-insights-endpoints) | none | `200` (Server-Sent Events), `503`, `404` when Insights is off |
@@ -68,8 +70,11 @@ no single parameter is.
 
 | Status | When | `parameter` |
 |---|---|---|
-| `400` | An unknown `bucket`, `rootActionType` or `view` value. `detail` lists the accepted values. | The parameter |
-| `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`. | The parameter |
+| `400` | An unknown `bucket`, `rootActionType`, `view` or `outcome` value, or an unknown log search `level`. `detail` lists the accepted values. | The parameter |
+| `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`, or a number outside its range, such as `limit=0`. `detail` gives the range. | The parameter |
+| `400` | A `since` or `until` that is no ISO-8601 instant, or an `until` not later than `since`. | The parameter |
+| `400` | A `cursor` the endpoint did not hand out, the other listing's `next` among them. | `cursor` |
+| `400` | A trace list or log search parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
 | `400` | A missing `level`, or one outside the configured levels. `detail` gives the accepted range. | `level` |
 | `404` | The store does not hold the [trace](#single-trace). | `null` |
 | `401` | [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) refused the request. | `null` |
@@ -151,16 +156,46 @@ Tag values that look like secrets are masked. Without a `MeterRegistry` the resp
 
 | Parameter | Values | Default | Invalid value |
 |---|---|---|---|
-| `limit` | 0 to 10000 | `100` | Out of range is clamped. Not a number: `400`. |
+| `limit` | 1 to 10000 | `100` | `400`, see [Errors](#errors). |
+| `cursor` | The `next` of an earlier response | none, the first page | `400` |
 | `bucket` | `all`, `errors`, `slow`, any case | `all` | `400`, see [Errors](#errors). |
 | `rootActionType` | Comma-separated [root action types]({{ '/docs/traces/' | relative_url }}#root-action-type), any case, or `*` alone | Every type except `MAINTENANCE` | An unknown name, an empty entry or `*` among names: `400`. |
 | `rootOperation` | Part of the name of the row's root span, any case | none | none |
+| `route` | The request's route as `summary.request.route` shows it, such as `/persons/{id}`, exactly | none | none |
+| `path` | The start of the request path, as written | none | none |
+| `statusCode` | `100` to `599`, exactly | none | `400` |
+| `outcome` | `OK`, `ERROR` or `IN_PROGRESS`, any case | none | `400` |
+| `minDurationMs` | `0` or more. Lists rows whose `durationMs` is at least this. | none | `400` |
+| `since`, `until` | ISO-8601 instants, such as `2026-11-01T10:15:30Z` | none | Not an instant, or an `until` not later than `since`: `400`. |
 | `view` | `summary` or `full`, any case | `summary` | `400`, see [Errors](#errors). |
 
 `rootActionType=*` includes `MAINTENANCE`.
 
 A `rootOperation` with more than two dot-separated segments also matches on its last two. So
 `com.acme.ReportJob.run` finds a scheduled task span named `reportJob.run`.
+
+Filters combine. A row lists when it matches every one. A parameter sent empty counts as not
+sent. `since` and `until` bound the row's `summary.startTime`, `since` in and `until` out. A
+trace with no start time yet is outside any window. Send the `+` of an offset as `%2B`. A bare
+`+` in a query string arrives as a space, and the instant is refused.
+
+A row for an [async task]({{ '/docs/traces/' | relative_url }}#async-rows) answers no request,
+so `route`, `path` and `statusCode` never list it. Its `outcome` and `durationMs` are the task's
+own, and those are what `outcome` and `minDurationMs` judge.
+
+A trace still in flight can change between the filter and the response. A row can list under
+`outcome=OK` and read `ERROR`, or under `outcome=IN_PROGRESS` and read complete. A failure never
+clears, so `outcome=ERROR` never lists a row that reads `OK`.
+
+```bash
+curl -G 'http://localhost:8080/peekaboot/api/traces' \
+  --data-urlencode 'route=/persons/{id}' \
+  --data-urlencode 'outcome=error' \
+  --data-urlencode 'since=2026-11-01T10:00:00+01:00'
+```
+
+`-G` with `--data-urlencode` encodes the braces and the `+`. In the URL itself, curl would read
+`{id}` as one of its own patterns.
 
 With tracing off, the response has no traces and zero counts.
 
@@ -173,15 +208,15 @@ types]({{ '/docs/traces/' | relative_url }}#root-action-type).
 
 ```
 {traces: [{summary, data}], bucketCounts: {all, errors, slow},
- filteredBucketCounts: {all, errors, slow}}
+ filteredBucketCounts: {all, errors, slow}, next}
 ```
 
 Each row is a [trace resource](#trace-fields). With `view=summary`, the default, every row's
 `data` is `null`. Ask for `view=full` to get each row's spans, logs and queries.
 
 `bucketCounts` counts what the store holds. `filteredBucketCounts` counts the traces that
-match `rootActionType` and `rootOperation`. It is `null` for `rootActionType=*` without a
-`rootOperation`, and while tracing is off.
+match every filter. It is `null` when nothing filters, that is `rootActionType=*` with no other
+filter, and while tracing is off.
 
 A trace with [background work]({{ '/docs/traces/' | relative_url }}#background-work) appears once
 for itself and once more for each async task it started. Those extra rows count towards
@@ -190,6 +225,25 @@ for itself and once more for each async task it started. Those extra rows count 
 The list leaves out a trace's own row while some of its spans have arrived and its root has not.
 Before any of its spans arrive, the trace lists with `summary.complete` set to `false`. Fetch the
 [single trace](#single-trace) to follow a trace still in flight.
+
+### Paging {#trace-list-paging}
+
+The list is newest first. `next` is the `cursor` for the page after this one, and `null` on the
+last page. Send it back as it is, with the same filters, to read on.
+
+A cursor names the position of the page's last row. The next page lists what sorts below it as
+the store stands then, so no older row is listed twice or skipped. A trace that leaves the store
+shifts no other row. A cursor carries no filters. Sent with others, it pages through what those
+match below the same position.
+
+A trace that enters a bucket after the cursor was handed out lists above it, and so does an
+async task that ends. A trace that enters a bucket again, All after Errors or Slow kept it,
+moves to the top. A trace's own row keeps the position it took when it entered the bucket. In
+All, that is when the store first received anything for it.
+
+So a request still running while you page can show up below the cursor once it finishes, or
+above the cursor, among rows you have already read. Read the first page again to catch it. A cursor means
+something only to the running application that handed it out. A restart starts its count over.
 
 ### The trace resource {#trace-fields}
 
@@ -212,7 +266,7 @@ List rows and the [single trace](#single-trace) share one shape, `{summary, data
 | `complete` | `true` once the trace's root span has arrived. See [Single trace](#single-trace). A row for an async task is always `true`. |
 | `rootActionType` | What started the trace, see [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type). `UNKNOWN` while the root is missing. |
 | `rootOperation` | The name of the row's root span. `null` while the root is missing. |
-| `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `route` is the matched pattern, such as `/persons/{id}`, and `null` where no handler matched. `request` is `null` when the root is missing or is no HTTP request. |
+| `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `route` is the route tag as recorded, such as `/persons/{id}`, and `null` when the request recorded none, or only a placeholder such as `NOT_FOUND`. Under Spring Boot's default static-resource mapping, a request no controller matched carries `/**`. `request` is `null` when the root is missing or is no HTTP request. |
 | `outcome` | `IN_PROGRESS` while `complete` is `false`. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure. |
 | `buckets` | The buckets that hold the trace now: `ERRORS`, `SLOW`, both in that order, or none. `ALL` is never named. |
 | `reasons` | Why the trace failed or ran slow, `[{kind, spanId, detail}]`. See [reasons](#reasons). |
@@ -369,8 +423,12 @@ by value shape.
 
 ### Log fields {#log-fields}
 
-Each entry in the trace's `logs` is `{spanId, timestamp, level, message, stackTrace, hiddenFrames,
-applicationFrames}`.
+Each entry in the trace's `logs` is `{traceId, spanId, timestamp, level, logger, thread, message,
+stackTrace, hiddenFrames, applicationFrames}`.
+
+`logger` is the name of the logger the line was written to and `thread` the name of the thread
+that wrote it. Neither is masked. `message` is empty when Logback hands over a line without one.
+The [log search](#log-search) serves the same shape.
 
 `stackTrace` is `null` when the log event carried no exception. `hiddenFrames` and
 `applicationFrames` are lists of `{start, endExclusive}` line ranges into `stackTrace`. They
@@ -398,6 +456,79 @@ its own server span arrives.
 An application that calls itself over HTTP reads complete for a moment, rooted at the inner
 request's server span, until the outgoing call's client span arrives. It reads in progress
 again until the real root arrives.
+
+## Log search {#log-search}
+
+`GET /peekaboot/api/logs` searches every log line the store holds, inside traces and outside
+them, newest first in the order they were captured.
+
+| Parameter | Values | Default | Invalid value |
+|---|---|---|---|
+| `level` | `TRACE`, `DEBUG`, `INFO`, `WARN` or `ERROR`, any case. Lists that level and every one above. | every level | `400` |
+| `q` | Text the line's message or stack trace contains, in any case | none | none |
+| `logger` | The start of the logger's name, as written | none | none |
+| `traceId` | One trace's id | every trace and the lines outside traces | none |
+| `since`, `until` | ISO-8601 instants bounding the line's `timestamp`, `since` in and `until` out | none | `400` |
+| `limit` | 1 to 10000 | `100` | `400` |
+| `cursor` | The `next` of an earlier response | none, the first page | `400` |
+
+The response is `{logs, next}`, each entry a [log line](#log-fields). With tracing off, `logs`
+is empty and `next` is `null`.
+
+A line written outside any trace has `traceId` and `spanId` `null`. Such a line was written
+during startup, on a thread without the trace context, or by Tomcat after the request's trace
+ended. Capture starts once Peekaboot attaches its appender while the application context starts,
+so Spring Boot's first startup lines are never captured.
+Peekaboot keeps the newest
+[`peekaboot.tracing.max-untraced-logs`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing)
+of them (1000). A trace's lines go with the trace, up to `max-logs-per-trace`.
+
+`q` matches the text the response shows, after [masking]({{ '/docs/security/' | relative_url }}#masking).
+A secret the masking rules replace cannot be found, and `q=******` finds the lines that held
+one. `q` is plain text, so `(` and `*` match themselves. `logger=com.acme.orders` also lists
+`com.acme.ordersarchive`.
+
+`next` works as on the [trace list](#trace-list-paging). A line captured between two pages lists
+above the cursor. Several threads store lines at once, so a line stored while a search runs can
+still show up on a later page, below the cursor. It can also miss that page and every later one,
+and then shows up when a search starts again without a `cursor`.
+
+```bash
+curl -G 'http://localhost:8080/peekaboot/api/logs' --data-urlencode 'level=warn' --data-urlencode 'q=timeout'
+```
+
+## Routes {#routes}
+
+`GET /peekaboot/api/routes` sums up the HTTP requests the All bucket holds now, one row per
+method and route pattern, busiest first:
+
+```
+{window: {from, to, traceCount},
+ routes: [{method, route, count, errorCount, p50Ms, p95Ms, maxMs,
+           latestErrorTraceId, latestSlowTraceId, issueCounts}]}
+```
+
+| Field | Meaning |
+|---|---|
+| `window` | The requests counted. `from` and `to` are the earliest and latest of their start times, `null` when there are none. `traceCount` is how many there are. |
+| `method`, `route` | The request method and its route as `summary.request.route` shows it, such as `/persons/{id}`. |
+| `count` | The route's requests. |
+| `errorCount` | Those whose [outcome](#summary-fields) is `ERROR`. A 4xx alone is none. |
+| `p50Ms`, `p95Ms`, `maxMs` | The median, the 95th percentile and the longest of their `durationMs`. The percentiles are nearest rank over every request. |
+| `latestErrorTraceId` | The newest request whose outcome is `ERROR`, `null` when none failed. |
+| `latestSlowTraceId` | The newest request that took at least `slow-trace-threshold-ms`, the one a `SLOW` reason names. `null` when none did. |
+| `issueCounts` | For each [issue type](#issue-fields), how many requests carry at least one issue of that type. Every type is named, `0` where no request has one. |
+
+Under Spring Boot's default static-resource mapping, a GET or a POST that no controller matched
+carries the route `/**` and is answered `404`. Those requests share a `/**` row per method. The
+`route: null` row holds the requests recorded without a route tag, or with only a placeholder
+such as `NOT_FOUND`.
+
+Only complete traces whose root is an HTTP request count. A request's async tasks count with
+it, and their failures fail it. The numbers cover what All holds at the moment of the call, at
+most `max-traces` traces, and nothing is kept between calls. With tracing off, `routes` is
+empty and `traceCount` is `0`. Fetch a `latestErrorTraceId` as a [single trace](#single-trace)
+to read the failure.
 
 ## Metric charts {#the-insights-endpoints}
 

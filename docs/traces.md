@@ -46,7 +46,9 @@ Requests to `/peekaboot/` are not observed at all. Your other exporters and the
 `http.server.requests` metrics do not see them either.
 
 Each trace also holds the request and response headers and parameters and the log lines
-written while handling it.
+written while handling it. Log lines written outside any trace, later in startup or on a
+thread without the trace context, are kept as well, the newest `peekaboot.tracing.max-untraced-logs`
+(1,000), for the [log search]({{ '/docs/api/' | relative_url }}#log-search).
 
 ## Spans Peekaboot adds {#spans-peekaboot-adds}
 
@@ -274,9 +276,10 @@ A span's stack trace is also cut by
 OpenTelemetry SDK then shortens it to that many characters. Spring Boot sets no limit.
 
 In the worst case the store holds 1,000 traces in All plus up to 200 that only Errors or Slow
-still keep, each with 500 spans and 500 log lines: about 1.2 million entries, and each log line
-and each failed span can carry a stack trace of up to 1,000 lines. Lower the limits on a memory-constrained
-application, see [Configuration]({{ '/docs/configuration/' | relative_url }}#memory-constrained).
+still keep, each with 500 spans and 500 log lines: about 1.2 million entries, plus 1,000 log
+lines written outside any trace, and each log line and each failed span can carry a stack trace
+of up to 1,000 lines. Lower the limits on a memory-constrained application, see
+[Configuration]({{ '/docs/configuration/' | relative_url }}#memory-constrained).
 
 ### The SLOW badge and the Slow bucket {#slow-badge-vs-slow-bucket}
 

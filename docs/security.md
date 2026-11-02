@@ -68,13 +68,14 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event history, and the list of collected meters | Insights tab, `/peekaboot/api/insights/**` | No |
 | Request traces: span tree, span names, timings, tags, the exception and stack trace of a failed span, SQL text and bind parameters | Traces tab, toolbar | Tags, exceptions, SQL and bind parameters by value shape only |
 | Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape |
-| The message and stack trace of every log event emitted inside a trace | Logs tab of a trace | By value shape only |
+| The message and stack trace of every log event, inside a trace or not, and the names of its logger and thread | Logs tab of a trace, `/peekaboot/api/logs` | Message and stack trace by value shape only. Logger and thread names are shown as is. |
 
 SQL text is shown as your JDBC instrumentation records it, with any literal values in the
 statement. Bind parameters are shown too. Masking applies to what Peekaboot shows. An
 application that also exports its traces, over OTLP for example, sends the SQL and the bind
-parameters unmasked. Request and response bodies are never captured. A log event emitted
-outside a trace is dropped.
+parameters unmasked. Request and response bodies are never captured. Log events emitted
+outside a trace are kept too, the newest `peekaboot.tracing.max-untraced-logs`. The log search's
+`q` reads the masked text, so it cannot find a masked value.
 
 With tracing on, every response carries
 `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"`, JSON API calls included.
@@ -151,7 +152,7 @@ Masking is on by default and has nothing to configure. It replaces a value with 
 - Micrometer meter tags
 - captured headers, query and form parameters, span tags, SQL text and bind parameters
 - the message and stack trace of every failed span
-- the message and stack trace of every log captured inside a trace
+- the message and stack trace of every captured log, inside a trace or not
 - the last failure message of a scheduled task
 - the database connection parameters in Peekaboot's startup log line
 

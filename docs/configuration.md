@@ -266,6 +266,7 @@ Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`,
 | `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. |
 | `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Duration in milliseconds, background async work excluded, at or above which a trace enters the Slow bucket and shows a SLOW badge. |
 | `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. |
+| `peekaboot.tracing.max-untraced-logs` | `1000` | Log lines written outside any trace that are kept for the [log search]({{ '/docs/api/' | relative_url }}#log-search), oldest dropped first. `0` keeps none; a negative value stops startup. |
 
 See [Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)
 for what these limits hold and the worst case, and [background
@@ -386,6 +387,7 @@ peekaboot:
     max-traces: 200
     max-spans-per-trace: 50
     max-logs-per-trace: 100
+    max-untraced-logs: 200
     max-error-traces: 25
     max-slow-traces: 25
 ```

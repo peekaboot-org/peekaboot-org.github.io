@@ -82,7 +82,7 @@ application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application
 |---|---|
 | Tracing is off. Logs are captured only while `peekaboot.tracing.enabled` is on. | Remove `peekaboot.tracing.enabled: false`. |
 | The application does not log through Logback. | None. Log capture works with Logback only. |
-| The log line was written on a thread without the trace context. Only lines that carry the trace id are kept. | For `@Async` and other executor work, see [the next entry](#async-work-missing). |
+| The log line was written on a thread without the trace context, so it carries no trace id. It is kept with the lines written outside any trace, the newest [`peekaboot.tracing.max-untraced-logs`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) of them. | Find it with `GET /peekaboot/api/logs?q=<text>`. For `@Async` and other executor work, see [the next entry](#async-work-missing). |
 
 See [Traces, what gets recorded]({{ '/docs/traces/' | relative_url }}#what-gets-captured).
 
