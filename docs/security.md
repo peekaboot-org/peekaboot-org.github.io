@@ -100,8 +100,10 @@ outranks that page, is on [Error page]({{ '/docs/error-page/' | relative_url }})
 
 ## What stays in memory and what goes to disk {#what-peekaboot-writes-to-disk}
 
-Request traces, captured headers and parameters, log messages, environment values and config
-values stay in memory for the life of the process. They are never written to disk.
+Environment values and config values stay in memory for the life of the process. Request traces
+and their log lines are written to disk while storage and trace storage are on. Headers and
+parameters are masked when captured, so they reach the disk masked. Span attributes, SQL with its
+bind parameters, log messages and stack traces are written raw and masked only when shown.
 
 Peekaboot writes files only while `peekaboot.storage.enabled` is `true`, which is the default
 for a local run only. The one exception is `security.properties` with an explicit
@@ -111,11 +113,18 @@ for a local run only. The one exception is `security.properties` with an explici
 |---|---|---|
 | `insights.snapshot` | Storage on | The charts' aggregated numbers, keyed by series id. No request data, property values or traces. |
 | `lifecycle.jsonl` | Storage on | One line per start or stop: timestamp, pid, and `version`, `time`, `branch`, `commit.id`, `commit.id.full`, `commit.id.abbrev`, `build.version`, `build.time`. |
+| `traces.journal.jsonl` | Storage on and `peekaboot.storage.traces.enabled` | Every span, log line and completed request the trace store took since the last fold, one JSON line each. Span attributes, SQL with its bind parameters, log messages and stack traces are unmasked. Request and response headers and parameters are masked as captured. |
+| `traces.snapshot.jsonl` | As above | The same lines for the traces the store still holds and the untraced log lines it keeps, written at startup, at shutdown and past `max-journal-size`. Masked as the journal is. |
 | `security.properties` | The guard generated a password, and storage is on or `credentials-file` is set | A PBKDF2 hash of the generated password. Never the password itself. |
 
 `lifecycle.jsonl` drops every other build-info and git-info entry, including the git remote
 URL, the building user's name and mail address, and anything else your build wrote into
 `build-info.properties`.
+
+A password in a bind parameter or a log line is on disk in clear until its trace or line leaves
+the store and the next fold drops it. Keep `peekaboot.storage.dir` readable by you only,
+or set `peekaboot.storage.traces.enabled: false`. On POSIX systems Peekaboot creates the
+directory that way, see below.
 
 The files live under `${user.home}/.peekaboot/<groupId>.<artifactId>/` unless
 `peekaboot.storage.dir` says otherwise. On a POSIX file system the directory is created

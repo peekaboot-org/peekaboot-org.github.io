@@ -47,6 +47,26 @@ dependency to add.
 
 A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 
+## Traces from before a restart are gone {#traces-gone-after-restart}
+
+| Cause | Fix |
+|---|---|
+| Storage is off. It is off for anything but a local run, or `peekaboot.storage.enabled=false` turns it off. | Set `peekaboot.storage.enabled=true`, or run from the IDE, with `mvn spring-boot:run` or with `gradle bootRun`. |
+| `peekaboot.storage.traces.enabled=false`. | Remove it. |
+| The log said `Peekaboot traces: the files in <dir> come from another Peekaboot version or start with a damaged header; starting without them`. | None. Peekaboot deleted them, and this run writes new ones. |
+| The log said `Peekaboot traces: cannot write to <dir> (...); traces from here on will not survive a restart`. | Make the directory writable, or point `peekaboot.storage.dir` at one that is. |
+| The log said `Peekaboot traces: the journal could not keep up and dropped N inputs; they will not survive a restart`. | None. The journal fell behind a burst of spans or log lines, or more than 10,000 arrived before the application reported ready. The traces are complete in memory; the dropped inputs are missing after a restart only. |
+| The log said `Peekaboot traces: skipped N unreadable lines in <dir>; restored the rest`. | None. Those lines are missing from the restored traces. |
+| The log said `Peekaboot traces: cannot read <dir> (...); restored what was read before it`. | Check that the application can read the files in `<dir>`. What came after the failure was not restored. |
+| The storage directory differs between the two runs. Without `build-info.properties` it comes from `spring.application.name`, so a launch that lacks the file uses another directory. | Set `peekaboot.storage.dir`, or generate `build-info.properties` in every build. See [Configuration, storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage). |
+| The log said `Peekaboot traces: dropped N inputs that arrived while the stored traces were being restored`. | More than 10,000 spans, log lines and requests arrived before the restore finished. The rest reached neither the store nor the files. Repeat the requests you need. |
+| The log said `Peekaboot traces: could not apply N inputs that arrived while the stored traces were being restored (...)`. | A bug in Peekaboot; report it with the exception in the parentheses. Those inputs are missing from their traces in this run. They are in the files, so the next start may stop restoring at the first of them. |
+
+A trace that reads INTERRUPTED after a restart was still running when the application stopped.
+One that holds spans but no root does not list on the Traces tab. Fetch it by id from
+`/peekaboot/api/traces/{traceId}`, with an id from the [log
+search]({{ '/docs/api/' | relative_url }}#log-search) for example.
+
 ## Traces arrive late in tests {#traces-late-or-empty-in-tests}
 
 **Cause:** spans are exported in batches. Tests do not turn the dev toolbar on, so they keep

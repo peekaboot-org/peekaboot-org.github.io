@@ -15,7 +15,7 @@ Five properties default according to how the application was launched.
 |---|---|---|---|---|
 | `peekaboot.enabled` | `true` | `false` | `false` | The dashboard, its API, and Peekaboot's defaults. |
 | `peekaboot.dev-toolbar.enabled` | `true` | `false` | `false` | The toolbar on your HTML pages. |
-| `peekaboot.storage.enabled` | `true` | `false` | `false` | Writing the charts and the run history to disk. |
+| `peekaboot.storage.enabled` | `true` | `false` | `false` | Writing the charts, the run history and the traces to disk. |
 | `peekaboot.error-page.enabled` | `true` | `false` | `false` | The error page in place of Boot's whitelabel page. |
 | `peekaboot.security.enabled` | `false` | `true` | `false` | Peekaboot's HTTP Basic guard on `/peekaboot/**`. |
 
@@ -85,7 +85,7 @@ Every feature also needs `peekaboot.enabled=true`.
 | Error page | `peekaboot.error-page.enabled` (detected) | A servlet web application with Spring MVC. |
 | Peekaboot's guard | `peekaboot.security.enabled` (detected) | A servlet web application. |
 | Startup and shutdown summaries, run history | `peekaboot.lifecycle.enabled` (`true`) | Nothing else. The Lifecycle tab and `/peekaboot/api/lifecycle/**` need a servlet web application. |
-| Persisted history | `peekaboot.storage.enabled` (detected) | A writable directory. A failed write logs a warning and Peekaboot carries on in memory. |
+| Persisted history and traces | `peekaboot.storage.enabled` (detected) | A writable directory. A failed write logs a warning and Peekaboot carries on in memory. |
 | Spring Boot defaults [below](#what-peekaboot-sets-in-your-application) | `peekaboot.enabled` | A servlet web application. |
 
 On WebFlux or a non-web application there is nothing at `/peekaboot/**`, no trace store, no
@@ -97,7 +97,8 @@ insights and none of the Spring Boot defaults. The startup summary and run histo
 
 These switches turn on only with `true`, in any case:
 
-`peekaboot.enabled`, `peekaboot.dev-toolbar.enabled`, `peekaboot.error-page.enabled`,
+`peekaboot.enabled`, `peekaboot.dev-toolbar.enabled`, `peekaboot.storage.enabled`,
+`peekaboot.storage.traces.enabled`, `peekaboot.error-page.enabled`,
 `peekaboot.error-page.override`, `peekaboot.security.enabled`, `peekaboot.lifecycle.enabled`,
 `peekaboot.tracing.enabled`, `peekaboot.tracing.async`, `peekaboot.tracing.event-listeners`,
 `peekaboot.insights.enabled`.
@@ -108,10 +109,9 @@ and its value. `peekaboot.error-page.override` turns off only with `false`, and 
 `no`, `off` and `0` too. In YAML a bare `yes` or `on` already reads as `true` and passes.
 
 An empty value counts as unset, as a compose file or Helm chart leaves one for a missing
-variable. This also holds for `peekaboot.storage.enabled`. The value from the next source down
-wins, with placeholders resolved. Without one, the launch decides as in [When Peekaboot is
-on](#when-peekaboot-is-on), and otherwise the property's default applies. A `yes` beneath an
-empty value still stops startup.
+variable. The value from the next source down wins, with placeholders resolved. Without one,
+the launch decides as in [When Peekaboot is on](#when-peekaboot-is-on), and otherwise the
+property's default applies. A `yes` beneath an empty value still stops startup.
 
 ## Properties {#properties}
 
@@ -131,12 +131,15 @@ is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ### Storage {#peekabootstorage}
 
-Storage decides whether the insights history and the start/stop log survive a restart.
+Storage decides whether the insights history, the start/stop log and the traces survive a restart.
 
 | Property | Default | Effect |
 |---|---|---|
-| `peekaboot.storage.enabled` | detected | Whether anything is written. Off, both stores live in memory and never open a file. |
+| `peekaboot.storage.enabled` | detected | Whether anything is written. Off, every store lives in memory and never opens a file. |
 | `peekaboot.storage.dir` | `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where the files live. An explicit value is used as is, with no per-application subdirectory. |
+| `peekaboot.storage.traces.enabled` | `true` | Whether traces and their logs survive a restart while storage is on. `false` keeps them in memory only. |
+| `peekaboot.storage.traces.flush-interval` | `1s` | How often the trace journal is handed to the operating system, without an fsync. A crash usually loses the last interval, and everything since the start while the application is still starting or restoring its traces. Zero or a negative value stops startup. |
+| `peekaboot.storage.traces.max-journal-size` | `64MB` | The journal size, counted in characters, past which it is folded into the snapshot. Zero or a negative value stops startup. |
 
 The default directory sits outside your project, so it survives `mvn clean` and a re-clone.
 `<groupId>.<artifactId>` comes from `build-info.properties`. Generate it with the Spring Boot
@@ -151,14 +154,19 @@ directory overwrite each other's history. Set `dir` in both cases. Every charact
 |---|---|---|
 | `insights.snapshot` | The insights history, written every `peekaboot.insights.persistence.interval` and at shutdown. | About 5 MB at the default levels. |
 | `lifecycle.jsonl` | The start and stop history, capped at 1,000 events (about 500 runs), oldest dropped first. | Typically well under 400 KB. |
+| `traces.journal.jsonl` | Every span, log line and completed request since the last fold, one line each. See [Traces across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces). | Folded once it passes `max-journal-size`. |
+| `traces.snapshot.jsonl` | The traces the store held at the last fold, and the untraced log lines it kept. | What the [trace limits](#peekaboottracing) keep. |
 
-On a POSIX file system Peekaboot creates the directory `rwx------` and both files `rw-------`.
+On a POSIX file system Peekaboot creates the directory `rwx------` and every file `rw-------`.
 An existing directory keeps its permissions. On Windows the platform defaults apply.
 
-Neither file can fail your application. A snapshot that is unreadable, older than
+No file can fail your application. An insights snapshot that is unreadable, older than
 `peekaboot.insights.persistence.max-age` or written for different levels is dropped, and the
-history starts empty. A failed write logs one warning per file and run, and
-Peekaboot carries on in memory.
+history starts empty. A failed write logs one warning per store and run, and Peekaboot carries
+on in memory.
+
+Trace files in another format, which an older or newer Peekaboot may write, or with a damaged
+header, are deleted, and the trace store starts empty.
 
 ### Peekaboot's guard {#peekabootsecurity}
 

@@ -210,9 +210,10 @@ beside its attributes instead of linking out to the other tabs.
 
 ## Outcome and issues {#trace-status}
 
-A trace's outcome is OK, ERROR or IN PROGRESS. ERROR means a span failed, a server span
-answered with a 5xx, or a line was logged at `ERROR`. That is also what puts a trace in Errors.
-A 4xx answer is a CLIENT_ERROR issue and leaves the outcome OK.
+A trace's outcome is OK, ERROR, IN PROGRESS or INTERRUPTED. INTERRUPTED is a trace restored
+from an earlier run that stopped before the trace's root arrived. ERROR means a span failed, a
+server span answered with a 5xx, or a line was logged at `ERROR`. That is also what puts a trace
+in Errors. A 4xx answer is a CLIENT_ERROR issue and leaves the outcome OK.
 
 With [`peekaboot.error-page.override`]({{ '/docs/error-page/' | relative_url }}#override) on, an
 HTML request that ends in an exception reads ERROR and lands in Errors, whatever its status.
@@ -262,8 +263,8 @@ Every trace is in All. A trace that qualifies is also in Errors, Slow, or both.
 | Slow | Traces whose duration, [background work](#background-work) excluded, reaches `peekaboot.tracing.slow-trace-threshold-ms` (1000) | `peekaboot.tracing.max-slow-traces` (100) |
 
 When a bucket is full, it drops the trace it admitted first. The buckets evict independently,
-so a trace can stay under Errors or Slow after it has left All. Nothing expires on a timer,
-and everything is gone at restart.
+so a trace can stay under Errors or Slow after it has left All. Nothing expires on a timer.
+With storage on, the buckets survive a restart, see [below](#persisted-traces).
 
 One trace keeps at most `peekaboot.tracing.max-spans-per-trace` spans (500) and
 `peekaboot.tracing.max-logs-per-trace` log lines (500). Past either limit the oldest are
@@ -280,6 +281,48 @@ still keep, each with 500 spans and 500 log lines: about 1.2 million entries, pl
 lines written outside any trace, and each log line and each failed span can carry a stack trace
 of up to 1,000 lines. Lower the limits on a memory-constrained application, see
 [Configuration]({{ '/docs/configuration/' | relative_url }}#memory-constrained).
+
+With [traces kept across restarts](#persisted-traces), folding the journal replays the files
+into a second store, so while a fold runs the peak is about twice that.
+
+### Traces across restarts {#persisted-traces}
+
+With [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
+on, the default for a local run, and `peekaboot.storage.traces.enabled` left on, every span, log
+line and completed request the store takes is appended to `traces.journal.jsonl` in the storage
+directory. Each running instance needs its own storage directory. Two instances on one directory
+restore each other's traces, and each starts its journal afresh over the other's, so the lines the
+other wrote since its last fold are lost.
+
+The journal is handed to the operating system every `peekaboot.storage.traces.flush-interval`,
+one second by default, without an fsync. A crash usually loses the last interval, and everything
+since the start while the application is still starting or restoring its traces.
+
+At shutdown the spans still waiting in OpenTelemetry's batch are exported before the journal
+closes. OpenTelemetry waits at most 10 seconds for that, and Spring Boot gives every span exporter
+the same batch. An exporter of your own that takes longer, such as an OTLP exporter whose collector
+does not answer, can hold Peekaboot's last spans past that wait. Those spans miss the journal, and
+a request among them reads INTERRUPTED after the restart.
+
+At the next start Peekaboot replays the files into the store in the background. For the first
+moments the Traces tab and the API show the traces restored so far, and the last run's cut-off
+traces read IN PROGRESS until the restore ends. The summaries and issues are worked out again by
+the version now running.
+
+The snapshot lists each bucket's traces in order, so with unchanged bucket limits All, Errors
+and Slow come back exactly as the last fold saw them. Later inputs replay in the order the
+journal wrote them, so two traces that arrived at the same moment may come back swapped, and a
+full bucket may keep the other one of the two.
+
+A request that was still running when the application stopped reads INTERRUPTED, since its root
+never arrives. If it holds any span it does not list, see the [trace
+list]({{ '/docs/api/' | relative_url }}#trace-list). Every trace names the run it came from, the
+`run` of [its summary]({{ '/docs/api/' | relative_url }}#summary-fields).
+
+The journal is folded into `traces.snapshot.jsonl` at startup, at shutdown and once it passes
+`peekaboot.storage.traces.max-journal-size` (64 MB). Files in another format, which an older or
+newer Peekaboot may write, or with a damaged header, are deleted at startup with one line in the
+log. What is stored unmasked is under [Security]({{ '/docs/security/' | relative_url }}#what-peekaboot-writes-to-disk).
 
 ### The SLOW badge and the Slow bucket {#slow-badge-vs-slow-bucket}
 
@@ -299,8 +342,8 @@ show two partial traces under the same trace id, on two dashboards. It reads the
 `traceparent` header and never changes it, so propagation works as [Spring Boot's tracing
 support](https://docs.spring.io/spring-boot/reference/actuator/tracing.html) configures it.
 
-It keeps no history past the limits above or past a restart, does not aggregate across
-instances, and does not alert. The percentiles on
+It keeps no history past the limits above, and none past a restart while storage is off. It
+does not aggregate across instances, and does not alert. The percentiles on
 [Insights]({{ '/docs/insights/' | relative_url }}#percentiles-of-aggregates) are percentiles
 of aggregates.
 

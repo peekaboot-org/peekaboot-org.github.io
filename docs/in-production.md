@@ -48,7 +48,7 @@ changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your
 
 The trace store is capped by trace count and by spans and log lines per trace. [Traces,
 buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets) works out
-the worst case.
+the worst case. With the trace journal on, a fold briefly holds a second store's worth.
 
 The Insights history is sized by `peekaboot.insights.levels` and by how many series the
 enabled panels produce. Peekaboot logs the estimate at startup. See [Insights, what it

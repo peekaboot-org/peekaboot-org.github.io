@@ -73,7 +73,7 @@ no single parameter is.
 | `400` | An unknown `bucket`, `rootActionType`, `view` or `outcome` value, or an unknown log search `level`. `detail` lists the accepted values. | The parameter |
 | `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`, or a number outside its range, such as `limit=0`. `detail` gives the range. | The parameter |
 | `400` | A `since` or `until` that is no ISO-8601 instant, or an `until` not later than `since`. | The parameter |
-| `400` | A `cursor` the endpoint did not hand out, the other listing's `next` among them. | `cursor` |
+| `400` | A `cursor` the endpoint did not hand out, the other listing's `next` among them, or one handed out before the application restarted. | `cursor` |
 | `400` | A trace list or log search parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
 | `400` | A missing `level`, or one outside the configured levels. `detail` gives the accepted range. | `level` |
 | `404` | The store does not hold the [trace](#single-trace). | `null` |
@@ -164,7 +164,7 @@ Tag values that look like secrets are masked. Without a `MeterRegistry` the resp
 | `route` | The request's route as `summary.request.route` shows it, such as `/persons/{id}`, exactly | none | none |
 | `path` | The start of the request path, as written | none | none |
 | `statusCode` | `100` to `599`, exactly | none | `400` |
-| `outcome` | `OK`, `ERROR` or `IN_PROGRESS`, any case | none | `400` |
+| `outcome` | `OK`, `ERROR`, `IN_PROGRESS` or `INTERRUPTED`, any case | none | `400` |
 | `minDurationMs` | `0` or more. Lists rows whose `durationMs` is at least this. | none | `400` |
 | `since`, `until` | ISO-8601 instants, such as `2026-11-01T10:15:30Z` | none | Not an instant, or an `until` not later than `since`: `400`. |
 | `view` | `summary` or `full`, any case | `summary` | `400`, see [Errors](#errors). |
@@ -226,6 +226,10 @@ The list leaves out a trace's own row while some of its spans have arrived and i
 Before any of its spans arrive, the trace lists with `summary.complete` set to `false`. Fetch the
 [single trace](#single-trace) to follow a trace still in flight.
 
+An `INTERRUPTED` trace follows the same rule. One that holds any span never lists its own row,
+so `outcome=INTERRUPTED` lists only the interrupted traces that hold no span. Fetch the others
+as a [single trace](#single-trace).
+
 ### Paging {#trace-list-paging}
 
 The list is newest first. `next` is the `cursor` for the page after this one, and `null` on the
@@ -242,15 +246,17 @@ moves to the top. A trace's own row keeps the position it took when it entered t
 All, that is when the store first received anything for it.
 
 So a request still running while you page can show up below the cursor once it finishes, or
-above the cursor, among rows you have already read. Read the first page again to catch it. A cursor means
-something only to the running application that handed it out. A restart starts its count over.
+above the cursor, among rows you have already read. Read the first page again to catch it.
+
+A restart numbers every row anew, restored ones included, so a cursor handed out before it is
+refused with a `400` on `cursor`. Read the first page again.
 
 ### The trace resource {#trace-fields}
 
 List rows and the [single trace](#single-trace) share one shape, `{summary, data}`:
 
 ```
-{summary: {traceId, startTime, durationMs, complete, rootActionType, rootOperation, request,
+{summary: {traceId, startTime, durationMs, complete, run, rootActionType, rootOperation, request,
            outcome, buckets, reasons, cause, issues, hotspots, counts, subtree},
  data: {rootSpan, orphans, logs, queries, httpExchange}}
 ```
@@ -264,10 +270,11 @@ List rows and the [single trace](#single-trace) share one shape, `{summary, data
 | `startTime` | When the trace started. `null` while no span with a start time has arrived. |
 | `durationMs` | How long the trace took, [background work]({{ '/docs/traces/' | relative_url }}#background-work) excluded. |
 | `complete` | `true` once the trace's root span has arrived. See [Single trace](#single-trace). A row for an async task is always `true`. |
+| `run` | When the run of the application that produced the trace started, the `startedAt` of its row in [`/peekaboot/api/lifecycle/runs`](#restart-history). `null` until that run finished starting, and for good if it stopped before then. A trace restored after a restart keeps the run it came from. |
 | `rootActionType` | What started the trace, see [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type). `UNKNOWN` while the root is missing. |
 | `rootOperation` | The name of the row's root span. `null` while the root is missing. |
 | `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `route` is the route tag as recorded, such as `/persons/{id}`, and `null` when the request recorded none, or only a placeholder such as `NOT_FOUND`. Under Spring Boot's default static-resource mapping, a request no controller matched carries `/**`. `request` is `null` when the root is missing or is no HTTP request. |
-| `outcome` | `IN_PROGRESS` while `complete` is `false`. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure. |
+| `outcome` | `IN_PROGRESS` while `complete` is `false`, or `INTERRUPTED` for a trace [restored](#single-trace) from an earlier run that stopped before its root arrived. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure. |
 | `buckets` | The buckets that hold the trace now: `ERRORS`, `SLOW`, both in that order, or none. `ALL` is never named. |
 | `reasons` | Why the trace failed or ran slow, `[{kind, spanId, detail}]`. See [reasons](#reasons). |
 | `cause` | Where to start reading a failed trace, `{type, message, applicationFrame, spanId}`. See [cause](#cause). |
@@ -443,11 +450,19 @@ as a [trace resource](#trace-fields).
 
 - `404` with a [problem body](#errors) means the store does not hold the trace. The id is
   unknown or evicted, tracing is off, or it was a request to Peekaboot itself.
-- `200` with `summary.complete` set to `false` means spans are still arriving.
+- Right after a restart with [storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
+  on, Peekaboot restores the stored traces in the background. For the first moments a trace
+  from before the restart can answer `404`, and the [trace list](#trace-list) and the [log
+  search](#log-search) can miss it. Ask again.
+- `200` with `summary.outcome` set to `IN_PROGRESS` means spans are still arriving.
   `data.rootSpan` is `null` and the spans that have arrived are under `data.orphans`. Poll
   until `summary.complete` is `true`. How long that
   takes is the span export delay, see [Spring Boot defaults Peekaboot
   changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
+- `200` with `summary.outcome` set to `INTERRUPTED` means the trace was restored from an
+  earlier run of the application, which stopped before the root arrived. It never completes, so
+  stop polling. While the restore runs, such a trace can still read `IN_PROGRESS`. See
+  [persisted traces]({{ '/docs/traces/' | relative_url }}#persisted-traces).
 
 A trace is complete once a span without a parent arrives. A request that continues a caller's
 trace through a `traceparent` header has its parent elsewhere, so its trace is complete once
@@ -481,7 +496,9 @@ ended. Capture starts once Peekaboot attaches its appender while the application
 so Spring Boot's first startup lines are never captured.
 Peekaboot keeps the newest
 [`peekaboot.tracing.max-untraced-logs`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing)
-of them (1000). A trace's lines go with the trace, up to `max-logs-per-trace`.
+of them (1000). A trace's lines go with the trace, up to `max-logs-per-trace`. With
+[storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) on, they survive a
+restart with the traces.
 
 `q` matches the text the response shows, after [masking]({{ '/docs/security/' | relative_url }}#masking).
 A secret the masking rules replace cannot be found, and `q=******` finds the lines that held

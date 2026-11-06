@@ -139,6 +139,10 @@ stored, the row has a **View the trace this ran under** link.
 [Traces]({{ '/docs/traces/' | relative_url }}) explains buckets, badges, root action types
 and [background work]({{ '/docs/traces/' | relative_url }}#background-work).
 
+With [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
+on, the tab keeps its traces [across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces).
+A trace cut off by a restart shows an INTERRUPTED badge in the header of its detail.
+
 ## Meters {#meters}
 
 {% include screenshot.html name="dashboard-meters" %}

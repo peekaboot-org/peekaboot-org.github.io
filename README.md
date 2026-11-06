@@ -115,7 +115,7 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 | `peekaboot-insights-defaults.yml`, or the panel-file schema | `docs/insights.md`, which states the field sets and tabulates the shipped panels |
 | An insights level default, or the memory formula | `docs/insights.md`, `docs/configuration.md`, both of which carry worked arithmetic |
 | The startup summary's lines, or how a URL in it is built | `docs/configuration.md` (*The URLs in the summary*) |
-| Anything under `peekaboot.storage`, or what the two stores write | `docs/configuration.md`, `docs/security.md`, `docs/insights.md` |
+| Anything under `peekaboot.storage`, or what the stores write | `docs/configuration.md`, `docs/security.md`, `docs/insights.md`, `docs/traces.md` |
 | The runs projection, its columns or its badges | `docs/dashboard.md` (*Lifecycle*) |
 | The error page, its back-off rules or the override | `docs/error-page.md` |
 
