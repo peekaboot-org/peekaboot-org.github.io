@@ -197,7 +197,7 @@ do. Peekaboot charts and serves it from 0 to 100.
 | `stat` | Plots |
 |---|---|
 | `value` | The meter's current value: a gauge, a counter's total, or a long task timer's active tasks. A timer or distribution summary gives a gap |
-| `rate` | The count's increase per second since the previous sample. The first sample is a gap |
+| `rate` | The count's increase per second since the previous sample. The first sample after a start is a gap. A counter or timer that appears later counts from 0, so the first 5xx shows in its own tick |
 | `avg` | The average duration of the calls since the previous sample. No calls gives a gap |
 | `max` | Micrometer's MAX for a timer or summary, which covers the last few minutes. See [Limitations](#percentiles-of-aggregates) |
 
