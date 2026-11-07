@@ -177,11 +177,17 @@ tabs and opens on Spans.
 {% include screenshot.html name="trace-detail" %}
 
 Spans shows the span tree with each span's kind, tags and duration, nested as they ran. Click
-a span's name for its details: kind, a copyable span id and the full tags. Where the span
+a span's name for its details: kind, a copyable span id, its issues and the full tags. Where the span
 failed, they also show the exception's class, message and stack trace, folded as on the Logs
 tab. A query span carries a "1 query" button that opens the statement with its row count. A span that
 logged carries an "N logs" button that opens its log lines, with stack traces folded as on the
 Logs tab. Both panels open in place.
+
+The header names the trace's cause when it failed: the exception's class and message, the
+application frame it came from, and a link to its span. Above the tree, Most self time lists up
+to three spans that spent the longest on their own work, each linking to its row. A span whose
+children covered part of its time shows its self time after its duration and share, such as
+`1.20s · 80% · self 300ms`.
 
 {% include screenshot.html name="trace-detail-queries" %}
 
@@ -215,12 +221,13 @@ from an earlier run that stopped before the trace's root arrived. ERROR means a 
 server span answered with a 5xx, or a line was logged at `ERROR`. That is also what puts a trace
 in Errors. A 4xx answer is a CLIENT_ERROR issue and leaves the outcome OK.
 
-With [`peekaboot.error-page.override`]({{ '/docs/error-page/' | relative_url }}#override) on, an
-HTML request that ends in an exception reads ERROR and lands in Errors, whatever its status.
-That includes Spring's own `400`, `405` and the `404` for an unknown path. A view your own
-`@ExceptionHandler` renders does the same. Spring records the exception on the request's server
-span whenever a view answers it. Without either, the error page renders on the ERROR dispatch,
-which has no span, so a 4xx stays OK.
+A 4xx stays OK however it was answered, also where a view rendered an exception for it. That
+view is the page [`peekaboot.error-page.override`]({{ '/docs/error-page/' | relative_url }}#override)
+renders for an HTML request that ends in an exception, or one your own `@ExceptionHandler`
+renders. Spring clears the exception once the view has rendered, so the request's server span
+does not record it. Spring's own `400`, `405` and the `404` for an unknown path read OK with a
+CLIENT_ERROR issue and stay out of Errors and the error digest. A view that answers with a 5xx
+still fails the trace through its HTTP status.
 {: #exception-views}
 
 A trace whose root span has not arrived yet shows IN PROGRESS in its detail, with the spans that
@@ -249,8 +256,10 @@ under. `datasource-micrometer` records a JDBC connection span as their sibling, 
 queries stay under the loop's span. CLIENT_ERROR is raised on the root server span only, the
 request the trace answers.
 
-The Spans tab colours a span's duration by its SLOW, VERY_SLOW and SLOW_QUERY issues.
-REPEATED_QUERY and CLIENT_ERROR show only in the [HTTP API]({{ '/docs/api/' | relative_url }}#issue-fields).
+The Spans tab colours a span's duration by its SLOW, VERY_SLOW and SLOW_QUERY issues, and marks
+REPEATED_QUERY and CLIENT_ERROR with a badge on their span. A type gets one badge however many
+statements the span repeats, and the badge's tooltip lists each issue. A span's details list each
+of its issues with its sentence.
 
 ## Buckets, limits and memory {#the-three-buckets}
 
@@ -338,7 +347,8 @@ The SLOW badge on a row means the trace's duration, background work excluded, re
 [background work](#async-rows) it judges the task's own duration, so that row can show SLOW
 while its trace is outside Slow. A slow span
 inside a quick request shows as that span's own SLOW or VERY_SLOW issue in the Spans tab. A
-trace with an error shows the ERROR badge instead of SLOW.
+trace with an error shows the ERROR badge instead of SLOW. A row for an
+[interrupted](#persisted-traces) trace also shows INTERRUPTED.
 
 ## Limitations {#tracing-vs-distributed-tracing}
 

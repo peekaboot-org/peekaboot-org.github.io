@@ -38,7 +38,10 @@ To keep a branded error page in production and see Peekaboot's page while develo
 `peekaboot.error-page.override: true` in your local profile. Peekaboot's page then wins wherever
 `enabled` is `true`. It also wins over an `@ControllerAdvice` or `@ExceptionHandler` that
 renders your error page, and the whitelabel setting no longer applies. The `Accept` rule above
-still holds, so API clients keep your application's own error response.
+still holds, so API clients keep your application's own error response. A request Peekaboot's
+[HTTP API]({{ '/docs/api/' | relative_url }}#errors) refuses, such as one with an unknown query
+parameter, keeps its `application/problem+json` answer and its status for any `Accept` that
+admits JSON, a browser's included.
 
 With the override on, the page keeps the status, headers and reason Spring would send: `400`
 for a type mismatch, `405` with its `Allow` header, the headers of a `ResponseStatusException`,

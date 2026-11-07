@@ -141,7 +141,8 @@ and [background work]({{ '/docs/traces/' | relative_url }}#background-work).
 
 With [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
 on, the tab keeps its traces [across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces).
-A trace cut off by a restart shows an INTERRUPTED badge in the header of its detail.
+A trace cut off by a restart shows an INTERRUPTED badge in the header of its detail, and on its
+row where it lists one, see [Traces across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces).
 
 ## Meters {#meters}
 

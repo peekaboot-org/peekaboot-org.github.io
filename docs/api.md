@@ -19,6 +19,9 @@ them anywhere else.
 - Peekaboot serialises its responses with its own JSON converter. Your `spring.jackson.*`
   settings do not change them, and Peekaboot does not change your application's JSON.
 - All endpoints are `GET`.
+- An endpoint refuses a query parameter it does not take, and any parameter sent more than once,
+  with a `400`. [Endpoints](#endpoints) lists what each one takes. Spring Security's `continue`,
+  which its login adds to the URL it sends a browser back to, is accepted everywhere.
 - The errors under [Errors](#errors) answer with a problem body.
 - A point in time Peekaboot records is an ISO-8601 string in UTC, such as
   `2026-10-23T10:15:30.123456Z`, with as many fractional digits as the clock gave.
@@ -32,19 +35,19 @@ them anywhere else.
 
 | Endpoint | Parameters | Status codes |
 |---|---|---|
-| [`/peekaboot/api/features`](#features) | none | `200` |
+| [`/peekaboot/api/features`](#features) | none | `200`, `400` |
 | [`/peekaboot/api/actuator/all/insights`](#what-insights-adds) | `locale`, `unmask` | `200`, `400` |
-| [`/peekaboot/api/metrics`](#meters) | none | `200` |
+| [`/peekaboot/api/metrics`](#meters) | none | `200`, `400` |
 | [`/peekaboot/api/traces`](#trace-list) | `limit`, `cursor`, `bucket`, `rootActionType`, `rootOperation`, `route`, `path`, `statusCode`, `outcome`, `minDurationMs`, `since`, `until`, `view` | `200`, `400` |
-| [`/peekaboot/api/traces/{traceId}`](#single-trace) | none | `200`, `404` |
+| [`/peekaboot/api/traces/{traceId}`](#single-trace) | none | `200`, `400`, `404` |
 | [`/peekaboot/api/logs`](#log-search) | `level`, `q`, `logger`, `traceId`, `since`, `until`, `limit`, `cursor` | `200`, `400` |
-| [`/peekaboot/api/routes`](#routes) | none | `200` |
+| [`/peekaboot/api/routes`](#routes) | none | `200`, `400` |
 | [`/peekaboot/api/errors`](#error-digest) | `since`, `route` | `200`, `400` |
-| [`/peekaboot/api/insights/config`](#the-insights-endpoints) | none | `200`, `404` when Insights is off |
+| [`/peekaboot/api/insights/config`](#the-insights-endpoints) | none | `200`, `400`, `404` when Insights is off |
 | [`/peekaboot/api/insights/data`](#the-insights-endpoints) | `level` (required), `view`, `series`, `since` | `200`, `400`, `404` when Insights is off |
-| [`/peekaboot/api/insights/stream`](#the-insights-endpoints) | none | `200` (Server-Sent Events), `503`, `404` when Insights is off |
-| [`/peekaboot/api/lifecycle/events`](#restart-history) | none | `200`, `404` when lifecycle is off |
-| [`/peekaboot/api/lifecycle/runs`](#restart-history) | none | `200`, `404` when lifecycle is off |
+| [`/peekaboot/api/insights/stream`](#the-insights-endpoints) | none | `200` (Server-Sent Events), `400`, `503`, `404` when Insights is off |
+| [`/peekaboot/api/lifecycle/events`](#restart-history) | none | `200`, `400`, `404` when lifecycle is off |
+| [`/peekaboot/api/lifecycle/runs`](#restart-history) | none | `200`, `400`, `404` when lifecycle is off |
 
 Where Peekaboot's guard is armed, every endpoint can also answer `401`. See
 [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
@@ -77,7 +80,8 @@ no single parameter is.
 | `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`, or a number outside its range, such as `limit=0`. `detail` gives the range. | The parameter |
 | `400` | A `since` or `until` that is no ISO-8601 instant, or an `until` not later than `since`. | The parameter |
 | `400` | A `cursor` the endpoint did not hand out, the other listing's `next` among them, or one handed out before the application restarted. | `cursor` |
-| `400` | A trace list, log search, insights data or error digest parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
+| `400` | A parameter the endpoint does not take, such as a misspelled `buckett` or a different case, `Limit`. `detail` lists the parameters it takes, or `none`. | The parameter |
+| `400` | A parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
 | `400` | A missing `level`, or one that is no integer or outside the configured levels. `detail` gives the accepted range. An empty id in `series`, such as `series=a,,b`. | `level`, `series` |
 | `404` | The store does not hold the [trace](#single-trace). | `null` |
 | `401` | [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) refused the request. | `null` |
@@ -277,7 +281,7 @@ List rows and the [single trace](#single-trace) share one shape, `{summary, data
 | `rootActionType` | What started the trace, see [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type). `UNKNOWN` while the root is missing. |
 | `rootOperation` | The name of the row's root span. `null` while the root is missing. |
 | `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `route` is the route tag as recorded, such as `/persons/{id}`, and `null` when the request recorded none, or only a placeholder such as `NOT_FOUND`. Under Spring Boot's default static-resource mapping, a request no controller matched carries `/**`. `request` is `null` when the root is missing or is no HTTP request. |
-| `outcome` | `IN_PROGRESS` while `complete` is `false`, or `INTERRUPTED` for a trace [restored](#single-trace) from an earlier run that stopped before its root arrived. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure. |
+| `outcome` | `IN_PROGRESS` while `complete` is `false`, or `INTERRUPTED` for a trace [restored](#single-trace) from an earlier run that stopped before its root arrived. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure, also where a view rendered an exception for it. |
 | `buckets` | The buckets that hold the trace now: `ERRORS`, `SLOW`, both in that order, or none. `ALL` is never named. |
 | `reasons` | Why the trace failed or ran slow, `[{kind, spanId, detail}]`. See [reasons](#reasons). |
 | `cause` | Where to start reading a failed trace, `{type, message, applicationFrame, spanId}`. See [cause](#cause). |
@@ -289,7 +293,8 @@ List rows and the [single trace](#single-trace) share one shape, `{summary, data
 A failure stays on a whole trace. When the caps evict the span or the log line that failed
 it, `outcome` still reads `ERROR`, though no reason or cause names it.
 
-Some 4xx answers read `ERROR` too, see [Traces, outcome and
+A 4xx reads `OK` also where a view rendered an exception for it, such as Peekaboot's error page
+with `peekaboot.error-page.override` on. See [Traces, outcome and
 issues]({{ '/docs/traces/' | relative_url }}#exception-views).
 
 A row for an async task reports the task's own work. Its `startTime`, `durationMs`, `outcome`,
