@@ -67,6 +67,19 @@ One that holds spans but no root does not list on the Traces tab. Fetch it by id
 `/peekaboot/api/traces/{traceId}`, with an id from the [log
 search]({{ '/docs/api/' | relative_url }}#log-search) for example.
 
+## The error digest is empty after a restart or misses a failure {#error-digest-gone}
+
+The [error digest]({{ '/docs/api/' | relative_url }}#error-digest) survives a restart on the
+same switches as the traces above. These lines in the log say why it lost entries.
+
+| Cause | Fix |
+|---|---|
+| The log said `Peekaboot errors: <dir>/errors.jsonl comes from another Peekaboot version or starts with a damaged header; starting without it`. | None. Peekaboot deleted it. The digest writes a new one once it records a failure. |
+| The log said `Peekaboot errors: cannot read <dir>/errors.jsonl (...); starting without it`. | Check that the application can read the file. |
+| The log said `Peekaboot errors: skipped N unreadable lines in <dir>/errors.jsonl; restored the rest`. | None. Those entries are missing, and the next write leaves them out of the file. |
+| The log said `Peekaboot errors: cannot write <dir>/errors.jsonl (...); the error digest from here on will not survive a restart`. | Make the directory writable, or point `peekaboot.storage.dir` at one that is. |
+| The log said `Peekaboot errors: cannot record trace <traceId> in the error digest (...); the digest misses it`. | A bug in Peekaboot; report it with the exception in the parentheses. The line is logged once per run, so later misses go unlogged. A missed failure's trace stays in the store as usual. |
+
 ## Traces arrive late in tests {#traces-late-or-empty-in-tests}
 
 **Cause:** spans are exported in batches. Tests do not turn the dev toolbar on, so they keep

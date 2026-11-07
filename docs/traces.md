@@ -266,6 +266,10 @@ When a bucket is full, it drops the trace it admitted first. The buckets evict i
 so a trace can stay under Errors or Slow after it has left All. Nothing expires on a timer.
 With storage on, the buckets survive a restart, see [below](#persisted-traces).
 
+One noisy failure can fill Errors and push every other failure out. The [error
+digest]({{ '/docs/api/' | relative_url }}#error-digest) keeps counting every failure, one entry
+per exception class, route and application frame, after its traces are gone.
+
 One trace keeps at most `peekaboot.tracing.max-spans-per-trace` spans (500) and
 `peekaboot.tracing.max-logs-per-trace` log lines (500). Past either limit the oldest are
 dropped. A trace that lost spans carries a TRUNCATED badge. A stack trace in a captured log
@@ -290,7 +294,8 @@ into a second store, so while a fold runs the peak is about twice that.
 With [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
 on, the default for a local run, and `peekaboot.storage.traces.enabled` left on, every span, log
 line and completed request the store takes is appended to `traces.journal.jsonl` in the storage
-directory. Each running instance needs its own storage directory. Two instances on one directory
+directory. The [error digest]({{ '/docs/api/' | relative_url }}#error-digest) is kept beside it
+in `errors.jsonl`, on the same switches. Each running instance needs its own storage directory. Two instances on one directory
 restore each other's traces, and each starts its journal afresh over the other's, so the lines the
 other wrote since its last fold are lost.
 

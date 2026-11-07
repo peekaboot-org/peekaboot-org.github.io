@@ -131,13 +131,14 @@ is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ### Storage {#peekabootstorage}
 
-Storage decides whether the insights history, the start/stop log and the traces survive a restart.
+Storage decides whether the insights history, the start/stop log, the traces and the error digest
+survive a restart.
 
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.storage.enabled` | detected | Whether anything is written. Off, every store lives in memory and never opens a file. |
 | `peekaboot.storage.dir` | `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where the files live. An explicit value is used as is, with no per-application subdirectory. |
-| `peekaboot.storage.traces.enabled` | `true` | Whether traces and their logs survive a restart while storage is on. `false` keeps them in memory only. |
+| `peekaboot.storage.traces.enabled` | `true` | Whether traces, their logs and the error digest survive a restart while storage is on. `false` keeps them in memory only. |
 | `peekaboot.storage.traces.flush-interval` | `1s` | How often the trace journal is handed to the operating system, without an fsync. A crash usually loses the last interval, and everything since the start while the application is still starting or restoring its traces. Zero or a negative value stops startup. |
 | `peekaboot.storage.traces.max-journal-size` | `64MB` | The journal size, counted in characters, past which it is folded into the snapshot. Zero or a negative value stops startup. |
 
@@ -156,6 +157,7 @@ directory overwrite each other's history. Set `dir` in both cases. Every charact
 | `lifecycle.jsonl` | The start and stop history, capped at 1,000 events (about 500 runs), oldest dropped first. | Typically well under 400 KB. |
 | `traces.journal.jsonl` | Every span, log line and completed request since the last fold, one line each. See [Traces across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces). | Folded once it passes `max-journal-size`. |
 | `traces.snapshot.jsonl` | The traces the store held at the last fold, and the untraced log lines it kept. | What the [trace limits](#peekaboottracing) keep. |
+| `errors.jsonl` | The [error digest]({{ '/docs/api/' | relative_url }}#error-digest), one line per failure, rewritten when it changed, at most once per `flush-interval`, and at shutdown. Kept while the traces are. | A version header and at most 500 entries. |
 
 On a POSIX file system Peekaboot creates the directory `rwx------` and every file `rw-------`.
 An existing directory keeps its permissions. On Windows the platform defaults apply.
@@ -165,8 +167,8 @@ No file can fail your application. An insights snapshot that is unreadable, olde
 history starts empty. A failed write logs one warning per store and run, and Peekaboot carries
 on in memory.
 
-Trace files in another format, which an older or newer Peekaboot may write, or with a damaged
-header, are deleted, and the trace store starts empty.
+Trace files and `errors.jsonl` in another format, which an older or newer Peekaboot may write,
+or with a damaged header, are deleted, and the trace store or the digest starts empty.
 
 ### Peekaboot's guard {#peekabootsecurity}
 
@@ -304,8 +306,15 @@ the history survives a restart is [`peekaboot.storage.enabled`](#peekabootstorag
 | `peekaboot.insights.levels[n].interval` | `10s`, `1m`, `1h` | The sampling tick (level 0) and each coarser aggregation window. |
 | `peekaboot.insights.levels[n].size` | `90`, `1440`, `720` | Entries kept per series at that level. `interval` &times; `size` is how far back the charts reach. |
 | `peekaboot.insights.config-location` | unset, so `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file. Peekaboot's bundled panels are still merged underneath. |
-| `peekaboot.insights.persistence.interval` | the coarsest level's `interval` (`1h`) | How often the history is written to `insights.snapshot`. Does nothing while storage is off. |
+| `peekaboot.insights.persistence.interval` | `1m` | How often the history is written to `insights.snapshot`. A crash loses at most this much. Does nothing while storage is off. |
 | `peekaboot.insights.persistence.max-age` | the coarsest level's span (30 days) | The oldest snapshot that is still loaded at startup. |
+| `peekaboot.insights.problems.cpu-high-percent` | `80` | [`CPU_HIGH`]({{ '/docs/api/' | relative_url }}#problems): the median process CPU, in percent. |
+| `peekaboot.insights.problems.gc-overhead-percent` | `10` | `GC_OVERHEAD`: the median share of CPU time spent collecting garbage, in percent. |
+| `peekaboot.insights.problems.heap-near-max-percent` | `90` | `HEAP_NEAR_MAX`: the median heap in use as a share of its maximum, in percent. |
+| `peekaboot.insights.problems.thread-growth` | `50` | `THREAD_GROWTH`: how far the fewest live threads rise from a window's first quarter to its last. |
+| `peekaboot.insights.problems.pool-waiting` | `1` | `POOL_WAITING`: connections waiting for the pool at once. |
+| `peekaboot.insights.problems.server-errors-percent` | `5` | `SERVER_ERRORS`: the share of HTTP requests answered with a 5xx, in percent. |
+| `peekaboot.insights.problems.error-logs` | `1` | `ERROR_LOGS`: lines logged at ERROR in the window. |
 
 Setting `levels` replaces the whole list, so list every level you want. Startup fails unless
 all of these hold:
@@ -315,7 +324,8 @@ all of these hold:
 - Each `interval` is a whole multiple of the one before it.
 - Each `interval` fits in the level below it. A `1m` level over a `10s` level spans six entries,
   so the `10s` level needs a `size` of at least 6. The startup failure names both intervals.
-- `persistence.interval` and `persistence.max-age`, when set, are greater than zero.
+- `persistence.interval` is set and greater than zero, and `persistence.max-age`, when set, too.
+- Every `problems.*-percent` is above 0 and at most 100, and every other `problems.*` at least 1.
 
 Memory follows `size`, not `interval`. Level 0 stores one number per series per entry. Every
 higher level stores eight. Peekaboot logs the total at startup. See [what it

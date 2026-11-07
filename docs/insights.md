@@ -108,8 +108,8 @@ appears as a restart marker. The markers come from the same history as the
 [Lifecycle tab]({{ '/docs/dashboard/' | relative_url }}#lifecycle). Loading the history never
 delays your application's startup.
 
-History is written once per `persistence.interval` and at shutdown. Peekaboot discards the
-saved file and starts empty when:
+History is written once a minute (`persistence.interval`) and at shutdown, so a crash loses at
+most that minute. Peekaboot discards the saved file and starts empty when:
 
 - this Peekaboot version cannot read it,
 - your `levels` changed since it was written,
@@ -177,6 +177,9 @@ Find meter names on the [Meters tab]({{ '/docs/dashboard/' | relative_url }}#met
 | `level` | the level this panel shows by default; must index a configured level | follows the global switch |
 | `series` | the lines to draw | empty |
 
+`percent` expects a meter that reports a ratio from 0 to 1, as Micrometer's CPU and GC meters
+do. Peekaboot charts and serves it from 0 to 100.
+
 ### Series fields {#series-fields}
 
 | Field | Values | Default |
@@ -225,8 +228,9 @@ The `tiles` section of the same file defines the
 | `format` | `duration`, `datetime`, `bytes`, `count` | raw number |
 | `live` | `true` re-reads the value on every refresh; `false` keeps the first value | `false` |
 
-A tile always shows the meter's current value. `duration` and `datetime` expect seconds. A
-tile over a plain gauge that holds milliseconds shows a value a thousand times too large.
+A tile always shows the meter's current value. A time gauge, which every default tile reads, is
+read in milliseconds, which `duration` and `datetime` expect. A tile over a plain gauge that holds
+seconds shows a value a thousand times too small.
 
 ### An invalid file is ignored {#invalid-panel-file}
 
@@ -260,6 +264,17 @@ log first if your panels do not appear.
 - A gap means no sample. Peekaboot never draws a missed sample as zero.
 
 The charts update live and keep updating while the dashboard's auto-refresh is paused.
+
+## What the API judges {#problems}
+
+The [insights data endpoint]({{ '/docs/api/' | relative_url }}#problems) summarises each series
+over a window you choose and names the problems the window shows: CPU or GC overhead running
+high, a heap near its maximum, live threads growing, connections waiting for the pool, a share of
+5xx answers, ERROR lines and slow HTTP latency. The rules read the default panels' series, so a
+panel you switch off, or replace without those series, skips its rule. The tab does not show them.
+The thresholds are
+[`peekaboot.insights.problems.*`]({{ '/docs/configuration/' | relative_url }}#peekabootinsights),
+and slow latency is `peekaboot.tracing.slow-trace-threshold-ms`.
 
 ## Limitations {#percentiles-of-aggregates}
 

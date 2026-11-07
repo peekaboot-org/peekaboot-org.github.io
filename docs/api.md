@@ -23,8 +23,10 @@ them anywhere else.
 - A point in time Peekaboot records is an ISO-8601 string in UTC, such as
   `2026-10-23T10:15:30.123456Z`, with as many fractional digits as the clock gave.
   `server.currentTime` keeps the JVM's own offset. `application.git.commit.time` is the string
-  Actuator reports. Only the Insights series positions are epoch milliseconds, named
-  `...EpochMs`. Any other field ending in `Ms` is a duration.
+  Actuator reports.
+  Epoch milliseconds appear only in the insights endpoints: the fields named `epochMs` or
+  `...EpochMs`, the `timestamps` array, and a `datetime` tile's value. Any other field ending in
+  `Ms` is a duration.
 
 ## Endpoints {#endpoints}
 
@@ -37,8 +39,9 @@ them anywhere else.
 | [`/peekaboot/api/traces/{traceId}`](#single-trace) | none | `200`, `404` |
 | [`/peekaboot/api/logs`](#log-search) | `level`, `q`, `logger`, `traceId`, `since`, `until`, `limit`, `cursor` | `200`, `400` |
 | [`/peekaboot/api/routes`](#routes) | none | `200` |
+| [`/peekaboot/api/errors`](#error-digest) | `since`, `route` | `200`, `400` |
 | [`/peekaboot/api/insights/config`](#the-insights-endpoints) | none | `200`, `404` when Insights is off |
-| [`/peekaboot/api/insights/data`](#the-insights-endpoints) | `level` (required) | `200`, `400`, `404` when Insights is off |
+| [`/peekaboot/api/insights/data`](#the-insights-endpoints) | `level` (required), `view`, `series`, `since` | `200`, `400`, `404` when Insights is off |
 | [`/peekaboot/api/insights/stream`](#the-insights-endpoints) | none | `200` (Server-Sent Events), `503`, `404` when Insights is off |
 | [`/peekaboot/api/lifecycle/events`](#restart-history) | none | `200`, `404` when lifecycle is off |
 | [`/peekaboot/api/lifecycle/runs`](#restart-history) | none | `200`, `404` when lifecycle is off |
@@ -70,12 +73,12 @@ no single parameter is.
 
 | Status | When | `parameter` |
 |---|---|---|
-| `400` | An unknown `bucket`, `rootActionType`, `view` or `outcome` value, or an unknown log search `level`. `detail` lists the accepted values. | The parameter |
+| `400` | An unknown `bucket`, `rootActionType`, `view` or `outcome` value, an unknown log search `level`, or an unknown insights `series` id. `detail` lists the accepted values. | The parameter |
 | `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`, or a number outside its range, such as `limit=0`. `detail` gives the range. | The parameter |
 | `400` | A `since` or `until` that is no ISO-8601 instant, or an `until` not later than `since`. | The parameter |
 | `400` | A `cursor` the endpoint did not hand out, the other listing's `next` among them, or one handed out before the application restarted. | `cursor` |
-| `400` | A trace list or log search parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
-| `400` | A missing `level`, or one outside the configured levels. `detail` gives the accepted range. | `level` |
+| `400` | A trace list, log search, insights data or error digest parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
+| `400` | A missing `level`, or one that is no integer or outside the configured levels. `detail` gives the accepted range. An empty id in `series`, such as `series=a,,b`. | `level`, `series` |
 | `404` | The store does not hold the [trace](#single-trace). | `null` |
 | `401` | [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) refused the request. | `null` |
 | `503` | The [insights stream](#the-insights-endpoints) already has 32 subscribers. | `null` |
@@ -547,6 +550,39 @@ most `max-traces` traces, and nothing is kept between calls. With tracing off, `
 empty and `traceCount` is `0`. Fetch a `latestErrorTraceId` as a [single trace](#single-trace)
 to read the failure.
 
+## Error digest {#error-digest}
+
+`GET /peekaboot/api/errors` lists every failure the application's traces showed, one entry per
+exception class, route and application frame, the entry seen latest first:
+
+```
+{errors: [{type, route, applicationFrame, count, firstSeen, lastSeen,
+           lastMessage, lastTraceId, traceAvailable, runs}]}
+```
+
+| Parameter | Values | Default | Bad value |
+|---|---|---|---|
+| `since` | an ISO-8601 instant | none | `400` |
+| `route` | a route pattern, matched exactly, such as `/orders/{id}` | none | none. An unknown route lists nothing. |
+
+| Field | Meaning |
+|---|---|
+| `type`, `route`, `applicationFrame` | What makes two failed traces one entry: the [cause](#cause)'s class, the root request's route, and the cause's top frame in your application without its line number, such as `com.acme.OrderService.place(OrderService.java)`. An edit that moves the line keeps the entry. `type` and `applicationFrame` are each `null` where the cause names none, see [cause](#cause). A 5xx without an exception names neither, and a failure without a frame of your application names a `type` alone. `route` is `null` for a trace whose root is no HTTP request. |
+| `count` | The failed traces. A trace counts once, the first time it is complete with `outcome: ERROR`, also when its failure arrived after the request answered. |
+| `firstSeen`, `lastSeen` | When the earliest and the latest of them started. `since` keeps the entries whose `lastSeen` is at or after it. |
+| `lastMessage`, `lastTraceId` | The latest trace's cause message, masked as on the trace, and its id. |
+| `traceAvailable` | Whether the store still holds `lastTraceId`. Fetch it as a [single trace](#single-trace) while it is `true`. |
+| `runs` | When each run the failure occurred in started, the last ten, oldest first. Each is the `startedAt` of a run in [`/peekaboot/api/lifecycle/runs`](#restart-history). A failure before its run finished starting names no run. |
+
+The digest keeps 500 entries; past that the one seen least recently goes. It outlives the traces.
+One noisy failure can fill the Errors bucket, and the digest still lists every other failure.
+With [storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) and
+`peekaboot.storage.traces.enabled` on, it survives a restart in `errors.jsonl`, and the traces
+restored beside it do not count again. Otherwise it lives in memory only. While the restore runs at
+a start, `errors` is empty, so an empty list then does not mean no failures. The saved entries
+return together after the stored traces. See [persisted
+traces]({{ '/docs/traces/' | relative_url }}#persisted-traces). With tracing off, `errors` is empty.
+
 ## Metric charts {#the-insights-endpoints}
 
 The `/peekaboot/api/insights/**` endpoints back the [Insights]({{ '/docs/insights/' | relative_url }})
@@ -562,16 +598,35 @@ tab. They return `404` when `peekaboot.insights.enabled=false` or there is no `M
 Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the same ids.
 
 `GET /peekaboot/api/insights/data?level=n` returns one level's history:
-`{level, intervalMs, endEpochMs, count, series: {id: {values, stats}}}`.
 
-- Level 0 fills `values`, one number per tick. `stats` is `null`.
-- Higher levels fill `stats` with the arrays `min`, `max`, `avg`, `median`, `p90`, `p95` and
-  `p99`. `values` is `null`.
-- Arrays hold no timestamps. Derive each position's time from `endEpochMs` and
-  `intervalMs`. A missing sample is `null`.
-- A missing `level`, or one outside the configured levels, answers `400` with a
-  [problem body](#errors) that names `level` and the accepted range. A non-numeric `level` is a
-  `400` problem too.
+```
+{level, intervalMs, endEpochMs, count, timestamps,
+ series: {id: {summary: {min, avg, max, median, p95, latest, samples}, values, stats}},
+ problems: [{rule, severity, series, value, threshold, unit, message}]}
+```
+
+| Parameter | Values | Default | Bad value |
+|---|---|---|---|
+| `level` | a configured level, `0` to the last | none, required | `400` naming the range |
+| `view` | `summary` or `full`, any case | `summary` | `400` |
+| `series` | series ids separated by commas, such as `cpu.process,heap.used` | every series | `400` naming the unknown ids and the accepted ones |
+| `since` | an ISO-8601 instant | the whole ring | `400` |
+
+- The window holds the `count` samples taken at or after `since`. The newest was taken at
+  `endEpochMs`, the others one `intervalMs` apart before it. A `since` after the newest sample
+  leaves an empty window, `count: 0`.
+- Every series carries a `summary` over the window. `samples` counts the level-0 samples behind
+  it, and the statistics are `null` when it is `0`. Above level 0, `median` and `p95` come from
+  the windows' averages, so a short spike is averaged away; `min` and `max` stay exact. `latest`
+  is the newest sample, or the newest window's average above level 0.
+- The `summary` view serves no samples: `values`, `stats` and `timestamps` are `null`. `full`
+  adds them. Level 0 fills `values`, one number per tick, and higher levels fill `stats` with
+  the arrays `min`, `max`, `avg`, `median`, `p90`, `p95` and `p99`. `timestamps` holds each
+  position's time in epoch milliseconds, shared by every series. A missing sample is `null`.
+- Each value is in its series' unit: a `percent` series from 0 to 100, `millis` in
+  milliseconds.
+- `series` narrows `series` only. `problems` always reads every series. Its rules are
+  under [Problems](#problems).
 
 `GET /peekaboot/api/insights/stream` is a Server-Sent Events stream with two events:
 
@@ -585,6 +640,34 @@ Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the 
 - At most 32 streams can be open. Further requests get `503`; retry later.
 - The server closes each stream after 30 minutes. `EventSource` reconnects on its own.
 - Events are not replayed. After a reconnect, fetch `/data` again for the levels you show.
+
+### Problems {#problems}
+
+The `problems` of `/peekaboot/api/insights/data` list every rule the window reached. Each reads
+like a trace's [issue](#issue-fields), with `rule` and `series` in place of `type` and `spanId`.
+`series` names the series the rule read. `value` is what the window measured and `threshold` the
+limit it reached, both in `unit`. `message` says it in one sentence. `severity` is `warning` or
+`error`. `unit` is `percent`, `count` or `millis`, the words a panel's `unit` takes, so a
+duration reads `millis` here where an issue says `ms`.
+
+| Rule | Severity | Measures | Reached at |
+|---|---|---|---|
+| `CPU_HIGH` | `warning` | The median of `cpu.process` | `cpu-high-percent` |
+| `GC_OVERHEAD` | `warning` | The median of `cpu.gc-overhead` | `gc-overhead-percent` |
+| `HEAP_NEAR_MAX` | `warning` | The median, per sample, of `heap.used` as a share of `heap.max` | `heap-near-max-percent` |
+| `THREAD_GROWTH` | `warning` | How far the fewest `threads.live` of the window's last quarter rose above its first quarter's | `thread-growth` |
+| `POOL_WAITING` | `error` | The most `db-pool.pending` | `pool-waiting` |
+| `SERVER_ERRORS` | `error` | `http-throughput.server-errors` as a share of `http-throughput.requests`, summed over the window | `server-errors-percent` |
+| `ERROR_LOGS` | `warning` | The lines logged at ERROR, from the `log-events.errors` rate | `error-logs` |
+| `SLOW_HTTP` | `warning` | The p95 of `http-latency.avg` | `peekaboot.tracing.slow-trace-threshold-ms` |
+
+The thresholds without a prefix are `peekaboot.insights.problems.*`, under [Insights
+configuration]({{ '/docs/configuration/' | relative_url }}#peekabootinsights). A rule whose series
+is switched off, has no meter in your application or holds no sample in the window is skipped.
+The list holds only what reached a threshold, so a rule missing from it may have been skipped.
+`HEAP_NEAR_MAX` also skips a heap without a configured maximum, `THREAD_GROWTH` a window of fewer
+than four samples, and `SERVER_ERRORS` a window without requests. The dashboard does not show
+`problems`.
 
 ## Restart history {#restart-history}
 
@@ -600,8 +683,8 @@ off they cover only the current run.
 ```
 
 - `type` is `start` or `stop`. A stop carries only `type` and `timestamp`.
-- A start carries the build fields that changed since the previous start. The first start
-  carries all of them.
+- A start carries every build field it recorded, whatever the previous start ran. Which of
+  them changed between runs is `changed` in `/peekaboot/api/lifecycle/runs`.
 - `uncleanPrevious` is `true` when the previous run recorded no stop.
 
 `GET /peekaboot/api/lifecycle/runs` returns one entry per run, newest first:

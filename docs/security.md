@@ -115,6 +115,7 @@ for a local run only. The one exception is `security.properties` with an explici
 | `lifecycle.jsonl` | Storage on | One line per start or stop: timestamp, pid, and `version`, `time`, `branch`, `commit.id`, `commit.id.full`, `commit.id.abbrev`, `build.version`, `build.time`. |
 | `traces.journal.jsonl` | Storage on and `peekaboot.storage.traces.enabled` | Every span, log line and completed request the trace store took since the last fold, one JSON line each. Span attributes, SQL with its bind parameters, log messages and stack traces are unmasked. Request and response headers and parameters are masked as captured. |
 | `traces.snapshot.jsonl` | As above | The same lines for the traces the store still holds and the untraced log lines it keeps, written at startup, at shutdown and past `max-journal-size`. Masked as the journal is. |
+| `errors.jsonl` | As `traces.journal.jsonl` | One line per failure in the [error digest]({{ '/docs/api/' | relative_url }}#error-digest): exception class, route, application frame, counts, dates, the last trace id, and the last cause message, masked as the API shows it. |
 | `security.properties` | The guard generated a password, and storage is on or `credentials-file` is set | A PBKDF2 hash of the generated password. Never the password itself. |
 
 `lifecycle.jsonl` drops every other build-info and git-info entry, including the git remote
