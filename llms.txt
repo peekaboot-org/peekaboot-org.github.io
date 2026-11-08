@@ -7,6 +7,7 @@ An agent debugging an application that runs Peekaboot starts with `GET /peekaboo
 ## Docs
 
 - [Agents](https://www.peekaboot.org/docs/agents/): authentication, masked values, and recipes for debugging a 500, finding slow or failing routes, reading health over time and searching logs
+- [peekaboot skill](https://github.com/peekaboot-org/peekaboot-skills): the recipes as an agent skill, with install commands for Claude Code and Codex, and a copy step for other agents
 - [HTTP API](https://www.peekaboot.org/docs/api/): every endpoint, parameter, field and error
 - [Traces](https://www.peekaboot.org/docs/traces/): what a trace holds, its outcome, issues and buckets
 - [Insights](https://www.peekaboot.org/docs/insights/): the metric history and the problems the API names

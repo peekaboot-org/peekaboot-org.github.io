@@ -16,8 +16,8 @@ Zipkin or Jaeger pipeline keeps working unchanged. Peekaboot adds no exporter th
 out of the process, and it turns Micrometer's OTLP metrics export off.
 
 An agent reads the same traces over HTTP. [Agents, debug a
-500]({{ '/docs/agents/' | relative_url }}#debug-a-500) goes from a failing request to its stack
-trace.
+500]({{ '/docs/agents/' | relative_url }}#debug-a-500) reads a failing request's trace and cause,
+and links the full recipe.
 
 ## Requirements {#requirements}
 

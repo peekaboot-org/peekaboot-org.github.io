@@ -9,6 +9,47 @@ the dashboard shows is JSON under `/peekaboot/api`, and the answers carry Peekab
 judgement, such as a trace's cause, its issues and the routes that fail. The agent does not have
 to work any of it out again.
 
+## Install the skill {#install-the-skill}
+
+The [peekaboot skill](https://github.com/peekaboot-org/peekaboot-skills) puts these recipes in a
+coding agent's own environment. The agent loads it when a task fits, such as a request that
+fails, without being pointed at this page. It needs `curl` and `jq`.
+
+Claude Code, in a session:
+
+```text
+/plugin marketplace add peekaboot-org/peekaboot-skills
+/plugin install peekaboot@peekaboot
+```
+
+Or from a shell:
+
+```bash
+claude plugin marketplace add peekaboot-org/peekaboot-skills
+claude plugin install peekaboot@peekaboot
+```
+
+Codex:
+
+```bash
+codex plugin marketplace add peekaboot-org/peekaboot-skills
+codex plugin add peekaboot@peekaboot
+```
+
+Cursor, Gemini CLI and GitHub Copilot read skills from a project's `.agents/skills/`. From your
+project's root, clone the skill's repository next to it and copy the skill folder:
+
+```bash
+git clone --depth 1 https://github.com/peekaboot-org/peekaboot-skills ../peekaboot-skills
+mkdir -p .agents/skills && cp -r ../peekaboot-skills/skills/peekaboot .agents/skills/
+```
+
+Claude Code reads a project's skills from `.claude/skills/` instead:
+
+```bash
+mkdir -p .claude/skills && cp -r ../peekaboot-skills/skills/peekaboot .claude/skills/
+```
+
 ## Start here {#start-here}
 
 `GET /peekaboot/api` lists every endpoint with one line on what it is for, and links the
@@ -43,11 +84,13 @@ is armed, every request needs HTTP Basic credentials:
   where Peekaboot can store its hash, with storage on or `peekaboot.security.credentials-file`
   set. Without either, each start generates a new one.
 
-For an application whose artifact id is `orders`:
+For an application whose artifact id is `orders`, the application reads the password where it
+starts, and the agent reads both credentials from the environment its shell inherits:
 
 ```bash
 export PEEKABOOT_SECURITY_PASSWORD='a-long-random-secret'   # where the application starts
-curl -s -u "orders-admin:$PEEKABOOT_SECURITY_PASSWORD" http://localhost:8080/peekaboot/api/features
+export PEEKABOOT_USER=orders-admin PEEKABOOT_PASSWORD='a-long-random-secret'   # where the agent runs
+curl -s -u "$PEEKABOOT_USER:$PEEKABOOT_PASSWORD" http://localhost:8080/peekaboot/api/features
 ```
 
 A refused request answers `401` with a problem body. Where your own Spring Security guards
@@ -67,8 +110,9 @@ masking]({{ '/docs/security/' | relative_url }}#masking).
 
 ## Recipes {#recipes}
 
-The recipes use `curl` and `jq`, and each reads the application's address from `BASE`. Set it
-first, and add `-u` where the guard is armed:
+Each recipe shows its first call here. The skill's reference files hold the whole recipe, with
+the follow-up calls and what an empty answer means. The calls read the application's scheme,
+host, port and context path from `BASE`. Set it first, and add `-u` where the guard is armed:
 
 ```bash
 BASE=http://localhost:8080
@@ -85,24 +129,9 @@ if [ -z "$T" ]; then echo 'No Server-Timing header, so Peekaboot did not trace t
 else curl -s "$BASE/peekaboot/api/traces/$T" | jq '.summary | {complete, outcome, cause, reasons}'; fi
 ```
 
-`cause` names the exception, its message and the application frame it came from. While
-`complete` is `false` the spans are still arriving; ask again. The stack trace is on the span
-`cause.spanId` names:
-
-```bash
-if [ -n "$T" ]; then curl -s "$BASE/peekaboot/api/traces/$T" \
-  | jq -r '.summary.cause.spanId as $s | .data.rootSpan | .. | objects | select(has("children") and .spanId == $s) | .exception.stackTrace'; fi
-```
-
-A cause found in an ERROR log has its stack trace on that log line instead, under
-`.data.logs`. For failures you did not trigger yourself, the error digest lists every one the
-traces showed, seen latest first:
-
-```bash
-curl -s "$BASE/peekaboot/api/errors" | jq '.errors[:5] | map({type, route, count, lastMessage, lastTraceId, traceAvailable})'
-```
-
-Fetch a `lastTraceId` as a trace while its `traceAvailable` is `true`.
+While `complete` is `false` the spans are still arriving; ask again. The [full
+recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/main/skills/peekaboot/references/debug-a-500.md)
+adds the stack trace and the error digest.
 
 ### Find slow or failing routes {#slow-or-failing-routes}
 
@@ -111,33 +140,19 @@ curl -s "$BASE/peekaboot/api/routes" \
   | jq '.routes | sort_by(-.p95Ms) | .[:5] | map({method, route, count, errorCount, p95Ms, latestSlowTraceId, latestErrorTraceId})'
 ```
 
-Fetch the `latestSlowTraceId` of the route with the highest `p95Ms` that has one, as a trace.
-Its `summary.hotspots` names the spans that spent the longest on their own work, and
-`summary.issues` every issue on its spans, such as slow spans, slow queries and repeated queries:
-
-```bash
-T=$(curl -s "$BASE/peekaboot/api/routes" | jq -r '[.routes[] | select(.latestSlowTraceId)] | max_by(.p95Ms) | .latestSlowTraceId // empty')
-if [ -z "$T" ]; then echo 'No route has a slow trace.'
-else curl -s "$BASE/peekaboot/api/traces/$T" | jq '.summary | {durationMs, hotspots, issues: [.issues[] | {type, message}]}'; fi
-```
+The [full
+recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/main/skills/peekaboot/references/slow-or-failing-routes.md)
+reads the slowest route's trace, its hotspots and its issues.
 
 ### Read health over time {#health-over-time}
 
-The insights data summarises each metric over a window and names the problems it shows, such
-as CPU running high or connections waiting for the pool:
-
 ```bash
-curl -s "$BASE/peekaboot/api/insights/config" | jq '.levels'
-curl -s -G "$BASE/peekaboot/api/insights/data" --data-urlencode 'level=1' \
-  --data-urlencode 'since=2026-11-07T09:00:00Z' | jq '{level, count, problems}'
+curl -s -G "$BASE/peekaboot/api/insights/data" --data-urlencode 'level=1' | jq '{level, count, problems}'
 ```
 
-An empty `problems` list means no rule reached its threshold. A rule whose series has no
-samples in the window is left out of `problems`. Restarts and deployments are in the run history:
-
-```bash
-curl -s "$BASE/peekaboot/api/lifecycle/runs" | jq '.runs[:3] | map({startedAt, uncleanExit, changed})'
-```
+An empty `problems` list means no rule reached its threshold. The [full
+recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/main/skills/peekaboot/references/health-over-time.md)
+adds the levels and the run history.
 
 ### Search the logs {#log-search}
 
@@ -146,12 +161,6 @@ curl -s -G "$BASE/peekaboot/api/logs" --data-urlencode 'level=WARN' --data-urlen
   | jq '.logs[] | {timestamp, level, logger, message, traceId}'
 ```
 
-The search covers the lines inside traces and the ones outside them, newest first. A line with
-a `traceId` leads to its trace. A page's `next` is the page token for the one after it. Send it
-back as `cursor` with the same filters. On the last page `next` is `null`:
-
-```bash
-NEXT=$(curl -s -G "$BASE/peekaboot/api/logs" --data-urlencode 'level=WARN' | jq -r '.next // empty')
-if [ -z "$NEXT" ]; then echo 'That was the last page.'
-else curl -s -G "$BASE/peekaboot/api/logs" --data-urlencode 'level=WARN' --data-urlencode "cursor=$NEXT"; fi
-```
+The [full
+recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/main/skills/peekaboot/references/log-search.md)
+pages through the results.
