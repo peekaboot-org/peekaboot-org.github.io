@@ -167,7 +167,9 @@ Masking is on by default and has nothing to configure. It replaces a value with 
 - the database connection parameters in Peekaboot's startup log line
 
 Your own `SanitizingFunction` beans also run on environment and config values, so a value they
-mask reaches the dashboard as `******`.
+mask reaches the dashboard as `******`. `/peekaboot/api/features` names the literal in
+`maskLiteral`. [Agents]({{ '/docs/agents/' | relative_url }}#masked-values) says how an agent
+reads it.
 
 ### What gets masked, and how {#what-gets-masked-and-how}
 
@@ -391,6 +393,11 @@ changes on every restart. The startup log says so. Keep it stable with one of th
 - `peekaboot.security.credentials-file` pointing at a persistent path, for example a mounted
   volume in a container
 </div>
+
+An agent or a script sends the same credentials with HTTP Basic, such as
+`curl -u <username>:<password>`. Set the password with `peekaboot.security.password`, or the
+environment variable `PEEKABOOT_SECURITY_PASSWORD`, so the agent can know it without reading the
+startup log. See [Agents]({{ '/docs/agents/' | relative_url }}#authentication).
 
 Rules to know:
 

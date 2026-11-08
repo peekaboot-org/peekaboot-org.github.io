@@ -27,6 +27,8 @@
       url: /docs/configuration/
     - title: HTTP API
       url: /docs/api/
+    - title: Agents
+      url: /docs/agents/
 
 - title: Operations
   pages:

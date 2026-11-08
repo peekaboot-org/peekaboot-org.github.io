@@ -1,0 +1,19 @@
+# Peekaboot
+
+> Peekaboot is a Spring Boot starter that shows a running application's traces, logs, failures, routes and metrics on a dashboard at /peekaboot, and serves the same data as JSON under /peekaboot/api.
+
+An agent debugging an application that runs Peekaboot starts with `GET /peekaboot/api` on that application. It lists every endpoint and links the OpenAPI 3.1 document at `/peekaboot/api/openapi.json`. Where Peekaboot's guard is armed, send HTTP Basic credentials. A value that reads `******` is masked.
+
+## Docs
+
+- [Agents](https://www.peekaboot.org/docs/agents/): authentication, masked values, and recipes for debugging a 500, finding slow or failing routes, reading health over time and searching logs
+- [HTTP API](https://www.peekaboot.org/docs/api/): every endpoint, parameter, field and error
+- [Traces](https://www.peekaboot.org/docs/traces/): what a trace holds, its outcome, issues and buckets
+- [Insights](https://www.peekaboot.org/docs/insights/): the metric history and the problems the API names
+- [Security](https://www.peekaboot.org/docs/security/): what Peekaboot exposes, masking and the guard
+- [Configuration](https://www.peekaboot.org/docs/configuration/): every property
+
+## Optional
+
+- [Quick start](https://www.peekaboot.org/docs/quick-start/)
+- [Troubleshooting](https://www.peekaboot.org/docs/troubleshooting/)

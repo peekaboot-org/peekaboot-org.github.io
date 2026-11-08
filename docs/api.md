@@ -35,6 +35,8 @@ them anywhere else.
 
 | Endpoint | Parameters | Status codes |
 |---|---|---|
+| [`/peekaboot/api`](#openapi) | none | `200`, `400` |
+| [`/peekaboot/api/openapi.json`](#openapi) | none | `200`, `400` |
 | [`/peekaboot/api/features`](#features) | none | `200`, `400` |
 | [`/peekaboot/api/actuator/all/insights`](#what-insights-adds) | `locale`, `unmask` | `200`, `400` |
 | [`/peekaboot/api/metrics`](#meters) | none | `200`, `400` |
@@ -55,6 +57,26 @@ Where Peekaboot's guard is armed, every endpoint can also answer `401`. See
 `/peekaboot` and `/peekaboot/` redirect to the dashboard at
 `/peekaboot/ui/dashboard/index.html`. See [The
 dashboard]({{ '/docs/dashboard/' | relative_url }}).
+
+## Index and OpenAPI document {#openapi}
+
+`GET /peekaboot/api` lists every endpoint on this page with one line on what it is for, and
+names where the OpenAPI document is:
+
+```
+{openapi, endpoints: [{path, purpose}]}
+```
+
+`GET /peekaboot/api/openapi.json` is a hand-written OpenAPI 3.1 document. It describes every
+endpoint, parameter, response and problem body on this page, with each field's type and whether
+it can be `null`. Peekaboot's build validates the real answers of every endpoint against it.
+
+Both work behind a prefix. Behind a `server.servlet.context-path` or a
+`spring.mvc.servlet.path`, the index's paths carry that prefix, such as
+`/app/peekaboot/api/traces`, and the document's `servers` entry is that prefix. The `404` of a
+feature that is off, a `405`, a `406` and an unexpected `500` come from your application, so the
+document describes them in words only. See [Agents]({{ '/docs/agents/' | relative_url }}) for
+what an agent reads first.
 
 ## Errors {#errors}
 
@@ -197,7 +219,7 @@ clears, so `outcome=ERROR` never lists a row that reads `OK`.
 ```bash
 curl -G 'http://localhost:8080/peekaboot/api/traces' \
   --data-urlencode 'route=/persons/{id}' \
-  --data-urlencode 'outcome=error' \
+  --data-urlencode 'outcome=ERROR' \
   --data-urlencode 'since=2026-11-01T10:00:00+01:00'
 ```
 
@@ -519,7 +541,7 @@ still show up on a later page, below the cursor. It can also miss that page and 
 and then shows up when a search starts again without a `cursor`.
 
 ```bash
-curl -G 'http://localhost:8080/peekaboot/api/logs' --data-urlencode 'level=warn' --data-urlencode 'q=timeout'
+curl -G 'http://localhost:8080/peekaboot/api/logs' --data-urlencode 'level=WARN' --data-urlencode 'q=timeout'
 ```
 
 ## Routes {#routes}

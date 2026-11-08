@@ -275,6 +275,8 @@ panel you switch off, or replace without those series, skips its rule. The tab d
 The thresholds are
 [`peekaboot.insights.problems.*`]({{ '/docs/configuration/' | relative_url }}#peekabootinsights),
 and slow latency is `peekaboot.tracing.slow-trace-threshold-ms`.
+[Agents, read health over time]({{ '/docs/agents/' | relative_url }}#health-over-time) reads the
+problems with `curl`.
 
 ## Limitations {#percentiles-of-aggregates}
 

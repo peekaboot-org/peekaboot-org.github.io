@@ -15,6 +15,10 @@ The store is one more span exporter next to the ones you configured. An existing
 Zipkin or Jaeger pipeline keeps working unchanged. Peekaboot adds no exporter that sends data
 out of the process, and it turns Micrometer's OTLP metrics export off.
 
+An agent reads the same traces over HTTP. [Agents, debug a
+500]({{ '/docs/agents/' | relative_url }}#debug-a-500) goes from a failing request to its stack
+trace.
+
 ## Requirements {#requirements}
 
 - `peekaboot.enabled=true`. It defaults to true only for a [local
