@@ -25,8 +25,7 @@ them anywhere else.
 - The errors under [Errors](#errors) answer with a problem body.
 - A point in time Peekaboot records is an ISO-8601 string in UTC, such as
   `2026-10-23T10:15:30.123456Z`, with as many fractional digits as the clock gave.
-  `server.currentTime` keeps the JVM's own offset. `application.git.commit.time` is the string
-  Actuator reports.
+  `server.currentTime` keeps the JVM's own offset.
   Epoch milliseconds appear only in the insights endpoints: the fields named `epochMs` or
   `...EpochMs`, the `timestamps` array, and a `datetime` tile's value. Any other field ending in
   `Ms` is a duration.

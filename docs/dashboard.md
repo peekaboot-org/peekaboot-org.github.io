@@ -80,6 +80,13 @@ defaults, datasource status, and memory and storage meters. A composite health c
 such as Spring's `db` with two DataSources, shows as one row with its aggregate status,
 followed by its children as `db/<name>`.
 
+The Git card shows your application's own `git.properties`, the one the
+[Lifecycle](#lifecycle) tab reads. A `git.properties` a library ships never shows there. Your
+own `/actuator/info` stays as Spring Boot builds it.
+The Git card shows no git info where you turn off Spring Boot's git info contributor:
+`management.info.git.enabled=false`, or `management.info.defaults.enabled=false` without
+`management.info.git.enabled=true`. The Lifecycle tab still shows each run's branch and commit.
+
 The Machine card shows the logical CPU count (with the CPU model on Linux), total physical
 memory, the JVM's max heap, the machine's IPv4 and IPv6 addresses with their hostnames where these resolve, and
 the container runtime: `docker`, `podman`, `kubernetes`, `container` or `none`. Inside a

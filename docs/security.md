@@ -55,7 +55,8 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Every resolved property source, key and value | Environment tab | By key and by value shape |
 | Every `@ConfigurationProperties` value | Config tab | By key and by value shape |
 | Health status and per-component detail, custom indicators included | Overview | By key and by value shape |
-| Build and Git metadata (`info.build`) | Overview | By key and by value shape |
+| Build metadata (`info.build`) | Overview | By key and by value shape |
+| Git branch, commit id and commit time of the application's own `git.properties` | Overview | No. Peekaboot passes on only these three entries, so a remote URL or committer address never shows. |
 | Datasource host, port, database name, user, product and driver version | Overview | Connection parameters only. User, host and database name are shown as is. |
 | Process identity: OS user, uid, gid, pid, parent-process chain with command names | Overview | No |
 | Machine: CPU count and model, physical memory, max heap, container runtime, every non-local IP address and its hostname | Overview, `runtime.machine` and `runtime.memory` in the API | No |
