@@ -120,6 +120,17 @@ Lifecycle lists every run of the application, newest first, 20 to a page.
 A dash means the value is unknown. A run with no recorded stop has no duration, and a run
 after an unclean exit has no downtime.
 
+Branch and commit come from your application's own `git.properties`, the one in its jar or in its
+build's output directories. Without `build-info.properties`, so do the version and build time. A
+`git.properties` a library ships never counts for a new run. Set `spring.info.git.location` to
+name another file.
+
+A run recorded by an earlier Peekaboot may hold a library's build. That is the library's commit,
+and its version and build time where your application has no `build-info.properties`. A run
+without these facts of its own shows the last known ones, so later runs show that build too. Delete
+`lifecycle.jsonl` from the [storage directory]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
+once after upgrading to clear it.
+
 History across restarts needs
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage),
 on by default for a local run. Without it the tab shows the current run only. With
