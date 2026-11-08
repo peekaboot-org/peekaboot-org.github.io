@@ -228,10 +228,11 @@ in Errors. A 4xx answer is a CLIENT_ERROR issue and leaves the outcome OK.
 A 4xx stays OK however it was answered, also where a view rendered an exception for it. That
 view is the page [`peekaboot.error-page.override`]({{ '/docs/error-page/' | relative_url }}#override)
 renders for an HTML request that ends in an exception, or one your own `@ExceptionHandler`
-renders. Spring clears the exception once the view has rendered, so the request's server span
-does not record it. Spring's own `400`, `405` and the `404` for an unknown path read OK with a
-CLIENT_ERROR issue and stay out of Errors and the error digest. A view that answers with a 5xx
-still fails the trace through its HTTP status.
+renders. For a 4xx, Spring clears the exception once the view has rendered, so the request's
+server span does not record it. Spring's own `400`, `405` and the `404` for an unknown path read
+OK with a CLIENT_ERROR issue and stay out of Errors and the error digest. A view that answers
+with a 5xx still fails the trace through its HTTP status. Where Peekaboot's page answers an
+exception with a 5xx, it also fails the request's server span with that exception.
 {: #exception-views}
 
 A trace whose root span has not arrived yet shows IN PROGRESS in its detail, with the spans that
