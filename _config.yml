@@ -11,7 +11,7 @@ theme: null
 repository_url: https://github.com/peekaboot-org/peekaboot
 maven_group: org.peekaboot
 maven_artifact: peekaboot-spring-boot-starter
-peekaboot_version: 1.1.0
+peekaboot_version: 1.2.0
 java_version: "25"
 spring_boot_version: "4.1"
 

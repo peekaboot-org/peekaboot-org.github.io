@@ -1,5 +1,556 @@
 [
   {
+    "version": "1.2.0",
+    "date": "2026-11-10",
+    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.2.0",
+    "initial": false,
+    "groups": [
+      {
+        "title": "Features",
+        "entries": [
+          {
+            "text": "Sort span tags in code-point order",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mark slow queries with the shared SLOW pill",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give Queries the Logs tab's span-tree link",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name a filter target by class and method",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Spell out the toolbar's pending stats",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show the heap meter's maximum as Max Heap",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Move issue thresholds to peekaboot.tracing",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Rename dev-toolbar and enable-unmasking keys",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show the insights switch when it is off",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture requests and logs under tracing",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Hide the Lifecycle tab when lifecycle is off",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name handler and view spans by their target",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name the app in banners without build-info",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bind Hibernate panel meters without the jar",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Capture a failed span's exception",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve a failed span's folded stack trace",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Answer the API's errors with problem details",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give the guard's 401 a problem body",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "List 5xx answers in the Errors bucket",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give each issue its value and threshold",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Flag repeated queries under one span",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Flag 4xx answers as client errors",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Say why a trace failed or ran slow",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve traces as summary and data",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name the first failure in a trace",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "List the spans with the most self time",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Filter the trace list",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Page the trace list by row position",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name each log's trace, logger and thread",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep logs written outside any trace",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Search captured logs",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Aggregate traces per route",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "File a trace in its buckets as it is stored",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name the run that produced each trace",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse a page token from before a restart",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Write the store's inputs as journal lines",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Append trace inputs to a journal",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Replay the trace journal at startup",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold the trace journal into a snapshot",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep traces across restarts",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mark a trace cut off by a restart",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve each start with its whole build",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Summarise the insights data",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name problems in the insights data",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold failed traces into an error digest",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Record live failed traces in the digest",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve the error digest",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the error digest across restarts",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse unknown query parameters",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mark interrupted traces on the Traces tab",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show a trace's cause and hotspots",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show self time and issue badges on spans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve the API's OpenAPI document",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "List the API's endpoints at /peekaboot/api",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Record git even when events run async",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Detach log capture on the closing thread",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Bug fixes",
+        "entries": [
+          {
+            "text": "Link published poms to the real project page",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep insights working in full git mode",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Never write credentials through a symlink",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Find Swagger UI behind a slash-less path",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a stored password with a blank username",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ignore a child context's ready event",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Label Tomcat session creation per second",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse insights intervals finer than 1ms",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the Traces controls still on refresh",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop Safari rounding times up a millisecond",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Colour the toolbar by effective thresholds",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Skip a relocated Swagger UI's own calls",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask captured log messages and stack traces",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Group omitted parameter sets by locale",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve in-flight traces as incomplete",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep dashboard requests out of observations",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse unknown trace list filters",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Judge slow spans by their self time",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse an out-of-range trace list limit",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve insights values in their units",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Save the insights history every minute",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Count a late meter's first tick from zero",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep API refusals problem+json for browsers",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Prefix the insights and lifecycle beans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fail the server span of a 5xx error page",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Prefix the remaining Peekaboot beans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fail the handler span of a 5xx error page",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ignore a dependency's git.properties",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show the app's own git info on Overview",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Run stop listeners on the closing thread",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the ready banner above the posture",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Dependency upgrades",
+        "entries": [
+          {
+            "text": "Bump jdbc-url-parser to 0.1.3",
+            "scope": "deps",
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.1.0",
     "date": "2026-10-17",
     "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.1.0",
