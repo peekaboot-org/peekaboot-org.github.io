@@ -71,9 +71,10 @@ no reveal control, so a masked value stays masked. See
 [Security]({{ '/docs/security/' | relative_url }}#masking) for the rules and what they miss.
 Request bodies and uploaded file names are not captured.
 
-Form parameters are listed when your application read them; Peekaboot never parses a body
-itself, so a request your security rejected shows none. A name or value over 4,096 characters
-is cut.
+Form parameters are listed when your application read them, or a filter that runs after
+Peekaboot's did, such as Spring Security's CSRF check when the token is not in a header.
+Peekaboot never parses a body itself, so a request rejected before anything read its
+parameters shows none. A name or value over 4,096 characters is cut.
 
 ## The trace detail {#the-trace-view}
 
