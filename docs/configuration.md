@@ -178,7 +178,7 @@ or with a damaged header, are deleted, and the trace store or the digest starts 
 | `peekaboot.security.enabled` | detected | Whether Peekaboot's HTTP Basic guard protects `/peekaboot/**`. |
 | `peekaboot.security.username` | `<artifact>-admin` | The username the guard accepts. |
 | `peekaboot.security.password` | unset | A fixed password. Nothing is generated or written to disk. |
-| `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. |
+| `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. Readable by its owner only. |
 
 `enabled` defaults by launch. See [When Peekaboot is on](#when-peekaboot-is-on). How the guard
 derives its username and password, and how to keep a generated password across restarts, is

@@ -97,8 +97,17 @@ Anyone who reads that header and can reach `/peekaboot/**` can open that request
 `GET /peekaboot/api/traces/{traceId}`. Responses on the [paths Peekaboot never
 records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) get no header.
 
-Every `/peekaboot/api/**` response carries `Cache-Control: no-store` and
+Every API endpoint answers with `Cache-Control: no-store` and
 `X-Content-Type-Options: nosniff`, so a proxy or the browser's cache does not keep it.
+
+The dashboard's files under `/peekaboot/ui/**` are served with these headers, so no page can
+frame the dashboard. A header the response already carries stays as your application set it.
+
+```
+Content-Security-Policy: default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+```
 
 ## What the error page shows {#the-error-page}
 
@@ -380,8 +389,12 @@ If your application sends a `Content-Security-Policy`:
 (realm `Peekaboot`) on `/peekaboot/**`. It challenges every request, whatever else
 authenticated it. With `spring.mvc.servlet.path` set, it guards the dashboard under that prefix,
 such as `/app/peekaboot/**`. It also checks requests your application forwards or includes into
-the dashboard, and async dispatches. With Spring MVC on the classpath but no
-`DispatcherServletPath` bean, Peekaboot logs a WARN at startup and assumes `/peekaboot/*`.
+the dashboard, and async dispatches.
+
+The guard also challenges where your application's Spring MVC configuration moves Peekaboot's
+controllers or UI: a path prefix, a case-insensitive matcher or a second `DispatcherServlet`.
+With Spring MVC on the classpath but no `DispatcherServletPath` bean, Peekaboot logs a WARN at
+startup and assumes `/peekaboot/*`.
 
 A refused request gets a `401` with the challenge `WWW-Authenticate: Basic realm="Peekaboot",
 charset="UTF-8"` and a [problem body]({{ '/docs/api/' | relative_url }}#errors) saying which
@@ -423,8 +436,13 @@ Rules to know:
   out, so switch one off. With form login or a session cookie the reader signs in twice.
 - A VPN, an nginx basic-auth layer, an IP allowlist or an API gateway in front does not
   satisfy the guard. It still challenges behind them.
-- There is no rate limit on failed attempts. Rate-limit at the proxy in front of the
-  application.
+- At most two password checks run at once, and requests with the same credentials share one.
+  A sign-in that arrives while two are running gets a `401` unchecked, and the log says so
+  once at WARN. That is no rate limit. Rate-limit at the proxy in front of the application.
+- The generated password is in the application log only, never in the Logs tab, the log API
+  or the trace journal.
+- On a POSIX file system `security.properties` must be accessible to its owner only. Peekaboot
+  ignores a file its group or other users can access, logs a WARN and generates a new password.
 - The `Peekaboot Security` block logs at INFO. With the toolbar on it logs at WARN, because the
   toolbar's requests then raise a credential dialog on ordinary pages. With
   `peekaboot.error-page.enabled=true` on a deployment it also logs at WARN while Peekaboot's error

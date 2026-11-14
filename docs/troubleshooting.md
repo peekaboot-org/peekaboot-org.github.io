@@ -266,15 +266,20 @@ for credentials on whatever page is open.
 
 ## The generated password changes on every restart {#password-changes-on-restart}
 
-**Cause:** `peekaboot.storage.enabled` is `false`, the default on a deployment. The generated
-password is not saved.
+**Cause:** one of these.
+
+- `peekaboot.storage.enabled` is `false`, the default on a deployment. The generated password
+  is not saved.
+- The log says the credentials file `is accessible to its group or to others` on every start.
+  Peekaboot ignores such a file and writes the new one `rw-------`, so the file system it is
+  on does not keep that mode.
 
 **Fix:** one of these.
 
 - Set `peekaboot.storage.enabled=true` to keep the password across restarts.
 - Set `peekaboot.security.password` to your own.
 - Set `peekaboot.security.credentials-file` to a path. Peekaboot writes the credentials there
-  even with storage off.
+  even with storage off. Choose a file system that keeps the file's mode.
 
 See [Configuration, `peekaboot.security`]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
 
