@@ -79,10 +79,10 @@ Every feature also needs `peekaboot.enabled=true`.
 
 | Feature | Switch | Also needs |
 |---|---|---|
-| Dashboard and API | `peekaboot.enabled` | A servlet web application and Actuator. The starter brings Actuator. |
+| Dashboard and API | `peekaboot.enabled` | A servlet web application with Spring MVC, and Actuator. The starter brings Actuator. |
 | Dev toolbar | `peekaboot.dev-toolbar.enabled` (detected) | A servlet web application. The request details and logs it shows need tracing on. |
 | Tracing | `peekaboot.tracing.enabled` (`true`) | A servlet web application. The starter brings the OpenTelemetry SDK that fills the trace store. Request-detail and log capture come with it. |
-| Insights | `peekaboot.insights.enabled` (`true`) | A servlet web application and a Micrometer `MeterRegistry` bean. |
+| Insights | `peekaboot.insights.enabled` (`true`) | A servlet web application with Spring MVC and a Micrometer `MeterRegistry` bean. |
 | Error page | `peekaboot.error-page.enabled` (detected) | A servlet web application with Spring MVC. |
 | Peekaboot's guard | `peekaboot.security.enabled` (detected) | A servlet web application. |
 | Startup and shutdown summaries, run history | `peekaboot.lifecycle.enabled` (`true`) | Nothing else. The Lifecycle tab and `/peekaboot/api/lifecycle/**` need a servlet web application. |
