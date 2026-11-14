@@ -30,6 +30,12 @@ What that means for access:
     proxy or a tunnel adds when it relays a request.
   - No `Origin` or `Sec-Fetch-Site` header says another site sent it. A link followed from
     another site still opens the dashboard.
+- **Local run with `server.forward-headers-strategy=native`.** The rule above can be passed from
+  another machine. The server replaces the client address with the one `X-Forwarded-For` claims
+  before Peekaboot sees the request, and Tomcat does so by default for every client on a private
+  network. Such a client passes by sending `X-Forwarded-For: 127.0.0.1` and `Host: localhost`.
+  On a local run, leave that strategy out, bind the application with
+  `server.address=127.0.0.1`, or arm [Peekaboot's guard](#peekaboots-guard).
 - **Local run with `peekaboot.remote-access.enabled=true`.** Anyone who can reach the port reads
   `/peekaboot/**` without signing in, and Peekaboot logs a WARN at startup. To let other
   machines in behind a login, set `peekaboot.security.enabled=true` instead. See [Peekaboot's
