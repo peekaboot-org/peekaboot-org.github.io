@@ -87,7 +87,7 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Micrometer meters: names, tags, measurements | Meters tab | Tag values by key and by value shape |
 | Up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event history, and the list of collected meters | Insights tab, `/peekaboot/api/insights/**` | No |
 | Request traces: span tree, span names, timings, tags, the exception and stack trace of a failed span, SQL text and bind parameters | Traces tab, toolbar | Tags, exceptions, SQL and bind parameters by value shape only |
-| Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape |
+| Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape. A name or value over 4,096 characters is cut at its last whitespace and ends in `... N characters omitted`. |
 | The message and stack trace of every log event, inside a trace or not, and the names of its logger and thread | Logs tab of a trace, `/peekaboot/api/logs` | Message and stack trace by value shape only. Logger and thread names are shown as is. |
 
 SQL text is shown as your JDBC instrumentation records it, with any literal values in the
@@ -118,7 +118,8 @@ X-Content-Type-Options: nosniff
 ## What the error page shows {#the-error-page}
 
 The error page shows every detail Spring Boot's `ErrorAttributes` has: the status, the request
-line, the exception class, its message and the full stack trace. None of it is masked, and your
+line, the exception class, its message and the full stack trace. The message and the stack
+trace are masked by value shape; the request line is shown as sent. Your
 `spring.web.error.include-*` settings do not limit it. Requests that ask for JSON get Spring
 Boot's normal error response instead.
 
@@ -196,11 +197,15 @@ Masking is on by default and has nothing to configure. It replaces a value with 
 - the message and stack trace of every captured log, inside a trace or not
 - the last failure message of a scheduled task
 - the database connection parameters in Peekaboot's startup log line
+- the exception message and stack trace on the error page
 
 Your own `SanitizingFunction` beans also run on environment and config values, so a value they
-mask reaches the dashboard as `******`. `/peekaboot/api/features` names the literal in
-`maskLiteral`. [Agents]({{ '/docs/agents/' | relative_url }}#masked-values) says how an agent
-reads it.
+mask reaches the dashboard as `******`. They do not run on headers, parameters, span tags, SQL,
+log lines or the error page, and Peekaboot has no property or bean that adds a masking rule.
+The lists below are what it masks.
+
+`/peekaboot/api/features` names the literal in `maskLiteral`.
+[Agents]({{ '/docs/agents/' | relative_url }}#masked-values) says how an agent reads it.
 
 ### What gets masked, and how {#what-gets-masked-and-how}
 
@@ -213,16 +218,19 @@ Case does not matter.
 ```
 password              passwords             passwd
 passwds               pwd                   passphrase
-passphrases           secret                secrets
-client-secret         client-secrets        token
-tokens                access-token          refresh-token
-id-token              auth-token            bearer
-credential            credentials           api-key
-api-keys              apikey                apikeys
-access-key            access-keys           private-key
-private-keys          secret-key            secret-keys
-signing-key           signing-keys          encryption-key
-encryption-keys       authorization         auth
+passphrases           pass                  pw
+passcode              passcodes             secret
+secrets               client-secret         client-secrets
+token                 tokens                access-token
+refresh-token         id-token              auth-token
+bearer                credential            credentials
+api-key               api-keys              apikey
+apikeys               access-key            access-keys
+private-key           private-keys          secret-key
+secret-keys           signing-key           signing-keys
+encryption-key        encryption-keys       account-key
+account-keys          master-key            master-keys
+dsn                   authorization         auth
 session-id            salt                  signature
 sig                   certificate-password  certificate-private-key
 ```
@@ -231,8 +239,9 @@ sig                   certificate-password  certificate-private-key
 - Words match only as whole tokens: `design` and `signal` are not masked.
 - These key patterns also mask: `vcap_services` and `sun.java.command` anywhere in the key,
   `^vcap\.services.*$`, and `^spring[._]application[._]json$`.
-- `cookie`, `set-cookie`, `http.request.header.cookie` and `http.response.header.set-cookie`
-  mask only as the entire key. `server.servlet.session.cookie.*` stays readable.
+- `cookie`, `set-cookie`, `http.request.header.cookie`, `http.response.header.set-cookie`,
+  `encrypt.key` and `jwt` mask only as the entire key. `server.servlet.session.cookie.*` stays
+  readable. So do `encrypt.key-store.*` and `spring.security.oauth2.resourceserver.jwt.*`.
 - The exact key `PWD` (the shell's working directory) is not masked. `db.PWD` and a `PWD=`
   parameter inside a value are.
 - Bare `key` and bare `certificate` are not in the list, so `server.ssl.key-store` and
@@ -255,14 +264,20 @@ the matched part is masked, so a JDBC URL keeps its host and database name.
 | Stripe live key | `sk_live_…`, `rk_live_…` |
 | OpenAI key | `sk-proj-…`, legacy `sk-…` |
 | Anthropic key | `sk-ant-…` |
-| Credentials in a URL | `postgres://user:secret@host`, `redis://:secret@host` |
+| Credentials in a URL | `postgres://user:secret@host`, `redis://:secret@host`; the password may hold `:`, `/` or `@` |
 | Oracle thin URL | `jdbc:oracle:thin:user/secret@host` |
 | URL or connection-string parameter with a sensitive name | `?password=…`, `&token=…`, `;pwd=…` |
 | Command-line option with a sensitive name | `-Dspring.datasource.password=…`, `--api-key=…` in `JAVA_TOOL_OPTIONS` |
+| Quoted option with a sensitive name | `password="…"` in `sasl.jaas.config` |
 
 A parameter or option is judged by its name with the key-name rules above. It needs its
-marker: a bare `password=hunter2` without a leading `?`, `&`, `;`, `-D` or `--` is not masked.
-A PEM block without a footer masks to the end of the value.
+marker: a bare `password=hunter2` without a leading `?`, `&`, `;`, `-D` or `--` and without
+quotes is not masked. In a URL, up to five digits after the colon followed by `/` are read as a
+port, so `user:12345/x@host` is not masked. A password that holds `@` together with `/`, `?` or
+`#` is masked only up to an `@` inside it.
+
+A PEM block without a footer masks to the end of the value. A quoted value whose closing quote
+is missing is masked to the end of the text. One that holds a line break is not masked.
 
 The key names and value shapes above are the complete set.
 
@@ -279,7 +294,7 @@ can contain plaintext SQL and plaintext request data.
 - machine facts, IP addresses and hostnames included
 - the datasource user, host and database name
 - the run history
-- the error page, message and stack trace included
+- the request line on the error page
 - anything no key-name rule and no value shape recognises
 
 ### Two opt-ins before a real value is shown {#masking-opt-ins}

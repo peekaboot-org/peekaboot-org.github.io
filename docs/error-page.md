@@ -26,7 +26,8 @@ run]({{ '/docs/configuration/' | relative_url }}#local-run) and off for a deploy
 It also needs `peekaboot.enabled` and a servlet web application with Spring MVC. The properties
 are under [Configuration]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage).
 
-The page is not masked and sits outside Peekaboot's guard. Read [Security, what the error page
+The page masks the exception message and stack trace by value shape, and sits outside
+Peekaboot's guard. Read [Security, what the error page
 shows]({{ '/docs/security/' | relative_url }}#the-error-page) before you turn it on for a
 deployment.
 
