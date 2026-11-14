@@ -129,7 +129,8 @@ Lifecycle lists every run of the application, newest first, 20 to a page.
 | Build | The version, with `branch @ commit` beneath it and the build time on hover. A **Deployment** badge names which of the three changed since the previous run |
 
 A dash means the value is unknown. A run with no recorded stop has no duration, and a run
-after an unclean exit has no downtime.
+after an unclean exit has no downtime. A launch that fails before the application is ready
+records nothing.
 
 Branch and commit come from your application's own `git.properties`, the one in its jar or in its
 build's output directories. Without `build-info.properties`, so do the version and build time. A

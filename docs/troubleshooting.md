@@ -67,6 +67,17 @@ One that holds spans but no root does not list on the Traces tab. Fetch it by id
 `/peekaboot/api/traces/{traceId}`, with an id from the [log
 search]({{ '/docs/api/' | relative_url }}#log-search) for example.
 
+## History is not saved although storage is on {#second-instance}
+
+**Cause:** the startup log has `another running instance writes to <dir>`. That instance holds
+the storage directory, so this one keeps its insights history, lifecycle log and generated
+password in memory.
+
+**Fix:** stop the other instance and restart this one, or set `peekaboot.storage.dir` to give
+this one its own directory.
+
+See [Configuration, storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
+
 ## The error digest is empty after a restart or misses a failure {#error-digest-gone}
 
 The [error digest]({{ '/docs/api/' | relative_url }}#error-digest) survives a restart on the
@@ -273,6 +284,8 @@ for credentials on whatever page is open.
 - The log says the credentials file `is accessible to its group or to others` on every start.
   Peekaboot ignores such a file and writes the new one `rw-------`, so the file system it is
   on does not keep that mode.
+- The log says `another running instance writes to <dir>`. See
+  [History is not saved although storage is on](#second-instance).
 
 **Fix:** one of these.
 

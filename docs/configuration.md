@@ -38,7 +38,9 @@ deploy that way, set `peekaboot.enabled=false`.
 ### Containers, devcontainers and Codespaces {#container-markers}
 
 Peekaboot detects Kubernetes, Docker and Podman, and any container whose `/proc/1/cgroup`
-names `docker`, `kubepods` or `containerd`. Inside one, everything is off by default.
+names `docker`, `kubepods` or `containerd`. A `container` environment variable that is not
+blank counts as one too, and so does a `/proc/1/mountinfo` that lists `/etc/hostname`,
+`/etc/hosts` or `/etc/resolv.conf` as a mount point. Inside one, everything is off by default.
 
 That includes VS Code Dev Containers and GitHub Codespaces. Turn the local features on in the
 devcontainer's own configuration:
@@ -148,12 +150,16 @@ The default directory sits outside your project, so it survives `mvn clean` and 
 Maven plugin's `build-info` goal or `springBoot { buildInfo() }` in Gradle. Without it Peekaboot
 uses `spring.application.name`, then a folder named `application`.
 
-Two applications with the same name, or with none, share a directory. Two instances on the same
-directory overwrite each other's history. Set `dir` in both cases. Every character outside
-`A-Za-z0-9._-` in the name becomes a dash.
+Two applications with the same name, or with none, share a directory. Set `dir` to give each
+its own. Every character outside `A-Za-z0-9._-` in the name becomes a dash.
+
+A second instance that starts on a directory a running instance holds logs one warning and keeps
+its insights history, lifecycle log and generated password in memory. It loads none of them from
+the directory, so its password differs from the first instance's. Set `dir` to give it its own.
 
 | File | Contents | Size |
 |---|---|---|
+| `.lock` | Held by the instance that writes the directory. | Empty. |
 | `insights.snapshot` | The insights history, written every `peekaboot.insights.persistence.interval` and at shutdown. | About 5 MB at the default levels. |
 | `lifecycle.jsonl` | The start and stop history, capped at 1,000 events (about 500 runs), oldest dropped first. | Typically well under 400 KB. |
 | `traces.journal.jsonl` | Every span, log line and completed request since the last fold, one line each. See [Traces across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces). | Folded once it passes `max-journal-size`. |
@@ -165,8 +171,8 @@ An existing directory keeps its permissions. On Windows the platform defaults ap
 
 No file can fail your application. An insights snapshot that is unreadable, older than
 `peekaboot.insights.persistence.max-age` or written for different levels is dropped, and the
-history starts empty. A failed write logs one warning per store and run, and Peekaboot carries
-on in memory.
+history starts empty. A failed write logs one warning per store, and one more after a write
+succeeded in between. Peekaboot carries on in memory.
 
 Trace files and `errors.jsonl` in another format, which an older or newer Peekaboot may write,
 or with a damaged header, are deleted, and the trace store or the digest starts empty.
@@ -315,8 +321,8 @@ the history survives a restart is [`peekaboot.storage.enabled`](#peekabootstorag
 | `peekaboot.insights.enabled` | `true` | The collector, the `/peekaboot/api/insights/**` endpoints and the Insights tab. |
 | `peekaboot.insights.levels[n].interval` | `10s`, `1m`, `1h` | The sampling tick (level 0) and each coarser aggregation window. |
 | `peekaboot.insights.levels[n].size` | `90`, `1440`, `720` | Entries kept per series at that level. `interval` &times; `size` is how far back the charts reach. |
-| `peekaboot.insights.config-location` | unset, so `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file. Peekaboot's bundled panels are still merged underneath. |
-| `peekaboot.insights.persistence.interval` | `1m` | How often the history is written to `insights.snapshot`. A crash loses at most this much. Does nothing while storage is off. |
+| `peekaboot.insights.config-location` | unset, so `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file. Peekaboot's bundled panels are still merged underneath. A location that names nothing stops startup. |
+| `peekaboot.insights.persistence.interval` | `5m` | How often the history is written to `insights.snapshot`. A crash loses at most this much. A normal shutdown loses nothing. Does nothing while storage is off. |
 | `peekaboot.insights.persistence.max-age` | the coarsest level's span (30 days) | The oldest snapshot that is still loaded at startup. |
 | `peekaboot.insights.problems.cpu-high-percent` | `80` | [`CPU_HIGH`]({{ '/docs/api/' | relative_url }}#problems): the median process CPU, in percent. |
 | `peekaboot.insights.problems.gc-overhead-percent` | `10` | `GC_OVERHEAD`: the median share of CPU time spent collecting garbage, in percent. |

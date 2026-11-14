@@ -646,9 +646,10 @@ Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the 
   `endEpochMs`, the others one `intervalMs` apart before it. A `since` after the newest sample
   leaves an empty window, `count: 0`.
 - Every series carries a `summary` over the window. `samples` counts the level-0 samples behind
-  it, and the statistics are `null` when it is `0`. Above level 0, `median` and `p95` come from
-  the windows' averages, so a short spike is averaged away; `min` and `max` stay exact. `latest`
-  is the newest sample, or the newest window's average above level 0.
+  it, and the statistics are `null` when it is `0`. Above level 0, `median` and `p95` are taken
+  over the windows' own median and p95, weighted by samples, so both are estimates. At level 1
+  of the default levels `p95` is never below the true one. `min`, `max` and `avg` stay exact.
+  `latest` is the newest sample, or the newest window's average above level 0.
 - The `summary` view serves no samples: `values`, `stats` and `timestamps` are `null`. `full`
   adds them. Level 0 fills `values`, one number per tick, and higher levels fill `stats` with
   the arrays `min`, `max`, `avg`, `median`, `p90`, `p95` and `p99`. `timestamps` holds each
@@ -669,6 +670,8 @@ Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the 
   10-second tick none is sent.
 - At most 32 streams can be open. Further requests get `503`; retry later.
 - The server closes each stream after 30 minutes. `EventSource` reconnects on its own.
+- A client that stops reading is dropped, and its stream is closed once its pending write
+  returns. `EventSource` reconnects.
 - Events are not replayed. After a reconnect, fetch `/data` again for the levels you show.
 
 ### Problems {#problems}
@@ -729,6 +732,8 @@ off they cover only the current run.
   `[]` for the oldest run.
 - `uncleanExit: true` means the run recorded no stop. `stoppedAt` and `ranForMs` are
   then `null`.
+- The newest run without a stop is `running` only when the answering process recorded it.
+  Otherwise it reads `uncleanExit: true`.
 - On the `running` row, `stoppedAt` is `null` and `ranForMs` is the time so far.
 - `downForMs` is `null` when the gap to the previous run is unknown.
 

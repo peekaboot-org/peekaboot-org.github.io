@@ -108,8 +108,8 @@ appears as a restart marker. The markers come from the same history as the
 [Lifecycle tab]({{ '/docs/dashboard/' | relative_url }}#lifecycle). Loading the history never
 delays your application's startup.
 
-History is written once a minute (`persistence.interval`) and at shutdown, so a crash loses at
-most that minute. Peekaboot discards the saved file and starts empty when:
+History is written every five minutes (`persistence.interval`) and at shutdown, so a crash loses
+at most those five minutes. Peekaboot discards the saved file and starts empty when:
 
 - this Peekaboot version cannot read it,
 - your `levels` changed since it was written,
@@ -124,7 +124,8 @@ the file lives.
 
 Put a `peekaboot-insights.yml` in `src/main/resources/`, or point
 `peekaboot.insights.config-location` at another Spring resource location. Peekaboot's bundled
-panels still load underneath. A missing file is not an error.
+panels still load underneath. A missing `peekaboot-insights.yml` is not an error. A
+`config-location` that names nothing stops startup, and the message names the resource.
 
 Your file is merged with the bundled panels by panel `id`:
 
@@ -137,7 +138,8 @@ Your file is merged with the bundled panels by panel `id`:
   so on.
 
 An entry with no `title` and an unknown id fails validation. Tiles also merge by id, but only
-by replacement.
+by replacement. Two panels whose `<panel id>.<series id>` are equal make the file invalid. Panel
+`a` with series `b.c` and panel `a.b` with series `c` are such a pair.
 
 ```yaml
 panels:
@@ -197,7 +199,7 @@ do. Peekaboot charts and serves it from 0 to 100.
 | `stat` | Plots |
 |---|---|
 | `value` | The meter's current value: a gauge, a counter's total, or a long task timer's active tasks. A timer or distribution summary gives a gap |
-| `rate` | The count's increase per second since the previous sample. The first sample after a start is a gap. A counter or timer that appears later counts from 0, so the first 5xx shows in its own tick |
+| `rate` | The count's increase per second since the previous sample. The first sample after a start is a gap. A counter or timer that appears later counts from 0, so the first 5xx shows in its own tick. A function counter or function timer that appears later starts from its first reading |
 | `avg` | The average duration of the calls since the previous sample. No calls gives a gap |
 | `max` | Micrometer's MAX for a timer or summary, which covers the last few minutes. See [Limitations](#percentiles-of-aggregates) |
 
@@ -261,7 +263,8 @@ log first if your panels do not appear.
 - Drag across any chart to zoom all charts to the same time window. The reset control or a
   double-click returns them.
 - The Restarts toggle hides the restart markers. It is on by default.
-- A gap means no sample. Peekaboot never draws a missed sample as zero.
+- A gap means no sample. Peekaboot never draws a missed sample as zero. A meter whose function
+  throws shows as a gap in its own series and logs one warning.
 
 The charts update live and keep updating while the dashboard's auto-refresh is paused.
 
@@ -286,8 +289,9 @@ that needs a real metrics backend. See
 [Traces, limitations]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing).
 
 - At `1m`, each entry covers six 10-second samples. p90, p95 and p99 all equal the maximum.
-- At `1h`, percentiles are taken over the sixty one-minute averages. A single slow request is
-  averaged away before any percentile is computed. p99 equals the maximum.
+- At `1h` and above, the median and each percentile are taken over the same statistic of the
+  windows below, weighted by their samples. At the default levels a percentile is never below
+  the true one.
 - The min and max at `1h` are the true min and max of the minutes below, so a spike survives
   in max.
 - `stat: max` plots Micrometer's timer MAX, not the maximum since the previous sample. With

@@ -144,6 +144,7 @@ for a local run only. The one exception is `security.properties` with an explici
 
 | File | Written when | Contents |
 |---|---|---|
+| `.lock` | Storage on | Empty. Marks the instance that writes the directory. |
 | `insights.snapshot` | Storage on | The charts' aggregated numbers, keyed by series id. No request data, property values or traces. |
 | `lifecycle.jsonl` | Storage on | One line per start or stop: timestamp, pid, and `version`, `time`, `branch`, `commit.id`, `commit.id.full`, `commit.id.abbrev`, `build.version`, `build.time`. |
 | `traces.journal.jsonl` | Storage on and `peekaboot.storage.traces.enabled` | Every span, log line and completed request the trace store took since the last fold, one JSON line each. Span attributes, SQL with its bind parameters, log messages and stack traces are unmasked. Request and response headers and parameters are masked as captured. |
