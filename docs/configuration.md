@@ -350,27 +350,25 @@ you define your own. Peekaboot sets no `spring.task.execution.*` property.
 | Property | Spring Boot default | Peekaboot default | Applies when | Why |
 |---|---|---|---|---|
 | `management.otlp.metrics.export.enabled` | `true` | `false` | always | The starter brings Micrometer's OTLP registry, which would otherwise push metrics to `localhost:4318`. Nothing leaves the process unless you opt in. |
+| `jdbc.datasource-proxy.enabled` | `true` (datasource-micrometer's own) | `false` | Peekaboot off | The starter brings datasource-micrometer for the Queries tab. With Peekaboot off it wraps none of your DataSources. Set it to `true` if you use datasource-micrometer yourself. |
 | `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled`, servlet web application | Every request reaches the Traces tab. |
 | `spring.jpa.properties[hibernate.generate_statistics]` | `false` (Hibernate's own) | `true` | `peekaboot.enabled`, servlet web application | The `hibernate.*` panels on Insights need Hibernate's statistics, which Peekaboot binds as meters itself, or Spring Boot does where `hibernate-micrometer` is present. |
-| `management.info.env.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | Your `info.*` properties show on the Overview tab. OS environment variables are on the Environment tab. |
-| `management.info.java.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | The Java card on Overview. |
-| `management.info.os.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | The System card on Overview. |
-| `management.info.process.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | PID, uptime, CPU count and memory on Overview. |
 | `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | `@Observed`, `@Timed` and `@Counted` work without extra wiring. |
 | `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | `peekaboot.enabled`, servlet web application, dev toolbar on | The toolbar shows a request's trace while you are still on the page. |
 
 Traces and logs need no export switch. Spring Boot creates OTLP exporters for them only once
-you configure an endpoint. Peekaboot sets nothing under `management.endpoint.*`, changes nothing
-on `/actuator/**`, and your endpoint settings do not affect what the dashboard shows. See
+you configure an endpoint. Peekaboot sets nothing under `management.endpoint.*` or
+`management.info.*`, changes nothing on `/actuator/**`, and your endpoint settings do not affect
+what the dashboard shows. See
 [Security]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 Some of these widen what is exposed or cost something at runtime:
 
-- `management.info.env.enabled: true` publishes `info.*` through `/actuator/info` if you
-  expose that endpoint.
 - Sampling at `1.0` traces every request, for every exporter you have configured.
 - Hibernate statistics carry a runtime cost.
+- `@Observed`, `@Timed` and `@Counted` start recording, for every registry and exporter you have
+  configured.
 - With the toolbar on, spans reach every exporter roughly 25 times more often than at Spring's
   default.
 

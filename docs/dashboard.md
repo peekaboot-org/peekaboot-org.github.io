@@ -80,6 +80,10 @@ defaults, datasource status, and memory and storage meters. A composite health c
 such as Spring's `db` with two DataSources, shows as one row with its aggregate status,
 followed by its children as `db/<name>`.
 
+A DataSource gets its card once Peekaboot has read its metadata over a connection, which it
+first tries when the application is ready and never during startup. One that does not answer
+has no card yet; Peekaboot asks again at most every 30 seconds while the dashboard is read.
+
 The Git card shows your application's own `git.properties`, the one the
 [Lifecycle](#lifecycle) tab reads. A `git.properties` a library ships never shows there. Your
 own `/actuator/info` stays as Spring Boot builds it.

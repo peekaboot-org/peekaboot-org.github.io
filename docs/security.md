@@ -171,10 +171,9 @@ Peekaboot reads Actuator's data in-process. It adds nothing to
 or without it. Don't use `management.endpoints.web.exposure` to protect Peekaboot: it has no
 effect on `/peekaboot/**`.
 
-Peekaboot does set `management.info.env`, `.java`, `.os` and `.process.enabled` to `true` while
-it is on. If you expose `/actuator/info`, it carries that extra content. See [Configuration,
-Spring Boot defaults Peekaboot
-changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
+Peekaboot sets no `management.info.*` property. What `/actuator/info` serves is the same with or
+without it. The Java, System and memory cards on Overview come from contributors Peekaboot
+builds for itself.
 
 With Peekaboot off, nothing is served under `/peekaboot/**`, the UI assets included.
 
@@ -477,6 +476,14 @@ work through this list.
 - [ ] Where you turn it on, set `peekaboot.tracing.enabled=false` unless you need traces with
       their headers, parameters and logs. On a deployment the toolbar, storage and the error
       page stay off unless you set them.
+- [ ] Decide on the Spring Boot defaults Peekaboot changes while it is on.
+      `peekaboot.tracing.enabled=false` leaves them in place: every request is still sampled,
+      Hibernate statistics stay on and observation annotations still record. Set
+      `management.tracing.sampling.probability`,
+      `spring.jpa.properties[hibernate.generate_statistics]` and
+      `management.observations.annotations.enabled` yourself where you want Spring Boot's
+      values. See [Configuration, Spring Boot defaults Peekaboot
+      changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
 - [ ] Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password, see [Peekaboot's
       guard](#peekaboots-guard), or set `peekaboot.security.enabled=false` and put the
       [`SecurityFilterChain`](#securing-the-dashboard) in front first. Use the chain if you need

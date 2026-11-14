@@ -32,7 +32,13 @@ line only while the dashboard is served.
 Everything Peekaboot sets sits below your own configuration, so a value you set wins.
 [Configuration, Spring Boot defaults Peekaboot
 changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
-lists the properties it changes and what each one costs. It also adds these:
+lists the properties it changes and what each one costs.
+
+In short, every request is sampled, Hibernate statistics are on, `@Observed`, `@Timed` and
+`@Counted` record, and with the toolbar on spans are exported every 200 ms.
+`peekaboot.tracing.enabled=false` changes none of these.
+
+Peekaboot also adds these:
 
 | Change | Effect | Applied when |
 |---|---|---|
@@ -76,11 +82,14 @@ To size either down, see [Configuration, memory-constrained]({{ '/docs/configura
 With `peekaboot.enabled=false` the starter still brings:
 
 - `spring-boot-starter-actuator`. Spring Boot's default exposure serves `/actuator` and
-  `/actuator/health` over HTTP.
+  `/actuator/health` over HTTP. An application that had no Actuator gains both.
 - A `MeterRegistry` with Spring Boot's JVM, system and Logback meters.
 - The OpenTelemetry SDK and OTLP exporters. Nothing is sent. Metrics export is off, see
   [Configuration]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application),
   and Spring Boot creates trace and log exporters only once you configure an endpoint.
+- `datasource-micrometer`, with `spring-boot-jdbc`, `spring-jdbc`, `datasource-proxy` and
+  JSqlParser. While Peekaboot is off it sets `jdbc.datasource-proxy.enabled=false`, so none of
+  your DataSources is wrapped. Set it to `true` if you use datasource-micrometer yourself.
 - Peekaboot's own jars, unused.
 
 If that is not acceptable, keep the starter out of the artifact.

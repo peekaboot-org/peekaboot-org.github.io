@@ -30,7 +30,8 @@ and links the full recipe.
 
 Queries appear for JDBC only. The starter adds `datasource-micrometer`, which instruments your
 `DataSource` beans. If you instrument your `DataSource` yourself, exclude the starter's copy or
-set `jdbc.datasource-proxy.enabled=false`. R2DBC is not instrumented.
+set `jdbc.datasource-proxy.enabled=false`. While Peekaboot is off it sets that itself. R2DBC is
+not instrumented.
 
 ## What gets recorded {#what-gets-captured}
 
