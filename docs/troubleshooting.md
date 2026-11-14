@@ -146,6 +146,7 @@ work]({{ '/docs/traces/' | relative_url }}#background-work).
 | The response is not HTML with a `</body>` tag. JSON responses and redirects never get a bar. | Open the request's trace on the Traces tab. Calls made from Swagger UI show in its bar. |
 | The HTML response is larger than 2 MiB. | Open the request's trace on the Traces tab. |
 | The request matches an injection exclusion: an excluded path prefix, a blocked file extension, an `X-Requested-With` header or an async dispatch. | Open the request's trace on the Traces tab, if it is traced. See [Dev toolbar, pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears). |
+| On a local run, the page was opened from another machine, or through a tunnel or a proxy. | See [The dashboard returns 403 on a local run](#dashboard-403). |
 
 ## The toolbar says "could not start" {#toolbar-could-not-start}
 
@@ -233,6 +234,27 @@ That process counts as a deployment, not a test.
 - For the smoke-test container, set `peekaboot.security.enabled=false`.
 
 See [Security, securing the dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
+
+## The dashboard returns 403 on a local run {#dashboard-403}
+
+**Cause:** on a local run Peekaboot answers only the machine the application runs on. A request
+from another machine gets a `403`. So does one a tunnel service or a reverse proxy relays, and
+one that names the machine by anything but `localhost` or a loopback address. The response body
+names `peekaboot.remote-access.enabled`.
+
+**Fix:** one of these.
+
+- Open an SSH tunnel to the machine's own `localhost`, then use
+  `http://localhost:8080/peekaboot/` on yours:
+
+  ```bash
+  ssh -L 8080:localhost:8080 <host>
+  ```
+
+- Set `peekaboot.remote-access.enabled=true`. Anyone who can reach the port then reads the
+  dashboard without signing in.
+
+See [Security, who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
 ## Users get a browser login dialog on application pages {#credential-dialog-on-toolbar-pages}
 

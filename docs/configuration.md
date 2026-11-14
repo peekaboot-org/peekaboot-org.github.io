@@ -64,10 +64,11 @@ needs Peekaboot turns it on:
 ```
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-On a local run the dashboard and API have no authentication. On a deployment with
-`peekaboot.enabled=true`, Peekaboot's guard challenges every `/peekaboot/**` request until you
-switch it off to use your own security. Before setting `peekaboot.enabled=true` anywhere other
-people can reach,
+On a local run the dashboard and API have no authentication and answer [only the machine the
+application runs on]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot). On a
+deployment with `peekaboot.enabled=true`, Peekaboot's guard challenges every `/peekaboot/**`
+request until you switch it off to use your own security. Before setting
+`peekaboot.enabled=true` anywhere other people can reach,
 read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) and
 [Security]({{ '/docs/security/' | relative_url }}).
 </div>
@@ -182,6 +183,15 @@ or with a damaged header, are deleted, and the trace store or the digest starts 
 `enabled` defaults by launch. See [When Peekaboot is on](#when-peekaboot-is-on). How the guard
 derives its username and password, and how to keep a generated password across restarts, is
 under [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
+
+### Remote access {#peekabootremoteaccess}
+
+| Property | Default | Effect |
+|---|---|---|
+| `peekaboot.remote-access.enabled` | `false` | Lets clients other than this machine reach Peekaboot on a local run. Without effect once the guard is armed or on a deployment. |
+
+What a local run answers without it is under [Security, who can reach
+Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
 ### Error page {#peekabooterrorpage}
 

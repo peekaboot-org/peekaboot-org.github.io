@@ -73,6 +73,11 @@ On another port, context path or servlet path, use the URL on the `Peekaboot Das
 Peekaboot logs once the application is ready. See
 [Configuration]({{ '/docs/configuration/' | relative_url }}#the-urls-in-the-summary).
 
+The dashboard opens from the machine the application runs on. From another machine, use an SSH
+tunnel or set `peekaboot.remote-access.enabled=true`.
+[Troubleshooting]({{ '/docs/troubleshooting/' | relative_url }}#dashboard-403) shows both, and
+[Security]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot) has the rule.
+
 {% include screenshot.html name="dashboard-overview" %}
 
 ## What you get immediately {#what-you-get-immediately}

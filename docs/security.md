@@ -5,11 +5,12 @@ permalink: /docs/security/
 ---
 
 <div class="pk-callout pk-callout--danger" markdown="1">
-On a [local run]({{ '/docs/configuration/' | relative_url }}#local-run) anyone who can reach
-your application's port can read everything under `/peekaboot/**` without signing in:
-configuration, environment values, health, logs, migrations and full request traces.
-Peekaboot's guard is off there. If anyone other than you can reach that port, secure
-`/peekaboot/**` first or turn Peekaboot off.
+On a [local run]({{ '/docs/configuration/' | relative_url }}#local-run) Peekaboot's guard is
+off, and Peekaboot answers only the machine it runs on. Anyone on that machine reads everything
+under `/peekaboot/**` without signing in: configuration, environment values, health, logs,
+migrations and full request traces. With `peekaboot.remote-access.enabled=true`, so does anyone
+who can reach your application's port. If other people use that machine or can reach that
+port, secure `/peekaboot/**` first or turn Peekaboot off.
 </div>
 
 ## Who can reach Peekaboot, and when it is on {#who-can-reach-peekaboot}
@@ -20,12 +21,22 @@ has the table and the detection rules.
 
 What that means for access:
 
-- **Local run.** Anyone who can reach the port reads `/peekaboot/**` without authentication.
-  Bind the server to loopback (`server.address=127.0.0.1`) if you share a network you don't
-  trust.
-- **Local run, error page.** A browser request that fails gets the exception, its message and
-  its full stack trace. That page is served on the failing URL, so anyone who can trigger the
-  error sees it, not only someone who can reach `/peekaboot/**`.
+- **Local run.** Peekaboot answers only the machine it runs on, without authentication. Every
+  other request gets a `403` with a [problem body]({{ '/docs/api/' | relative_url }}#errors)
+  that names `peekaboot.remote-access.enabled`. A request passes when all of these hold:
+  - Its client address is a loopback address.
+  - Its `Host` header names `localhost`, a name ending in `.localhost` or a loopback address.
+  - It carries no `Forwarded` header and no `X-Forwarded-For` entry for another address, as a
+    proxy or a tunnel adds when it relays a request.
+  - No `Origin` or `Sec-Fetch-Site` header says another site sent it. A link followed from
+    another site still opens the dashboard.
+- **Local run with `peekaboot.remote-access.enabled=true`.** Anyone who can reach the port reads
+  `/peekaboot/**` without signing in, and Peekaboot logs a WARN at startup. To let other
+  machines in behind a login, set `peekaboot.security.enabled=true` instead. See [Peekaboot's
+  guard](#peekaboots-guard).
+- **Local run, toolbar and error page.** A browser request that fails gets the exception, its
+  message and its full stack trace, on the failing URL. A request that does not pass the rule
+  above gets the status and the path only, and no toolbar on any page.
 - **Deployment with `peekaboot.enabled=true`.** Peekaboot's HTTP Basic guard challenges every
   `/peekaboot/**` request. Switch it off to use your own security. See [Peekaboot's
   guard](#peekaboots-guard).
@@ -40,6 +51,8 @@ These properties change what Peekaboot exposes. Their defaults are under
 - `peekaboot.unmasking.enabled` allows real values. See [two opt-ins](#masking-opt-ins).
 - `peekaboot.security.*` arms and configures [Peekaboot's
   guard]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
+- `peekaboot.remote-access.enabled` lets clients other than this machine reach a local run. See
+  [Remote access]({{ '/docs/configuration/' | relative_url }}#peekabootremoteaccess).
 - `peekaboot.storage.*` decides whether and where Peekaboot writes
   [files]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
 - `peekaboot.error-page.*` serves the [error
@@ -94,10 +107,13 @@ line, the exception class, its message and the full stack trace. None of it is m
 `spring.web.error.include-*` settings do not limit it. Requests that ask for JSON get Spring
 Boot's normal error response instead.
 
-It is on for a local run and off for a deployment or a test. Turned on for a deployment, the
-page is outside Peekaboot's guard, and the startup report logs a WARN saying so whenever
-Peekaboot's page is served. When it backs off for your own error page, and how `override`
-outranks that page, is on [Error page]({{ '/docs/error-page/' | relative_url }}).
+It is on for a local run and off for a deployment or a test. Which requests get the detail on a
+local run is under [who can reach Peekaboot](#who-can-reach-peekaboot).
+
+Turned on for a deployment, the page is outside Peekaboot's guard, and the startup report logs
+a WARN saying so whenever Peekaboot's page is served. When it backs off for your own error
+page, and how `override` outranks that page, is on
+[Error page]({{ '/docs/error-page/' | relative_url }}).
 
 ## What stays in memory and what goes to disk {#what-peekaboot-writes-to-disk}
 

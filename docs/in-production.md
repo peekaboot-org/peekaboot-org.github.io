@@ -19,6 +19,11 @@ default.
 One launch you might deploy also counts as local. See [what counts as a local
 run]({{ '/docs/configuration/' | relative_url }}#local-run).
 
+A launch that counts as local answers only the machine it runs on. A build-tool launch on a
+server is not readable from the network unless `peekaboot.remote-access.enabled=true` opens it.
+See [Security, who can reach
+Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
+
 With lifecycle summaries on (the default), the startup summary has a `Peekaboot Dashboard:`
 line only while the dashboard is served.
 

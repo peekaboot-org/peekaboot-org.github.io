@@ -15,6 +15,10 @@ which reports the failed request.
 Only a request whose `Accept` header names `text/html` gets the page. Swagger UI, curl and
 `fetch()` send `*/*` and get Spring Boot's usual error response.
 
+On a local run, a request that does not come from the machine the application runs on gets the
+page with the status and the path only. See [Security, who can reach
+Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
+
 ## Turn it on or off {#turn-it-on-or-off}
 
 `peekaboot.error-page.enabled` turns it on for a [local

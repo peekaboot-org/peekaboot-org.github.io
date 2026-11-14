@@ -73,8 +73,12 @@ does take. A typo never returns the unfiltered list.
 ## Authentication {#authentication}
 
 On a [local run]({{ '/docs/configuration/' | relative_url }}#local-run) the API needs no
-credentials. Where [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard)
-is armed, every request needs HTTP Basic credentials:
+credentials and answers only the machine the application runs on. An agent on another host
+needs an SSH tunnel to that machine or `peekaboot.remote-access.enabled=true`. See [Security,
+who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
+
+Where [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) is armed,
+every request needs HTTP Basic credentials:
 
 - **Username:** `peekaboot.security.username`, else your build's artifact id plus `-admin`,
   else `spring.application.name` plus `-admin`, else `peekaboot-admin`.
@@ -93,8 +97,9 @@ export PEEKABOOT_USER=orders-admin PEEKABOOT_PASSWORD='a-long-random-secret'   #
 curl -s -u "$PEEKABOOT_USER:$PEEKABOOT_PASSWORD" http://localhost:8080/peekaboot/api/features
 ```
 
-A refused request answers `401` with a problem body. Where your own Spring Security guards
-`/peekaboot/**` instead, send the credentials it expects.
+A request the guard refuses answers `401` with a problem body, and one a local run refuses
+answers `403`. Where your own Spring Security guards `/peekaboot/**` instead, send the
+credentials it expects.
 
 ## Masked values {#masked-values}
 

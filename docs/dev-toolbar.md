@@ -51,6 +51,8 @@ does not get the bar when:
   so HTML fetched that way gets the bar.
 - The handler responds asynchronously.
 - The HTML body is larger than 2 MiB. It is served unchanged.
+- On a local run, the request does not come from the machine the application runs on. See
+  [Security, who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
 HTML error pages get the bar too. See [the bar on the error
 page](#the-bar-on-the-error-page).

@@ -2,7 +2,7 @@
 
 > Peekaboot is a Spring Boot starter that shows a running application's traces, logs, failures, routes and metrics on a dashboard at /peekaboot, and serves the same data as JSON under /peekaboot/api.
 
-An agent debugging an application that runs Peekaboot starts with `GET /peekaboot/api` on that application. It lists every endpoint and links the OpenAPI 3.1 document at `/peekaboot/api/openapi.json`. Where Peekaboot's guard is armed, send HTTP Basic credentials. A value that reads `******` is masked.
+An agent debugging an application that runs Peekaboot starts with `GET /peekaboot/api` on that application. It lists every endpoint and links the OpenAPI 3.1 document at `/peekaboot/api/openapi.json`. On a local run the API answers loopback requests only, so call it as `localhost` from the machine the application runs on. Where Peekaboot's guard is armed, send HTTP Basic credentials. A value that reads `******` is masked.
 
 ## Docs
 

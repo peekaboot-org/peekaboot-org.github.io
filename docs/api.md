@@ -52,6 +52,9 @@ them anywhere else.
 
 Where Peekaboot's guard is armed, every endpoint can also answer `401`. See
 [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
+On a local run every endpoint answers `403` to a request that does not come from the machine
+the application runs on. See [Security, who can reach
+Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
 `/peekaboot` and `/peekaboot/` redirect to the dashboard at
 `/peekaboot/ui/dashboard/index.html`. See [The
@@ -106,6 +109,7 @@ no single parameter is.
 | `400` | A missing `level`, or one that is no integer or outside the configured levels. `detail` gives the accepted range. An empty id in `series`, such as `series=a,,b`. | `level`, `series` |
 | `404` | The store does not hold the [trace](#single-trace). | `null` |
 | `401` | [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) refused the request. | `null` |
+| `403` | A [local run]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot) refused a request that does not come from its own machine. `detail` names `peekaboot.remote-access.enabled`. | `null` |
 | `503` | The [insights stream](#the-insights-endpoints) already has 32 subscribers. | `null` |
 
 The guard's `401` keeps its challenge, `WWW-Authenticate: Basic realm="Peekaboot",
