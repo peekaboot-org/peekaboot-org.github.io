@@ -51,6 +51,7 @@ does not get the bar when:
   so HTML fetched that way gets the bar.
 - The handler responds asynchronously.
 - The HTML body is larger than 2 MiB. It is served unchanged.
+- The response is partial content (status `206`). It is served unchanged.
 - On a local run, the request does not come from the machine the application runs on. See
   [Security, who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
