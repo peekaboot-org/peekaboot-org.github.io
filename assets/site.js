@@ -7,6 +7,7 @@
     'use strict';
 
     var STORAGE_KEY = 'peekaboot-theme';
+    var darkOsTheme = window.matchMedia('(prefers-color-scheme: dark)');
 
     function storedTheme() {
         try {
@@ -30,7 +31,7 @@
         if (stored === 'light' || stored === 'dark') {
             return stored;
         }
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        return darkOsTheme.matches ? 'dark' : 'light';
     }
 
     function labelToggle(theme) {
@@ -47,6 +48,10 @@
     }
 
     applyTheme(resolveTheme());
+    // Resolved again, so a theme chosen with the toggle outlasts an OS theme change.
+    darkOsTheme.addEventListener('change', function () {
+        applyTheme(resolveTheme());
+    });
     // CSS that needs this script keys on the class, so without it the sidebar stays open.
     document.documentElement.classList.add('pk-js');
 

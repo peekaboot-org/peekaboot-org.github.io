@@ -153,6 +153,23 @@ function darkThemeValues(page) {
     }, DARK_TOKENS);
 }
 
+// The theme and the toggle's label once the page has heard the OS turn dark. Change events
+// reach the oldest media query list first, so the page's own listener has run by then.
+async function themeOnceOsIsDark(page) {
+    await page.evaluate(() => {
+        window.osTurnedDark = new Promise((resolve) => matchMedia('(prefers-color-scheme: dark)')
+            .addEventListener('change', resolve, {once: true}));
+    });
+    await page.emulateMedia({colorScheme: 'dark'});
+    return page.evaluate(async () => {
+        await window.osTurnedDark;
+        return {
+            theme: document.documentElement.getAttribute('data-theme'),
+            toggleLabel: document.getElementById('theme-toggle').getAttribute('aria-label'),
+        };
+    });
+}
+
 test('the hero logo is legible on the dark ground', async () => {
     const problems = [];
     for (const [mode, options] of Object.entries(MODES)) {
@@ -226,4 +243,16 @@ test('the dark theme is the same with and without JavaScript', async () => {
     const unset = Object.keys(withScript).filter((name) => withScript[name] === '');
     assert.deepEqual(unset, []);
     assert.deepEqual(withoutScript, withScript);
+});
+
+test('the page follows an OS theme change', async () => {
+    const shown = await onPage('/docs/quick-start/', {scheme: 'light'}, themeOnceOsIsDark);
+
+    assert.deepEqual(shown, {theme: 'dark', toggleLabel: 'Switch to light theme'});
+});
+
+test('a stored theme outlasts an OS theme change', async () => {
+    const shown = await onPage('/docs/quick-start/', {storedTheme: 'light'}, themeOnceOsIsDark);
+
+    assert.deepEqual(shown, {theme: 'light', toggleLabel: 'Switch to dark theme'});
 });
