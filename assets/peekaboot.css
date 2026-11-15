@@ -114,7 +114,8 @@ a:hover {
 
 /* Not in table cells, where breaking anywhere shrinks columns until values wrap mid-word. */
 .pk-content p code,
-.pk-content li code {
+.pk-content li code,
+.pk-callout p code {
     overflow-wrap: anywhere;
 }
 

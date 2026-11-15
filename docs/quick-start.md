@@ -65,6 +65,10 @@ containers]({{ '/docs/configuration/' | relative_url }}#container-markers) for t
 that turn it on.
 </div>
 
+<div class="pk-callout pk-callout--warning" markdown="1">
+{% include facts/local-run-disk.md %}
+</div>
+
 ## Open the dashboard {#open-the-dashboard}
 
 The dashboard is at [`http://localhost:8080/peekaboot/`](http://localhost:8080/peekaboot/),

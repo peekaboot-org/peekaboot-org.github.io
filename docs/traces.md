@@ -1,6 +1,6 @@
 ---
 title: Traces
-lead: The last 1,000 requests, jobs and messages your application handled, with their spans, SQL and logs, held in memory.
+lead: The last 1,000 requests, jobs and messages your application handled, with their spans, SQL and logs, kept in memory and, on a local run, on disk.
 permalink: /docs/traces/
 redirect_from:
   - /docs/tracing/
@@ -10,6 +10,8 @@ redirect_from:
 Peekaboot keeps a copy of every span your application exports in an in-memory store. The
 dashboard's Traces tab lists them, and the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }})
 shows the trace of the page you are looking at.
+
+{% include facts/local-run-disk.md %}
 
 The store is one more span exporter next to the ones you configured. An existing OTLP,
 Zipkin or Jaeger pipeline keeps working unchanged. Peekaboot adds no exporter that sends data

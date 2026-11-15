@@ -57,3 +57,19 @@ test('every internal link and fragment resolves', async () => {
 
     assert.equal(unresolved.length, 0, `unresolved links:\n${unresolved.join('\n')}`);
 });
+
+test('the landing page does not scroll sideways on a phone', async () => {
+    const phoneWidth = 375;
+    const widths = {};
+    for (const js of [true, false]) {
+        const page = await openPage(browser, site.origin, '/', {width: phoneWidth, js});
+        try {
+            widths[js ? 'with JavaScript' : 'without JavaScript'] =
+                await page.evaluate(() => document.documentElement.scrollWidth);
+        } finally {
+            await page.context().close();
+        }
+    }
+
+    assert.deepEqual(widths, {'with JavaScript': phoneWidth, 'without JavaScript': phoneWidth});
+});

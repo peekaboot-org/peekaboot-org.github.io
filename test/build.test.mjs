@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { BUILT, SITE_ROOT, builtPages, html } from './site.mjs';
+import { BUILT, SITE_ROOT, builtPages, html, text } from './site.mjs';
 
 test('built pages carry no unrendered Liquid or kramdown attribute', () => {
     const unrendered = /\{\{|\{%|\{:\s*#|\{#[a-z-]+\}/;
@@ -25,4 +25,17 @@ test('only the site is published', () => {
         .filter((name) => existsSync(join(BUILT, name)));
 
     assert.deepEqual(published, []);
+});
+
+test('the landing page, quick start and traces say a local run writes traces to disk', () => {
+    const stated = ['/.peekaboot', 'unmasked', 'peekaboot.storage.traces.enabled'];
+    const wrong = ['/', '/docs/quick-start/', '/docs/traces/'].flatMap((urlPath) => {
+        const pageText = text(urlPath);
+        const missing = stated.filter((phrase) => !pageText.includes(phrase));
+        const memoryOnly = pageText.includes('held in memory') ? ['says "held in memory"'] : [];
+        return [...missing.map((phrase) => `lacks "${phrase}"`), ...memoryOnly]
+            .map((defect) => `${urlPath} ${defect}`);
+    });
+
+    assert.deepEqual(wrong, []);
 });

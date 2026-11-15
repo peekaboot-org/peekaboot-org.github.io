@@ -20,10 +20,17 @@ layout: page
 
 <section class="section pt-0">
   <div class="container">
-    <div class="pk-callout pk-callout--warning">
+    <div class="pk-callout pk-callout--warning content">
       <p>
         Peekaboot is beta software and may expose security-relevant settings. Use it at your
         own risk.
+      </p>
+      <p>
+        A local run keeps traces across restarts under <code>~/.peekaboot</code>, with SQL, bind
+        parameters and log lines unmasked. Set
+        <code>peekaboot.storage.traces.enabled=false</code> to keep them in memory only. See
+        <a href="{{ '/docs/security/' | relative_url }}#what-peekaboot-writes-to-disk">Security,
+        what goes to disk</a>.
       </p>
     </div>
   </div>
@@ -102,8 +109,8 @@ layout: page
       <div class="column is-5">
         <h2 class="title is-4">Traces with SQL queries</h2>
         <p class="content">
-          The last 1,000 requests your app served, held in memory with no collector to run, each
-          with its span tree, SQL queries and timings. With
+          The last 1,000 requests your app served, with no collector to run, each with its span
+          tree, SQL queries and timings. On a local run they survive a restart. With
           <a href="{{ '/docs/traces/' | relative_url }}#background-work">context
           propagation</a> on, work your <code>@Async</code> methods run shows up inside the request
           that started it. Errors and slow requests are kept in buckets of their own.
