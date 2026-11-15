@@ -316,9 +316,11 @@ With [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#p
 on, the default for a local run, and `peekaboot.storage.traces.enabled` left on, every span, log
 line and completed request the store takes is appended to `traces.journal.jsonl` in the storage
 directory. The [error digest]({{ '/docs/api/' | relative_url }}#error-digest) is kept beside it
-in `errors.jsonl`, on the same switches. Each running instance needs its own storage directory. Two instances on one directory
-restore each other's traces, and each starts its journal afresh over the other's, so the lines the
-other wrote since its last fold are lost.
+in `errors.jsonl`, on the same switches.
+
+One running instance writes a storage directory. A second instance that starts on it keeps its
+traces and its error digest in memory and restores none from the files. See
+[History is not saved although storage is on]({{ '/docs/troubleshooting/' | relative_url }}#second-instance).
 
 The journal is handed to the operating system every `peekaboot.storage.traces.flush-interval`,
 one second by default, without an fsync. A crash usually loses the last interval, and everything

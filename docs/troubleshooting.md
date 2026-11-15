@@ -53,6 +53,7 @@ A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 |---|---|
 | Storage is off. It is off for anything but a local run, or `peekaboot.storage.enabled=false` turns it off. | Set `peekaboot.storage.enabled=true`, or run from the IDE, with `mvn spring-boot:run` or with `gradle bootRun`. |
 | `peekaboot.storage.traces.enabled=false`. | Remove it. |
+| The log said `another running instance writes to <dir>`. | See [History is not saved although storage is on](#second-instance). |
 | The log said `Peekaboot traces: the files in <dir> come from another Peekaboot version or start with a damaged header; starting without them`. | None. Peekaboot deleted them, and this run writes new ones. |
 | The log said `Peekaboot traces: cannot write to <dir> (...); traces from here on will not survive a restart`. | Make the directory writable, or point `peekaboot.storage.dir` at one that is. |
 | The log said `Peekaboot traces: the journal in <dir> stopped (...); traces from here on will not survive a restart`. | The journal's thread ran out of memory or stack. Give the JVM more heap or lower `peekaboot.tracing.max-traces`. The traces stay complete in memory, and the files are read again at the next start. |
@@ -73,8 +74,8 @@ search]({{ '/docs/api/' | relative_url }}#log-search) for example.
 ## History is not saved although storage is on {#second-instance}
 
 **Cause:** the startup log has `another running instance writes to <dir>`. That instance holds
-the storage directory, so this one keeps its insights history, lifecycle log and generated
-password in memory.
+the storage directory, so this one keeps its insights history, lifecycle log, traces, error
+digest and generated password in memory. It writes no file there and reads none.
 
 **Fix:** stop the other instance and restart this one, or set `peekaboot.storage.dir` to give
 this one its own directory.
@@ -88,6 +89,7 @@ same switches as the traces above. These lines in the log say why it lost entrie
 
 | Cause | Fix |
 |---|---|
+| The log said `another running instance writes to <dir>`. | See [History is not saved although storage is on](#second-instance). |
 | The log said `Peekaboot errors: <dir>/errors.jsonl comes from another Peekaboot version or starts with a damaged header; starting without it`. | None. Peekaboot deleted it. The digest writes a new one once it records a failure. |
 | The log said `Peekaboot errors: cannot read <dir>/errors.jsonl (...); starting without it`. | Check that the application can read the file. |
 | The log said `Peekaboot errors: skipped N unreadable lines in <dir>/errors.jsonl; restored the rest`. | None. Those entries are missing, and the next write leaves them out of the file. |

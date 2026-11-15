@@ -154,8 +154,9 @@ Two applications with the same name, or with none, share a directory. Set `dir` 
 its own. Every character outside `A-Za-z0-9._-` in the name becomes a dash.
 
 A second instance that starts on a directory a running instance holds logs one warning and keeps
-its insights history, lifecycle log and generated password in memory. It loads none of them from
-the directory, so its password differs from the first instance's. Set `dir` to give it its own.
+its insights history, lifecycle log, traces, error digest and generated password in memory. It
+loads none of them from the directory, so its password differs from the first instance's. Set
+`dir` to give it its own.
 
 | File | Contents | Size |
 |---|---|---|
