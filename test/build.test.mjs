@@ -4,6 +4,17 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { BUILT, SITE_ROOT, builtPages, html, text } from './site.mjs';
 
+const SITE_URL = 'https://www.peekaboot.org';
+
+function builtText(name) {
+    return readFileSync(join(BUILT, name), 'utf8');
+}
+
+// A page's own content, without the navbar and the footer every page carries.
+function mainContent(urlPath) {
+    return /<main\b[^>]*>([\s\S]*)<\/main>/.exec(html(urlPath))?.[1] ?? '';
+}
+
 // A feature block of the landing page, from below its heading to the next heading.
 function landingBlock(heading) {
     const block = new RegExp(`<h2[^>]*>${heading}</h2>([\\s\\S]*?)(?=<h2|</section>)`);
@@ -68,7 +79,7 @@ test('the landing page presents the HTTP API', () => {
 test('the API page and llms.txt say what only the API serves', () => {
     const unread = /do not read[^.]*\./.exec(text('/docs/api/'))?.[0] ?? '';
     const description = /<meta name="description" content="([^"]*)">/.exec(html('/docs/api/'))[1];
-    const llms = readFileSync(join(BUILT, 'llms.txt'), 'utf8');
+    const llms = builtText('llms.txt');
     const wrong = [
         ...['index', 'OpenAPI document', 'log search', 'routes', 'error digest']
             .filter((endpoint) => !unread.includes(endpoint))
@@ -79,4 +90,22 @@ test('the API page and llms.txt say what only the API serves', () => {
     ];
 
     assert.deepEqual(wrong, []);
+});
+
+test('the site publishes a sitemap, robots.txt and a 404 page', () => {
+    const listed = [...builtText('sitemap.xml').matchAll(/<loc>([^<]*)<\/loc>/g)]
+        .map(([, location]) => location)
+        .sort();
+    const pages = builtPages()
+        .filter((urlPath) => urlPath !== '/404.html')
+        .map((urlPath) => SITE_URL + urlPath);
+    assert.deepEqual(listed, pages);
+
+    const sitemapLine = `Sitemap: ${SITE_URL}/sitemap.xml`;
+    assert.ok(builtText('robots.txt').includes(sitemapLine), `robots.txt lacks "${sitemapLine}"`);
+
+    const notFoundPage = mainContent('/404.html');
+    const missingFromNotFoundPage = ['Page not found', 'href="/"', 'href="/docs/quick-start/"']
+        .filter((markup) => !notFoundPage.includes(markup));
+    assert.deepEqual(missingFromNotFoundPage, []);
 });

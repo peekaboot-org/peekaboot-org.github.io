@@ -15,10 +15,13 @@ peekaboot_version: 1.2.0
 java_version: "25"
 spring_boot_version: "4.1"
 
-# Part of the github-pages gem, but only active when listed: serves the old URLs of pages
-# that were merged into others as a redirect (see `redirect_from` in their front matter).
+# Both ship with the github-pages gem and are active only when listed. jekyll-redirect-from
+# serves the old URLs of pages that were merged into others as a redirect (see `redirect_from`
+# in their front matter). jekyll-sitemap writes sitemap.xml, and robots.txt while the source
+# has none.
 plugins:
   - jekyll-redirect-from
+  - jekyll-sitemap
 
 markdown: kramdown
 kramdown:
