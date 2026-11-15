@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { contrastFailures } from './contrast.mjs';
-import { launch, readPage, serveSite } from './site.mjs';
+import { builtPages, launch, readPage, serveSite } from './site.mjs';
 
 const MODES = {
     'light': {scheme: 'light'},
@@ -21,6 +21,8 @@ const HIGHLIGHTED_TOKENS = {
     '/docs/security/': ['.highlight .s', '.highlight .c1'],
     '/docs/configuration/': ['.highlight .na'],
 };
+
+const SWEPT_MODES = ['light', 'dark'];
 
 let site;
 let browser;
@@ -122,6 +124,19 @@ function uncolouredTokens(page, tokens) {
     }), tokens);
 }
 
+// One line per selector and ratio, since a faint rule shows on every element it styles.
+function faintTextFindings(rows) {
+    const findings = new Map();
+    for (const {urlPath, selector, text, ratio, required} of rows) {
+        const finding = `${selector} has ${ratio.toFixed(2)}:1, want ${required}:1`;
+        const seen = findings.get(finding) ?? {count: 0, first: `"${text}" on ${urlPath}`};
+        seen.count++;
+        findings.set(finding, seen);
+    }
+    return Array.from(findings,
+        ([finding, {count, first}]) => `${finding}, count ${count}, first ${first}`);
+}
+
 test('the hero logo is legible on the dark ground', async () => {
     const problems = [];
     for (const [mode, options] of Object.entries(MODES)) {
@@ -173,3 +188,15 @@ test('highlighted code is coloured and readable', async () => {
 
     assert.deepEqual(problems, []);
 });
+
+for (const mode of SWEPT_MODES) {
+    test(`text clears AA contrast, ${mode}`, async () => {
+        const faint = [];
+        for (const urlPath of builtPages()) {
+            const rows = await onPage(urlPath, MODES[mode], contrastFailures);
+            faint.push(...rows.map((row) => ({...row, urlPath})));
+        }
+
+        assert.deepEqual(faintTextFindings(faint), []);
+    });
+}

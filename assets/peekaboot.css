@@ -13,7 +13,7 @@
 
     /* The brand green is a fill colour, 2.6:1 against white, so text uses these, as
        tokens.css splits --pk-primary from --pk-primary-text. */
-    --pk-link: #487e1b;         /* 4.91:1 on white */
+    --pk-link: #447718;         /* 5.39:1 on white, 4.90:1 on --bulma-background */
     --pk-link-hover: #3a6516;
 
     /* Highlighted code, in the text colours of tokens.css. Ratios are on the code ground,
