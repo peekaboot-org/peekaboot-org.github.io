@@ -28,7 +28,6 @@ redirect_from:
         <ul>
           {% for entry in group.entries %}
           <li>
-            {% if entry.breaking %}<span class="tag is-warning">breaking</span> {% endif %}
             {% if entry.scope %}<strong>{{ entry.scope | escape }}</strong>: {% endif %}
             {{ entry.text | escape }}{% if entry.detail %}. {{ entry.detail | escape }}{% endif %}
           </li>

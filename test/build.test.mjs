@@ -167,3 +167,12 @@ test('links into GitHub repositories use blob/HEAD', () => {
 
     assert.deepEqual(onABranch, []);
 });
+
+// The release job groups breaking entries under "Breaking changes", so a tag would say it twice.
+test('the releases page tags no entry', () => {
+    const releases = html('/releases/');
+
+    assert.ok(/<h3[^>]*>Breaking changes<\/h3>/.test(releases),
+        '/releases/ has no "Breaking changes" heading');
+    assert.ok(!releases.includes('class="tag'), '/releases/ renders a tag');
+});
