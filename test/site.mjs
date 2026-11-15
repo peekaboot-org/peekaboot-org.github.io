@@ -111,3 +111,12 @@ export async function openPage(browser, origin, urlPath,
     await page.goto(origin + urlPath);
     return page;
 }
+
+export async function readPage(browser, origin, urlPath, options, read) {
+    const page = await openPage(browser, origin, urlPath, options);
+    try {
+        return await read(page);
+    } finally {
+        await page.context().close();
+    }
+}

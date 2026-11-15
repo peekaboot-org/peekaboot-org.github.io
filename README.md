@@ -64,6 +64,9 @@ workflow. Run them before you push.
   sidebar and a page's `title`/`lead` front matter.
 - `assets/peekaboot.css`: the brand mapping over vendored Bulma
   (`assets/bulma.min.css`, whose banner names the version).
+- `assets/img/logo-mark-dark-480.png`: the landing page's logo on the dark theme. It is
+  `peekaboot-logo-mark-dark.png` from the sibling `assets/` directory (see "Social images"),
+  scaled with `magick <source> -resize 480x480 -strip <target>`.
 - `assets/site.js`: theme resolution (shared `peekaboot-theme` localStorage key and
   `data-theme` attribute with Peekaboot's own dashboard), the navbar burger, and the `#`
   anchor on each doc heading. Loaded synchronously in `<head>`, without `defer`, so the theme

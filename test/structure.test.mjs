@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
-import { builtPages, launch, openPage, serveSite } from './site.mjs';
+import { builtPages, launch, readPage, serveSite } from './site.mjs';
 
 let site;
 let browser;
@@ -15,13 +15,8 @@ after(async () => {
     await site?.close();
 });
 
-async function onPage(urlPath, options, read) {
-    const page = await openPage(browser, site.origin, urlPath, options);
-    try {
-        return await read(page);
-    } finally {
-        await page.context().close();
-    }
+function onPage(urlPath, options, read) {
+    return readPage(browser, site.origin, urlPath, options, read);
 }
 
 // Fragments that pages, bookmarks and the product repo linked before a section was renamed or moved.

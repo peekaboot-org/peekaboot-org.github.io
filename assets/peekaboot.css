@@ -126,20 +126,20 @@ a:hover {
     border-radius: var(--bulma-radius-large);
 }
 
-/* Each screenshot ships in both themes; the page shows the one matching its own theme. */
-[data-theme="light"] .pk-screenshot--dark,
-[data-theme="dark"] .pk-screenshot--light {
+/* An image pair ships one file per theme; the page shows the one matching its own theme. */
+[data-theme="light"] .pk-only-dark,
+[data-theme="dark"] .pk-only-light {
     display: none;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme]) .pk-screenshot--light {
+    :root:not([data-theme]) .pk-only-light {
         display: none;
     }
 }
 
 @media not all and (prefers-color-scheme: dark) {
-    :root:not([data-theme]) .pk-screenshot--dark {
+    :root:not([data-theme]) .pk-only-dark {
         display: none;
     }
 }
