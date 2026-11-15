@@ -37,6 +37,13 @@ function images(urlPath) {
     });
 }
 
+// The caption under a screenshot, as markup.
+function screenshotCaption(urlPath, name) {
+    const figure = html(urlPath).split('<figure')
+        .find((markup) => markup.includes(`/${name}-light.png"`));
+    return /<figcaption>([\s\S]*?)<\/figcaption>/.exec(figure ?? '')?.[1] ?? '';
+}
+
 test('built pages carry no unrendered Liquid or kramdown attribute', () => {
     const unrendered = /\{\{|\{%|\{:\s*#|\{#[a-z-]+\}/;
     const leaking = builtPages().filter((urlPath) => unrendered.test(html(urlPath)));
@@ -132,6 +139,18 @@ test('every image declares its intrinsic size', () => {
         .filter(({declared, actual}) => declared !== actual)
         .map(({src, declared, actual}) =>
             `${urlPath}: ${src} declares ${declared}, the file is ${actual}`));
+
+    assert.deepEqual(wrong, []);
+});
+
+test('the revealed screenshot links the two opt-ins', () => {
+    const caption = screenshotCaption('/docs/dashboard/', 'dashboard-environment-revealed');
+    const wrong = [
+        ...(caption.includes('href="/docs/security/#masking-opt-ins"')
+            ? [] : [`the caption does not link the two opt-ins: ${caption}`]),
+        ...(text('/docs/dashboard/').includes('safe to publish')
+            ? ['/docs/dashboard/ says "safe to publish"'] : []),
+    ];
 
     assert.deepEqual(wrong, []);
 });
