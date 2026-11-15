@@ -121,7 +121,8 @@ fi
 # --force_polling: inotify doesn't propagate from a bind mount into the container
 # on every platform, so Jekyll would miss edits without it.
 # --host 0.0.0.0: a published port reaches the container's own interfaces, never its loopback.
-exec "${JEKYLL_RUN[@]}" "${tty_flags[@]}" --init \
+# ${tty_flags[@]+...}: bash before 4.4 (macOS has 3.2) aborts on an empty array under set -u.
+exec "${JEKYLL_RUN[@]}" ${tty_flags[@]+"${tty_flags[@]}"} --init \
     -p "${BIND}:${PORT}:${PORT}" -p "${BIND}:${LIVERELOAD_PORT}:${LIVERELOAD_PORT}" \
     "$IMAGE" sh -c "$SETUP && bundle exec jekyll serve \
         --host 0.0.0.0 --port ${PORT} --livereload --force_polling --trace"
