@@ -153,9 +153,9 @@ on by default for a local run. Without it the tab shows the current run only. Wi
 {% include screenshot.html name="dashboard-traces" %}
 
 Traces lists recent requests, jobs and messages in three buckets: All, Errors and Slow. You
-can filter by root action type and root operation. The list shows the 50 newest matches and
-says so underneath. **Load more** adds the next 50. A bucket's count is in traces, so it can
-differ from the number of rows.
+can filter by root action type and root operation. When more than 50 match, the list shows the
+50 newest and says so underneath. **Load more** adds the next 50. A bucket's count is in
+traces, so it can differ from the number of rows.
 
 Click a row to open the trace detail with its spans, queries, logs and the HTTP exchange.
 Background work started from a trace gets its own row. When the trace it ran under is still
