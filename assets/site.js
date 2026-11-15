@@ -1,8 +1,8 @@
 // The entire client-side surface of this site: theme resolution, the navbar burger, the docs
 // sidebar toggle, the heading anchors and the tab stops on tables that scroll.
-// The storage key and the [data-theme] attribute are shared with Peekaboot's own UI
-// (peekaboot-frontend/.../shared/theme.js), so a visitor who set a theme in a running
-// dashboard sees this site match it.
+// The storage key and the [data-theme] attribute carry the names Peekaboot's own UI uses
+// (peekaboot-frontend/.../shared/theme.js), by convention. localStorage is per origin, so a
+// theme chosen in a dashboard never reaches this site.
 (function () {
     'use strict';
 

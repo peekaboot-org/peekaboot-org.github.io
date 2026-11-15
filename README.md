@@ -44,9 +44,12 @@ The checks under `test/` read the built site, so build it first:
 cd test && npm ci && npm test
 ```
 
+A `./serve.sh` run leaves a development build in `_site`, whose sitemap names the preview's
+address, so build again before the checks.
+
 They need Node. They were written on Node 24, and `playwright-core` asks for 20 or later.
-The link check drives the Chromium revision of `playwright-core` 1.63.0. If it reports a
-missing browser, run `npx playwright-core install chromium` in `test/` once.
+The checks that open a page drive the Chromium revision of `playwright-core` 1.63.0. If one
+reports a missing browser, run `npx playwright-core install chromium` in `test/` once.
 
 The `playwright-core` version follows `playwright.version` in the product's
 `peekaboot-testing-app/pom.xml`, so both repos drive the same Chromium revision.
@@ -58,10 +61,17 @@ workflow. Run them before you push.
 
 - `_config.yml`: site settings. `theme: null` is required to disable GitHub Pages' implicit
   default theme (`jekyll-theme-primer`), which otherwise ships its own unused CSS alongside
-  ours.
+  ours. The product repo's release job overwrites `peekaboot_version` on every release, so
+  it is not edited by hand.
+- `_data/releases.json`: the entries of the releases page. The same job overwrites the file
+  on every release, so it is not edited by hand either.
 - `_data/nav.yml`: the documentation sidebar, grouped into sections, and the navbar. An
   entry with a `navbar:` label also appears in the navbar; a section with one links to its
   first page.
+- `_includes/facts/`: explanations that more than one page needs. Each is written once here
+  and included where it is needed. `test/build.test.mjs` lists them in `FACTS`. A fragment
+  ends with a newline. Close the tag with `-%}` where the next line continues the same
+  paragraph or list.
 - `_layouts/default.html`, `page.html`, `doc.html`: page shells. `page.html` wraps a page
   that lays itself out, as `index.html` and `releases.html` do. `doc.html` renders the
   sidebar and a page's `title`/`lead` front matter, and wraps each Markdown table in a
@@ -72,11 +82,13 @@ workflow. Run them before you push.
 - `assets/img/logo-mark-dark-480.png`: the landing page's logo on the dark theme. It is
   `peekaboot-logo-mark-dark.png` from the sibling `assets/` directory (see "Social images"),
   scaled with `magick <source> -resize 480x480 -strip <target>`.
-- `assets/site.js`: theme resolution (shared `peekaboot-theme` localStorage key and
-  `data-theme` attribute with Peekaboot's own dashboard), the navbar burger, the toggle that
-  opens the docs sidebar on a phone, the `#` anchor on each doc heading, and the tab stop on
-  a table too wide for its box. Loaded synchronously in `<head>`, without `defer`, so the
-  theme applies before first paint.
+- `assets/site.js`: theme resolution, the navbar burger, the toggle that opens the docs
+  sidebar on a phone, the `#` anchor on each doc heading, and the tab stop on a table too
+  wide for its box. Loaded synchronously in `<head>`, without `defer`, so the theme applies
+  before first paint. The theme's storage key and attribute carry the product's names by
+  convention only, see "Decisions taken deliberately".
+- `test/`: the checks, see "Checks". `_config.yml` keeps the folder out of the published
+  site.
 
 ## Adding a page
 
@@ -104,23 +116,28 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 
 ## Decisions taken deliberately
 
-- **Links into the product repo use `/blob/HEAD/`, never a branch name.** Pages throughout
-  `docs/` write them as `{{ site.repository_url }}/blob/HEAD/...`, so they resolve against
+- **Links into the product repo and the skills repo use `/blob/HEAD/`, never a branch
+  name.** Pages write them as `{{ site.repository_url }}/blob/HEAD/...` and
+  `https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/...`, so they resolve against
   whatever `origin/HEAD` currently is, never a pinned commit and never a branch name that
   could be renamed.
 - **`theme: null` stays.** Without it GitHub Pages ships `jekyll-theme-primer`'s unused CSS
   on every deploy.
 - **Bulma is vendored, not CDN-linked.** `assets/bulma.min.css` is a committed copy: no
   third-party request, works offline.
+- **Bulma ships whole.** `assets/bulma.min.css` is the complete build, 677,931 bytes by
+  `wc -c`. A cut-down build needs a Sass toolchain, which the site does not have.
 - **The brand mapping is three numbers.** `--bulma-primary-h/s/l` is the mark's own green.
   That green is fill-tuned (white on it is 2.6:1), so link and body text use `--pk-link`,
   never `--bulma-primary`. It is the same fill/text split the product's `tokens.css` makes.
 - **The site's dark background is Bulma's, not the dashboard's.** `#14161a` against the
   dashboard's `#0d1117`. Closing that gap would re-tune every grey Bulma derives in dark
   mode for a difference nobody can see side by side.
-- **The theme toggle shares the product's storage key** (`peekaboot-theme`) and its
-  `data-theme` attribute. `assets/site.js` loads synchronously in `<head>` so the theme
-  applies before first paint. Do not add `defer`.
+- **The theme toggle uses the product's names by convention.** The storage key
+  (`peekaboot-theme`) and the `data-theme` attribute are named as the dashboard names them.
+  `localStorage` is per origin, so a theme chosen in a dashboard never reaches the site.
+  `assets/site.js` loads synchronously in `<head>` so the theme applies before first paint.
+  Do not add `defer`.
 - **Honest limits are stated on purpose.** Masking is not exhaustive and has no entropy
   detection. Peekaboot's dashboard guard is one HTTP Basic credential with no throttle on
   failed attempts. It sees one process, masks log content by value shape only, and its
@@ -135,17 +152,19 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 | Any masking rule | `docs/security.md` |
 | A new or renamed property, or one of Peekaboot's defaults | `docs/configuration.md`, `docs/in-production.md` |
 | Activation conditions | `docs/configuration.md` (*When Peekaboot is on*), `docs/in-production.md`, `docs/quick-start.md`, `docs/security.md` |
-| An API endpoint or parameter | `docs/api.md` |
-| Trace capture or the span cap | `docs/traces.md`, `docs/troubleshooting.md` |
+| An API endpoint or parameter | `docs/api.md`, `docs/agents.md`, `llms.txt`, `_includes/facts/guard-refusal.md`, `_includes/facts/insights-stream-cap.md` |
+| The guard's credentials, or what the API index lists | `_includes/facts/guard-credentials.md`, `docs/agents.md`, `llms.txt` |
+| Trace capture or the span cap | `docs/traces.md`, `docs/troubleshooting.md`, `_includes/facts/trace-memory.md`, `_includes/facts/propagate-context.md` |
 | Root action type detection | `docs/traces.md` |
 | A dashboard tab, or a header control | `docs/dashboard.md`, and re-run the screenshots |
+| The screenshot size | `_includes/screenshot.html`, which declares 1440 by 900 for every shot |
 | A dashboard tab *rename* | also `docs/troubleshooting.md`, `docs/quick-start.md`, and `docs/api.md` (the `/api/features` flag behind Meters is `metrics`) |
 | `peekaboot-insights-defaults.yml`, or the panel-file schema | `docs/insights.md`, which states the field sets and tabulates the shipped panels |
-| An insights level default, or the memory formula | `docs/insights.md`, `docs/configuration.md`, both of which carry worked arithmetic |
+| An insights level default, or the memory formula | `_includes/facts/insights-memory.md`, which carries the formula and the default figures, `docs/insights.md`, and `docs/configuration.md`, which works an example |
 | The startup summary's lines, or how a URL in it is built | `docs/configuration.md` (*The URLs in the summary*) |
-| Anything under `peekaboot.storage`, or what the stores write | `docs/configuration.md`, `docs/security.md`, `docs/insights.md`, `docs/traces.md` |
+| Anything under `peekaboot.storage`, or what the stores write | `_includes/facts/storage-files.md`, `_includes/facts/local-run-disk.md`, `docs/configuration.md`, `docs/security.md`, `docs/insights.md`, `docs/traces.md` |
 | The runs projection, its columns or its badges | `docs/dashboard.md` (*Lifecycle*) |
-| The error page, its back-off rules or the override | `docs/error-page.md` |
+| The error page, its back-off rules or the override | `docs/error-page.md`, `_includes/facts/error-page-accept.md` |
 
 `tokens.css` is not on that list. This site does not document theming; the product repo's
 `peekaboot-frontend/README.md` owns the token set.
@@ -214,21 +233,31 @@ through each platform's own settings and live here to keep them under version co
 
 ## Measured contrast
 
-Body text and link text, measured in a real browser (Chromium via Playwright) against their
-actual computed backgrounds, walking up to the nearest ancestor with a non-transparent
-background rather than reading off the CSS source, using the standard WCAG
-relative-luminance formula. All four clear the 4.5:1 AA threshold for normal text by a wide
-margin:
+`test/measure-contrast.mjs` prints this table. It opens `/docs/quick-start/` in Chromium, in
+the light and the dark theme, and measures each text colour against its ground with the WCAG
+relative-luminance formula. The ground is the nearest opaque background on the element or an
+ancestor, read from the computed styles.
 
-| Theme | Body text (`.pk-content p`) | Link text (`.pk-content a`) |
+| Text | Light | Dark |
 | --- | --- | --- |
-| Light | 9.45:1 | 4.91:1 |
-| Dark | 8.43:1 | 9.46:1 |
+| Body text (`.pk-content p`) | 9.45:1 | 8.43:1 |
+| Link on the page ground (`.pk-content > p a`) | 5.39:1 | 9.46:1 |
+| Link on the tinted ground of a callout (`.pk-callout a`) | 4.90:1 | 8.32:1 |
+| Current sidebar entry, on the tinted ground (`.pk-sidebar__link.is-current`) | 4.90:1 | 8.32:1 |
 
-Measured on `/docs/quick-start/`; the CSS is site-wide, so these figures hold for every doc
-page. If a future palette or token change moves these numbers, re-measure and update this
-table rather than trusting the CSS comments alone. `assets/peekaboot.css` documents the
-light/dark link ratios inline, but the body-text figures above only come from the browser.
+The link colour is measured on both grounds because the tinted one leaves it less contrast.
+Every figure clears the 4.5:1 that AA asks of normal text. The table records one page. The
+`text clears AA contrast` checks in `test/theme.test.mjs` hold the threshold on every page.
+
+After a palette or token change, measure again and paste the output here:
+
+```bash
+./serve.sh --build
+cd test && node measure-contrast.mjs
+```
+
+The comments in `assets/peekaboot.css` state the link ratios too, so change them with the
+table.
 
 ## Remaining manual setup
 
