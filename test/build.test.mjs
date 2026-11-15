@@ -59,6 +59,14 @@ function builtText(name) {
     return readFileSync(join(BUILT, name), 'utf8');
 }
 
+// Every built page as [path, read(path)], and llms.txt as it is.
+function published(read) {
+    return [
+        ...builtPages().map((urlPath) => [urlPath, read(urlPath)]),
+        ['/llms.txt', builtText('llms.txt')],
+    ];
+}
+
 // A source file with its whitespace collapsed, since the pages wrap in the middle of a phrase.
 function source(...segments) {
     const file = join(SITE_ROOT, ...segments);
@@ -126,13 +134,20 @@ test('the landing page, quick start and traces say a local run writes traces to 
     const stated = ['/.peekaboot', 'unmasked', 'peekaboot.storage.traces.enabled'];
     const wrong = ['/', '/docs/quick-start/', '/docs/traces/'].flatMap((urlPath) => {
         const pageText = text(urlPath);
-        const missing = stated.filter((phrase) => !pageText.includes(phrase));
-        const memoryOnly = pageText.includes('held in memory') ? ['says "held in memory"'] : [];
-        return [...missing.map((phrase) => `lacks "${phrase}"`), ...memoryOnly]
-            .map((defect) => `${urlPath} ${defect}`);
+        return stated.filter((phrase) => !pageText.includes(phrase))
+            .map((phrase) => `${urlPath} lacks "${phrase}"`);
     });
 
     assert.deepEqual(wrong, []);
+});
+
+// A local run journals what it records to disk, so "held in memory" understates what is kept.
+test('no page says recorded data is held in memory', () => {
+    const memoryOnly = published(text)
+        .filter(([, content]) => content.includes('held in memory'))
+        .map(([urlPath]) => `${urlPath} says "held in memory"`);
+
+    assert.deepEqual(memoryOnly, []);
 });
 
 test('the landing page presents the HTTP API', () => {
@@ -213,11 +228,7 @@ test('the revealed screenshot links the two opt-ins', () => {
 // A branch name in a link breaks when the branch is renamed. HEAD follows the default branch.
 test('links into GitHub repositories use blob/HEAD', () => {
     const branchLink = /github\.com\/peekaboot-org\/[^"\s]*\/blob\/(?!HEAD\/)[^"\s)]*/g;
-    const published = [
-        ...builtPages().map((urlPath) => [urlPath, html(urlPath)]),
-        ['/llms.txt', builtText('llms.txt')],
-    ];
-    const onABranch = published.flatMap(([urlPath, content]) =>
+    const onABranch = published(html).flatMap(([urlPath, content]) =>
         [...content.matchAll(branchLink)].map(([link]) => `${urlPath}: ${link}`));
 
     assert.deepEqual(onABranch, []);

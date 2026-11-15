@@ -82,7 +82,7 @@ line only while the dashboard is served.
    `/peekaboot/**` can add `?unmask=true`.
 1. Don't treat masking as complete. Log messages, SQL and request data are masked only
    where a rule recognises them. Don't point Peekaboot at traffic whose secrets must not be
-   held in memory and displayed.
+   recorded and displayed.
 
 ## What it changes while it is on {#what-it-costs-while-it-is-on}
 
