@@ -22,7 +22,12 @@ const HIGHLIGHTED_TOKENS = {
     '/docs/configuration/': ['.highlight .na'],
 };
 
-const SWEPT_MODES = ['light', 'dark'];
+const SWEPT_MODES = ['light', 'dark', 'dark without JavaScript'];
+
+// peekaboot.css states each dark value twice, for [data-theme="dark"] and for a dark OS
+// without the script.
+const DARK_TOKENS = ['--pk-link', '--pk-link-hover', '--pk-code-keyword', '--pk-code-string',
+    '--pk-code-literal', '--pk-code-comment'];
 
 let site;
 let browser;
@@ -137,6 +142,17 @@ function faintTextFindings(rows) {
         ([finding, {count, first}]) => `${finding}, count ${count}, first ${first}`);
 }
 
+function darkThemeValues(page) {
+    return page.evaluate((tokens) => {
+        const root = getComputedStyle(document.documentElement);
+        return {
+            ...Object.fromEntries(tokens.map((token) => [token, root.getPropertyValue(token)])),
+            '.pk-logo background-image':
+                getComputedStyle(document.querySelector('.pk-logo')).backgroundImage,
+        };
+    }, DARK_TOKENS);
+}
+
 test('the hero logo is legible on the dark ground', async () => {
     const problems = [];
     for (const [mode, options] of Object.entries(MODES)) {
@@ -200,3 +216,14 @@ for (const mode of SWEPT_MODES) {
         assert.deepEqual(faintTextFindings(faint), []);
     });
 }
+
+test('the dark theme is the same with and without JavaScript', async () => {
+    const urlPath = '/docs/quick-start/';
+    const withScript = await onPage(urlPath, MODES['dark'], darkThemeValues);
+    const withoutScript = await onPage(urlPath, MODES['dark without JavaScript'], darkThemeValues);
+
+    // A token no block sets reads as '' on both sides, which would compare equal.
+    const unset = Object.keys(withScript).filter((name) => withScript[name] === '');
+    assert.deepEqual(unset, []);
+    assert.deepEqual(withoutScript, withScript);
+});

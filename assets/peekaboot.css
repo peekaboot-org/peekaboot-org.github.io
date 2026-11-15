@@ -37,6 +37,34 @@
     --pk-code-comment: #8b949e; /* 5.18:1 */
 }
 
+/* site.js sets data-theme on every page view, so a missing attribute means no script. The
+   page then follows the OS theme, and a dark OS repeats the values of [data-theme="dark"]. */
+@media (prefers-color-scheme: dark) {
+    /* "the dark theme is the same with and without JavaScript" keeps the two in step. */
+    :root:not([data-theme]) {
+        --pk-link: #84cf3d;
+        --pk-link-hover: #9bdb5e;
+        --pk-code-keyword: #1acdff;
+        --pk-code-string: #3fb950;
+        --pk-code-literal: #d29922;
+        --pk-code-comment: #8b949e;
+    }
+
+    :root:not([data-theme]) .pk-logo {
+        background-image: url('/assets/img/logo-mark-dark.png');
+    }
+
+    :root:not([data-theme]) .pk-only-light {
+        display: none;
+    }
+}
+
+@media not all and (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .pk-only-dark {
+        display: none;
+    }
+}
+
 a {
     color: var(--pk-link);
 }
@@ -166,18 +194,6 @@ a:hover {
 [data-theme="light"] .pk-only-dark,
 [data-theme="dark"] .pk-only-light {
     display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme]) .pk-only-light {
-        display: none;
-    }
-}
-
-@media not all and (prefers-color-scheme: dark) {
-    :root:not([data-theme]) .pk-only-dark {
-        display: none;
-    }
 }
 
 .pk-content figcaption {
