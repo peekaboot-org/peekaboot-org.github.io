@@ -345,10 +345,11 @@ never arrives. If it holds any span it does not list, see the [trace
 list]({{ '/docs/api/' | relative_url }}#trace-list). Every trace names the run it came from, the
 `run` of [its summary]({{ '/docs/api/' | relative_url }}#summary-fields).
 
-The journal is folded into `traces.snapshot.jsonl` at startup, at shutdown and once it passes
-`peekaboot.storage.traces.max-journal-size` (64 MB). Files in another format, which an older or
-newer Peekaboot may write, or with a damaged header, are deleted at startup with one line in the
-log. What is stored unmasked is under [Security]({{ '/docs/security/' | relative_url }}#what-peekaboot-writes-to-disk).
+The journal is folded into `traces.snapshot.jsonl` at shutdown, once it passes
+`peekaboot.storage.traces.max-journal-size` (64 MB), and at startup when the last run left lines
+in it, as after a crash. Files in another format, which an older or newer Peekaboot may write, or
+with a damaged header, are deleted at startup with one line in the log. What is stored unmasked
+is under [Security]({{ '/docs/security/' | relative_url }}#what-peekaboot-writes-to-disk).
 
 ### The SLOW badge and the Slow bucket {#slow-badge-vs-slow-bucket}
 
