@@ -130,7 +130,7 @@ Startup never fails because of a missing piece.
 |---|---|
 | A Micrometer `Tracer` bean | The dev toolbar is absent. The rest of the dashboard works. |
 | The OpenTelemetry SDK | The Traces tab explains that the SDK is missing. |
-| A Micrometer `MeterRegistry` bean | The Meters and Insights tabs, the insights API and the Overview stat tiles are absent. See [Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there). |
+| A Micrometer `MeterRegistry` bean | The Meters and Insights tabs, the insights API and the Overview stat tiles are absent. See [Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-appears). |
 
 ## Next {#next}
 

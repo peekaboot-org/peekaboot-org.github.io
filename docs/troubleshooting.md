@@ -197,7 +197,7 @@ appear]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs).
 | A panel says "No data" | The panel's meters are not registered, for example there is no HikariCP, Hibernate or `datasource-micrometer`. | Look the meter up on the Meters tab. A meter that is not there cannot be charted. |
 
 See [Insights, when the tab
-appears]({{ '/docs/insights/' | relative_url }}#when-the-tab-isnt-there).
+appears]({{ '/docs/insights/' | relative_url }}#when-the-tab-appears).
 
 ## Liquibase dates are hours off on MySQL {#liquibase-dates-off-on-mysql}
 

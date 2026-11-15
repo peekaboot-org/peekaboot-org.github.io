@@ -11,9 +11,9 @@ your own.
 
 {% include screenshot.html name="dashboard-insights" %}
 
-## When the tab appears {#when-the-tab-isnt-there}
+## When the tab appears {#when-the-tab-appears}
 
-The Insights tab needs all of:
+<span id="when-the-tab-isnt-there"></span>The Insights tab needs all of:
 
 - a servlet web application,
 - `peekaboot.enabled`, on by default for a local run only. See

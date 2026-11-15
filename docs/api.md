@@ -37,7 +37,7 @@ them anywhere else.
 | [`/peekaboot/api`](#openapi) | none | `200`, `400` |
 | [`/peekaboot/api/openapi.json`](#openapi) | none | `200`, `400` |
 | [`/peekaboot/api/features`](#features) | none | `200`, `400` |
-| [`/peekaboot/api/actuator/all/insights`](#what-insights-adds) | `locale`, `unmask` | `200`, `400` |
+| [`/peekaboot/api/actuator/all/insights`](#environment-and-configuration) | `locale`, `unmask` | `200`, `400` |
 | [`/peekaboot/api/metrics`](#meters) | `name` | `200`, `400` |
 | [`/peekaboot/api/traces`](#trace-list) | `limit`, `cursor`, `bucket`, `rootActionType`, `rootOperation`, `route`, `path`, `statusCode`, `outcome`, `minDurationMs`, `since`, `until`, `view` | `200`, `400` |
 | [`/peekaboot/api/traces/{traceId}`](#single-trace) | none | `200`, `400`, `404` |
@@ -142,8 +142,9 @@ it uses. The dashboard shows or hides its tabs from it.
 | `slowSpanThresholdMs`, `verySlowSpanThresholdMs`, `slowQueryThresholdMs` | The effective thresholds from [`peekaboot.tracing`]({{ '/docs/configuration/' | relative_url }}#issue-thresholds). |
 | `maskLiteral` | The string masked values are replaced with, `******`. |
 
-## Environment and configuration {#what-insights-adds}
+## Environment and configuration {#environment-and-configuration}
 
+<span id="what-insights-adds"></span>
 `GET /peekaboot/api/actuator/all/insights` returns what the Overview, Environment, Config,
 Loggers, Flyway, Liquibase and Scheduled Tasks tabs show:
 `{application, runtime, dataSources, health, environment, loggers, flyway, liquibase, config,

@@ -40,6 +40,14 @@ const LEGACY_ANCHORS = [
     ['/docs/security/', 'production-checklist'],
     ['/docs/security/', 'keeping-it-out-of-production-entirely'],
     ['/docs/security/', 'if-nothing-else-secures-it'],
+    ['/docs/api/', 'what-insights-adds'],
+    ['/docs/insights/', 'when-the-tab-isnt-there'],
+];
+
+// Headings that were reworded, with the id that matches the new wording.
+const RENAMED_SECTIONS = [
+    ['/docs/api/', 'environment-and-configuration'],
+    ['/docs/insights/', 'when-the-tab-appears'],
 ];
 
 function idsAndLinks(urlPath) {
@@ -213,6 +221,20 @@ test('anchors from before the restructure still resolve', async () => {
         }
         if (!idsByPage.get(urlPath).includes(id)) {
             missing.push(`${urlPath}#${id}`);
+        }
+    }
+
+    assert.deepEqual(missing, []);
+});
+
+test('headings carry ids that match them', async () => {
+    const missing = [];
+    for (const [urlPath, id] of RENAMED_SECTIONS) {
+        const sectionIds = await onPage(urlPath, {}, (page) => page
+            .locator('main h2')
+            .evaluateAll((headings) => headings.map((heading) => heading.id)));
+        if (!sectionIds.includes(id)) {
+            missing.push(`${urlPath}: no h2 has the id ${id}`);
         }
     }
 
