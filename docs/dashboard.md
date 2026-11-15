@@ -153,8 +153,9 @@ on by default for a local run. Without it the tab shows the current run only. Wi
 {% include screenshot.html name="dashboard-traces" %}
 
 Traces lists recent requests, jobs and messages in three buckets: All, Errors and Slow. You
-can filter by root action type and root operation. The list shows the 50 newest matches, so
-a bucket's count can be higher than the rows under it.
+can filter by root action type and root operation. The list shows the 50 newest matches and
+says so underneath. **Load more** adds the next 50. A bucket's count is in traces, so it can
+differ from the number of rows.
 
 Click a row to open the trace detail with its spans, queries, logs and the HTTP exchange.
 Background work started from a trace gets its own row. When the trace it ran under is still
@@ -194,7 +195,7 @@ shown above the list. Use it to find which source wins for a key.
 {% include screenshot.html name="dashboard-flyway" %}
 
 Flyway shows one row per migration: version, description, script, type, duration, install
-time and status.
+time and status. A repeatable migration shows Repeatable in place of a version.
 
 ## Liquibase {#liquibase}
 

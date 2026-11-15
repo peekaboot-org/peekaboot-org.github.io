@@ -263,10 +263,13 @@ log first if your panels do not appear.
 - Drag across any chart to zoom all charts to the same time window. The reset control or a
   double-click returns them.
 - The Restarts toggle hides the restart markers. It is on by default.
+- Focus a chart and press Left or Right to step through its restart markers. Escape hides the
+  details.
 - A gap means no sample. Peekaboot never draws a missed sample as zero. A meter whose function
   throws shows as a gap in its own series and logs one warning.
 
-The charts update live and keep updating while the dashboard's auto-refresh is paused.
+The charts update live and keep updating while the dashboard's auto-refresh is paused. They
+stop while another dashboard tab is showing and catch up when you return.
 
 ## What the API judges {#problems}
 
@@ -298,6 +301,6 @@ that needs a real metrics backend. See
   Micrometer's default distribution expiry of 2 minutes over 3 buffers, it covers roughly the
   last four to six minutes.
 
-The live charts use a streaming connection per open Insights tab. At most 32 are open per
-application. A 33rd tab gets `503` until another closes. See
-[HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints).
+The live charts use one streaming connection per dashboard that is showing the Insights tab. A
+dashboard on another tab holds none. At most 32 are open per application. A 33rd tab gets `503`
+until another closes. See [HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints).
