@@ -153,10 +153,18 @@ a:hover {
     min-width: 0;
 }
 
-/* Markdown tables carry no wrapper element, so the table itself becomes the scroll box. */
-.pk-content table {
-    display: block;
+/* The doc layout wraps each table in this box, which scrolls so the table stays a table. */
+.pk-table-scroll {
     overflow-x: auto;
+}
+
+.pk-table-scroll:not(:last-child) {
+    margin-bottom: var(--bulma-content-block-margin-bottom);
+}
+
+.pk-table-scroll:focus-visible {
+    outline: 2px solid var(--pk-link);
+    outline-offset: 2px;
 }
 
 /* Not in table cells, where breaking anywhere shrinks columns until values wrap mid-word. */

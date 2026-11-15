@@ -1,5 +1,5 @@
 // The entire client-side surface of this site: theme resolution, the navbar burger, the docs
-// sidebar toggle and the heading anchors.
+// sidebar toggle, the heading anchors and the tab stops on tables that scroll.
 // The storage key and the [data-theme] attribute are shared with Peekaboot's own UI
 // (peekaboot-frontend/.../shared/theme.js), so a visitor who set a theme in a running
 // dashboard sees this site match it.
@@ -81,9 +81,28 @@
         });
     }
 
+    // Only a box that scrolls needs keyboard focus. One that fits would be an idle tab stop.
+    function makeScrollingTablesFocusable() {
+        var boxes = document.querySelectorAll('.pk-table-scroll');
+        for (var i = 0; i < boxes.length; i++) {
+            var box = boxes[i];
+            if (box.scrollWidth > box.clientWidth) {
+                box.setAttribute('tabindex', '0');
+                box.setAttribute('role', 'group');
+                box.setAttribute('aria-label', 'Table, scrolls sideways');
+            } else {
+                box.removeAttribute('tabindex');
+                box.removeAttribute('role');
+                box.removeAttribute('aria-label');
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         labelToggle(document.documentElement.getAttribute('data-theme'));
         addHeadingAnchors();
+        makeScrollingTablesFocusable();
+        window.addEventListener('resize', makeScrollingTablesFocusable);
 
         var toggle = document.getElementById('theme-toggle');
         if (toggle) {

@@ -61,7 +61,9 @@ workflow. Run them before you push.
   first page.
 - `_layouts/default.html`, `page.html`, `doc.html`: page shells. `page.html` wraps a page
   that lays itself out, as `index.html` and `releases.html` do. `doc.html` renders the
-  sidebar and a page's `title`/`lead` front matter.
+  sidebar and a page's `title`/`lead` front matter, and wraps each Markdown table in a
+  `.pk-table-scroll` box. It matches the bare `<table>` kramdown writes, so a table given
+  attributes fails the `tables keep their semantics` check.
 - `assets/peekaboot.css`: the brand mapping over vendored Bulma
   (`assets/bulma.min.css`, whose banner names the version).
 - `assets/img/logo-mark-dark-480.png`: the landing page's logo on the dark theme. It is
@@ -69,8 +71,9 @@ workflow. Run them before you push.
   scaled with `magick <source> -resize 480x480 -strip <target>`.
 - `assets/site.js`: theme resolution (shared `peekaboot-theme` localStorage key and
   `data-theme` attribute with Peekaboot's own dashboard), the navbar burger, the toggle that
-  opens the docs sidebar on a phone, and the `#` anchor on each doc heading. Loaded
-  synchronously in `<head>`, without `defer`, so the theme applies before first paint.
+  opens the docs sidebar on a phone, the `#` anchor on each doc heading, and the tab stop on
+  a table too wide for its box. Loaded synchronously in `<head>`, without `defer`, so the
+  theme applies before first paint.
 
 ## Adding a page
 

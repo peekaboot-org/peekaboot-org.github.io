@@ -22,6 +22,8 @@ function onPage(urlPath, options, read) {
 const PHONE_WIDTH = 375;
 const DESKTOP_WIDTH = 1280;
 const SIDEBAR_PAGE = '/docs/configuration/';
+const WIDE_TABLES_PAGE = '/docs/configuration/';
+const NARROW_TABLE_PAGE = '/docs/quick-start/';
 
 // Fragments that pages, bookmarks and the product repo linked before a section was renamed or moved.
 const LEGACY_ANCHORS = [
@@ -89,6 +91,62 @@ function navbarMenuState(page) {
             expanded: burger.getAttribute('aria-expanded'),
         };
     });
+}
+
+function docPages() {
+    return builtPages().filter((urlPath) => urlPath.startsWith('/docs/'));
+}
+
+function contentTables(page) {
+    return page.locator('.pk-content table').evaluateAll((tables) => tables.map((table) => ({
+        display: getComputedStyle(table).display,
+        inScrollBox: table.parentElement.matches('.pk-table-scroll'),
+    })));
+}
+
+function tableBoxes(page) {
+    return page.evaluate(() => Array.from(document.querySelectorAll('.pk-table-scroll'), (box) => ({
+        overflows: box.scrollWidth > box.clientWidth,
+        tabindex: box.getAttribute('tabindex'),
+        role: box.getAttribute('role'),
+        label: box.getAttribute('aria-label'),
+    })));
+}
+
+// The table boxes once the page has heard the resize. Listeners run in the order they were
+// added, so the page's own listener has run by then.
+async function tableBoxesAtWidth(page, width) {
+    await page.evaluate(() => {
+        window.resized = new Promise((resolve) => addEventListener('resize', resolve, {once: true}));
+    });
+    await page.setViewportSize({width, height: page.viewportSize().height});
+    await page.evaluate(() => window.resized);
+    return tableBoxes(page);
+}
+
+// How wide a page that scrolls sideways is, and the outermost elements that reach past its right
+// edge. An element inside a box that scrolls or clips is left out, since its box holds it in.
+function sidewaysOverflow(page, pageWidth) {
+    return page.evaluate((width) => {
+        const scrollWidth = document.documentElement.scrollWidth;
+        if (scrollWidth <= width) {
+            return null;
+        }
+        const reachesPast = (element) => element.getBoundingClientRect().right > width;
+        const heldIn = (element) => {
+            for (let box = element.parentElement; box !== document.body; box = box.parentElement) {
+                if (getComputedStyle(box).overflowX !== 'visible') {
+                    return true;
+                }
+            }
+            return false;
+        };
+        const elements = Array.from(document.body.querySelectorAll('*'))
+            .filter((element) => reachesPast(element) && !reachesPast(element.parentElement)
+                && !heldIn(element))
+            .map((element) => [element.localName, ...element.classList].join('.'));
+        return `${scrollWidth} px wide, past the edge: ${[...new Set(elements)].join(', ')}`;
+    }, pageWidth);
 }
 
 test('every internal link and fragment resolves', async () => {
@@ -238,4 +296,70 @@ test('the sidebar shows no toggle on a desktop', async () => {
         await onPage(SIDEBAR_PAGE, {width: DESKTOP_WIDTH}, sidebarState);
 
     assert.deepEqual({firstLinkShown, toggleShown}, {firstLinkShown: true, toggleShown: false});
+});
+
+test('tables keep their semantics', async () => {
+    let tableCount = 0;
+    const broken = [];
+    for (const urlPath of docPages()) {
+        const tables = await onPage(urlPath, {}, contentTables);
+        tableCount += tables.length;
+        const off = tables.filter((table) => table.display !== 'table' || !table.inScrollBox);
+        if (off.length > 0) {
+            broken.push(`${urlPath}: ${off.length} of ${tables.length} tables, the first with `
+                + `display ${off[0].display} ${off[0].inScrollBox ? 'in' : 'outside'} a scroll box`);
+        }
+    }
+
+    assert.ok(tableCount > 0, 'no doc page has a table');
+    assert.deepEqual(broken, []);
+});
+
+test('a table too wide for a phone scrolls inside a focusable box', async () => {
+    const overflowing = (await onPage(WIDE_TABLES_PAGE, {width: PHONE_WIDTH}, tableBoxes))
+        .filter((box) => box.overflows);
+
+    assert.ok(overflowing.length > 0,
+        `no table box on ${WIDE_TABLES_PAGE} overflows at ${PHONE_WIDTH} px`);
+    assert.deepEqual(
+        overflowing.map(({tabindex, role, label}) =>
+            ({tabindex, role, labelled: Boolean(label?.trim())})),
+        overflowing.map(() => ({tabindex: '0', role: 'group', labelled: true})));
+});
+
+test('a table that fits is no tab stop', async () => {
+    const boxes = await onPage(NARROW_TABLE_PAGE, {width: DESKTOP_WIDTH}, tableBoxes);
+
+    assert.ok(boxes.length > 0, `${NARROW_TABLE_PAGE} has no table box`);
+    assert.deepEqual(boxes.map((box) => box.tabindex), boxes.map(() => null));
+});
+
+test('a table box joins and leaves the tab order as the window is resized', async () => {
+    const plain = {overflows: false, tabindex: null, role: null, label: null};
+
+    await onPage(WIDE_TABLES_PAGE, {width: PHONE_WIDTH}, async (page) => {
+        const onAPhone = await tableBoxes(page);
+        const onADesktop = await tableBoxesAtWidth(page, DESKTOP_WIDTH);
+        const fittingOnADesktopOnly =
+            onADesktop.filter((box, index) => !box.overflows && onAPhone[index].overflows);
+        assert.ok(fittingOnADesktopOnly.length > 0, `no table box on ${WIDE_TABLES_PAGE} `
+            + `overflows at ${PHONE_WIDTH} px and fits at ${DESKTOP_WIDTH} px`);
+        assert.deepEqual(fittingOnADesktopOnly, fittingOnADesktopOnly.map(() => plain));
+        assert.deepEqual(await tableBoxesAtWidth(page, PHONE_WIDTH), onAPhone);
+    });
+});
+
+test('no doc page scrolls sideways on a phone', async () => {
+    const tooWide = [];
+    for (const js of [true, false]) {
+        for (const urlPath of docPages()) {
+            const overflow = await onPage(urlPath, {width: PHONE_WIDTH, js},
+                (page) => sidewaysOverflow(page, PHONE_WIDTH));
+            if (overflow) {
+                tooWide.push(`${urlPath} ${js ? 'with' : 'without'} JavaScript: ${overflow}`);
+            }
+        }
+    }
+
+    assert.deepEqual(tooWide, []);
 });
