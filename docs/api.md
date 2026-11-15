@@ -1,6 +1,6 @@
 ---
 title: HTTP API
-lead: The JSON endpoints under /peekaboot/api that the dashboard and the dev toolbar read.
+lead: The JSON endpoints under /peekaboot/api. The dashboard and the dev toolbar read some of them, the rest are for agents and scripts.
 permalink: /docs/api/
 ---
 
@@ -49,6 +49,9 @@ them anywhere else.
 | [`/peekaboot/api/insights/stream`](#the-insights-endpoints) | none | `200` (Server-Sent Events), `400`, `503`, `404` when Insights is off |
 | [`/peekaboot/api/lifecycle/events`](#restart-history) | none | `200`, `400`, `404` when lifecycle is off |
 | [`/peekaboot/api/lifecycle/runs`](#restart-history) | none | `200`, `400`, `404` when lifecycle is off |
+
+The dashboard and the toolbar do not read the index, the OpenAPI document, the log search, the
+routes or the error digest. Those five exist for agents and scripts.
 
 Where Peekaboot's guard is armed, every endpoint can also answer `401`. See
 [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).

@@ -64,3 +64,19 @@ test('the landing page presents the HTTP API', () => {
 
     assert.deepEqual(missing, []);
 });
+
+test('the API page and llms.txt say what only the API serves', () => {
+    const unread = /do not read[^.]*\./.exec(text('/docs/api/'))?.[0] ?? '';
+    const description = /<meta name="description" content="([^"]*)">/.exec(html('/docs/api/'))[1];
+    const llms = readFileSync(join(BUILT, 'llms.txt'), 'utf8');
+    const wrong = [
+        ...['index', 'OpenAPI document', 'log search', 'routes', 'error digest']
+            .filter((endpoint) => !unread.includes(endpoint))
+            .map((endpoint) => `/docs/api/ does not say the dashboard skips the ${endpoint}`),
+        ...(description.includes('that the dashboard and the dev toolbar read')
+            ? ['the description of /docs/api/ says the dashboard reads every endpoint'] : []),
+        ...(llms.includes('the same data') ? ['llms.txt says "the same data"'] : []),
+    ];
+
+    assert.deepEqual(wrong, []);
+});
