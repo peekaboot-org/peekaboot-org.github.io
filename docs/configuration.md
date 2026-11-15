@@ -160,14 +160,7 @@ its insights history, lifecycle log, traces, error digest and generated password
 loads none of them from the directory, so its password differs from the first instance's. Set
 `dir` to give it its own.
 
-| File | Contents | Size |
-|---|---|---|
-| `.lock` | Held by the instance that writes the directory. | Empty. |
-| `insights.snapshot` | The insights history, written every `peekaboot.insights.persistence.interval` and at shutdown. | About 5 MB at the default levels. |
-| `lifecycle.jsonl` | The start and stop history, capped at 1,000 events (about 500 runs), oldest dropped first. | Typically well under 400 KB. |
-| `traces.journal.jsonl` | Every span, log line and completed request since the last fold, one line each. See [Traces across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces). | Folded once it passes `max-journal-size`. |
-| `traces.snapshot.jsonl` | The traces the store held at the last fold, and the untraced log lines it kept. | What the [trace limits](#peekaboottracing) keep. |
-| `errors.jsonl` | The [error digest]({{ '/docs/api/' | relative_url }}#error-digest), one line per failure, rewritten when it changed, at most once per `flush-interval`, and at shutdown. Kept while the traces are. | A version header and at most 500 entries. |
+{% include facts/storage-files.md %}
 
 On a POSIX file system Peekaboot creates the directory `rwx------` and every file `rw-------`.
 An existing directory keeps its permissions. On Windows the platform defaults apply.
@@ -185,7 +178,7 @@ or with a damaged header, are deleted, and the trace store or the digest starts 
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.security.enabled` | detected | Whether Peekaboot's HTTP Basic guard protects `/peekaboot/**`. |
-| `peekaboot.security.username` | `<artifact>-admin` | The username the guard accepts. |
+| `peekaboot.security.username` | derived | The username the guard accepts. |
 | `peekaboot.security.password` | unset | A fixed password. Nothing is generated or written to disk. |
 | `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. Readable by its owner only. |
 

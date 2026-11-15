@@ -142,15 +142,7 @@ Peekaboot writes files only while `peekaboot.storage.enabled` is `true`, which i
 for a local run only. The one exception is `security.properties` with an explicit
 `peekaboot.security.credentials-file`.
 
-| File | Written when | Contents |
-|---|---|---|
-| `.lock` | Storage on | Empty. Marks the instance that writes the directory. |
-| `insights.snapshot` | Storage on | The charts' aggregated numbers, keyed by series id. No request data, property values or traces. |
-| `lifecycle.jsonl` | Storage on | One line per start or stop: timestamp, pid, and `version`, `time`, `branch`, `commit.id`, `commit.id.full`, `commit.id.abbrev`, `build.version`, `build.time`. |
-| `traces.journal.jsonl` | Storage on and `peekaboot.storage.traces.enabled` | Every span, log line and completed request the trace store took since the last fold, one JSON line each. Span attributes, SQL with its bind parameters, log messages and stack traces are unmasked. Request and response headers and parameters are masked as captured. |
-| `traces.snapshot.jsonl` | As above | The same lines for the traces the store still holds and the untraced log lines it keeps, written at shutdown, past `max-journal-size`, and at startup after a run that did not stop cleanly. Masked as the journal is. |
-| `errors.jsonl` | As `traces.journal.jsonl` | One line per failure in the [error digest]({{ '/docs/api/' | relative_url }}#error-digest): exception class, route, application frame, counts, dates, the last trace id, and the last cause message, masked as the API shows it. |
-| `security.properties` | The guard generated a password, and storage is on or `credentials-file` is set | A PBKDF2 hash of the generated password. Never the password itself. |
+{% include facts/storage-files.md %}
 
 `lifecycle.jsonl` drops every other build-info and git-info entry, including the git remote
 URL, the building user's name and mail address, and anything else your build wrote into
@@ -418,23 +410,11 @@ controllers or UI: a path prefix, a case-insensitive matcher or a second `Dispat
 With Spring MVC on the classpath but no `DispatcherServletPath` bean, Peekaboot logs a WARN at
 startup and assumes `/peekaboot/*`.
 
-A refused request gets a `401` with the challenge `WWW-Authenticate: Basic realm="Peekaboot",
-charset="UTF-8"` and a [problem body]({{ '/docs/api/' | relative_url }}#errors) saying which
-credentials it needs. A `401` your own Spring Security sends first is its own, without
-Peekaboot's realm or body.
-
-A request your application includes into the dashboard gets nothing from it. An include cannot
-set the status, so the including response keeps its own.
+{% include facts/guard-refusal.md %}
 
 The credentials:
 
-- **Username:** `peekaboot.security.username`, else your build's artifact id plus `-admin`,
-  else `spring.application.name` plus `-admin`, else `peekaboot-admin`.
-- **Password:** `peekaboot.security.password`, else the hash stored in `security.properties`,
-  else a 26-character password generated on first start, printed in the startup log's
-  `Peekaboot Security` block. Only its hash is stored, in `security.properties` in the [storage
-  directory]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) or at
-  `peekaboot.security.credentials-file`.
+{% include facts/guard-credentials.md %}
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 On a deployment, storage is off by default, so the generated password is not saved and

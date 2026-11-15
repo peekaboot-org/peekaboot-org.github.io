@@ -116,12 +116,7 @@ no single parameter is.
 | `403` | A [local run]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot) refused a request that does not come from its own machine. `detail` names `peekaboot.remote-access.enabled`. | `null` |
 | `503` | The [insights stream](#the-insights-endpoints) already has 32 subscribers. | `null` |
 
-The guard's `401` keeps its challenge, `WWW-Authenticate: Basic realm="Peekaboot",
-charset="UTF-8"`. Where your own Spring Security refuses a request first, the `401` is Spring
-Security's, without Peekaboot's realm or body.
-
-A request your application includes into the dashboard gets nothing from it. An include cannot
-set the status, so the including response keeps its own.
+{% include facts/guard-refusal.md %}
 
 Any other error, such as the `404` while Insights or lifecycle is off, a `405` or an unexpected
 `500`, gets your application's usual error response.

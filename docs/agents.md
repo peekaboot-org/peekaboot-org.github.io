@@ -80,16 +80,11 @@ who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-pe
 Where [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) is armed,
 every request needs HTTP Basic credentials:
 
-- **Username:** `peekaboot.security.username`, else your build's artifact id plus `-admin`,
-  else `spring.application.name` plus `-admin`, else `peekaboot-admin`.
-- **Password:** set one the agent can know, with `peekaboot.security.password` or the
-  environment variable `PEEKABOOT_SECURITY_PASSWORD`. Otherwise Peekaboot generates one and
-  prints it once, in the startup log's `Peekaboot Security` block. It survives a restart only
-  where Peekaboot can store its hash, with storage on or `peekaboot.security.credentials-file`
-  set. Without either, each start generates a new one.
+{% include facts/guard-credentials.md %}
 
-For an application whose artifact id is `orders`, the application reads the password where it
-starts, and the agent reads both credentials from the environment its shell inherits:
+Set the password, so the agent can know it without reading the startup log. For an
+application whose artifact id is `orders`, the application reads the password where it starts,
+and the agent reads both credentials from the environment its shell inherits:
 
 ```bash
 export PEEKABOOT_SECURITY_PASSWORD='a-long-random-secret'   # where the application starts

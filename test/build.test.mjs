@@ -1,13 +1,43 @@
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { BUILT, SITE_ROOT, builtPages, html, text } from './site.mjs';
 
 const SITE_URL = 'https://www.peekaboot.org';
 
+// What more than one page explains, written once under _includes/facts and included by each.
+const FACTS = [
+    {
+        file: 'guard-credentials.md',
+        phrase: 'else `peekaboot-admin`',
+        pages: ['/docs/security/', '/docs/agents/'],
+    },
+    {
+        file: 'guard-refusal.md',
+        phrase: 'An include cannot set the status',
+        pages: ['/docs/security/', '/docs/api/'],
+    },
+    {
+        file: 'storage-files.md',
+        phrase: '| `traces.snapshot.jsonl` |',
+        pages: ['/docs/configuration/', '/docs/security/'],
+    },
+    {
+        file: 'local-run-disk.md',
+        phrase: 'so traces survive a restart',
+        pages: ['/docs/quick-start/', '/docs/traces/'],
+    },
+];
+
 function builtText(name) {
     return readFileSync(join(BUILT, name), 'utf8');
+}
+
+// A source file with its whitespace collapsed, since the pages wrap in the middle of a phrase.
+function source(...segments) {
+    const file = join(SITE_ROOT, ...segments);
+    return existsSync(file) ? readFileSync(file, 'utf8').replace(/\s+/g, ' ') : '';
 }
 
 // A page's own content, without the navbar and the footer every page carries.
@@ -175,4 +205,46 @@ test('the releases page tags no entry', () => {
     assert.ok(/<h3[^>]*>Breaking changes<\/h3>/.test(releases),
         '/releases/ has no "Breaking changes" heading');
     assert.ok(!releases.includes('class="tag'), '/releases/ renders a tag');
+});
+
+test('a single-sourced fact is written in one file', () => {
+    const pages = readdirSync(join(SITE_ROOT, 'docs')).filter((name) => name.endsWith('.md'));
+    const wrong = FACTS.flatMap(({file, phrase}) => [
+        ...(source('_includes', 'facts', file).includes(phrase)
+            ? [] : [`_includes/facts/${file} lacks "${phrase}"`]),
+        ...pages
+            .filter((name) => source('docs', name).includes(phrase))
+            .map((name) => `docs/${name} repeats "${phrase}" of _includes/facts/${file}`),
+    ]);
+
+    assert.deepEqual(wrong, []);
+});
+
+test('each page that needs a fact renders it', () => {
+    const missing = FACTS.flatMap(({file, phrase, pages}) => {
+        const rendered = phrase.replace(/[`|]/g, '').trim();
+        return pages
+            .filter((urlPath) => !text(urlPath).includes(rendered))
+            .map((urlPath) => `${urlPath} does not render "${rendered}" of ${file}`);
+    });
+
+    assert.deepEqual(missing, []);
+});
+
+// Markdown inside an HTML block that lacks markdown="1" reaches the page as typed.
+test('included facts render as Markdown', () => {
+    const codeAndTags = /<!--[\s\S]*?-->|<(script|style|pre|code)\b[\s\S]*?<\/\1>|<[^>]+>/g;
+    const pages = [...new Set(FACTS.flatMap((fact) => fact.pages))];
+    const wrong = pages.flatMap((urlPath) => {
+        const prose = html(urlPath).replace(codeAndTags, '');
+        return ['`', '**', '{%']
+            .filter((markup) => prose.includes(markup))
+            .map((markup) => {
+                const at = prose.indexOf(markup);
+                const around = prose.slice(Math.max(0, at - 40), at + 40).replace(/\s+/g, ' ');
+                return `${urlPath} shows a literal ${markup} in "${around}"`;
+            });
+    });
+
+    assert.deepEqual(wrong, []);
 });
