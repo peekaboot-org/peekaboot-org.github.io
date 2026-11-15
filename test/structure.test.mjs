@@ -262,6 +262,15 @@ test('security sends the reader to the in-production checklist', async () => {
         {linksTheChecklist: true, lists: 0});
 });
 
+test('the configuration page links its property tables from the top', async () => {
+    const linksAboveTheFirstSection = await onPage('/docs/configuration/', {}, (page) => page
+        .locator('main > p:not(h2 ~ p) a[href]')
+        .evaluateAll((links) => links.map((link) => link.getAttribute('href'))));
+
+    assert.ok(linksAboveTheFirstSection.includes('#properties'), '/docs/configuration/ links '
+        + `${JSON.stringify(linksAboveTheFirstSection)} above its first section, want #properties`);
+});
+
 test('no page renders a checkbox', async () => {
     const checkboxesByPage = {};
     for (const urlPath of builtPages()) {

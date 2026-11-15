@@ -7,6 +7,8 @@ redirect_from:
   - /docs/auto-configured-defaults/
 ---
 
+Looking for a property? The tables start at [Properties](#properties).
+
 ## When Peekaboot is on {#when-peekaboot-is-on}
 
 Five properties default according to how the application was launched.
