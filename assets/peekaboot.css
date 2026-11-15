@@ -15,6 +15,13 @@
        tokens.css splits --pk-primary from --pk-primary-text. */
     --pk-link: #487e1b;         /* 4.91:1 on white */
     --pk-link-hover: #3a6516;
+
+    /* Highlighted code, in the text colours of tokens.css. Ratios are on the code ground,
+       --bulma-background, #f3f4f6. */
+    --pk-code-keyword: #02458e; /* 8.50:1 */
+    --pk-code-string: #117937;  /* 5.00:1 */
+    --pk-code-literal: #9a5e06; /* 4.80:1 */
+    --pk-code-comment: #626c79; /* 4.84:1 */
 }
 
 [data-theme="dark"] {
@@ -22,6 +29,12 @@
        The background stays Bulma's #14161a; see "Decisions taken deliberately" in README.md. */
     --pk-link: #84cf3d;         /* 9.46:1 on Bulma's dark scheme background, hsl(221 14% 9%) */
     --pk-link-hover: #9bdb5e;
+
+    /* On the dark code ground, #1f2229. */
+    --pk-code-keyword: #1acdff; /* 8.51:1 */
+    --pk-code-string: #3fb950;  /* 6.27:1 */
+    --pk-code-literal: #d29922; /* 6.31:1 */
+    --pk-code-comment: #8b949e; /* 5.18:1 */
 }
 
 a {
@@ -130,6 +143,23 @@ a:hover {
     height: auto;
     border: 1px solid var(--bulma-border);
     border-radius: var(--bulma-radius-large);
+}
+
+/* Rouge's token classes. A token of any other class keeps the colour of its code block. */
+.highlight :is(.k, .kc, .kd, .kn, .kp, .kr, .kt, .kv, .nt) {
+    color: var(--pk-code-keyword);
+}
+
+.highlight :is(.s, .s1, .s2, .sb, .sc, .sd, .se, .sh, .si, .sr, .ss, .sx, .dl) {
+    color: var(--pk-code-string);
+}
+
+.highlight :is(.m, .mi, .mf, .mh, .mo, .il, .na, .nl) {
+    color: var(--pk-code-literal);
+}
+
+.highlight :is(.c, .c1, .cm, .cp, .cs, .cd, .ch) {
+    color: var(--pk-code-comment);
 }
 
 /* An image pair ships one file per theme; the page shows the one matching its own theme. */

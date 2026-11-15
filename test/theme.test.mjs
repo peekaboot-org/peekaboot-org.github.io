@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
+import { contrastFailures } from './contrast.mjs';
 import { launch, readPage, serveSite } from './site.mjs';
 
 const MODES = {
@@ -13,6 +14,13 @@ const MODES = {
 const GRAPHIC_CONTRAST = 3;
 // A lower alpha is an anti-aliased edge, which takes its colour from the ground.
 const OPAQUE_ALPHA = 250;
+
+// One Rouge class per --pk-code-* token, each on a page whose code blocks have it.
+const HIGHLIGHTED_TOKENS = {
+    '/docs/quick-start/': ['.highlight .nt'],
+    '/docs/security/': ['.highlight .s', '.highlight .c1'],
+    '/docs/configuration/': ['.highlight .na'],
+};
 
 let site;
 let browser;
@@ -100,6 +108,20 @@ function displayedScreenshotThemes(page) {
             .join('+')));
 }
 
+// A problem per token that is missing or has the colour of the code around it.
+function uncolouredTokens(page, tokens) {
+    return page.evaluate((selectors) => selectors.flatMap((selector) => {
+        const token = document.querySelector(selector);
+        if (!token) {
+            return [`${selector} is not on the page`];
+        }
+        const colour = getComputedStyle(token).color;
+        return colour === getComputedStyle(token.closest('pre')).color
+            ? [`${selector} has the colour of its pre, ${colour}`]
+            : [];
+    }), tokens);
+}
+
 test('the hero logo is legible on the dark ground', async () => {
     const problems = [];
     for (const [mode, options] of Object.entries(MODES)) {
@@ -132,4 +154,22 @@ test('each screenshot shows in the theme of the page', async () => {
     }
 
     assert.deepEqual(shown, wanted);
+});
+
+test('highlighted code is coloured and readable', async () => {
+    const problems = [];
+    for (const mode of ['light', 'dark']) {
+        for (const [urlPath, tokens] of Object.entries(HIGHLIGHTED_TOKENS)) {
+            const {uncoloured, faint} = await onPage(urlPath, MODES[mode], async (page) => ({
+                uncoloured: await uncolouredTokens(page, tokens),
+                faint: await contrastFailures(page, '.highlight'),
+            }));
+            problems.push(
+                ...uncoloured.map((problem) => `${mode} ${urlPath}: ${problem}`),
+                ...faint.map(({selector, text, ratio, required}) => `${mode} ${urlPath}: `
+                    + `${selector} "${text}" has ${ratio.toFixed(2)}:1, want ${required}:1`));
+        }
+    }
+
+    assert.deepEqual(problems, []);
 });
