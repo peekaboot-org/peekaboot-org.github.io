@@ -22,6 +22,21 @@ function landingBlock(heading) {
     return {markup, text: markup.replace(/<[^>]+>/g, '')};
 }
 
+// The size a PNG states in its IHDR chunk, the first chunk after the 8-byte signature.
+function pngSize(file) {
+    const header = readFileSync(file).subarray(0, 24);
+    assert.equal(header.toString('latin1', 12, 16), 'IHDR', `${file} is not a PNG`);
+    return `${header.readUInt32BE(16)}x${header.readUInt32BE(20)}`;
+}
+
+function images(urlPath) {
+    return [...html(urlPath).matchAll(/<img\b[^>]*>/g)].map(([tag]) => {
+        const attribute = (name) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
+        const declared = `${attribute('width') ?? '?'}x${attribute('height') ?? '?'}`;
+        return {src: attribute('src'), declared};
+    });
+}
+
 test('built pages carry no unrendered Liquid or kramdown attribute', () => {
     const unrendered = /\{\{|\{%|\{:\s*#|\{#[a-z-]+\}/;
     const leaking = builtPages().filter((urlPath) => unrendered.test(html(urlPath)));
@@ -108,4 +123,15 @@ test('the site publishes a sitemap, robots.txt and a 404 page', () => {
     const missingFromNotFoundPage = ['Page not found', 'href="/"', 'href="/docs/quick-start/"']
         .filter((markup) => !notFoundPage.includes(markup));
     assert.deepEqual(missingFromNotFoundPage, []);
+});
+
+// Read from the files, since a lazy image the theme hides never loads in a browser.
+test('every image declares its intrinsic size', () => {
+    const wrong = builtPages().flatMap((urlPath) => images(urlPath)
+        .map(({src, declared}) => ({src, declared, actual: pngSize(join(BUILT, src))}))
+        .filter(({declared, actual}) => declared !== actual)
+        .map(({src, declared, actual}) =>
+            `${urlPath}: ${src} declares ${declared}, the file is ${actual}`));
+
+    assert.deepEqual(wrong, []);
 });
