@@ -24,6 +24,8 @@ const DESKTOP_WIDTH = 1280;
 const SIDEBAR_PAGE = '/docs/configuration/';
 const WIDE_TABLES_PAGE = '/docs/configuration/';
 const NARROW_TABLE_PAGE = '/docs/quick-start/';
+// The page a section's navbar item links, another page of that section, a page with its own item.
+const NAVBAR_CURRENT_PAGES = ['/docs/dev-toolbar/', '/docs/traces/', '/docs/api/'];
 
 // Fragments that pages, bookmarks and the product repo linked before a section was renamed or moved.
 const LEGACY_ANCHORS = [
@@ -296,6 +298,63 @@ test('the sidebar shows no toggle on a desktop', async () => {
         await onPage(SIDEBAR_PAGE, {width: DESKTOP_WIDTH}, sidebarState);
 
     assert.deepEqual({firstLinkShown, toggleShown}, {firstLinkShown: true, toggleShown: false});
+});
+
+test('the brand link is named Peekaboot once', async () => {
+    const inNavbarBrand = await onPage('/', {}, (page) => page
+        .getByRole('link', {name: 'Peekaboot', exact: true})
+        .evaluateAll((links) => links.map((link) => Boolean(link.closest('.navbar-brand')))));
+
+    assert.deepEqual(inNavbarBrand, [true]);
+});
+
+test('the burger names the menu it controls', async () => {
+    const burger = await onPage('/', {}, (page) => page.evaluate(() => {
+        const controls = document.querySelector('.navbar-burger').getAttribute('aria-controls');
+        const menuHasThatId =
+            Boolean(document.getElementById(controls)?.classList.contains('navbar-menu'));
+        return {controls, menuHasThatId};
+    }));
+
+    assert.deepEqual(burger, {controls: 'navbar-menu', menuHasThatId: true});
+});
+
+test('the navbar marks the current page and section', async () => {
+    const wrong = [];
+    for (const urlPath of NAVBAR_CURRENT_PAGES) {
+        const current = await onPage(urlPath, {}, (page) => page
+            .locator('.navbar-item.is-current')
+            .evaluateAll((items) => items.map((item) => ({
+                href: item.getAttribute('href'),
+                mark: item.getAttribute('aria-current'),
+            }))));
+        assert.ok(current.length > 0, `no navbar item is current on ${urlPath}`);
+        for (const {href, mark} of current) {
+            const wanted = href === urlPath ? 'page' : 'true';
+            if (mark !== wanted) {
+                wrong.push(`${urlPath}: the item to ${href} has aria-current ${mark}, want ${wanted}`);
+            }
+        }
+    }
+
+    assert.deepEqual(wrong, []);
+});
+
+test('the sidebar is a navigation landmark', async () => {
+    const isTheSidebar = await onPage('/docs/api/', {}, (page) => page
+        .getByRole('navigation', {name: 'Documentation', exact: true})
+        .evaluateAll((landmarks) => landmarks.map((landmark) => landmark.matches('.pk-sidebar'))));
+
+    assert.deepEqual(isTheSidebar, [true]);
+});
+
+test('heading anchors do not repeat the heading', async () => {
+    const labels = await onPage('/docs/api/', {}, (page) => page
+        .locator('.pk-heading-anchor')
+        .evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute('aria-label'))));
+
+    assert.ok(labels.length > 0, '/docs/api/ has no heading anchor');
+    assert.deepEqual([...new Set(labels)], ['Link to this section']);
 });
 
 test('tables keep their semantics', async () => {

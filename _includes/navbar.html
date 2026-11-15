@@ -1,11 +1,11 @@
 <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <a class="navbar-item" href="{{ '/' | relative_url }}">
-      <span class="pk-logo" role="img" aria-label="Peekaboot"></span>
+      <span class="pk-logo" aria-hidden="true"></span>
       <strong class="ml-2">Peekaboot</strong>
     </a>
     <button class="navbar-burger" data-target="navbar-menu" type="button"
-            aria-label="menu" aria-expanded="false">
+            aria-label="menu" aria-expanded="false" aria-controls="navbar-menu">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
@@ -19,7 +19,7 @@
       {%- assign first = section.pages | first %}
       {%- assign section_urls = section.pages | map: "url" %}
       <a class="navbar-item{% if section_urls contains page.url %} is-current{% endif %}"
-         href="{{ first.url | relative_url }}"{% if page.url == first.url %} aria-current="page"{% endif %}>{{ section.navbar }}</a>
+         href="{{ first.url | relative_url }}"{% if page.url == first.url %} aria-current="page"{% elsif section_urls contains page.url %} aria-current="true"{% endif %}>{{ section.navbar }}</a>
       {%- endif %}
       {%- for item in section.pages %}
       {%- if item.navbar %}

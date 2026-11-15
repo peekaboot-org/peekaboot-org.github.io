@@ -65,7 +65,7 @@
             var link = document.createElement('a');
             link.className = 'pk-heading-anchor';
             link.href = '#' + heading.id;
-            link.setAttribute('aria-label', 'Link to this section: ' + heading.textContent.trim());
+            link.setAttribute('aria-label', 'Link to this section');
             link.textContent = '#';
             heading.appendChild(link);
         }
