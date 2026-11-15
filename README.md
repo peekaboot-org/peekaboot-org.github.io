@@ -32,6 +32,25 @@ Two things you may notice, neither a problem:
   `docker run` left root-owned files behind, the script detects and repairs that on startup
   rather than failing with a permission error you can't clear without `sudo`.
 
+## Checks
+
+The checks under `test/` read the built site, so build it first:
+
+```bash
+./serve.sh --build
+cd test && npm ci && npm test
+```
+
+They need Node. They were written on Node 24, and `playwright-core` asks for 20 or later.
+The link check drives the Chromium revision of `playwright-core` 1.63.0. If it reports a
+missing browser, run `npx playwright-core install chromium` in `test/` once.
+
+The `playwright-core` version follows `playwright.version` in the product's
+`peekaboot-testing-app/pom.xml`, so both repos drive the same Chromium revision.
+
+Nothing runs the checks in CI, because Pages builds from the branch and this repo has no
+workflow. Run them before you push.
+
 ## Structure
 
 - `_config.yml`: site settings. `theme: null` is required to disable GitHub Pages' implicit

@@ -36,4 +36,5 @@ exclude:
   - Gemfile.lock
   - README.md
   - serve.sh
+  - test
   - vendor
