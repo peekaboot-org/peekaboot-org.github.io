@@ -4,6 +4,13 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { BUILT, SITE_ROOT, builtPages, html, text } from './site.mjs';
 
+// A feature block of the landing page, from below its heading to the next heading.
+function landingBlock(heading) {
+    const block = new RegExp(`<h2[^>]*>${heading}</h2>([\\s\\S]*?)(?=<h2|</section>)`);
+    const markup = block.exec(html('/'))?.[1] ?? '';
+    return {markup, text: markup.replace(/<[^>]+>/g, '')};
+}
+
 test('built pages carry no unrendered Liquid or kramdown attribute', () => {
     const unrendered = /\{\{|\{%|\{:\s*#|\{#[a-z-]+\}/;
     const leaking = builtPages().filter((urlPath) => unrendered.test(html(urlPath)));
@@ -38,4 +45,22 @@ test('the landing page, quick start and traces say a local run writes traces to 
     });
 
     assert.deepEqual(wrong, []);
+});
+
+test('the landing page presents the HTTP API', () => {
+    const api = landingBlock('HTTP API for agents and scripts');
+    const dashboard = landingBlock('Dashboard');
+    const missing = [
+        ...['/peekaboot/api', 'OpenAPI']
+            .filter((phrase) => !api.text.includes(phrase))
+            .map((phrase) => `"${phrase}" in the API block`),
+        ...['/docs/api/', '/docs/agents/', '/llms.txt']
+            .filter((href) => !api.markup.includes(`href="${href}"`))
+            .map((href) => `a link to ${href} in the API block`),
+        ...['Lifecycle', 'Meters']
+            .filter((tab) => !dashboard.text.includes(tab))
+            .map((tab) => `"${tab}" in the Dashboard block`),
+    ];
+
+    assert.deepEqual(missing, []);
 });

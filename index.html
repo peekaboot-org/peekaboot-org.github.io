@@ -96,7 +96,8 @@ layout: page
         <p class="content">
           Health, build and Git info, environment, configuration properties, Flyway and
           Liquibase migrations, logger levels and scheduled tasks, at <code>/peekaboot</code>
-          in your running app.
+          in your running app. Lifecycle lists every run of the app, Meters every meter in its
+          registry.
           <a href="{{ '/docs/dashboard/' | relative_url }}">The dashboard</a>
         </p>
       </div>
@@ -133,6 +134,27 @@ layout: page
       </div>
       <div class="column is-7">
         {% include screenshot.html name="dashboard-insights" %}
+      </div>
+    </div>
+
+    <div class="columns is-vcentered">
+      <div class="column is-5">
+        <h2 class="title is-4">HTTP API for agents and scripts</h2>
+        <p class="content">
+          What the dashboard shows is JSON under <code>/peekaboot/api</code>, with Peekaboot's
+          own verdicts, such as a trace's cause, the routes that fail and the error digest. A
+          log search covers every line the store holds. <code>GET /peekaboot/api</code> lists
+          every endpoint and links the OpenAPI 3.1 document. An agent starts from
+          <a href="{{ '/llms.txt' | relative_url }}">llms.txt</a> or the
+          <a href="https://github.com/peekaboot-org/peekaboot-skills">peekaboot skill</a>.
+          <a href="{{ '/docs/api/' | relative_url }}">HTTP API</a> covers every field,
+          <a href="{{ '/docs/agents/' | relative_url }}">Agents</a> has the recipes.
+        </p>
+      </div>
+      <div class="column is-7">
+        <pre><code>curl -s http://localhost:8080/peekaboot/api | jq
+curl -s http://localhost:8080/peekaboot/api/routes | jq
+curl -s http://localhost:8080/peekaboot/api/errors | jq</code></pre>
       </div>
     </div>
   </div>

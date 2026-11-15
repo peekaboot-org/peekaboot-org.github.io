@@ -21,12 +21,13 @@
       url: /docs/insights/
 
 - title: Reference
-  navbar: Reference
   pages:
     - title: Configuration
       url: /docs/configuration/
+      navbar: Configuration
     - title: HTTP API
       url: /docs/api/
+      navbar: API
     - title: Agents
       url: /docs/agents/
 
