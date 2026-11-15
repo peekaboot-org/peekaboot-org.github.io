@@ -28,6 +28,31 @@ const FACTS = [
         phrase: 'so traces survive a restart',
         pages: ['/docs/quick-start/', '/docs/traces/'],
     },
+    {
+        file: 'insights-stream-cap.md',
+        phrase: 'At most 32',
+        pages: ['/docs/api/', '/docs/insights/'],
+    },
+    {
+        file: 'propagate-context.md',
+        phrase: 'propagate-context: true',
+        pages: ['/docs/traces/', '/docs/troubleshooting/'],
+    },
+    {
+        file: 'error-page-accept.md',
+        phrase: 'A bare `*/*`',
+        pages: ['/docs/error-page/', '/docs/troubleshooting/'],
+    },
+    {
+        file: 'trace-memory.md',
+        phrase: '1.2 million entries',
+        pages: ['/docs/traces/', '/docs/in-production/'],
+    },
+    {
+        file: 'insights-memory.md',
+        phrase: '138,960',
+        pages: ['/docs/insights/', '/docs/in-production/'],
+    },
 ];
 
 function builtText(name) {

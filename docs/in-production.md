@@ -114,12 +114,14 @@ changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your
 
 ## Memory {#memory}
 
-The trace store is capped by trace count and by spans and log lines per trace. [Traces,
-buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets) works out
-the worst case. With the trace journal on, a fold briefly holds a second store's worth.
+{% include facts/trace-memory.md -%}
+[Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)
+describes the buckets and the limits.
 
 The Insights history is sized by `peekaboot.insights.levels` and by how many series the
-enabled panels produce. Peekaboot logs the estimate at startup. See [Insights, what it
+enabled panels produce.
+{% include facts/insights-memory.md -%}
+Peekaboot logs the estimate at startup. See [Insights, what it
 costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
 
 To size either down, see [Configuration, memory-constrained]({{ '/docs/configuration/' | relative_url }}#memory-constrained).

@@ -114,7 +114,7 @@ no single parameter is.
 | `404` | The store does not hold the [trace](#single-trace). | `null` |
 | `401` | [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) refused the request. | `null` |
 | `403` | A [local run]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot) refused a request that does not come from its own machine. `detail` names `peekaboot.remote-access.enabled`. | `null` |
-| `503` | The [insights stream](#the-insights-endpoints) already has 32 subscribers. | `null` |
+| `503` | The [insights stream](#the-insights-endpoints) is at its subscriber cap. | `null` |
 
 {% include facts/guard-refusal.md %}
 
@@ -681,7 +681,7 @@ Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the 
 
 - A comment heartbeat goes out once 15 seconds pass without an event. At the default
   10-second tick none is sent.
-- At most 32 streams can be open. Further requests get `503`; retry later.
+- {% include facts/insights-stream-cap.md -%}
 - The server closes each stream after 30 minutes. `EventSource` reconnects on its own.
 - A client that stops reading is dropped, and its stream is closed once its pending write
   returns. `EventSource` reconnects.

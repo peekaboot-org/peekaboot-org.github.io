@@ -78,20 +78,13 @@ removes all four.
 ## Background work {#background-work}
 
 Work handed to a Spring task executor, for example an `@Async` method, runs on another thread.
-To see it inside the trace that started it, set:
-
-```yaml
-spring:
-  task:
-    execution:
-      propagate-context: true
-```
+It appears inside the trace that started it only when the trace context follows it there.
+{% include facts/propagate-context.md %}
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-**Peekaboot does not set `spring.task.execution.propagate-context`.** Spring Boot leaves it
-off. Without it, Peekaboot records no `async task` span and no row is of type Async Task. The
-queries and outbound calls a task makes become traces of their own, typed by the call, with
-nothing linking them to the request that started them.
+With the property off, Peekaboot records no `async task` span and no row is of type Async
+Task. The queries and outbound calls a task makes become traces of their own, typed by the
+call, with nothing linking them to the request that started them.
 </div>
 
 Peekaboot wraps tasks on executors that Spring Boot builds: the auto-configured
@@ -303,14 +296,9 @@ A span's stack trace is also cut by
 `management.opentelemetry.tracing.limits.max-attribute-value-length`, if you set it. The
 OpenTelemetry SDK then shortens it to that many characters. Spring Boot sets no limit.
 
-In the worst case the store holds 1,000 traces in All plus up to 200 that only Errors or Slow
-still keep, each with 500 spans and 500 log lines: about 1.2 million entries, plus 1,000 log
-lines written outside any trace, and each log line and each failed span can carry a stack trace
-of up to 1,000 lines. Lower the limits on a memory-constrained application, see
+{% include facts/trace-memory.md -%}
+Lower the limits on a memory-constrained application, see
 [Configuration]({{ '/docs/configuration/' | relative_url }}#memory-constrained).
-
-With [traces kept across restarts](#persisted-traces), folding the journal replays the files
-into a second store, so while a fold runs the peak is about twice that.
 
 ### Traces across restarts {#persisted-traces}
 

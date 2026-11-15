@@ -339,8 +339,7 @@ all of these hold:
 - `persistence.interval` is set and greater than zero, and `persistence.max-age`, when set, too.
 - Every `problems.*-percent` is above 0 and at most 100, and every other `problems.*` at least 1.
 
-Memory follows `size`, not `interval`. Level 0 stores one number per series per entry. Every
-higher level stores eight. Peekaboot logs the total at startup. See [what it
+Memory follows `size`, not `interval`. Peekaboot logs the total at startup. See [what it
 costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
 
 ## Spring Boot defaults Peekaboot changes {#what-peekaboot-sets-in-your-application}

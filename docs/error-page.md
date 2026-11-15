@@ -12,8 +12,7 @@ the stack trace with your own frames marked. Framework frames fold behind a disc
 decides. The page carries the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}#the-bar-on-the-error-page),
 which reports the failed request.
 
-Only a request whose `Accept` header names `text/html` gets the page. Swagger UI, curl and
-`fetch()` send `*/*` and get Spring Boot's usual error response.
+{% include facts/error-page-accept.md %}
 
 On a local run, a request that does not come from the machine the application runs on gets the
 page with the status and the path only. See [Security, who can reach

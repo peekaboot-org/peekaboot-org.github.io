@@ -83,14 +83,8 @@ the other `peekaboot.insights.*` properties.
 ### What it costs {#what-it-costs}
 
 Memory grows with the number of series the enabled panels draw and with the level sizes.
-Each series costs
-
-```
-(level-0 size + sum of higher-level sizes × 8) × 8 bytes
-```
-
-With the default levels that is 138,960 bytes per series. The default panels draw 39 series,
-so about 5.2 MiB in total. Peekaboot logs the real figure at startup:
+{% include facts/insights-memory.md -%}
+Peekaboot logs the real figure at startup:
 
 ```
 Peekaboot insights: <series> series across <panels> panels, levels [10s x90, 1m x1440, 1h x720], ring buffers ~<size>, persisted across restarts
@@ -302,5 +296,6 @@ that needs a real metrics backend. See
   last four to six minutes.
 
 The live charts use one streaming connection per dashboard that is showing the Insights tab. A
-dashboard on another tab holds none. At most 32 are open per application. A 33rd tab gets `503`
-until another closes. See [HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints).
+dashboard on another tab holds none.
+{% include facts/insights-stream-cap.md -%}
+See [HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints).

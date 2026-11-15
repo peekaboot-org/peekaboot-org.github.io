@@ -137,17 +137,9 @@ See [Traces, what gets recorded]({{ '/docs/traces/' | relative_url }}#what-gets-
 
 ## `@Async` work is missing or shows up as separate traces {#async-work-missing}
 
-**Cause:** the trace context does not reach the executor thread. Spring Boot does not propagate
-it by default, and Peekaboot does not switch that on for you.
+**Cause:** the trace context does not reach the executor thread.
 
-**Fix:** enable context propagation.
-
-```yaml
-spring:
-  task:
-    execution:
-      propagate-context: true
-```
+**Fix:** {% include facts/propagate-context.md %}
 
 Also check that `peekaboot.tracing.async` and `peekaboot.tracing.enabled` are not set to
 `false`. An application that declares its own `Executor` bean also needs
@@ -308,8 +300,7 @@ See [Configuration, `peekaboot.security`]({{ '/docs/configuration/' | relative_u
 - `peekaboot.error-page.enabled` is off. It is on only for a local run.
 - The application has its own error page: an `error` view bean, an `error` template or a static
   `error/*.html`. Or it sets `spring.web.error.whitelabel.enabled=false`.
-- The request's `Accept` header does not name `text/html`. A bare `*/*`, as Swagger UI, curl
-  and `fetch()` send, does not count. These clients get the usual JSON error.
+- {% include facts/error-page-accept.md %}
 
 **Fix:** set `peekaboot.error-page.enabled: true` on a deployment. To show Peekaboot's page
 in place of your own, set `peekaboot.error-page.override: true`, typically in your local
