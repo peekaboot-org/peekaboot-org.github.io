@@ -479,38 +479,8 @@ The guard has one flat credential and no roles. For roles, switch it off and use
 
 ## Running it on a shared or deployed server {#running-it-in-a-deployed-environment}
 
-Read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) first. Then
-work through this list.
-{: #production-checklist}
-
-- [ ] Verify `peekaboot.enabled` resolves to `false` wherever you do not want the dashboard.
-      The startup summary has no `Peekaboot Dashboard:` line when the dashboard is off.
-- [ ] Set `peekaboot.enabled=false` explicitly if you deploy with a launch that [counts as
-      local]({{ '/docs/configuration/' | relative_url }}#local-run).
-- [ ] <span id="keeping-it-out-of-production-entirely"></span>If Peekaboot must never ship,
-      keep the starter out of the production artifact. See [Keeping it out of the artifact
-      entirely]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely).
-- [ ] Where you turn it on, set `peekaboot.tracing.enabled=false` unless you need traces with
-      their headers, parameters and logs. On a deployment the toolbar, storage and the error
-      page stay off unless you set them.
-- [ ] Decide on the Spring Boot defaults Peekaboot changes while it is on.
-      `peekaboot.tracing.enabled=false` leaves them in place: every request is still sampled,
-      Hibernate statistics stay on and observation annotations still record. Set
-      `management.tracing.sampling.probability`,
-      `spring.jpa.properties[hibernate.generate_statistics]` and
-      `management.observations.annotations.enabled` yourself where you want Spring Boot's
-      values. See [Configuration, Spring Boot defaults Peekaboot
-      changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
-- [ ] Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password, see [Peekaboot's
-      guard](#peekaboots-guard), or set `peekaboot.security.enabled=false` and put the
-      [`SecurityFilterChain`](#securing-the-dashboard) in front first. Use the chain if you need
-      roles. Whoever passes reads everything under [What the dashboard and API
-      show](#what-the-dashboard-and-api-expose).
-- [ ] Restrict network reach as well, with an internal-only ingress, a VPN, or a proxy that
-      forwards `/peekaboot/**` only from trusted sources.
-- [ ] Don't rely on `management.endpoints.web.exposure`. It does not affect `/peekaboot/**`.
-- [ ] Leave `peekaboot.unmasking.enabled=false`. With it on, anyone who can reach
-      `/peekaboot/**` can add `?unmask=true`.
-- [ ] Don't treat masking as complete. Log messages, SQL and request data are masked only
-      where a rule recognises them. Don't point Peekaboot at traffic whose secrets must not be
-      held in memory and displayed.
+<span id="production-checklist"></span>
+<span id="keeping-it-out-of-production-entirely"></span>[Do I want this in
+production?]({{ '/docs/in-production/' | relative_url }}) says what Peekaboot does on a
+deployment. It lists [what to set before you turn it on
+there]({{ '/docs/in-production/' | relative_url }}#before-you-turn-it-on).
