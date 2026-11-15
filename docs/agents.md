@@ -135,7 +135,7 @@ else curl -s "$BASE/peekaboot/api/traces/$T" | jq '.summary | {complete, outcome
 ```
 
 While `complete` is `false` the spans are still arriving; ask again. The [full
-recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/main/skills/peekaboot/references/debug-a-500.md)
+recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/debug-a-500.md)
 adds the stack trace and the error digest.
 
 ### Find slow or failing routes {#slow-or-failing-routes}
@@ -146,7 +146,7 @@ curl -s "$BASE/peekaboot/api/routes" \
 ```
 
 The [full
-recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/main/skills/peekaboot/references/slow-or-failing-routes.md)
+recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/slow-or-failing-routes.md)
 reads the slowest route's trace, its hotspots and its issues.
 
 ### Read health over time {#health-over-time}
@@ -156,7 +156,7 @@ curl -s -G "$BASE/peekaboot/api/insights/data" --data-urlencode 'level=1' | jq '
 ```
 
 An empty `problems` list means no rule reached its threshold. The [full
-recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/main/skills/peekaboot/references/health-over-time.md)
+recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/health-over-time.md)
 adds the levels and the run history.
 
 ### Search the logs {#log-search}
@@ -167,5 +167,5 @@ curl -s -G "$BASE/peekaboot/api/logs" --data-urlencode 'level=WARN' --data-urlen
 ```
 
 The [full
-recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/main/skills/peekaboot/references/log-search.md)
+recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/log-search.md)
 pages through the results.

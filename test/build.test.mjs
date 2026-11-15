@@ -154,3 +154,16 @@ test('the revealed screenshot links the two opt-ins', () => {
 
     assert.deepEqual(wrong, []);
 });
+
+// A branch name in a link breaks when the branch is renamed. HEAD follows the default branch.
+test('links into GitHub repositories use blob/HEAD', () => {
+    const branchLink = /github\.com\/peekaboot-org\/[^"\s]*\/blob\/(?!HEAD\/)[^"\s)]*/g;
+    const published = [
+        ...builtPages().map((urlPath) => [urlPath, html(urlPath)]),
+        ['/llms.txt', builtText('llms.txt')],
+    ];
+    const onABranch = published.flatMap(([urlPath, content]) =>
+        [...content.matchAll(branchLink)].map(([link]) => `${urlPath}: ${link}`));
+
+    assert.deepEqual(onABranch, []);
+});
