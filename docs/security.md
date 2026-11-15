@@ -82,7 +82,7 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Logger levels, configured and effective | Loggers tab | Nothing to mask. The API is GET-only, so levels cannot be changed. |
 | Flyway migrations: version, description, script, type, duration, install time, status | Flyway tab | No |
 | Liquibase change sets: execution order, id, author, change log, description, execution date, status | Liquibase tab | No |
-| `@Scheduled` tasks: schedule, last and next run, last failure's exception type and message | Scheduled Tasks tab | Failure text by value shape |
+| Scheduled tasks: schedule, last and next run, last failure's exception type and message | Scheduled Tasks tab | Failure text and a custom trigger's description by value shape |
 | Start and stop history with version, branch, commit and build time per run, unclean shutdowns | Lifecycle tab, `/peekaboot/api/lifecycle/**` | No |
 | Micrometer meters: names, tags, measurements | Meters tab | Tag values by key and by value shape |
 | Up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event history, and the list of collected meters | Insights tab, `/peekaboot/api/insights/**` | No |
@@ -193,10 +193,11 @@ Masking is on by default and has nothing to configure. It replaces a value with 
 - environment and `@ConfigurationProperties` values
 - health details, `info.build` and datasource connection parameters
 - Micrometer meter tags
-- captured headers, query and form parameters, span tags, SQL text and bind parameters
+- captured headers, the request path, query and form parameters, span tags, SQL text and bind
+  parameters
 - the message and stack trace of every failed span
 - the message and stack trace of every captured log, inside a trace or not
-- the last failure message of a scheduled task
+- the last failure message of a scheduled task, and a custom trigger's description
 - the database connection parameters in Peekaboot's startup log line
 - the exception message and stack trace on the error page
 

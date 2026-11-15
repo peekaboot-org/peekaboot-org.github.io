@@ -251,9 +251,9 @@ what is not.
 
 {% include screenshot.html name="dashboard-scheduled-tasks" %}
 
-Scheduled Tasks lists `@Scheduled` methods grouped by type: cron, fixed delay and fixed rate.
-Each group expands to its tasks. Cron expressions come with a description in the dashboard's
-language.
+Scheduled Tasks lists `@Scheduled` methods and the tasks a `SchedulingConfigurer` registers,
+grouped by type: cron, fixed delay, fixed rate and custom trigger. Each group expands to its
+tasks. Cron expressions come with a description in the dashboard's language.
 
 ## Which tabs appear {#conditionally-shown-tabs}
 

@@ -38,7 +38,7 @@ them anywhere else.
 | [`/peekaboot/api/openapi.json`](#openapi) | none | `200`, `400` |
 | [`/peekaboot/api/features`](#features) | none | `200`, `400` |
 | [`/peekaboot/api/actuator/all/insights`](#what-insights-adds) | `locale`, `unmask` | `200`, `400` |
-| [`/peekaboot/api/metrics`](#meters) | none | `200`, `400` |
+| [`/peekaboot/api/metrics`](#meters) | `name` | `200`, `400` |
 | [`/peekaboot/api/traces`](#trace-list) | `limit`, `cursor`, `bucket`, `rootActionType`, `rootOperation`, `route`, `path`, `statusCode`, `outcome`, `minDurationMs`, `since`, `until`, `view` | `200`, `400` |
 | [`/peekaboot/api/traces/{traceId}`](#single-trace) | none | `200`, `400`, `404` |
 | [`/peekaboot/api/logs`](#log-search) | `level`, `q`, `logger`, `traceId`, `since`, `until`, `limit`, `cursor` | `200`, `400` |
@@ -101,8 +101,9 @@ no single parameter is.
 | Status | When | `parameter` |
 |---|---|---|
 | `400` | An unknown `bucket`, `rootActionType`, `view` or `outcome` value, an unknown log search `level`, or an unknown insights `series` id. `detail` lists the accepted values. | The parameter |
-| `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`, or a number outside its range, such as `limit=0`. `detail` gives the range. | The parameter |
+| `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`, or a number outside its range, such as `limit=0`, or `limit=101` with `view=full`. `detail` gives the range. | The parameter |
 | `400` | A `since` or `until` that is no ISO-8601 instant, or an `until` not later than `since`. | The parameter |
+| `400` | A `route` that does not start with `/`, or a `locale` that is no well-formed language tag. | The parameter |
 | `400` | A `cursor` the endpoint did not hand out, the other listing's `next` among them, or one handed out before the application restarted. | `cursor` |
 | `400` | A parameter the endpoint does not take, such as a misspelled `buckett` or a different case, `Limit`. `detail` lists the parameters it takes, or `none`. | The parameter |
 | `400` | A parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
@@ -152,6 +153,7 @@ missing (no Flyway, say) or fails leaves the rest of the response intact.
 ### The `locale` parameter {#the-locale-parameter}
 
 `locale` is a language tag such as `de-DE`. `de_DE` works too. Omitted or blank means English.
+A value that is no well-formed language tag is refused with a `400` on `locale`.
 
 It changes only the cron descriptions of scheduled tasks and the display name of the server's
 default locale. The dashboard sends `en-US`, `de-DE`, `fr-FR` or `es-ES`; see
@@ -165,10 +167,14 @@ shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ### Scheduled tasks {#scheduled-tasks}
 
+`scheduledTasks` is `{tasks, cronCount, fixedDelayCount, fixedRateCount, customCount}`, the tasks
+and how many there are of each type.
+
 Each task is `{target, type, schedule, scheduleDescription, intervalMs, lastExecution,
-lastStatus, lastException, nextExecution}`. `type` is `CRON`, `FIXED_DELAY` or `FIXED_RATE`.
-`schedule` holds the cron expression and is `null` for fixed-rate and fixed-delay tasks, which
-carry `intervalMs` instead.
+lastStatus, lastException, nextExecution}`. `type` is `CRON`, `FIXED_DELAY`, `FIXED_RATE` or
+`CUSTOM`. `schedule` holds the cron expression, or a custom trigger's description of itself,
+masked by value shape. It is `null` for fixed-rate and fixed-delay tasks, which carry
+`intervalMs` instead.
 
 ## Meters {#meters}
 
@@ -179,8 +185,12 @@ carry `intervalMs` instead.
             measurements: [{tags, statistics: [{name, value}]}]}]}
 ```
 
-Tag values that look like secrets are masked. Without a `MeterRegistry` the response is
-`{metrics: []}`.
+`name` narrows the list to the meters whose name starts with it, as written. `name=jvm.memory`
+lists `jvm.memory.used` and every other meter whose name starts that way. A prefix that matches
+nothing answers `{metrics: []}`.
+
+Tag values that look like secrets are masked. A statistic whose `value` is NaN or infinite
+reads `null`. Without a `MeterRegistry` the response is `{metrics: []}`.
 
 ## Trace list {#trace-list}
 
@@ -188,13 +198,13 @@ Tag values that look like secrets are masked. Without a `MeterRegistry` the resp
 
 | Parameter | Values | Default | Invalid value |
 |---|---|---|---|
-| `limit` | 1 to 10000 | `100` | `400`, see [Errors](#errors). |
+| `limit` | 1 to 10000, at most 100 with `view=full` | `100` | `400`, see [Errors](#errors). |
 | `cursor` | The `next` of an earlier response | none, the first page | `400` |
 | `bucket` | `all`, `errors`, `slow`, any case | `all` | `400`, see [Errors](#errors). |
 | `rootActionType` | Comma-separated [root action types]({{ '/docs/traces/' | relative_url }}#root-action-type), any case, or `*` alone | Every type except `MAINTENANCE` | An unknown name, an empty entry or `*` among names: `400`. |
 | `rootOperation` | Part of the name of the row's root span, any case | none | none |
-| `route` | The request's route as `summary.request.route` shows it, such as `/persons/{id}`, exactly | none | none |
-| `path` | The start of the request path, as written | none | none |
+| `route` | The request's route as `summary.request.route` shows it, such as `/persons/{id}`, exactly | none | `400` when it does not start with `/` |
+| `path` | The start of the request path as `summary.request.path` shows it, after masking | none | none |
 | `statusCode` | `100` to `599`, exactly | none | `400` |
 | `outcome` | `OK`, `ERROR`, `IN_PROGRESS` or `INTERRUPTED`, any case | none | `400` |
 | `minDurationMs` | `0` or more. Lists rows whose `durationMs` is at least this. | none | `400` |
@@ -203,8 +213,8 @@ Tag values that look like secrets are masked. Without a `MeterRegistry` the resp
 
 `rootActionType=*` includes `MAINTENANCE`.
 
-A `rootOperation` with more than two dot-separated segments also matches on its last two. So
-`com.acme.ReportJob.run` finds a scheduled task span named `reportJob.run`.
+Under `rootOperation`, a scheduled job also matches on part of its fully qualified target. So
+`com.acme.ReportJob.run` finds the job whose span is named `task reportJob.run`.
 
 Filters combine. A row lists when it matches every one. A parameter sent empty counts as not
 sent. `since` and `until` bound the row's `summary.startTime`, `since` in and `until` out. A
@@ -244,7 +254,8 @@ types]({{ '/docs/traces/' | relative_url }}#root-action-type).
 ```
 
 Each row is a [trace resource](#trace-fields). With `view=summary`, the default, every row's
-`data` is `null`. Ask for `view=full` to get each row's spans, logs and queries.
+`data` is `null`. Ask for `view=full` to get each row's spans, logs and queries. A full page
+holds at most 100 rows. A larger `limit` is refused with a `400` on `limit`.
 
 `bucketCounts` counts what the store holds. `filteredBucketCounts` counts the traces that
 match every filter. It is `null` when nothing filters, that is `rootActionType=*` with no other
@@ -305,7 +316,7 @@ List rows and the [single trace](#single-trace) share one shape, `{summary, data
 | `run` | When the run of the application that produced the trace started, the `startedAt` of its row in [`/peekaboot/api/lifecycle/runs`](#restart-history). `null` until that run finished starting, and for good if it stopped before then. A trace restored after a restart keeps the run it came from. |
 | `rootActionType` | What started the trace, see [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type). `UNKNOWN` while the root is missing. |
 | `rootOperation` | The name of the row's root span. `null` while the root is missing. |
-| `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `route` is the route tag as recorded, such as `/persons/{id}`, and `null` when the request recorded none, or only a placeholder such as `NOT_FOUND`. Under Spring Boot's default static-resource mapping, a request no controller matched carries `/**`. `request` is `null` when the root is missing or is no HTTP request. |
+| `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `path` is masked by value shape. `route` is the route tag as recorded, such as `/persons/{id}`, and `null` when the request recorded none, or only a placeholder such as `NOT_FOUND`. Under Spring Boot's default static-resource mapping, a request no controller matched carries `/**`. `request` is `null` when the root is missing or is no HTTP request. |
 | `outcome` | `IN_PROGRESS` while `complete` is `false`, or `INTERRUPTED` for a trace [restored](#single-trace) from an earlier run that stopped before its root arrived. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure, also where a view rendered an exception for it. |
 | `buckets` | The buckets that hold the trace now: `ERRORS`, `SLOW`, both in that order, or none. `ALL` is never named. |
 | `reasons` | Why the trace failed or ran slow, `[{kind, spanId, detail}]`. See [reasons](#reasons). |
@@ -382,7 +393,7 @@ dashboard shows a `TRUNCATED` badge when `droppedSpans` is above zero.
 | `orphans` | While `rootSpan` is `null`, every stored span as subtrees, earliest start first. `[]` when there is a `rootSpan`. |
 | `logs` | The trace's [log lines](#log-fields). |
 | `queries` | The trace's [queries](#query-fields). |
-| `httpExchange` | Request and response details. `null` on a row for an async task, and when none was captured. |
+| `httpExchange` | Request and response details. The request's `path` is masked by value shape. `null` on a row for an async task, and when none was captured. |
 
 ### Span fields {#span-fields}
 
@@ -543,6 +554,9 @@ above the cursor. Several threads store lines at once, so a line stored while a 
 still show up on a later page, below the cursor. It can also miss that page and every later one,
 and then shows up when a search starts again without a `cursor`.
 
+One request reads at most 10000 lines. A page can then hold fewer lines than `limit`, or none,
+and still carry a `next`. Follow `next` until it is `null`.
+
 ```bash
 curl -G 'http://localhost:8080/peekaboot/api/logs' --data-urlencode 'level=WARN' --data-urlencode 'q=timeout'
 ```
@@ -593,7 +607,7 @@ exception class, route and application frame, the entry seen latest first:
 | Parameter | Values | Default | Bad value |
 |---|---|---|---|
 | `since` | an ISO-8601 instant | none | `400` |
-| `route` | a route pattern, matched exactly, such as `/orders/{id}` | none | none. An unknown route lists nothing. |
+| `route` | a route pattern, matched exactly, such as `/orders/{id}` | none | `400` when it does not start with `/`. An unknown route lists nothing. |
 
 | Field | Meaning |
 |---|---|
