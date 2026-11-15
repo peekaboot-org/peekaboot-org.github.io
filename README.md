@@ -12,7 +12,10 @@ and reloading the browser as you edit:
 ./serve.sh              # build, serve, watch for edits
 ./serve.sh --build      # build into _site/ and exit
 PORT=8080 ./serve.sh    # serve somewhere else
+BIND=0.0.0.0 ./serve.sh # let other machines reach the preview
 ```
+
+The preview answers this machine only, unless `BIND` names another address to publish it on.
 
 Everything runs in Docker, so no Ruby, Bundler or Node is needed on your machine. Docker
 does have to be running. The first run takes a minute installing gems into `vendor/bundle`

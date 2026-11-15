@@ -6,6 +6,7 @@
 #   ./serve.sh            build and serve at http://localhost:4000, rebuilding on edit
 #   ./serve.sh --build    build into _site and exit, no server
 #   PORT=8080 ./serve.sh  serve on a different port
+#   BIND=0.0.0.0 ./serve.sh  let other machines reach the preview
 #
 # Everything runs inside Docker, so no Ruby, Bundler or Node is needed on this
 # machine. The container runs as the invoking user, so nothing it writes into
@@ -15,6 +16,7 @@ set -euo pipefail
 
 readonly IMAGE="ruby:3.3"          # verified to resolve and build the github-pages gem
 readonly PORT="${PORT:-4000}"
+readonly BIND="${BIND:-127.0.0.1}"
 readonly LIVERELOAD_PORT=35729
 readonly ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 readonly -a SITE_MOUNT=(-v "$ROOT":/srv/jekyll -w /srv/jekyll)
@@ -23,7 +25,7 @@ readonly -a JEKYLL_RUN=(docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp 
 build_only=false
 case "${1:-}" in
     --build) build_only=true ;;
-    -h|--help) sed -n '3,12p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'; exit 0 ;;
+    -h|--help) sed -n '3,13p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'; exit 0 ;;
     "") ;;
     *) echo "unknown argument: $1 (try --help)" >&2; exit 2 ;;
 esac
@@ -118,7 +120,8 @@ fi
 
 # --force_polling: inotify doesn't propagate from a bind mount into the container
 # on every platform, so Jekyll would miss edits without it.
+# --host 0.0.0.0: a published port reaches the container's own interfaces, never its loopback.
 exec "${JEKYLL_RUN[@]}" "${tty_flags[@]}" --init \
-    -p "${PORT}:${PORT}" -p "${LIVERELOAD_PORT}:${LIVERELOAD_PORT}" \
+    -p "${BIND}:${PORT}:${PORT}" -p "${BIND}:${LIVERELOAD_PORT}:${LIVERELOAD_PORT}" \
     "$IMAGE" sh -c "$SETUP && bundle exec jekyll serve \
         --host 0.0.0.0 --port ${PORT} --livereload --force_polling --trace"
