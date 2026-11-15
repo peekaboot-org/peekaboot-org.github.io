@@ -68,9 +68,9 @@ workflow. Run them before you push.
   `peekaboot-logo-mark-dark.png` from the sibling `assets/` directory (see "Social images"),
   scaled with `magick <source> -resize 480x480 -strip <target>`.
 - `assets/site.js`: theme resolution (shared `peekaboot-theme` localStorage key and
-  `data-theme` attribute with Peekaboot's own dashboard), the navbar burger, and the `#`
-  anchor on each doc heading. Loaded synchronously in `<head>`, without `defer`, so the theme
-  applies before first paint.
+  `data-theme` attribute with Peekaboot's own dashboard), the navbar burger, the toggle that
+  opens the docs sidebar on a phone, and the `#` anchor on each doc heading. Loaded
+  synchronously in `<head>`, without `defer`, so the theme applies before first paint.
 
 ## Adding a page
 

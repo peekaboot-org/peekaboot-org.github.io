@@ -66,6 +66,12 @@ a:hover {
     overflow-y: auto;
 }
 
+/* Shown on a phone only, see the 768px block. Two classes, to outrank Bulma's
+   .button.is-fullwidth, which sets display. */
+.pk-sidebar .pk-sidebar__toggle {
+    display: none;
+}
+
 .pk-sidebar__section {
     margin-bottom: 1.5rem;
 }
@@ -216,7 +222,21 @@ h4:hover .pk-heading-anchor,
     .pk-sidebar {
         position: static;
         flex-basis: auto;
+        align-self: stretch;
         max-height: none;
+    }
+
+    /* Gated on .pk-js, since without the script nothing could open the sidebar again. */
+    .pk-js .pk-sidebar .pk-sidebar__toggle {
+        display: flex;
+    }
+
+    .pk-js .pk-sidebar:not(.is-open) .pk-sidebar__sections {
+        display: none;
+    }
+
+    .pk-js .pk-sidebar__sections {
+        margin-top: 1.5rem;
     }
 }
 

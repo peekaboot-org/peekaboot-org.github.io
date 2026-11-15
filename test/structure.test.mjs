@@ -19,6 +19,10 @@ function onPage(urlPath, options, read) {
     return readPage(browser, site.origin, urlPath, options, read);
 }
 
+const PHONE_WIDTH = 375;
+const DESKTOP_WIDTH = 1280;
+const SIDEBAR_PAGE = '/docs/configuration/';
+
 // Fragments that pages, bookmarks and the product repo linked before a section was renamed or moved.
 const LEGACY_ANCHORS = [
     ['/docs/in-production/', 'what-happens-when-you-deploy'],
@@ -60,6 +64,33 @@ function sectionUnder(urlPath, headingId) {
     }, headingId));
 }
 
+function sidebarState(page) {
+    return page.evaluate(() => {
+        const shown = (element) => Boolean(element) && element.getClientRects().length > 0;
+        const toggle = document.querySelector('.pk-sidebar__toggle');
+        const controlled = document.getElementById(toggle?.getAttribute('aria-controls'));
+        const width = (element) => element?.getBoundingClientRect().width;
+        return {
+            firstLinkShown: shown(document.querySelector('.pk-sidebar__link')),
+            toggleShown: shown(toggle),
+            toggleAsWideAsMain: width(toggle) === width(document.querySelector('main')),
+            expanded: toggle?.getAttribute('aria-expanded') ?? null,
+            toggleControlsTheLinks: Boolean(controlled?.querySelector('.pk-sidebar__link')),
+        };
+    });
+}
+
+function navbarMenuState(page) {
+    return page.evaluate(() => {
+        const burger = document.querySelector('.navbar-burger');
+        return {
+            menuShown: document.getElementById('navbar-menu').getClientRects().length > 0,
+            burgerActive: burger.classList.contains('is-active'),
+            expanded: burger.getAttribute('aria-expanded'),
+        };
+    });
+}
+
 test('every internal link and fragment resolves', async () => {
     const idsByPage = new Map();
     const internalLinks = [];
@@ -91,15 +122,14 @@ test('every internal link and fragment resolves', async () => {
 });
 
 test('the landing page does not scroll sideways on a phone', async () => {
-    const phoneWidth = 375;
     const widths = {};
     for (const js of [true, false]) {
         widths[js ? 'with JavaScript' : 'without JavaScript'] =
-            await onPage('/', {width: phoneWidth, js},
+            await onPage('/', {width: PHONE_WIDTH, js},
                 (page) => page.evaluate(() => document.documentElement.scrollWidth));
     }
 
-    assert.deepEqual(widths, {'with JavaScript': phoneWidth, 'without JavaScript': phoneWidth});
+    assert.deepEqual(widths, {'with JavaScript': PHONE_WIDTH, 'without JavaScript': PHONE_WIDTH});
 });
 
 test('the navbar links the API', async () => {
@@ -161,4 +191,51 @@ test('no page renders a checkbox', async () => {
     }
 
     assert.deepEqual(checkboxesByPage, {});
+});
+
+test('the burger opens and closes the navbar menu on a phone', async () => {
+    const closed = {menuShown: false, burgerActive: false, expanded: 'false'};
+    const open = {menuShown: true, burgerActive: true, expanded: 'true'};
+
+    await onPage('/', {width: PHONE_WIDTH}, async (page) => {
+        const burger = page.locator('.navbar-burger');
+        assert.deepEqual(await navbarMenuState(page), closed);
+        await burger.click();
+        assert.deepEqual(await navbarMenuState(page), open);
+        await burger.click();
+        assert.deepEqual(await navbarMenuState(page), closed);
+    });
+});
+
+test('the sidebar collapses behind a toggle on a phone', async () => {
+    const headingTopLimit = 250;
+    const toggleInPlace = {toggleShown: true, toggleAsWideAsMain: true, toggleControlsTheLinks: true};
+    const collapsed = {...toggleInPlace, firstLinkShown: false, expanded: 'false'};
+    const open = {...toggleInPlace, firstLinkShown: true, expanded: 'true'};
+
+    await onPage(SIDEBAR_PAGE, {width: PHONE_WIDTH}, async (page) => {
+        const toggle = page.locator('.pk-sidebar__toggle');
+        assert.deepEqual(await sidebarState(page), collapsed);
+        const headingTop = (await page.locator('main h1').boundingBox()).y;
+        assert.ok(headingTop < headingTopLimit,
+            `the h1 starts ${headingTop} px down the page, want under ${headingTopLimit}`);
+        await toggle.click();
+        assert.deepEqual(await sidebarState(page), open);
+        await toggle.click();
+        assert.deepEqual(await sidebarState(page), collapsed);
+    });
+});
+
+test('the sidebar stays open on a phone without JavaScript', async () => {
+    const {firstLinkShown, toggleShown} =
+        await onPage(SIDEBAR_PAGE, {width: PHONE_WIDTH, js: false}, sidebarState);
+
+    assert.deepEqual({firstLinkShown, toggleShown}, {firstLinkShown: true, toggleShown: false});
+});
+
+test('the sidebar shows no toggle on a desktop', async () => {
+    const {firstLinkShown, toggleShown} =
+        await onPage(SIDEBAR_PAGE, {width: DESKTOP_WIDTH}, sidebarState);
+
+    assert.deepEqual({firstLinkShown, toggleShown}, {firstLinkShown: true, toggleShown: false});
 });

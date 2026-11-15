@@ -1,5 +1,5 @@
-// The entire client-side surface of this site: theme resolution, the navbar burger and the
-// heading anchors.
+// The entire client-side surface of this site: theme resolution, the navbar burger, the docs
+// sidebar toggle and the heading anchors.
 // The storage key and the [data-theme] attribute are shared with Peekaboot's own UI
 // (peekaboot-frontend/.../shared/theme.js), so a visitor who set a theme in a running
 // dashboard sees this site match it.
@@ -47,6 +47,8 @@
     }
 
     applyTheme(resolveTheme());
+    // CSS that needs this script keys on the class, so without it the sidebar stays open.
+    document.documentElement.classList.add('pk-js');
 
     // Every doc heading already carries a stable, explicit id (see docs/*.md); this just
     // gives a reader something to click. Scoped to .pk-content, which only the doc layout
@@ -62,6 +64,16 @@
             link.textContent = '#';
             heading.appendChild(link);
         }
+    }
+
+    function discloseOnClick(button, openClass, elements) {
+        button.addEventListener('click', function () {
+            var open = button.getAttribute('aria-expanded') !== 'true';
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].classList.toggle(openClass, open);
+            }
+            button.setAttribute('aria-expanded', open);
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -81,11 +93,13 @@
         var burger = document.querySelector('.navbar-burger');
         var menu = burger && document.getElementById(burger.dataset.target);
         if (burger && menu) {
-            burger.addEventListener('click', function () {
-                burger.classList.toggle('is-active');
-                menu.classList.toggle('is-active');
-                burger.setAttribute('aria-expanded', menu.classList.contains('is-active'));
-            });
+            discloseOnClick(burger, 'is-active', [burger, menu]);
+        }
+
+        var sidebar = document.querySelector('.pk-sidebar');
+        var sidebarToggle = sidebar && sidebar.querySelector('.pk-sidebar__toggle');
+        if (sidebarToggle) {
+            discloseOnClick(sidebarToggle, 'is-open', [sidebar]);
         }
     });
 })();
