@@ -52,3 +52,10 @@ test('serve.sh --help lists BIND and every line of the header', () => {
     assert.ok(stdout.includes('BIND=0.0.0.0 ./serve.sh  let other machines reach the preview'), stdout);
     assert.ok(stdout.endsWith('ends up owned by root.\n'), stdout);
 });
+
+test('serve.sh --build names no file to open', () => {
+    const stdout = serve(['--build']);
+
+    assert.ok(!stdout.includes('_site/index.html'), stdout);
+    assert.ok(stdout.includes('./serve.sh'), stdout);
+});

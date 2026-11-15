@@ -103,7 +103,7 @@ if [ "$build_only" = true ]; then
     echo "Building into _site/ ..."
     "${JEKYLL_RUN[@]}" "$IMAGE" sh -c "$SETUP && bundle exec jekyll build --trace"
     echo
-    echo "Built. Open _site/index.html, or run ./serve.sh to browse it."
+    echo "Built into _site/. Run ./serve.sh to browse it."
     exit 0
 fi
 
