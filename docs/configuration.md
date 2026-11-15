@@ -286,12 +286,12 @@ Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`,
 | `peekaboot.tracing.enabled` | `true` | Whether the in-memory trace store exists, and with it the capture of each request's headers, parameters, resolved controller and log lines. Request and response bodies are not captured. |
 | `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors. The span fails when an `@Async` method, or a task passed to `execute()` or `submit()`, throws. Needs `spring.task.execution.propagate-context`, see [Traces, background work]({{ '/docs/traces/' | relative_url }}#background-work). |
 | `peekaboot.tracing.event-listeners` | `true` | Records a span for each call of an `@EventListener` method. An `@Async` listener also needs `spring.task.execution.propagate-context`. See [Traces, event listeners]({{ '/docs/traces/' | relative_url }}#event-listeners). |
-| `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. |
-| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped. The trace counts them in its `droppedSpans`, and the dashboard shows a `TRUNCATED` badge. |
-| `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. |
-| `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. |
+| `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. At least `1`; a lower value stops startup. |
+| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped. The trace counts them in its `droppedSpans`, and the dashboard shows a `TRUNCATED` badge. At least `1`; a lower value stops startup. |
+| `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. `0` keeps none; a negative value stops startup. |
+| `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. `0` keeps none; a negative value stops startup. |
 | `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Duration in milliseconds, background async work excluded, at or above which a trace enters the Slow bucket and shows a SLOW badge. |
-| `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. |
+| `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. `0` keeps none, and an `ERROR` line still fails its trace; a negative value stops startup. |
 | `peekaboot.tracing.max-untraced-logs` | `1000` | Log lines written outside any trace that are kept for the [log search]({{ '/docs/api/' | relative_url }}#log-search), oldest dropped first. `0` keeps none; a negative value stops startup. |
 
 See [Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)

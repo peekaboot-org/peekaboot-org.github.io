@@ -44,8 +44,9 @@ records 10%.
 
 Requests under these path prefixes are never recorded: `/static/`, `/webjars/`,
 `/peekaboot/`, `/error/`, and the management base path (`/actuator/` by default, following
-`management.endpoints.web.base-path`). With the base path set to `/` there is no prefix to
-exclude, and actuator requests are recorded like any other.
+`management.endpoints.web.base-path`). That holds for a request that carries a `traceparent`
+header too, such as a probe from a monitor that traces its own calls. With the base path set to
+`/` there is no prefix to exclude, and actuator requests are recorded like any other.
 
 Requests to `/peekaboot/` are not observed at all. Your other exporters and the
 `http.server.requests` metrics do not see them either.
@@ -206,9 +207,11 @@ A statement shows as captured, highlighted. With Hibernate on the classpath, For
 out the way Hibernate's `format_sql` log does. Its bind parameters are listed under it, one list
 per batch entry, masked like the SQL. Substitute parameters puts them in place of the `?`
 placeholders when there is one set and it fits. The copy button copies the SQL as shown. A bind
-value over 1,000 characters is cut with a comment like `/* 7 characters omitted */`. A batch
-records at most 100 parameter sets, and a note after the last one says how many were left
-out, such as "5 parameter sets omitted".
+value over 1,000 characters is cut with a comment like `/* 7 characters omitted */`. One
+statement records at most 100 parameter sets and 16,000 characters of bind values. A batch past
+either limit leaves out its later sets, and a note after the last one says how many, such as
+"5 parameter sets omitted". A single set past the character limit ends with a comment like
+`/* 12 parameters omitted */`.
 
 Logs lists the log lines written while handling the request, filterable by text, level and
 span. Request shows the method, path, query string, status, duration, controller method,
@@ -290,7 +293,9 @@ One trace keeps at most `peekaboot.tracing.max-spans-per-trace` spans (500) and
 `peekaboot.tracing.max-logs-per-trace` log lines (500). Past either limit the oldest are
 dropped. A trace that lost spans carries a TRUNCATED badge. A stack trace in a captured log
 line or on a failed span is cut at 1,000 lines and ends with a `... N lines omitted` marker. A
-`StackOverflowError` is the usual case. The error page shows the whole trace.
+`StackOverflowError` is the usual case. The error page shows the whole trace. A span tag value,
+an exception message or a log message over 16,000 characters is cut and ends with
+`... N characters omitted`.
 
 A span's stack trace is also cut by
 `management.opentelemetry.tracing.limits.max-attribute-value-length`, if you set it. The
