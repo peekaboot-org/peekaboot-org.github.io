@@ -248,3 +248,12 @@ test('included facts render as Markdown', () => {
 
     assert.deepEqual(wrong, []);
 });
+
+test("the guard's username rule is on both pages", () => {
+    const missing = ['/docs/security/', '/docs/agents/'].flatMap((urlPath) =>
+        ['lowercased', 'orders-service--admin']
+            .filter((phrase) => !text(urlPath).includes(phrase))
+            .map((phrase) => `${urlPath} lacks "${phrase}"`));
+
+    assert.deepEqual(missing, []);
+});
