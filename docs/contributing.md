@@ -15,10 +15,13 @@ next to the code it describes.
   structured and run.
 - [`BUILD.md`]({{ site.repository_url }}/blob/HEAD/BUILD.md): building with Maven or Gradle,
   the quality gates, and how a release is cut.
+- [`CONTRIBUTING.md`]({{ site.repository_url }}/blob/HEAD/CONTRIBUTING.md): how to propose a
+  change.
 
-Report bugs and proposals in the [issue tracker]({{ site.repository_url }}/issues). Commit
-messages follow [Conventional Commits](https://www.conventionalcommits.org/); the prefix decides
-the next version number.
+Report bugs and proposals in the [issue tracker]({{ site.repository_url }}/issues). Report a
+vulnerability privately instead. [`SECURITY.md`]({{ site.repository_url }}/blob/HEAD/SECURITY.md)
+says how. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/);
+the prefix decides the next version number.
 
 This site has its own repository,
 [peekaboot-org.github.io](https://github.com/peekaboot-org/peekaboot-org.github.io). Its README
