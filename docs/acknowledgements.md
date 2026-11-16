@@ -33,5 +33,8 @@ License. Peekaboot's UI uses the [Geist and Geist Mono](https://github.com/verce
 fonts, under the SIL Open Font License 1.1. Both ship inside Peekaboot's jar. The
 [`NOTICE`]({{ site.repository_url }}/blob/HEAD/NOTICE) file lists their versions and licences.
 
+Every Peekaboot jar on an application's classpath carries `LICENSE` and `NOTICE` under
+`META-INF/`.
+
 The starter brings [datasource-micrometer](https://github.com/jdbc-observations/datasource-micrometer),
 under the Apache License 2.0. It records the JDBC queries the Traces tab shows.
