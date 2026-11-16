@@ -234,15 +234,18 @@ test('links into GitHub repositories use blob/HEAD', () => {
     assert.deepEqual(onABranch, []);
 });
 
-// The release job groups breaking entries under "Breaking changes", so a tag would say it twice.
-test('the releases page tags no entry', () => {
+// The release job writes each release's notes as markdown, which the page renders itself.
+test('the releases page renders the notes of every release', () => {
     const releases = html('/releases/');
-    const hasBreakingEntry = JSON.parse(source('_data', 'releases.json'))
-        .some((release) => release.groups.some((group) => group.title === 'Breaking changes'));
+    const unrendered = JSON.parse(source('_data', 'releases.json'))
+        .flatMap(({version, notes}) => notes.split('\n')
+            .filter((line) => line.startsWith('### '))
+            .map((line) => line.slice(4))
+            .filter((heading) => !new RegExp(`<h3[^>]*>${heading}</h3>`).test(releases))
+            .map((heading) => `${version} lacks the heading "${heading}"`));
 
-    assert.equal(/<h3[^>]*>Breaking changes<\/h3>/.test(releases), hasBreakingEntry,
-        '/releases/ and _data/releases.json disagree on a "Breaking changes" heading');
-    assert.ok(!releases.includes('class="tag'), '/releases/ renders a tag');
+    assert.deepEqual(unrendered, []);
+    assert.ok(!releases.includes('### '), '/releases/ shows markdown as text');
 });
 
 test('a single-sourced fact is written in one file', () => {

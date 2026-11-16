@@ -20,25 +20,7 @@ redirect_from:
       </summary>
 
       <div class="content mt-4">
-        {% for group in release.groups %}
-        <h3 class="title is-5">{{ group.title | escape }}</h3>
-        <ul>
-          {% for entry in group.entries %}
-          {% capture heading %}{{ entry.text | escape }}{% if entry.detail %}. {{ entry.detail | escape }}{% endif %}{% endcapture %}
-          <li>
-            {% if entry.scope %}<strong>{{ entry.scope | escape }}</strong>: {% endif %}
-            {% if entry.description.size > 0 %}
-            <strong>{{ heading }}.</strong>
-            {% for paragraph in entry.description %}
-            {% if forloop.first %}{{ paragraph | escape }}{% else %}<p>{{ paragraph | escape }}</p>{% endif %}
-            {% endfor %}
-            {% else %}
-            {{ heading }}
-            {% endif %}
-          </li>
-          {% endfor %}
-        </ul>
-        {% endfor %}
+        {{ release.notes | markdownify }}
 
         <p><a href="{{ release.url | escape }}">Full notes for {{ release.version | escape }} on GitHub</a></p>
       </div>
