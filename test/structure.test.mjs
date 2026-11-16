@@ -103,6 +103,40 @@ function navbarMenuState(page) {
     });
 }
 
+// The bars the burger paints, in markup order, once Bulma has finished moving them.
+function burgerDrawing(page) {
+    return page.evaluate(async () => {
+        const burger = document.querySelector('.navbar-burger');
+        await Promise.all(
+            burger.getAnimations({subtree: true}).map((animation) => animation.finished));
+        const middle = ({left, top, right, bottom}) =>
+            ({x: (left + right) / 2, y: (top + bottom) / 2});
+        const bars = Array.from(burger.children)
+            .filter((bar) => getComputedStyle(bar).opacity !== '0')
+            .map((bar) => {
+                const {left, top, right, bottom} = bar.getBoundingClientRect();
+                const {a, b} = new DOMMatrix(getComputedStyle(bar).transform);
+                const turnedBy = Math.round(Math.atan2(b, a) * 180 / Math.PI);
+                return {left, top, right, bottom, turnedBy};
+            });
+        const outermost = (pick, side) => pick(...bars.map((bar) => bar[side]));
+        return {
+            bars,
+            middle: middle({
+                left: outermost(Math.min, 'left'),
+                top: outermost(Math.min, 'top'),
+                right: outermost(Math.max, 'right'),
+                bottom: outermost(Math.max, 'bottom'),
+            }),
+            buttonMiddle: middle(burger.getBoundingClientRect()),
+        };
+    });
+}
+
+function withinAPixel(one, other) {
+    return Math.abs(one.x - other.x) <= 1 && Math.abs(one.y - other.y) <= 1;
+}
+
 function docPages() {
     return builtPages().filter((urlPath) => urlPath.startsWith('/docs/'));
 }
@@ -296,6 +330,42 @@ test('the burger opens and closes the navbar menu on a phone', async () => {
         await burger.click();
         assert.deepEqual(await navbarMenuState(page), closed);
     });
+});
+
+test('the burger draws three even bars in the middle of its button', async () => {
+    const {bars, middle, buttonMiddle} = await onPage('/', {width: PHONE_WIDTH}, burgerDrawing);
+    // Two bars lie on each other in the middle row, the pair Bulma turns into the cross.
+    const rows = bars.filter((bar, i) => bars.findIndex(({top}) => top === bar.top) === i)
+        .sort((one, other) => one.top - other.top);
+    const gaps = rows.slice(1).map((row, i) => row.top - rows[i].bottom);
+
+    const problems = [];
+    if (rows.length !== 3) {
+        problems.push(`${rows.length} bars, want 3`);
+    }
+    if (gaps.some((gap) => gap <= 0)) {
+        problems.push(`bars overlap, the gaps are ${gaps.join(' and ')} px`);
+    }
+    if (Math.max(...gaps) - Math.min(...gaps) > 1) {
+        problems.push(`uneven gaps, ${gaps.join(' and ')} px`);
+    }
+    if (!withinAPixel(middle, buttonMiddle)) {
+        problems.push(`the bars are around ${middle.x},${middle.y}, `
+            + `the button around ${buttonMiddle.x},${buttonMiddle.y}`);
+    }
+    assert.deepEqual(problems, []);
+});
+
+test('the open burger draws a cross in the middle of its button', async () => {
+    const {bars, middle, buttonMiddle} = await onPage('/', {width: PHONE_WIDTH}, async (page) => {
+        await page.locator('.navbar-burger').click();
+        return burgerDrawing(page);
+    });
+
+    assert.deepEqual(bars.map(({turnedBy}) => turnedBy), [-45, 45]);
+    assert.ok(withinAPixel(middle, buttonMiddle),
+        `the cross is around ${middle.x},${middle.y}, `
+        + `the button around ${buttonMiddle.x},${buttonMiddle.y}`);
 });
 
 test('the sidebar collapses behind a toggle on a phone', async () => {
