@@ -8,6 +8,7 @@ import { chromium } from 'playwright-core';
 
 export const SITE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 export const BUILT = join(SITE_ROOT, '_site');
+export const PHONE_WIDTH = 375;
 
 const THEME_STORAGE_KEY = 'peekaboot-theme';
 const REDIRECT_STUB = '<meta http-equiv="refresh"';

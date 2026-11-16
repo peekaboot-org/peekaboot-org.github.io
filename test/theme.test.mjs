@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
-import { contrastFailures } from './contrast.mjs';
-import { builtPages, launch, readPage, serveSite } from './site.mjs';
+import { contrastFailures, contrastOf } from './contrast.mjs';
+import { builtPages, launch, PHONE_WIDTH, readPage, serveSite } from './site.mjs';
 
 const MODES = {
     'light': {scheme: 'light'},
@@ -21,6 +21,8 @@ const HIGHLIGHTED_TOKENS = {
     '/docs/security/': ['.highlight .s', '.highlight .c1'],
     '/docs/configuration/': ['.highlight .na'],
 };
+
+const BURGER = '.navbar-burger';
 
 const SWEPT_MODES = ['light', 'dark', 'dark without JavaScript'];
 
@@ -153,6 +155,25 @@ function darkThemeValues(page) {
     }, DARK_TOKENS);
 }
 
+// What the burger paints once its transitions have ended, beside the colour of a navbar entry.
+// Its bars are filled with its text colour, which contrastOf reads against the tinted ground.
+async function burgerColours(page) {
+    const colours = await page.evaluate(async (selector) => {
+        const burger = document.querySelector(selector);
+        await Promise.all(
+            burger.getAnimations({subtree: true}).map((animation) => animation.finished));
+        const fills = Array.from(burger.children, (bar) => getComputedStyle(bar).backgroundColor);
+        const [red, green, blue, alpha = 1] =
+            getComputedStyle(burger).backgroundColor.match(/[\d.]+/g).map(Number);
+        return {
+            drawnIn: [...new Set([getComputedStyle(burger).color, ...fills])],
+            tint: alpha === 0 ? null : `rgb(${red}, ${green}, ${blue})`,
+            entry: getComputedStyle(document.querySelector('.navbar-start .navbar-item')).color,
+        };
+    }, BURGER);
+    return {...colours, contrast: await contrastOf(page, BURGER)};
+}
+
 // The theme and the toggle's label once the page has heard the OS turn dark. Change events
 // reach the oldest media query list first, so the page's own listener has run by then.
 async function themeOnceOsIsDark(page) {
@@ -186,6 +207,42 @@ test('the hero logo is legible on the dark ground', async () => {
             problems.push(`${mode}: ${logo.file} has pixels at `
                 + `${logo.lowestContrast.toFixed(2)}:1 on ${logo.ground}, `
                 + `want ${GRAPHIC_CONTRAST}:1 or more`);
+        }
+    }
+
+    assert.deepEqual(problems, []);
+});
+
+test('the burger is drawn in the colour of the navbar entries', async () => {
+    const problems = [];
+    for (const [mode, options] of Object.entries(MODES)) {
+        const states = await onPage('/', {...options, width: PHONE_WIDTH}, async (page) => {
+            const burger = page.locator(BURGER);
+            const seen = {closed: await burgerColours(page)};
+            await burger.hover();
+            seen.hovered = await burgerColours(page);
+            await page.mouse.down();
+            seen.pressed = await burgerColours(page);
+            await page.mouse.up();
+            // Only the script opens the menu.
+            if (options.js !== false) {
+                assert.equal(await burger.getAttribute('aria-expanded'), 'true');
+                seen.open = await burgerColours(page);
+            }
+            return seen;
+        });
+        for (const [state, {drawnIn, tint, entry, contrast}] of Object.entries(states)) {
+            if (drawnIn.length !== 1 || drawnIn[0] !== entry) {
+                problems.push(`${mode}, ${state}: drawn in ${drawnIn.join(' and ')}, `
+                    + `the entries are ${entry}`);
+            }
+            if (tint !== null && tint !== entry) {
+                problems.push(`${mode}, ${state}: tinted with ${tint}, the entries are ${entry}`);
+            }
+            if (contrast < GRAPHIC_CONTRAST) {
+                problems.push(`${mode}, ${state}: the bars have ${contrast.toFixed(2)}:1, `
+                    + `want ${GRAPHIC_CONTRAST}:1 or more`);
+            }
         }
     }
 

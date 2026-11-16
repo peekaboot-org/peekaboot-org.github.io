@@ -143,6 +143,15 @@ a:hover {
     font-weight: 600;
 }
 
+/* Bulma draws the burger, and the tint behind it on hover, in its link blue. Set on .navbar,
+   where Bulma declares the navbar tokens these read. */
+.navbar {
+    --bulma-navbar-burger-color: var(--bulma-navbar-item-color);
+    --bulma-burger-h: var(--bulma-navbar-h);
+    --bulma-burger-s: var(--bulma-navbar-s);
+    --bulma-burger-l: var(--bulma-navbar-item-color-l);
+}
+
 .navbar-item.is-current {
     color: var(--pk-link);
     font-weight: 600;

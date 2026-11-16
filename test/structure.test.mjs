@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
-import { builtPages, launch, readPage, serveSite } from './site.mjs';
+import { builtPages, launch, PHONE_WIDTH, readPage, serveSite } from './site.mjs';
 
 let site;
 let browser;
@@ -19,7 +19,6 @@ function onPage(urlPath, options, read) {
     return readPage(browser, site.origin, urlPath, options, read);
 }
 
-const PHONE_WIDTH = 375;
 const DESKTOP_WIDTH = 1280;
 const SIDEBAR_PAGE = '/docs/configuration/';
 const WIDE_TABLES_PAGE = '/docs/configuration/';
