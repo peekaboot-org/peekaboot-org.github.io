@@ -1,5 +1,688 @@
 [
   {
+    "version": "1.3.0",
+    "date": "2026-11-16",
+    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.3.0",
+    "initial": false,
+    "groups": [
+      {
+        "title": "Features",
+        "entries": [
+          {
+            "text": "Answer only loopback on a local run",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give remote clients no bar or stack trace",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Apply the loopback rule beneath wrappers",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Load older traces on request",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Filter meters by a name prefix",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Bug fixes",
+        "entries": [
+          {
+            "text": "Enforce the guard on Peekaboot's handlers",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop reading the launch from a property",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the security banner out of capture",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bound concurrent password checks",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Clean the username the guard logs",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse a credentials file others can read",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Send security headers with the UI",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Honour reset and write listeners in the bar",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Leave partial content without a toolbar",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Write the toolbar in ASCII",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Back off without Spring MVC",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read the system class loader by identity",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ask Spring whether the client hung up",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the launch source out of binding",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Leave the host's /actuator/info alone",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read DataSource metadata after startup",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Leave DataSources unwrapped while off",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask more key names and quoted options",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask a quoted value ending in a backslash",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask URL credentials whole, in linear time",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask a URL password that starts like a port",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Never parse a form body for the capture",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Cap captured header and parameter values",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask a quoted value with no closing quote",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask overlapping matches to the later end",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask the error page's message and trace",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Guard the capture's async listener",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Isolate a failing meter to its own series",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Roll up only the ticks before the boundary",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Restart an insights thread an error ended",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Give each atomic write its own temp file",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep an atomic write interruptible",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a second instance from writing history",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Free the loaded snapshot once handed over",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Report a storage write outage per episode",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Write the insights snapshot every 5 minutes",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Take coarse percentiles from finer ones",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close the stream of a dropped SSE client",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Baseline each meter from its own reading",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse colliding insights series ids",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fail on a missing insights config-location",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Record no stop for a run that never started",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Call only this process's run running",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a start however long history loads",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Load lifecycle history in time order",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read a damaged lifecycle file line by line",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Survive a malformed git.properties escape",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Detect cgroup v2 containers by their mounts",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "End a dropped SSE stream on Tomcat too",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Stop leaking an SSE sender on shutdown",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a dead insights thread out of a new run",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Drop a failed request a newer one overtook",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep focus and open groups across a refresh",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Render only the tab that is showing",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close the insights stream while hidden",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep rows and cards in place on refresh",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Retry the features request on refresh",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name a health component's status in text",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the hash when a trace view reopens",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show the error when a tab's load fails",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Name a repeatable Flyway migration",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Close accessibility gaps in the overlay",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Reach restart details from the keyboard",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Draw the chart selection in dark theme",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Round durations and sizes into the next unit",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Format decimals in the dashboard language",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep the bar's errors out of the host's fetch",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Replace history on arrow-key tab moves",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Write chart test hooks only on change",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Show a text health detail as it was sent",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a batch when one span fails to store",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Leave no trace of a probe with traceparent",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Cap tag values, log messages and bind text",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a cut text from splitting a credential",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "End a cut text before a quote or comma",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a cut text from unmasking a URL password",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Warn once when the journal thread dies",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Skip a journal line the store refuses",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Run the trace journal on a platform thread",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse a span that names itself as parent",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse trace caps below their floor",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Fold only JDBC twins that failed alike",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep capture off the application's events",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Read a span without tags as no HTTP request",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep a second instance off the trace files",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Mask the request path of a trace",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Cap a full-view trace page at 100 rows",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve a trace nested past 250 spans",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Serve an infinite value as null",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Match a job's target, not any suffix",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse a route that is no pattern",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Refuse an ill-formed locale",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Sort a scheduled task without a target",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "List custom-trigger scheduled tasks",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Ship the licence and notice in every jar",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      },
+      {
+        "title": "Performance",
+        "entries": [
+          {
+            "text": "Look a digested trace up once",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Leave Slow alone for a trace not in it",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Skip a fold that has nothing to fold",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Map a summary row without span content",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Count routes from the listing facts",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Map only a page's rows in full",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Walk a mapped trace once",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Bound the lines a log search reads",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Keep route issue counts equal to summaries",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          },
+          {
+            "text": "Replace an unusable snapshot in the fold",
+            "scope": null,
+            "breaking": false,
+            "detail": null
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.2.0",
     "date": "2026-11-10",
     "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.2.0",
