@@ -237,9 +237,11 @@ test('links into GitHub repositories use blob/HEAD', () => {
 // The release job groups breaking entries under "Breaking changes", so a tag would say it twice.
 test('the releases page tags no entry', () => {
     const releases = html('/releases/');
+    const hasBreakingEntry = JSON.parse(source('_data', 'releases.json'))
+        .some((release) => release.groups.some((group) => group.title === 'Breaking changes'));
 
-    assert.ok(/<h3[^>]*>Breaking changes<\/h3>/.test(releases),
-        '/releases/ has no "Breaking changes" heading');
+    assert.equal(/<h3[^>]*>Breaking changes<\/h3>/.test(releases), hasBreakingEntry,
+        '/releases/ and _data/releases.json disagree on a "Breaking changes" heading');
     assert.ok(!releases.includes('class="tag'), '/releases/ renders a tag');
 });
 

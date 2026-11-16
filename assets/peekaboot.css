@@ -303,7 +303,7 @@ h4:hover .pk-heading-anchor,
     }
 }
 
-/* Each release collapses: 0.1.0 alone carries the whole pre-release history. */
+/* Each release collapses, so the page opens on the newest one alone. */
 .pk-release {
     border-top: 1px solid var(--bulma-border);
     padding: 1.25rem 0;

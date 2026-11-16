@@ -3,7 +3,6 @@
     "version": "1.3.0",
     "date": "2026-11-16",
     "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.3.0",
-    "initial": false,
     "groups": [
       {
         "title": "Features",
@@ -12,31 +11,36 @@
             "text": "Answer only loopback on a local run",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Give remote clients no bar or stack trace",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Apply the loopback rule beneath wrappers",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Load older traces on request",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Filter meters by a name prefix",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           }
         ]
       },
@@ -47,571 +51,666 @@
             "text": "Enforce the guard on Peekaboot's handlers",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Stop reading the launch from a property",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep the security banner out of capture",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Bound concurrent password checks",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Clean the username the guard logs",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Refuse a credentials file others can read",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Send security headers with the UI",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Honour reset and write listeners in the bar",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Leave partial content without a toolbar",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Write the toolbar in ASCII",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Back off without Spring MVC",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Read the system class loader by identity",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Ask Spring whether the client hung up",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep the launch source out of binding",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Leave the host's /actuator/info alone",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Read DataSource metadata after startup",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Leave DataSources unwrapped while off",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Mask more key names and quoted options",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Mask a quoted value ending in a backslash",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Mask URL credentials whole, in linear time",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Mask a URL password that starts like a port",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Never parse a form body for the capture",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Cap captured header and parameter values",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Mask a quoted value with no closing quote",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Mask overlapping matches to the later end",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Mask the error page's message and trace",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Guard the capture's async listener",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Isolate a failing meter to its own series",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Roll up only the ticks before the boundary",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Restart an insights thread an error ended",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Give each atomic write its own temp file",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep an atomic write interruptible",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep a second instance from writing history",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Free the loaded snapshot once handed over",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Report a storage write outage per episode",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Write the insights snapshot every 5 minutes",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Take coarse percentiles from finer ones",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Close the stream of a dropped SSE client",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Baseline each meter from its own reading",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Refuse colliding insights series ids",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Fail on a missing insights config-location",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Record no stop for a run that never started",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Call only this process's run running",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep a start however long history loads",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Load lifecycle history in time order",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Read a damaged lifecycle file line by line",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Survive a malformed git.properties escape",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Detect cgroup v2 containers by their mounts",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "End a dropped SSE stream on Tomcat too",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Stop leaking an SSE sender on shutdown",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep a dead insights thread out of a new run",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Drop a failed request a newer one overtook",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep focus and open groups across a refresh",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Render only the tab that is showing",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Close the insights stream while hidden",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep rows and cards in place on refresh",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Retry the features request on refresh",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Name a health component's status in text",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep the hash when a trace view reopens",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Show the error when a tab's load fails",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Name a repeatable Flyway migration",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Close accessibility gaps in the overlay",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Reach restart details from the keyboard",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Draw the chart selection in dark theme",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Round durations and sizes into the next unit",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Format decimals in the dashboard language",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep the bar's errors out of the host's fetch",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Replace history on arrow-key tab moves",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Write chart test hooks only on change",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Show a text health detail as it was sent",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep a batch when one span fails to store",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Leave no trace of a probe with traceparent",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Cap tag values, log messages and bind text",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep a cut text from splitting a credential",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "End a cut text before a quote or comma",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep a cut text from unmasking a URL password",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Warn once when the journal thread dies",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Skip a journal line the store refuses",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Run the trace journal on a platform thread",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Refuse a span that names itself as parent",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Refuse trace caps below their floor",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Fold only JDBC twins that failed alike",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep capture off the application's events",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Read a span without tags as no HTTP request",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep a second instance off the trace files",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Mask the request path of a trace",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Cap a full-view trace page at 100 rows",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Serve a trace nested past 250 spans",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Serve an infinite value as null",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Match a job's target, not any suffix",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Refuse a route that is no pattern",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Refuse an ill-formed locale",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Sort a scheduled task without a target",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "List custom-trigger scheduled tasks",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Ship the licence and notice in every jar",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           }
         ]
       },
@@ -622,1554 +721,74 @@
             "text": "Look a digested trace up once",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Leave Slow alone for a trace not in it",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Skip a fold that has nothing to fold",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Map a summary row without span content",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Count routes from the listing facts",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Map only a page's rows in full",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Walk a mapped trace once",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Bound the lines a log search reads",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Keep route issue counts equal to summaries",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           },
           {
             "text": "Replace an unusable snapshot in the fold",
             "scope": null,
             "breaking": false,
-            "detail": null
+            "detail": null,
+            "description": []
           }
         ]
       }
     ]
-  },
-  {
-    "version": "1.2.0",
-    "date": "2026-11-10",
-    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.2.0",
-    "initial": false,
-    "groups": [
-      {
-        "title": "Features",
-        "entries": [
-          {
-            "text": "Sort span tags in code-point order",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Mark slow queries with the shared SLOW pill",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Give Queries the Logs tab's span-tree link",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name a filter target by class and method",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Spell out the toolbar's pending stats",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show the heap meter's maximum as Max Heap",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Move issue thresholds to peekaboot.tracing",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Rename dev-toolbar and enable-unmasking keys",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show the insights switch when it is off",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Capture requests and logs under tracing",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Hide the Lifecycle tab when lifecycle is off",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name handler and view spans by their target",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name the app in banners without build-info",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bind Hibernate panel meters without the jar",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Capture a failed span's exception",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve a failed span's folded stack trace",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Answer the API's errors with problem details",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Give the guard's 401 a problem body",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "List 5xx answers in the Errors bucket",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Give each issue its value and threshold",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Flag repeated queries under one span",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Flag 4xx answers as client errors",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Say why a trace failed or ran slow",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve traces as summary and data",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name the first failure in a trace",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "List the spans with the most self time",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Filter the trace list",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Page the trace list by row position",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name each log's trace, logger and thread",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep logs written outside any trace",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Search captured logs",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Aggregate traces per route",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "File a trace in its buckets as it is stored",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name the run that produced each trace",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Refuse a page token from before a restart",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Write the store's inputs as journal lines",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Append trace inputs to a journal",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Replay the trace journal at startup",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fold the trace journal into a snapshot",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep traces across restarts",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Mark a trace cut off by a restart",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve each start with its whole build",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Summarise the insights data",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name problems in the insights data",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fold failed traces into an error digest",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Record live failed traces in the digest",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve the error digest",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep the error digest across restarts",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Refuse unknown query parameters",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Mark interrupted traces on the Traces tab",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show a trace's cause and hotspots",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show self time and issue badges on spans",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve the API's OpenAPI document",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "List the API's endpoints at /peekaboot/api",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Record git even when events run async",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Detach log capture on the closing thread",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Bug fixes",
-        "entries": [
-          {
-            "text": "Link published poms to the real project page",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep insights working in full git mode",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Never write credentials through a symlink",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Find Swagger UI behind a slash-less path",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep a stored password with a blank username",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Ignore a child context's ready event",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Label Tomcat session creation per second",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Refuse insights intervals finer than 1ms",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep the Traces controls still on refresh",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Stop Safari rounding times up a millisecond",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Colour the toolbar by effective thresholds",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Skip a relocated Swagger UI's own calls",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Mask captured log messages and stack traces",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Group omitted parameter sets by locale",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve in-flight traces as incomplete",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep dashboard requests out of observations",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Refuse unknown trace list filters",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Judge slow spans by their self time",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Refuse an out-of-range trace list limit",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve insights values in their units",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Save the insights history every minute",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Count a late meter's first tick from zero",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep API refusals problem+json for browsers",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Prefix the insights and lifecycle beans",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fail the server span of a 5xx error page",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Prefix the remaining Peekaboot beans",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fail the handler span of a 5xx error page",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Ignore a dependency's git.properties",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show the app's own git info on Overview",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Run stop listeners on the closing thread",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep the ready banner above the posture",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Dependency upgrades",
-        "entries": [
-          {
-            "text": "Bump jdbc-url-parser to 0.1.3",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "version": "1.1.0",
-    "date": "2026-10-17",
-    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.1.0",
-    "initial": false,
-    "groups": [
-      {
-        "title": "Features",
-        "entries": [
-          {
-            "text": "Label queries with their DataSource name",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Map Liquibase change sets into insights",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Read Liquibase through its actuator endpoint",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Add the Liquibase dashboard tab",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Trace event listener invocations",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fold Peekaboot's own frames by default",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Warn when an insights series never resolves",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Warn about the error page on a deployment",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Read a blank switch value as unset",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Warn only about an error page that is served",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Rename the pool trace type to maintenance",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Classify redis upkeep traces as maintenance",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Bug fixes",
-        "entries": [
-          {
-            "text": "Render span toggle buttons in the bundled font",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "List non-default-candidate DataSources",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show Flyway for non-default-candidate beans",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve the error page only to clients asking for HTML",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fail the async task span when @Async throws",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Stop startup on a non-boolean switch value",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Record submitted task failures on async spans",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "List a late async row at the top of the list",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Warn on every subtract-meter outage",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Drop the ERROR span issue nothing renders",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Ignore an empty manifest Class-Path",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Open a trace from anywhere on its row",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep timeline tick labels distinct",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep info apart from pink for protanopes",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Explain why the Traces tab cannot fill",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep the overlay's Escape inside the overlay",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Let the keyboard scroll overlay tab content",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Stop warning when shutdown cuts a write short",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Challenge every dashboard request",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Write each insights tick under one lock",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Open the subtree hiding a cross-link target",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep span toggle focus rings inside the row",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name the pool checkbox by what it does",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep toggle labels fixed and state in ARIA",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep truncated traces in the Slow bucket",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep async descendants out of the sync window",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep Spring's status on the override page",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Log the exception the override page renders",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Guard the dashboard under the servlet path",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Guard requests forwarded into the dashboard",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Drop the WARN on a dashboard challenge",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fold stack traces by default on every launch",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Mark a truncated parameter batch",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Read every roll-up window under one lock",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Never write a capture taken before restore",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show the error when the recovery reload stalls",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Put the servlet path in the banner URLs",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Name the guarded path in the security posture",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Honour spring.mvc.log-resolved-exception",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Escape the base path in page URLs",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Read listing roots under one lock",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Count one omitted character or byte singular",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Count one omitted stack-trace line singular",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep insights time labels from overlapping",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep insights deltas that race a snapshot",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Performance",
-        "entries": [
-          {
-            "text": "Build span panels when first opened",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Map only the async subtree for its row",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Stop sending span logs twice",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Resolve listener names once per method",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Pair row counts with queries in one pass",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "version": "1.0.0",
-    "date": "2026-09-30",
-    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/1.0.0",
-    "initial": false,
-    "groups": [
-      {
-        "title": "Breaking changes",
-        "entries": [
-          {
-            "text": "Fold the Internal trace type into Unknown",
-            "scope": null,
-            "breaking": true,
-            "detail": "Traces with a kindless root span now report UNKNOWN; filter on rootActionType=UNKNOWN where you used INTERNAL."
-          }
-        ]
-      },
-      {
-        "title": "Features",
-        "entries": [
-          {
-            "text": "Exclude pool traces with a checkbox",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fit the trace type filter on one row",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Capture the bind parameters of JDBC queries",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Format queries and serve their parameters",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Tokenize SQL for highlighting",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Copy the text a view shows at click time",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Highlight SQL and substitute its parameters",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show a span's logs in its details",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Expand a span's query and logs in place",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Dependency upgrades",
-        "entries": [
-          {
-            "text": "Bump net.osslabz:jdbc-url-parser from 0.1.1 to 0.1.2",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "version": "0.3.0",
-    "date": "2026-09-26",
-    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.3.0",
-    "initial": false,
-    "groups": [
-      {
-        "title": "Features",
-        "entries": [
-          {
-            "text": "Open span details from the span tree",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Mark span kinds with coloured dots",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Make span tree rows easier to scan",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Size the span name column to its names",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show span errors in span details",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Copy a span id from span details",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show or hide all span details at once",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Drop the counts the overlay tabs repeat",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Drop Content-Type from the Request section",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Count spans and logs in the trace stat line",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show query row counts as neutral chips",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Add the error-page switch",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Render a Peekaboot error page",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Serve the error page in place of whitelabel",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Put the toolbar on error pages",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Add an error-page override switch",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Beat a ControllerAdvice's own error page",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Resolve the stack-trace exclusion list",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Decide which stack-trace frames fold away",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Add the stack-trace folding properties",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fold framework frames on the error page",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Reveal the full trace on the error page",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Capture the stack trace of a logged error",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show a logged error's trace, folded",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Classify async tasks as their own action",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Observe tasks handed to task executors",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Register the async task decorator",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Track async subtrees in the trace bundle",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep async work out of a trace's duration",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep async spans out of the span summary",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Map a trace subtree as its own tree",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "List async subtrees as their own rows",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Link, distinguish and open async rows",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Fold async work out of a trace's timeline",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Remove a trace from Slow when it is not slow",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Give an async row its own logs and status",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Single-space the error page stack trace",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Bug fixes",
-        "entries": [
-          {
-            "text": "Tolerate other filter registrations",
-            "scope": "security",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show span tag keys in full",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Group every count in the reader's locale",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Render buttons in the UI font",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep the jump highlight on a hovered row",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Capture a failed request as a server error",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Classify suppressed frames",
-            "scope": "stack-trace",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Merge adjacent application runs",
-            "scope": "stack-trace",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Ask FoldedTrace what to reveal",
-            "scope": "error-page",
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Dependency upgrades",
-        "entries": [
-          {
-            "text": "Bump net.ttddyy.observation:datasource-micrometer-opentelemetry",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bump net.ttddyy.observation:datasource-micrometer-spring-boot",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Use jdbc-url-parser 0.1.2",
-            "scope": "deps",
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "version": "0.2.0",
-    "date": "2026-09-14",
-    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.2.0",
-    "initial": false,
-    "groups": [
-      {
-        "title": "Features",
-        "entries": [
-          {
-            "text": "Expose whether trace spans can arrive",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Capture JDBC queries out of the box",
-            "scope": "starter",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Show a query's row count in the span tree",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Secure the dashboard automatically",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Bundle the Geist webfonts",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Bug fixes",
-        "entries": [
-          {
-            "text": "Close the defects the docs rewrite left",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Correct trace and span edge cases",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Harden the passthrough writer hand-over",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Close the remaining masking gaps",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Shut down cleanly behind a stalled SSE peer",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Correct activation and startup edge cases",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Correct dashboard UI defects",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Keep forwarded pages intact under Tomcat 11",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Scope observations to the dispatch, not the request",
-            "scope": "tracing",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Stack the trace overlay above host page chrome",
-            "scope": "toolbar",
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Polish the dashboard UI",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      },
-      {
-        "title": "Performance",
-        "entries": [
-          {
-            "text": "Apply the audit's performance fixes",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          },
-          {
-            "text": "Cache the bundled font for a year",
-            "scope": null,
-            "breaking": false,
-            "detail": null
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "version": "0.1.0",
-    "date": "2026-09-04",
-    "url": "https://github.com/peekaboot-org/peekaboot/releases/tag/0.1.0",
-    "initial": true,
-    "groups": []
   }
 ]

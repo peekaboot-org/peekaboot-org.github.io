@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Releases
-lead: Every Peekaboot release, with its breaking changes, features and fixes. The full notes for each version are on GitHub.
+lead: The Peekaboot releases from 1.3.0 on, with their breaking changes, features and fixes. The full notes for each version are on GitHub.
 permalink: /releases/
 redirect_from:
   - /docs/release-notes/
@@ -20,21 +20,25 @@ redirect_from:
       </summary>
 
       <div class="content mt-4">
-        {% if release.initial %}
-        <p>Initial release.</p>
-        {% else %}
         {% for group in release.groups %}
         <h3 class="title is-5">{{ group.title | escape }}</h3>
         <ul>
           {% for entry in group.entries %}
+          {% capture heading %}{{ entry.text | escape }}{% if entry.detail %}. {{ entry.detail | escape }}{% endif %}{% endcapture %}
           <li>
             {% if entry.scope %}<strong>{{ entry.scope | escape }}</strong>: {% endif %}
-            {{ entry.text | escape }}{% if entry.detail %}. {{ entry.detail | escape }}{% endif %}
+            {% if entry.description.size > 0 %}
+            <strong>{{ heading }}.</strong>
+            {% for paragraph in entry.description %}
+            {% if forloop.first %}{{ paragraph | escape }}{% else %}<p>{{ paragraph | escape }}</p>{% endif %}
+            {% endfor %}
+            {% else %}
+            {{ heading }}
+            {% endif %}
           </li>
           {% endfor %}
         </ul>
         {% endfor %}
-        {% endif %}
 
         <p><a href="{{ release.url | escape }}">Full notes for {{ release.version | escape }} on GitHub</a></p>
       </div>
