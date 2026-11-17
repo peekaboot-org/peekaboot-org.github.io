@@ -39,10 +39,8 @@ deploy that way, set `peekaboot.enabled=false`.
 
 ### Containers, devcontainers and Codespaces {#container-markers}
 
-Peekaboot detects Kubernetes, Docker and Podman, and any container whose `/proc/1/cgroup`
-names `docker`, `kubepods` or `containerd`. A `container` environment variable that is not
-blank counts as one too, and so does a `/proc/1/mountinfo` that lists `/etc/hostname`,
-`/etc/hosts` or `/etc/resolv.conf` as a mount point. Inside one, everything is off by default.
+Peekaboot detects Kubernetes, Docker and Podman containers, and a non-blank `container`
+environment variable. Inside one, everything is off by default.
 
 That includes VS Code Dev Containers and GitHub Codespaces. Turn the local features on in the
 devcontainer's own configuration:
@@ -73,7 +71,7 @@ application runs on]({{ '/docs/security/' | relative_url }}#who-can-reach-peekab
 deployment with `peekaboot.enabled=true`, Peekaboot's guard challenges every `/peekaboot/**`
 request until you switch it off to use your own security. Before setting
 `peekaboot.enabled=true` anywhere other people can reach,
-read [Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) and
+read [Production use]({{ '/docs/in-production/' | relative_url }}) and
 [Security]({{ '/docs/security/' | relative_url }}).
 </div>
 
@@ -83,20 +81,19 @@ Every feature also needs `peekaboot.enabled=true`.
 
 | Feature | Switch | Also needs |
 |---|---|---|
-| Dashboard and API | `peekaboot.enabled` | A servlet web application with Spring MVC, and Actuator. The starter brings Actuator. |
-| Dev toolbar | `peekaboot.dev-toolbar.enabled` (detected) | A servlet web application. The request details and logs it shows need tracing on. |
-| Tracing | `peekaboot.tracing.enabled` (`true`) | A servlet web application. The starter brings the OpenTelemetry SDK that fills the trace store. Request-detail and log capture come with it. |
+| Dashboard and API | `peekaboot.enabled` | A servlet web application with Spring MVC, and Actuator (the starter brings it). |
+| Dev toolbar | `peekaboot.dev-toolbar.enabled` (detected) | A servlet web application. Request details and logs need tracing on. |
+| Tracing | `peekaboot.tracing.enabled` (`true`) | A servlet web application. Request-detail and log capture come with it. |
 | Insights | `peekaboot.insights.enabled` (`true`) | A servlet web application with Spring MVC and a Micrometer `MeterRegistry` bean. |
 | Error page | `peekaboot.error-page.enabled` (detected) | A servlet web application with Spring MVC. |
 | Peekaboot's guard | `peekaboot.security.enabled` (detected) | A servlet web application. |
-| Startup and shutdown summaries, run history | `peekaboot.lifecycle.enabled` (`true`) | Nothing else. The Lifecycle tab and `/peekaboot/api/lifecycle/**` need a servlet web application. |
+| Summaries and run history | `peekaboot.lifecycle.enabled` (`true`) | Nothing. The Lifecycle tab and `/peekaboot/api/lifecycle/**` need a servlet web application. |
 | Persisted history and traces | `peekaboot.storage.enabled` (detected) | A writable directory. A failed write logs a warning and Peekaboot carries on in memory. |
-| Spring Boot defaults [below](#what-peekaboot-sets-in-your-application) | `peekaboot.enabled` | A servlet web application. |
+| [Spring Boot defaults](#what-peekaboot-sets-in-your-application) | `peekaboot.enabled` | A servlet web application. |
 
 On WebFlux or a non-web application there is nothing at `/peekaboot/**`, no trace store, no
 insights and none of the Spring Boot defaults. The startup summary and run history still work.
-`spring.main.web-application-type` decides this, whether you set it as a property or through
-`SpringApplicationBuilder.web(...)`. See [Quick start]({{ '/docs/quick-start/' | relative_url }}).
+`spring.main.web-application-type` decides this. See [Quick start]({{ '/docs/quick-start/' | relative_url }}).
 
 ### Switch values {#switch-values}
 
@@ -108,15 +105,14 @@ These switches turn on only with `true`, in any case:
 `peekaboot.tracing.enabled`, `peekaboot.tracing.async`, `peekaboot.tracing.event-listeners`,
 `peekaboot.insights.enabled`.
 
-`false`, `no`, `off` and `0` turn them off. Any other value, such as `yes`, `on`, `1`, `true`
-with spaces around it or an unknown word, stops startup with a report that names the property
-and its value. `peekaboot.error-page.override` turns off only with `false`, and stops startup on
-`no`, `off` and `0` too. In YAML a bare `yes` or `on` already reads as `true` and passes.
+`false`, `no`, `off` and `0` turn them off. Any other value, such as `yes`, `on`, `1` or an
+unknown word, stops startup with a report naming the property and its value. In YAML a bare
+`yes` or `on` already reads as `true`. `peekaboot.error-page.override` turns off only with
+`false`, and `no`, `off` and `0` stop startup.
 
-An empty value counts as unset, as a compose file or Helm chart leaves one for a missing
-variable. The value from the next source down wins, with placeholders resolved. Without one,
-the launch decides as in [When Peekaboot is on](#when-peekaboot-is-on), and otherwise the
-property's default applies. A `yes` beneath an empty value still stops startup.
+An empty value counts as unset: the next source down wins, then the launch decides as in [When
+Peekaboot is on](#when-peekaboot-is-on), then the default applies. A `yes` beneath an empty
+value still stops startup.
 
 ## Properties {#properties}
 
@@ -128,24 +124,20 @@ property's default applies. A `yes` beneath an empty value still stops startup.
 | `peekaboot.dev-toolbar.enabled` | detected | The dev toolbar on your HTML pages. |
 | `peekaboot.unmasking.enabled` | `false` | Allows `unmask=true` on `/peekaboot/api/actuator/all/insights` to reveal every value that response masks: environment and config values, build info, health details and datasource connection parameters. |
 
-The toolbar shows what tracing captures for the request. See [Dev
-toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
-
-`unmasking.enabled` changes nothing on its own. See [Security, two opt-ins before a real value
+`unmasking.enabled` changes nothing on its own, see [Security, two opt-ins before a real value
 is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 ### Storage {#peekabootstorage}
-
-Storage decides whether the insights history, the start/stop log, the traces and the error digest
-survive a restart.
 
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.storage.enabled` | detected | Whether anything is written. Off, every store lives in memory and never opens a file. |
 | `peekaboot.storage.dir` | `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where the files live. An explicit value is used as is, with no per-application subdirectory. |
 | `peekaboot.storage.traces.enabled` | `true` | Whether traces, their logs and the error digest survive a restart while storage is on. `false` keeps them in memory only. |
-| `peekaboot.storage.traces.flush-interval` | `1s` | How often the trace journal is handed to the operating system, without an fsync. A crash usually loses the last interval, and everything since the start while the application is still starting or restoring its traces. Zero or a negative value stops startup. |
-| `peekaboot.storage.traces.max-journal-size` | `64MB` | The journal size, counted in characters, past which it is folded into the snapshot. Zero or a negative value stops startup. |
+| `peekaboot.storage.traces.flush-interval` | `1s` | How often trace data is written out. A crash usually loses the last interval, and everything since the start while the application is still starting or restoring its traces. |
+| `peekaboot.storage.traces.max-journal-size` | `64MB` | The journal size, counted in characters, past which it is compacted. |
+
+Zero or a negative `flush-interval` or `max-journal-size` stops startup.
 
 The default directory sits outside your project, so it survives `mvn clean` and a re-clone.
 `<groupId>.<artifactId>` comes from `build-info.properties`. Generate it with the Spring Boot
@@ -156,9 +148,8 @@ Two applications with the same name, or with none, share a directory. Set `dir` 
 its own. Every character outside `A-Za-z0-9._-` in the name becomes a dash.
 
 A second instance that starts on a directory a running instance holds logs one warning and keeps
-its insights history, lifecycle log, traces, error digest and generated password in memory. It
-loads none of them from the directory, so its password differs from the first instance's. Set
-`dir` to give it its own.
+everything in memory, the generated password included, so its password differs from the first
+instance's. Set `dir` to give it its own.
 
 {% include facts/storage-files.md %}
 
@@ -167,11 +158,9 @@ An existing directory keeps its permissions. On Windows the platform defaults ap
 
 No file can fail your application. An insights snapshot that is unreadable, older than
 `peekaboot.insights.persistence.max-age` or written for different levels is dropped, and the
-history starts empty. A failed write logs one warning per store, and one more after a write
-succeeded in between. Peekaboot carries on in memory.
-
-Trace files and `errors.jsonl` in another format, which an older or newer Peekaboot may write,
-or with a damaged header, are deleted, and the trace store or the digest starts empty.
+history starts empty. Trace files and `errors.jsonl` in another format or with a damaged header
+are deleted, and the trace store or the digest starts empty. A failed write logs one warning per
+store and Peekaboot carries on in memory.
 
 ### Peekaboot's guard {#peekabootsecurity}
 
@@ -182,9 +171,8 @@ or with a damaged header, are deleted, and the trace store or the digest starts 
 | `peekaboot.security.password` | unset | A fixed password. Nothing is generated or written to disk. |
 | `peekaboot.security.credentials-file` | `security.properties` in the storage directory | Where the generated password's hash is stored. A path you set is written even while storage is off. Readable by its owner only. |
 
-`enabled` defaults by launch. See [When Peekaboot is on](#when-peekaboot-is-on). How the guard
-derives its username and password, and how to keep a generated password across restarts, is
-under [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
+The username and password rules, and how to keep a generated password across restarts, are under
+[Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
 
 ### Remote access {#peekabootremoteaccess}
 
@@ -213,37 +201,17 @@ backs off and what `override` changes.
 | `peekaboot.stack-trace.exclude` | unset | Patterns for the frames that fold. A non-empty list replaces the default list. |
 
 A frame folds when its line contains a pattern as a substring. Your application's own frames
-never fold.
+never fold. The patterns come from the first of these that is set:
 
-`exclude` comes from the first of these sources that is set:
-
-1. `peekaboot.stack-trace.exclude`, if it is a non-empty list. You cannot add to the built-in
-   list, only replace it.
+1. `peekaboot.stack-trace.exclude`, if it is a non-empty list. It replaces the built-in list.
 2. The patterns in the `%wEx{...}` block of your `logging.exception-conversion-word`. A block
    with no patterns, such as `%wEx{full}`, folds nothing.
-3. The built-in list:
+3. The built-in list: `java.lang.reflect.Method`, `jdk.internal.reflect`, `sun.reflect`,
+   `org.apache.catalina`, `org.apache.coyote`, `org.apache.tomcat`, `org.springframework`,
+   `org.thymeleaf`, `org.attoparser`, `jakarta.servlet`, `net.sf.cglib`, `ByCGLIB` (a CGLIB proxy
+   class name), `org.zalando.logbook`, `net.ttddyy.dsproxy`, `com.mysql` and `org.peekaboot`.
 
-   ```
-   java.lang.reflect.Method
-   jdk.internal.reflect
-   sun.reflect
-   org.apache.catalina
-   org.apache.coyote
-   org.apache.tomcat
-   org.springframework
-   org.thymeleaf
-   org.attoparser      # Thymeleaf's own parser
-   jakarta.servlet
-   net.sf.cglib
-   ByCGLIB             # a CGLIB-generated proxy class name, not a package
-   org.zalando.logbook
-   net.ttddyy.dsproxy
-   com.mysql
-   org.peekaboot
-   ```
-
-`exclude: []` does not stop folding. It counts as unset and falls through to the next source.
-Use `fold: false` instead.
+`exclude: []` does not stop folding. It counts as unset. Use `fold: false` instead.
 
 ### Lifecycle {#peekabootlifecycle}
 
@@ -252,7 +220,6 @@ Use `fold: false` instead.
 | `peekaboot.lifecycle.enabled` | `true` | The startup and shutdown summaries and the run history behind the Lifecycle tab and `/peekaboot/api/lifecycle/**`. |
 
 The startup summary shows the application name, build info, server, dashboard and datasource.
-The name is the build's, from `build-info.properties`, else `spring.application.name`.
 The shutdown summary shows the uptime and the start and stop times.
 
 #### The URLs in the summary {#the-urls-in-the-summary}
@@ -263,17 +230,9 @@ The shutdown summary shows the uptime and the start and stop times.
  Peekaboot Dashboard: http://localhost:8080/peekaboot/
 ```
 
-Service URL appears whenever there is an embedded web server. It uses the bound port and
-appends `server.servlet.context-path`. A `server.address` that is unset, blank, `0.0.0.0` or
-`::` prints as `localhost`.
-
-The scheme is `https` when Spring Boot considers TLS on. A key store or an SSL bundle under
-`server.ssl` is enough. `server.ssl.enabled: false` keeps it `http`.
-
-Swagger UI appears when springdoc is on the classpath and honours `springdoc.swagger-ui.path`.
-Peekaboot Dashboard appears only where the dashboard is served: a servlet application with
-Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`, so with
-`/app` the dashboard line reads `http://localhost:8080/app/peekaboot/`.
+Service URL carries the bound port and `server.servlet.context-path` and is `https` when TLS is
+on. Swagger UI appears with springdoc. The dashboard line appears only where the dashboard is
+served, and both lines sit below `spring.mvc.servlet.path`.
 
 ### Tracing {#peekaboottracing}
 
@@ -282,17 +241,19 @@ Actuator and `peekaboot.enabled=true`. Both sit below `spring.mvc.servlet.path`,
 | `peekaboot.tracing.enabled` | `true` | Whether the in-memory trace store exists, and with it the capture of each request's headers, parameters, resolved controller and log lines. Request and response bodies are not captured. |
 | `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors. The span fails when an `@Async` method, or a task passed to `execute()` or `submit()`, throws. Needs `spring.task.execution.propagate-context`, see [Traces, background work]({{ '/docs/traces/' | relative_url }}#background-work). |
 | `peekaboot.tracing.event-listeners` | `true` | Records a span for each call of an `@EventListener` method. An `@Async` listener also needs `spring.task.execution.propagate-context`. See [Traces, event listeners]({{ '/docs/traces/' | relative_url }}#event-listeners). |
-| `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. At least `1`; a lower value stops startup. |
-| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped. The trace counts them in its `droppedSpans`, and the dashboard shows a `TRUNCATED` badge. At least `1`; a lower value stops startup. |
-| `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. `0` keeps none; a negative value stops startup. |
-| `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. `0` keeps none; a negative value stops startup. |
+| `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. |
+| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped. The trace counts them in its `droppedSpans`, and the dashboard shows a `TRUNCATED` badge. |
+| `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. |
+| `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. |
 | `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Duration in milliseconds, background async work excluded, at or above which a trace enters the Slow bucket and shows a SLOW badge. |
-| `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. `0` keeps none, and an `ERROR` line still fails its trace; a negative value stops startup. |
-| `peekaboot.tracing.max-untraced-logs` | `1000` | Log lines written outside any trace that are kept for the [log search]({{ '/docs/api/' | relative_url }}#log-search), oldest dropped first. `0` keeps none; a negative value stops startup. |
+| `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. An `ERROR` line still fails its trace when none are kept. |
+| `peekaboot.tracing.max-untraced-logs` | `1000` | Log lines written outside any trace that are kept for the [log search]({{ '/docs/api/' | relative_url }}#log-search), oldest dropped first. |
+
+`max-traces` and `max-spans-per-trace` must be at least `1`. For the other limits `0` keeps none.
+A value below the minimum stops startup.
 
 See [Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)
-for what these limits hold and the worst case, and [background
-work]({{ '/docs/traces/' | relative_url }}#background-work) for what `async` shows.
+for the worst case.
 
 #### Issue thresholds {#issue-thresholds}
 
@@ -308,9 +269,9 @@ These decide the issues on a trace's spans. They do not change what is captured.
 
 ### Insights {#peekabootinsights}
 
-These configure the collector behind the Insights tab. Which metrics it samples comes from a
-YAML file, see [Insights]({{ '/docs/insights/' | relative_url }}#configuring-panels). Whether
-the history survives a restart is [`peekaboot.storage.enabled`](#peekabootstorage).
+Which metrics the collector samples comes from a YAML file, see
+[Insights]({{ '/docs/insights/' | relative_url }}#configuring-panels). Whether the history
+survives a restart is [`peekaboot.storage.enabled`](#peekabootstorage).
 
 | Property | Default | Effect |
 |---|---|---|
@@ -335,47 +296,33 @@ all of these hold:
 - Every `interval` and `size` is greater than zero, and every `size` is at most 1,000,000.
 - Each `interval` is a whole multiple of the one before it.
 - Each `interval` fits in the level below it. A `1m` level over a `10s` level spans six entries,
-  so the `10s` level needs a `size` of at least 6. The startup failure names both intervals.
+  so the `10s` level needs a `size` of at least 6.
 - `persistence.interval` is set and greater than zero, and `persistence.max-age`, when set, too.
 - Every `problems.*-percent` is above 0 and at most 100, and every other `problems.*` at least 1.
 
-Memory follows `size`, not `interval`. Peekaboot logs the total at startup. See [what it
+Memory follows `size`, not `interval`, and Peekaboot logs the total at startup. See [what it
 costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
 
 ## Spring Boot defaults Peekaboot changes {#what-peekaboot-sets-in-your-application}
 
-Peekaboot changes a few Spring Boot and library defaults so the dashboard has data without
-further setup. Anything you set yourself wins, and every bean Peekaboot registers backs off when
-you define your own. Peekaboot sets no `spring.task.execution.*` property.
+Anything you set yourself wins. Peekaboot sets no `spring.task.execution.*` property.
 
-| Property | Spring Boot default | Peekaboot default | Applies when | Why |
+| Property | Spring Boot default | Peekaboot default | Applies when | Effect |
 |---|---|---|---|---|
-| `management.otlp.metrics.export.enabled` | `true` | `false` | always | The starter brings Micrometer's OTLP registry, which would otherwise push metrics to `localhost:4318`. Nothing leaves the process unless you opt in. |
-| `jdbc.datasource-proxy.enabled` | `true` (datasource-micrometer's own) | `false` | Peekaboot off | The starter brings datasource-micrometer for the Queries tab. With Peekaboot off it wraps none of your DataSources. Set it to `true` if you use datasource-micrometer yourself. |
-| `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled`, servlet web application | Every request reaches the Traces tab. |
-| `spring.jpa.properties[hibernate.generate_statistics]` | `false` (Hibernate's own) | `true` | `peekaboot.enabled`, servlet web application | The `hibernate.*` panels on Insights need Hibernate's statistics, which Peekaboot binds as meters itself, or Spring Boot does where `hibernate-micrometer` is present. |
-| `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | `@Observed`, `@Timed` and `@Counted` work without extra wiring. |
-| `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | `peekaboot.enabled`, servlet web application, dev toolbar on | The toolbar shows a request's trace while you are still on the page. |
+| `management.otlp.metrics.export.enabled` | `true` | `false` | always | Metrics are not pushed to `localhost:4318`. Nothing leaves the process unless you opt in. |
+| `jdbc.datasource-proxy.enabled` | `true` (datasource-micrometer's own) | `false` | Peekaboot off | None of your DataSources is wrapped. Set it to `true` if you use datasource-micrometer yourself. |
+| `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled`, servlet web application | Every request reaches the Traces tab, and every exporter you configured. |
+| `spring.jpa.properties[hibernate.generate_statistics]` | `false` (Hibernate's own) | `true` | `peekaboot.enabled`, servlet web application | The `hibernate.*` panels on Insights get data. Hibernate statistics carry a runtime cost. |
+| `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | `@Observed`, `@Timed` and `@Counted` work without extra wiring and record for every registry and exporter you configured. |
+| `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | `peekaboot.enabled`, servlet web application, dev toolbar on | The toolbar shows a request's trace while you are still on the page. Spans reach every exporter about 25 times more often than at Spring's default. |
 
 Traces and logs need no export switch. Spring Boot creates OTLP exporters for them only once
-you configure an endpoint. Peekaboot sets nothing under `management.endpoint.*` or
-`management.info.*`, changes nothing on `/actuator/**`, and your endpoint settings do not affect
-what the dashboard shows. See
+you configure an endpoint. Peekaboot changes nothing on `/actuator/**`. See
 [Security]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Some of these widen what is exposed or cost something at runtime:
-
-- Sampling at `1.0` traces every request, for every exporter you have configured.
-- Hibernate statistics carry a runtime cost.
-- `@Observed`, `@Timed` and `@Counted` start recording, for every registry and exporter you have
-  configured.
-- With the toolbar on, spans reach every exporter roughly 25 times more often than at Spring's
-  default.
-
-On your own machine this is harmless. Check it before `peekaboot.enabled` is `true` anywhere
-other people can reach. See [Do I want this in
-production?]({{ '/docs/in-production/' | relative_url }}).
+On your own machine these defaults are harmless. Check them before `peekaboot.enabled` is `true`
+anywhere other people can reach. See [Production use]({{ '/docs/in-production/' | relative_url }}).
 </div>
 
 ## Examples {#worked-examples}
@@ -394,9 +341,8 @@ peekaboot:
         size: 2160     # 3 days
 ```
 
-That is (360 + 2160&times;8) &times; 8 bytes per series, about the same as the defaults. The
-startup log reports the actual figure. See [what it
-costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
+That is about the same memory as the defaults. The startup log reports the actual figure. See
+[what it costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
 
 Halving level 0's `interval` costs no memory. It halves the window that level covers and
 doubles how often every meter is read. Keeping the window means doubling `size`, which doubles
@@ -404,9 +350,9 @@ the memory.
 
 ### Memory-constrained {#memory-constrained}
 
-Every trace limit below trades memory for history. [Traces, buckets, limits and
-memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets) works out the worst case. Errors
-and Slow can keep a trace after All has evicted it, so scale them down with All:
+Errors and Slow can keep a trace after All has evicted it, so scale them down with All. [Traces,
+buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets) works out the
+worst case.
 
 ```yaml
 peekaboot:
@@ -419,19 +365,16 @@ peekaboot:
     max-slow-traces: 25
 ```
 
-Requests with more than 50 spans get truncated. Watch for the `TRUNCATED` badge, especially
-with query-heavy endpoints.
+Requests with more than 50 spans get truncated, which shows as the `TRUNCATED` badge.
 
 ### Query-heavy application {#query-heavy-application}
 
 A report or bulk export can issue hundreds of queries. Past the span cap, spans are dropped and
-the row's query count under-reports. The default of 500, counted after duplicates are merged,
-covers most endpoints. If the trace list shows `TRUNCATED` for one, raise the cap:
+the row's query count under-reports. If the trace list shows `TRUNCATED` for one, raise the cap.
+Every span kept costs memory.
 
 ```yaml
 peekaboot:
   tracing:
     max-spans-per-trace: 1500
 ```
-
-Every span kept costs memory, so raise it only once `TRUNCATED` shows up.

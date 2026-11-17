@@ -23,47 +23,24 @@ What that means for access:
 
 - **Local run.** Peekaboot answers only the machine it runs on, without authentication. Every
   other request gets a `403` with a [problem body]({{ '/docs/api/' | relative_url }}#errors)
-  that names `peekaboot.remote-access.enabled`. A request passes when all of these hold:
-  - Its client address is a loopback address.
-  - Its `Host` header names `localhost`, a name ending in `.localhost` or a loopback address.
-  - It carries no `Forwarded` header and no `X-Forwarded-For` entry for another address, as a
-    proxy or a tunnel adds when it relays a request.
-  - No `Origin` or `Sec-Fetch-Site` header says another site sent it. A link followed from
-    another site still opens the dashboard.
-- **Local run with `server.forward-headers-strategy=native`.** The rule above can be passed from
-  another machine. The server replaces the client address with the one `X-Forwarded-For` claims
-  before Peekaboot sees the request, and Tomcat does so by default for every client on a private
-  network. Such a client passes by sending `X-Forwarded-For: 127.0.0.1` and `Host: localhost`.
-  On a local run, leave that strategy out, bind the application with
-  `server.address=127.0.0.1`, or arm [Peekaboot's guard](#peekaboots-guard).
-- **Local run with `peekaboot.remote-access.enabled=true`.** Anyone who can reach the port reads
-  `/peekaboot/**` without signing in, and Peekaboot logs a WARN at startup. To let other
-  machines in behind a login, set `peekaboot.security.enabled=true` instead. See [Peekaboot's
+  that names `peekaboot.remote-access.enabled`. A request counts as local when its client address
+  and `Host` header are loopback and no `Forwarded`, `X-Forwarded-For`, `Origin` or
+  `Sec-Fetch-Site` header says it came from elsewhere. A link followed from another site still
+  opens the dashboard.
+- **Local run with `server.forward-headers-strategy=native`.** Another machine passes that rule by
+  sending `X-Forwarded-For: 127.0.0.1` and `Host: localhost`, because Tomcat then takes the
+  client address from `X-Forwarded-For` for every client on a private network. Leave that
+  strategy out, bind the application with `server.address=127.0.0.1`, or arm [Peekaboot's
   guard](#peekaboots-guard).
+- **Local run with `peekaboot.remote-access.enabled=true`.** Anyone who can reach the port reads
+  `/peekaboot/**` without signing in, and Peekaboot logs a WARN at startup. To let other machines
+  in behind a login, set `peekaboot.security.enabled=true` instead.
 - **Local run, toolbar and error page.** A browser request that fails gets the exception, its
   message and its full stack trace, on the failing URL. A request that does not pass the rule
   above gets the status and the path only, and no toolbar on any page.
 - **Deployment with `peekaboot.enabled=true`.** Peekaboot's HTTP Basic guard challenges every
   `/peekaboot/**` request. Switch it off to use your own security. See [Peekaboot's
   guard](#peekaboots-guard).
-
-### Security-related properties {#security-properties}
-
-These properties change what Peekaboot exposes. Their defaults are under
-[Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
-
-- `peekaboot.enabled` serves the dashboard and its API, and `peekaboot.tracing.enabled` captures
-  headers, parameters and log messages. See [Tracing]({{ '/docs/configuration/' | relative_url }}#peekaboottracing).
-- `peekaboot.unmasking.enabled` allows real values. See [two opt-ins](#masking-opt-ins).
-- `peekaboot.security.*` arms and configures [Peekaboot's
-  guard]({{ '/docs/configuration/' | relative_url }}#peekabootsecurity).
-- `peekaboot.remote-access.enabled` lets clients other than this machine reach a local run. See
-  [Remote access]({{ '/docs/configuration/' | relative_url }}#peekabootremoteaccess).
-- `peekaboot.storage.*` decides whether and where Peekaboot writes
-  [files]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
-- `peekaboot.error-page.*` serves the [error
-  page]({{ '/docs/configuration/' | relative_url }}#peekabooterrorpage) with exception and stack
-  trace.
 
 ## What the dashboard and API show {#what-the-dashboard-and-api-expose}
 
@@ -90,12 +67,11 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape. A name or value over 4,096 characters is cut at its last whitespace and ends in `... N characters omitted`. |
 | The message and stack trace of every log event, inside a trace or not, and the names of its logger and thread | Logs tab of a trace, `/peekaboot/api/logs` | Message and stack trace by value shape only. Logger and thread names are shown as is. |
 
-SQL text is shown as your JDBC instrumentation records it, with any literal values in the
-statement. Bind parameters are shown too. Masking applies to what Peekaboot shows. An
-application that also exports its traces, over OTLP for example, sends the SQL and the bind
-parameters unmasked. Request and response bodies are never captured. Log events emitted
-outside a trace are kept too, the newest `peekaboot.tracing.max-untraced-logs`. The log search's
-`q` reads the masked text, so it cannot find a masked value.
+SQL text is shown as your JDBC instrumentation records it, with any literal values, and bind
+parameters are shown too. Masking applies to what Peekaboot shows. An application that also
+exports its traces, over OTLP for example, sends the SQL and the bind parameters unmasked.
+Request and response bodies are never captured. The log search's `q` reads the masked text, so
+it cannot find a masked value.
 
 With tracing on, every response carries
 `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"`, JSON API calls included.
@@ -103,17 +79,8 @@ Anyone who reads that header and can reach `/peekaboot/**` can open that request
 `GET /peekaboot/api/traces/{traceId}`. Responses on the [paths Peekaboot never
 records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) get no header.
 
-Every API endpoint answers with `Cache-Control: no-store` and
-`X-Content-Type-Options: nosniff`, so a proxy or the browser's cache does not keep it.
-
-The dashboard's files under `/peekaboot/ui/**` are served with these headers, so no page can
-frame the dashboard. A header the response already carries stays as your application set it.
-
-```
-Content-Security-Policy: default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
-X-Frame-Options: DENY
-X-Content-Type-Options: nosniff
-```
+No page can frame the dashboard. A security header your application already sets on those
+responses stays as it set it.
 
 ## What the error page shows {#the-error-page}
 
@@ -126,77 +93,45 @@ Boot's normal error response instead.
 It is on for a local run and off for a deployment or a test. Which requests get the detail on a
 local run is under [who can reach Peekaboot](#who-can-reach-peekaboot).
 
-Turned on for a deployment, the page is outside Peekaboot's guard, and the startup report logs
-a WARN saying so whenever Peekaboot's page is served. When it backs off for your own error
-page, and how `override` outranks that page, is on
-[Error page]({{ '/docs/error-page/' | relative_url }}).
+Turned on for a deployment, the page is outside Peekaboot's guard and Peekaboot logs a WARN
+about it. When it backs off for your own error page, and how `override` outranks that page, is
+on [Error page]({{ '/docs/error-page/' | relative_url }}).
 
 ## What stays in memory and what goes to disk {#what-peekaboot-writes-to-disk}
 
-Environment values and config values stay in memory for the life of the process. Request traces
-and their log lines are written to disk while storage and trace storage are on. Headers and
-parameters are masked when captured, so they reach the disk masked. Span attributes, SQL with its
-bind parameters, log messages and stack traces are written raw and masked only when shown.
-
-Peekaboot writes files only while `peekaboot.storage.enabled` is `true`, which is the default
-for a local run only. The one exception is `security.properties` with an explicit
-`peekaboot.security.credentials-file`.
+Environment values and config values stay in memory. Peekaboot writes files only while
+`peekaboot.storage.enabled` is `true`, which is the default for a local run only. The exception
+is `security.properties` with an explicit `peekaboot.security.credentials-file`. Traces and their
+log lines go to disk while storage and trace storage are on, as the table shows.
 
 {% include facts/storage-files.md %}
 
-`lifecycle.jsonl` drops every other build-info and git-info entry, including the git remote
-URL, the building user's name and mail address, and anything else your build wrote into
-`build-info.properties`.
+`lifecycle.jsonl` holds no other build-info or git-info entry, so the git remote URL, the
+building user's name and mail address and anything else your build wrote stay out.
 
 A password in a bind parameter or a log line is on disk in clear until its trace or line leaves
-the store and the next fold drops it. Keep `peekaboot.storage.dir` readable by you only,
-or set `peekaboot.storage.traces.enabled: false`. On POSIX systems Peekaboot creates the
-directory that way, see below.
-
-The files live under `${user.home}/.peekaboot/<groupId>.<artifactId>/` unless
-`peekaboot.storage.dir` says otherwise. On a POSIX file system the directory is created
-`rwx------` and the files `rw-------`. See [Configuration,
-`peekaboot.storage`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
+the store. Keep `peekaboot.storage.dir` readable by you only, or set
+`peekaboot.storage.traces.enabled: false`. Where the files live, when they are written and their
+permissions are under [Configuration, `peekaboot.storage`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage).
 
 ## Peekaboot leaves `/actuator` alone {#what-peekaboot-does-not-do}
 
-Peekaboot reads Actuator's data in-process. It adds nothing to
-`management.endpoints.web.exposure`, and which endpoints `/actuator/**` serves is the same with
-or without it. Don't use `management.endpoints.web.exposure` to protect Peekaboot: it has no
-effect on `/peekaboot/**`.
-
-Peekaboot sets no `management.info.*` property. What `/actuator/info` serves is the same with or
-without it. The Java, System and memory cards on Overview come from contributors Peekaboot
-builds for itself.
-
-With Peekaboot off, nothing is served under `/peekaboot/**`, the UI assets included.
-
-### Actuator's `show-values` does not apply {#show-values-does-not-apply}
-
-`management.endpoint.env.show-values` and `management.endpoint.configprops.show-values` have no
-effect on the dashboard. Setting them to `never` does not blank the Environment and Config tabs.
-Peekaboot's own masking decides what those tabs hide. Peekaboot never sets either property, so
-your own `/actuator/env` and `/actuator/configprops` behave as you configured them.
+Peekaboot does not change `/actuator`. It adds nothing to `management.endpoints.web.exposure` and
+sets no `management.endpoint.*` or `management.info.*` property. Actuator's exposure settings and
+`show-values` do not affect `/peekaboot/**`, so setting `show-values` to `never` does not blank
+the Environment and Config tabs. Protect Peekaboot with [its guard](#peekaboots-guard) or your own
+security.
 
 ## Masking {#masking}
 
-Masking is on by default and has nothing to configure. It replaces a value with `******` in:
+Masking is on by default and has nothing to configure. It replaces a value with `******`
+wherever the Masked column of the [table above](#what-the-dashboard-and-api-expose) says so. It
+also masks the request path, the database connection parameters in Peekaboot's startup log line
+and the exception message and stack trace on the error page.
 
-- environment and `@ConfigurationProperties` values
-- health details, `info.build` and datasource connection parameters
-- Micrometer meter tags
-- captured headers, the request path, query and form parameters, span tags, SQL text and bind
-  parameters
-- the message and stack trace of every failed span
-- the message and stack trace of every captured log, inside a trace or not
-- the last failure message of a scheduled task, and a custom trigger's description
-- the database connection parameters in Peekaboot's startup log line
-- the exception message and stack trace on the error page
-
-Your own `SanitizingFunction` beans also run on environment and config values, so a value they
-mask reaches the dashboard as `******`. They do not run on headers, parameters, span tags, SQL,
-log lines or the error page, and Peekaboot has no property or bean that adds a masking rule.
-The lists below are what it masks.
+Your own `SanitizingFunction` beans also run on environment and config values. They do not run on
+headers, parameters, span tags, SQL, log lines or the error page, and Peekaboot has no property or
+bean that adds a masking rule.
 
 `/peekaboot/api/features` names the literal in `maskLiteral`.
 [Agents]({{ '/docs/agents/' | relative_url }}#masked-values) says how an agent reads it.
@@ -205,9 +140,9 @@ The lists below are what it masks.
 
 Two rule sets run together.
 
-**By key name.** A key is sensitive when one of these words appears in it as a whole token,
-separated by any character other than a letter or digit, or by a camelCase boundary.
-Case does not matter.
+**By key name.** A key is sensitive when one of these words is a whole token of it, split at any
+character other than a letter or digit or at a camelCase boundary, in any case. A sensitive key
+masks its entire value, and `design` and `signal` are not masked.
 
 ```
 password              passwords             passwd
@@ -229,20 +164,15 @@ session-id            salt                  signature
 sig                   certificate-password  certificate-private-key
 ```
 
-- A sensitive key masks its entire value.
-- Words match only as whole tokens: `design` and `signal` are not masked.
 - These key patterns also mask: `vcap_services` and `sun.java.command` anywhere in the key,
   `^vcap\.services.*$`, and `^spring[._]application[._]json$`.
 - `cookie`, `set-cookie`, `http.request.header.cookie`, `http.response.header.set-cookie`,
-  `encrypt.key` and `jwt` mask only as the entire key. `server.servlet.session.cookie.*` stays
-  readable. So do `encrypt.key-store.*` and `spring.security.oauth2.resourceserver.jwt.*`.
-- The exact key `PWD` (the shell's working directory) is not masked. `db.PWD` and a `PWD=`
-  parameter inside a value are.
-- Bare `key` and bare `certificate` are not in the list, so `server.ssl.key-store` and
-  `server.ssl.certificate` stay readable.
-- A key whose last token is `uri` or `url` skips the word list. Only the four key patterns
-  above apply to it. `…provider.<x>.token-uri` stays readable, and so does
-  `app.password-url`. `app.token-uri.password` is masked.
+  `encrypt.key` and `jwt` mask only as the entire key, so `server.servlet.session.cookie.*`,
+  `encrypt.key-store.*` and `spring.security.oauth2.resourceserver.jwt.*` stay readable.
+- The exact key `PWD` (the shell's working directory), bare `key` and bare `certificate` are not
+  masked, so `server.ssl.key-store` and `server.ssl.certificate` stay readable.
+- A key whose last token is `uri` or `url` skips the word list. `…provider.<x>.token-uri` and
+  `app.password-url` stay readable. `app.token-uri.password` is masked.
 
 **By value shape.** These patterns mask a credential inside any value, whatever its key. Only
 the matched part is masked, so a JDBC URL keeps its host and database name.
@@ -264,32 +194,19 @@ the matched part is masked, so a JDBC URL keeps its host and database name.
 | Command-line option with a sensitive name | `-Dspring.datasource.password=…`, `--api-key=…` in `JAVA_TOOL_OPTIONS` |
 | Quoted option with a sensitive name | `password="…"` in `sasl.jaas.config` |
 
-A parameter or option is judged by its name with the key-name rules above. It needs its
-marker: a bare `password=hunter2` without a leading `?`, `&`, `;`, `-D` or `--` and without
-quotes is not masked. In a URL, up to five digits after the colon followed by `/` are read as a
-port, so `user:12345/x@host` is not masked. A password that holds `@` together with `/`, `?` or
-`#` is masked only up to an `@` inside it.
-
-A PEM block without a footer masks to the end of the value. A quoted value whose closing quote
-is missing is masked to the end of the text. One that holds a line break is not masked.
-
-The key names and value shapes above are the complete set.
+A parameter or option is judged by its name with the key-name rules above, and needs its marker:
+a bare `password=hunter2` without a leading `?`, `&`, `;`, `-D` or `--` and without quotes is not
+masked. A password that holds `@` together with `/`, `?` or `#` is masked only up to an `@`
+inside it, and a quoted value that holds a line break is not masked. The key names and value
+shapes above are the complete set.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Masking is not exhaustive. A credential with no recognisable shape under a key that is not
-listed is shown as is. `INSERT INTO users (password) VALUES ('hunter2')` is not masked, because
-SQL masking goes by value shape only and does not know column names. Assume any captured trace
-can contain plaintext SQL and plaintext request data.
+Masking is not exhaustive and has no entropy detection. A credential with no recognisable shape
+under a key that is not listed is shown as is. Log content is masked by value shape only. Anything not listed here is not masked, and neither
+are the rows marked No in the table above. `INSERT INTO users (password) VALUES ('hunter2')` is
+not masked, because SQL masking goes by value shape only and does not know column names. Assume
+any captured trace can contain plaintext SQL and plaintext request data.
 </div>
-
-### What is left unmasked entirely {#what-is-left-unmasked-entirely}
-
-- process identity: OS user, uid, gid, pid, parent processes
-- machine facts, IP addresses and hostnames included
-- the datasource user, host and database name
-- the run history
-- the request line on the error page
-- anything no key-name rule and no value shape recognises
 
 ### Two opt-ins before a real value is shown {#masking-opt-ins}
 
@@ -300,8 +217,7 @@ Masked values are revealed only when both are true:
    accepts `unmask`.
 
 The parameter alone does nothing. With unmasking enabled, the Environment and Config tabs show
-a "Show secrets" toggle that sends it. It is absent otherwise. See [The
-dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config).
+a "Show secrets" toggle. See [The dashboard]({{ '/docs/dashboard/' | relative_url }}#environment-vs-config).
 
 {% capture caption %}Masked, the default.{% endcapture %}
 {% include screenshot.html name="dashboard-config" caption=caption %}
@@ -321,14 +237,12 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class PeekabootSecurityConfig {
 
+    // Evaluated before your application's own chain, which has no @Order.
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain peekabootSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -337,39 +251,15 @@ public class PeekabootSecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
-
-    // Stands in for your application's own chain. No @Order, so it is evaluated last.
-    @Bean
-    public SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll()).build();
-    }
-
-    // Stands in for wherever your users and roles already come from.
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("admin")
-                        .password("{noop}admin-password")
-                        .roles("ADMIN")
-                        .build(),
-                User.withUsername("user")
-                        .password("{noop}user-password")
-                        .roles("USER")
-                        .build());
-    }
 }
 ```
 
-Two rules make this work:
-
-1. Give the Peekaboot chain `securityMatcher("/peekaboot/**")` and
-   `@Order(Ordered.HIGHEST_PRECEDENCE)`, and leave your application's chain without `@Order`.
-   A `/peekaboot/**` rule in your general chain, or a lower order on that chain, matches
-   `/peekaboot/**` first, and the role check never runs.
-2. Copy only `peekabootSecurityFilterChain`. `applicationSecurityFilterChain` permits every
-   request. In an application with no chain yet, declaring any `SecurityFilterChain` switches
-   off Spring Boot's default chain, so every request outside `/peekaboot/**` passes unsecured
-   unless you add a chain for it.
+Give the Peekaboot chain `securityMatcher("/peekaboot/**")` and
+`@Order(Ordered.HIGHEST_PRECEDENCE)`, and leave your application's chain without `@Order`. A
+`/peekaboot/**` rule in your general chain, or a lower order on that chain, matches
+`/peekaboot/**` first, and the role check never runs. In an application with no chain yet,
+declaring any `SecurityFilterChain` switches off Spring Boot's default chain, so add one for
+every request outside `/peekaboot/**`.
 
 Replace `httpBasic` with whatever your application uses: form login, OAuth2, a gateway header.
 Use `.authenticated()` instead of `.hasRole(...)` only if every signed-in user may read
@@ -385,8 +275,8 @@ sees a filled toolbar. A reader your chain refuses sees an empty bar with this l
 Peekaboot toolbar could not start — sign in, or check that its script is allowed to load
 ```
 
-The link opens `/peekaboot/`. The browser gets the `401` challenge and asks for credentials.
-After signing in, the toolbar fills on the next page load.
+The link opens `/peekaboot/` and the browser asks for credentials. The toolbar fills on the next
+page load.
 
 If your application sends a `Content-Security-Policy`:
 
@@ -399,16 +289,10 @@ If your application sends a `Content-Security-Policy`:
 ### Peekaboot's guard {#peekaboots-guard}
 
 <span id="if-nothing-else-secures-it"></span>On a deployment launch with
-`peekaboot.enabled=true`, Peekaboot arms an HTTP Basic guard
-(realm `Peekaboot`) on `/peekaboot/**`. It challenges every request, whatever else
-authenticated it. With `spring.mvc.servlet.path` set, it guards the dashboard under that prefix,
-such as `/app/peekaboot/**`. It also checks requests your application forwards or includes into
-the dashboard, and async dispatches.
-
-The guard also challenges where your application's Spring MVC configuration moves Peekaboot's
-controllers or UI: a path prefix, a case-insensitive matcher or a second `DispatcherServlet`.
-With Spring MVC on the classpath but no `DispatcherServletPath` bean, Peekaboot logs a WARN at
-startup and assumes `/peekaboot/*`.
+`peekaboot.enabled=true`, Peekaboot arms an HTTP Basic guard (realm `Peekaboot`) on
+`/peekaboot/**`. It challenges every request, whatever else authenticated it. With
+`spring.mvc.servlet.path` set, it guards the dashboard under that prefix, such as
+`/app/peekaboot/**`.
 
 {% include facts/guard-refusal.md %}
 
@@ -427,9 +311,8 @@ changes on every restart. The startup log says so. Keep it stable with one of th
 </div>
 
 An agent or a script sends the same credentials with HTTP Basic, such as
-`curl -u <username>:<password>`. Set the password with `peekaboot.security.password`, or the
-environment variable `PEEKABOOT_SECURITY_PASSWORD`, so the agent can know it without reading the
-startup log. See [Agents]({{ '/docs/agents/' | relative_url }}#authentication).
+`curl -u <username>:<password>`. Set the password explicitly so it need not read the startup log.
+See [Agents]({{ '/docs/agents/' | relative_url }}#authentication).
 
 Rules to know:
 
@@ -438,21 +321,16 @@ Rules to know:
   out, so switch one off. With form login or a session cookie the reader signs in twice.
 - A VPN, an nginx basic-auth layer, an IP allowlist or an API gateway in front does not
   satisfy the guard. It still challenges behind them.
-- At most two password checks run at once, and requests with the same credentials share one.
-  A sign-in that arrives while two are running gets a `401` unchecked, and the log says so
-  once at WARN. That is no rate limit. Rate-limit at the proxy in front of the application.
+- The guard is one HTTP Basic credential with no throttle on failed attempts. Rate-limit at the
+  proxy in front of the application. At most two password checks run at once, and a sign-in that
+  arrives while two are running gets a `401` unchecked.
 - The generated password is in the application log only, never in the Logs tab, the log API
   or the trace journal.
 - On a POSIX file system `security.properties` must be accessible to its owner only. Peekaboot
   ignores a file its group or other users can access, logs a WARN and generates a new password.
-- The `Peekaboot Security` block logs at INFO. With the toolbar on it logs at WARN, because the
-  toolbar's requests then raise a credential dialog on ordinary pages. With
-  `peekaboot.error-page.enabled=true` on a deployment it also logs at WARN while Peekaboot's error
-  page is served, because that page serves full stack traces with no guard in front.
-- Failed attempts log at DEBUG.
 - `peekaboot.security.enabled=false` turns the guard off. On a deployment launch Peekaboot then
   logs a WARN at startup that your own security must authenticate `/peekaboot/**`, or the
-  dashboard path under `spring.mvc.servlet.path`, such as `/app/peekaboot/**`.
+  dashboard path under `spring.mvc.servlet.path`.
 
 The guard has one flat credential and no roles. For roles, switch it off and use the
 [`SecurityFilterChain`](#securing-the-dashboard) above.
@@ -460,7 +338,6 @@ The guard has one flat credential and no roles. For roles, switch it off and use
 ## Running it on a shared or deployed server {#running-it-in-a-deployed-environment}
 
 <span id="production-checklist"></span>
-<span id="keeping-it-out-of-production-entirely"></span>[Do I want this in
-production?]({{ '/docs/in-production/' | relative_url }}) says what Peekaboot does on a
+<span id="keeping-it-out-of-production-entirely"></span>[Production use]({{ '/docs/in-production/' | relative_url }}) says what Peekaboot does on a
 deployment. It lists [what to set before you turn it on
 there]({{ '/docs/in-production/' | relative_url }}#before-you-turn-it-on).
