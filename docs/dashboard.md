@@ -58,36 +58,24 @@ Filters travel as a query string:
 
 | View | Query string |
 |---|---|
-| Traces | `bucket`, `type` and `op` (`#traces?bucket=errors`). Without `type` the list shows every type except Maintenance. Unticking Maintenance under Excluded adds `excluded=none`. `type=MAINTENANCE` in a link is ignored |
+| Traces | `bucket`, `type` and `op` (`#traces?bucket=errors`). Without `type` the list shows every type except Maintenance |
 | Meters, Environment, Config | `q`, the text filter (`#config?q=datasource`) |
 | Loggers | `q` plus the configured-only checkbox (`#loggers?q=peekaboot&configured=1`) |
 | Insights | `level`, the `percentiles` and `restarts` toggles, and `panels` for per-panel level overrides |
 | Lifecycle | `page` |
 | An open trace's Logs tab | `q`, `level` and `span` (`#traces/<traceId>/logs?level=WARN&q=timeout`) |
 
-An invalid bucket, level or page in a link falls back to the default. Theme, language and
-timezone are never part of a link.
+Theme, language and timezone are never part of a link.
 
 ## Overview {#overview}
 
 {% include screenshot.html name="dashboard-overview" %}
 
 Overview shows the application's health, build and runtime details, datasource status, and
-memory and storage meters. A composite health contributor, such as Spring's `db` with two
-DataSources, shows as one row with its aggregate status, followed by its children as `db/<name>`.
-
-A DataSource gets its card once its metadata is readable after startup. Until then it has no
-card, and Peekaboot retries at most every 30 seconds while the dashboard is read.
-
-The Git card and the [Lifecycle](#lifecycle) tab read your application's own `git.properties`.
-A `git.properties` a library ships never shows. Your own `/actuator/info` stays as Spring Boot
-builds it. The Git card shows no git info where you turn off Spring Boot's git info
-contributor: `management.info.git.enabled=false`, or `management.info.defaults.enabled=false`
-without `management.info.git.enabled=true`. The Lifecycle tab still shows each run's branch and
-commit.
-
-The Machine card names the container runtime: `docker`, `podman`, `kubernetes`, `container` or
-`none`. Inside a container, CPU and memory show the container's limits.
+memory and storage meters. The Git card and the [Lifecycle](#lifecycle) tab read your
+application's own `git.properties`. The Machine card names the container runtime: `docker`,
+`podman`, `kubernetes`, `container` or `none`. Inside a container, CPU and memory show the
+container's limits.
 
 ### Stat tiles {#stat-tiles}
 
@@ -121,20 +109,12 @@ Lifecycle lists every run of the application, newest first, 20 to a page.
 | Down before | The gap between the previous run's stop and this run's start |
 | Build | The version, with `branch @ commit` beneath it and the build time on hover. A **Deployment** badge names which of the three changed since the previous run |
 
-A dash means the value is unknown. A run with no recorded stop has no duration, and a run
-after an unclean exit has no downtime. A launch that fails before the application is ready
+A dash means the value is unknown. A launch that fails before the application is ready
 records nothing.
 
-Branch and commit come from your application's `git.properties`, the one in its jar or in its
-build's output directories. Without `build-info.properties`, so do the version and build time.
-Set `spring.info.git.location` to name another file.
-
-A `git.properties` a library ships never counts for a new run. A run recorded by an earlier
-Peekaboot may hold a library's build. That is the library's commit, and its version and build
-time where your application has no `build-info.properties`. A run without these facts of its own
-shows the last known ones, so later runs show that build too. Delete `lifecycle.jsonl` from the
-[storage directory]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) once after
-upgrading to clear it.
+Branch and commit come from your application's `git.properties`. Without
+`build-info.properties`, so do the version and build time. Set `spring.info.git.location` to
+name another file.
 
 History across restarts needs
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage),
@@ -181,16 +161,14 @@ keys and values, including Peekaboot's own defaults. Use it to find which source
 
 {% include screenshot.html name="dashboard-flyway" %}
 
-Flyway shows one row per migration with its status. A repeatable migration shows Repeatable in
-place of a version.
+Flyway shows one row per migration with its status.
 
 ## Liquibase {#liquibase}
 
 {% include screenshot.html name="dashboard-liquibase" %}
 
 Liquibase shows one row per change set in the order they ran. The status is `EXECUTED`, `FAILED`,
-`SKIPPED`, `RERAN`, `MARK_RAN` or `UNKNOWN`, and a failed change set is highlighted. Change sets
-from every Liquibase bean share one table. Liquibase records no duration.
+`SKIPPED`, `RERAN`, `MARK_RAN` or `UNKNOWN`, and a failed change set is highlighted.
 
 ## Loggers {#loggers}
 
@@ -203,10 +181,8 @@ read-only. It cannot change a level.
 
 {% include screenshot.html name="dashboard-config" %}
 
-Config shows the values bound to `@ConfigurationProperties` beans, grouped by prefix. Nested
-values get one row each under their full dotted key, such as
-`registration.google.client-secret`, and list entries are indexed as `servers[0]`. The filter
-matches these keys and their values.
+Config shows the values bound to `@ConfigurationProperties` beans, grouped by prefix, under their
+full dotted keys. The filter matches keys and values.
 
 ### Environment vs Config {#environment-vs-config}
 
@@ -218,11 +194,8 @@ matches these keys and their values.
 A property in `application.yml` that feeds a `@ConfigurationProperties` bean appears in both.
 `@Value` injections are not in Config. Look them up under Environment.
 
-Both tabs mask sensitive values by key name and by value shape, whatever your
-`management.endpoint.*.show-values` settings say. The **Show secrets** toggle appears only with
-unmasking enabled, reveals real values on both tabs and resets on reload. See [Security, what gets
-masked]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) and [two opt-ins before a
-real value is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
+Both tabs mask sensitive values. See [Security, what gets
+masked]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 Masking is not exhaustive. See
@@ -235,7 +208,7 @@ what is not.
 {% include screenshot.html name="dashboard-scheduled-tasks" %}
 
 Scheduled Tasks lists `@Scheduled` methods and the tasks a `SchedulingConfigurer` registers,
-grouped by type: cron, fixed delay, fixed rate and custom trigger. Cron expressions come with a description in the dashboard's language.
+grouped by type: cron, fixed delay, fixed rate and custom trigger.
 
 ## Which tabs appear {#conditionally-shown-tabs}
 

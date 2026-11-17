@@ -85,18 +85,11 @@ Peekaboot insights: <series> series across <panels> panels, levels [10s x90, 1m 
 With [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
 on, the default for a local run, the history is saved to disk and loaded at the next start.
 The downtime shows as a gap, and every start and stop appears as a restart marker, as on the
-[Lifecycle tab]({{ '/docs/dashboard/' | relative_url }}#lifecycle). Loading the history never
-delays your application's startup.
+[Lifecycle tab]({{ '/docs/dashboard/' | relative_url }}#lifecycle).
 
 History is written every five minutes (`persistence.interval`) and at shutdown, so a crash loses
-at most those five minutes. Peekaboot discards the saved file and starts empty when:
-
-- this Peekaboot version cannot read it,
-- your `levels` changed since it was written,
-- it is older than `persistence.max-age`,
-- it is dated more than five minutes in the future.
-
-Each case is logged at `INFO`. A bad file never fails your application. See
+at most those five minutes. Peekaboot starts empty when the saved file is older than
+`persistence.max-age` or your `levels` changed. See
 [`peekaboot.storage`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) for where
 the file lives.
 
@@ -105,7 +98,7 @@ the file lives.
 Put a `peekaboot-insights.yml` in `src/main/resources/`, or point
 `peekaboot.insights.config-location` at another Spring resource location. Peekaboot's bundled
 panels still load underneath. A missing `peekaboot-insights.yml` is not an error. A
-`config-location` that names nothing stops startup, and the message names the resource.
+`config-location` that names nothing stops startup.
 
 Your file is merged with the bundled panels by panel `id`:
 
@@ -114,10 +107,8 @@ Your file is merged with the bundled panels by panel `id`:
 | Existing id, no `title` | Patches the shipped panel. Only `order`, `enabled` and `level` are taken. Use it to switch a panel on or off, move it, or pin it to a level |
 | Existing id, with a `title` | Replaces the shipped panel completely. Series you do not repeat are gone |
 | New id | Added and placed by its `order`. The defaults use 10, 20, 30 and so on |
-| Unknown id, no `title` | Fails validation |
+| Unknown id, no `title` | Fails validation, see [below](#invalid-panel-file) |
 | Tile | Merges by id, by replacement only |
-
-Duplicate ids make the file invalid, see [below](#invalid-panel-file).
 
 ```yaml
 panels:
@@ -176,13 +167,13 @@ do. Peekaboot charts and serves it from 0 to 100.
 
 | `stat` | Plots |
 |---|---|
-| `value` | The meter's current value: a gauge, a counter's total, or a long task timer's active tasks. A timer or distribution summary gives a gap |
-| `rate` | The count's increase per second since the previous sample. The first sample after a start is a gap. A counter or timer that appears later counts from 0, so the first 5xx shows at once. A function counter or function timer that appears later starts from its first reading |
+| `value` | The meter's current value: a gauge, a counter's total, or a long task timer's active tasks |
+| `rate` | The count's increase per second since the previous sample. The first sample after a start is a gap |
 | `avg` | The average duration of the calls since the previous sample. No calls gives a gap |
-| `max` | Micrometer's MAX for a timer or summary, which covers the last few minutes. See [Limitations](#percentiles-of-aggregates) |
+| `max` | Micrometer's MAX for a timer or summary |
 
 `subtract-meter` subtracts a second meter, as Disk space does for Used (`disk.total` minus
-`disk.free`). The series' `tags` apply to both. If either meter is missing, the line shows a gap.
+`disk.free`). The series' `tags` apply to both.
 
 #### A series with no `tags` sums every meter of that name {#series-without-tags}
 
@@ -214,25 +205,18 @@ reads. A plain gauge that holds seconds shows a value a thousand times too small
 Peekaboot validates your file at startup. It is invalid when:
 
 - two panels share an id, or two series of a panel do,
-- two panels' `<panel id>.<series id>` are equal,
 - a series has no `meter`,
-- `chart`, `unit`, `stat` or `format` is not one of the values above,
-- `subtract-meter` is set without `stat: value`,
-- an entry with no `title` has an unknown id.
+- `chart`, `unit`, `stat` or `format` is not one of the values above.
 
-An invalid file is ignored as a whole, and the bundled panels show. Your application still
-starts. The startup log has an `ERROR` with the stack trace:
+An invalid file is ignored as a whole and the bundled panels show. Your application still
+starts. The startup log has an `ERROR`:
 
 ```
 Insights panel config class path resource [peekaboot-insights.yml] is invalid; discarding it entirely and serving the bundled panels instead of the operator's customisation
 ```
 
-With `config-location` set, the resource reads like `file [/etc/app/panels.yml]`. Check the
-log first if your panels do not appear.
-
-Meter names are not checked. A series of yours whose `meter` or `subtract-meter` stays unresolved
-for three sampling ticks shows a gap and logs a `WARN` naming it, and logs it again if a meter
-that resolved disappears. Shipped series log the same case at `DEBUG`.
+Check the log first if your panels do not appear. An unknown meter shows a gap and logs a `WARN`
+naming it.
 
 ## Reading the charts {#reading-the-tab}
 
@@ -271,10 +255,4 @@ requests. Use them to see trends and spot leaks or a saturating pool. Do not use
 that needs a real metrics backend. See
 [Traces, limitations]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing).
 
-- At `1m`, p90, p95 and p99 all equal the maximum.
-- At `1h` and above, a percentile is calculated over the windows below it. At the default
-  levels it is never below the true one.
-- The min and max at `1h` are the true min and max of the minutes below, so a spike survives
-  in max.
-- `stat: max` plots Micrometer's timer MAX, not the maximum since the previous sample. It
-  covers roughly the last four to six minutes.
+At `1m`, p90, p95 and p99 all equal the maximum.
