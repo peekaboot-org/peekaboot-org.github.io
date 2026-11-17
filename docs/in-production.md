@@ -1,24 +1,20 @@
 ---
-title: Do I want this in production?
+title: Production use
 lead: What Peekaboot changes while it is on, what it costs, and how to keep it out of a production build.
 permalink: /docs/in-production/
 ---
 
-Peekaboot is built for one process on your own machine: the toolbar, the request's trace, its
-queries and its logs, with no collector or backend to run. [Traces,
-limitations]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing) says what that
+Peekaboot is built for one process on your own machine, with no collector or backend to run.
+[Traces, limitations]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing) says what that
 leaves to a tracing backend.
-
-On a deployment Peekaboot is off unless you set `peekaboot.enabled=true`. Turned on there, it
-serves the dashboard and API behind its guard and leaves the toolbar, storage and the error
-page off.
 
 ## What happens on a deployment {#what-happens-on-a-deployment}
 
 <span id="what-happens-when-you-deploy"></span>A deployment is every launch that is neither a
 local run nor a test, such as `java -jar`, a war, a native image or anything in a container.
-[Configuration, what counts as a local
-run]({{ '/docs/configuration/' | relative_url }}#local-run) has the rules.
+[Configuration, when Peekaboot is
+on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on) has the rules and every
+switch.
 
 | Part | With Peekaboot off, the default | With `peekaboot.enabled=true` |
 |---|---|---|
@@ -29,45 +25,32 @@ run]({{ '/docs/configuration/' | relative_url }}#local-run) has the rules.
 | Files on disk | None | None until you set `peekaboot.storage.enabled=true` or `peekaboot.security.credentials-file` |
 | Tracing and Insights | Off | On, in memory only |
 | Startup and shutdown summaries | None | Logged |
-| Spring Boot defaults | `management.otlp.metrics.export.enabled=false` and `jdbc.datasource-proxy.enabled=false` | `management.otlp.metrics.export.enabled=false`, and the sampling, Hibernate and observation defaults under [Configuration, Spring Boot defaults Peekaboot changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application) |
 
-[Configuration, when Peekaboot is
-on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on) lists each switch and its
-default.
-
-One launch you might deploy also counts as local. See [what counts as a local
-run]({{ '/docs/configuration/' | relative_url }}#local-run).
-
-A launch that counts as local answers only the machine it runs on. A build-tool launch on a
-server is not readable from the network unless `peekaboot.remote-access.enabled=true` opens it.
-See [Security, who can reach
-Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
-
-With lifecycle summaries on (the default), the startup summary has a `Peekaboot Dashboard:`
-line only while the dashboard is served.
+A launch that counts as a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
+answers only the machine it runs on, even on a server. A build-tool launch on a server is not
+readable from the network unless `peekaboot.remote-access.enabled=true` opens it. See
+[Security, who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
 ## Before you turn it on {#before-you-turn-it-on}
 
-<span id="if-you-run-it-somewhere-shared"></span>Work through this list before
-`peekaboot.enabled=true` reaches a deployment or a machine other people use.
+<span id="if-you-run-it-somewhere-shared"></span>Before `peekaboot.enabled=true` reaches a
+deployment or a machine other people use:
 
 1. Verify `peekaboot.enabled` resolves to `false` wherever you do not want the dashboard.
-   The startup summary has no `Peekaboot Dashboard:` line when the dashboard is off.
+   With lifecycle summaries on (the default), the startup summary has no `Peekaboot Dashboard:`
+   line when the dashboard is off.
 1. Set `peekaboot.enabled=false` explicitly if you deploy with a launch that [counts as
    local]({{ '/docs/configuration/' | relative_url }}#local-run).
 1. If Peekaboot must never ship, keep the starter out of the production artifact. See [Keeping
    it out of the artifact entirely](#keeping-it-out-of-the-artifact-entirely).
 1. Where you turn it on, set `peekaboot.tracing.enabled=false` unless you need traces with
-   their headers, parameters and logs. On a deployment the toolbar, storage and the error
-   page stay off unless you set them.
-1. Decide on the Spring Boot defaults Peekaboot changes while it is on.
-   `peekaboot.tracing.enabled=false` leaves them in place: every request is still sampled,
-   Hibernate statistics stay on and observation annotations still record. Set
+   their headers, parameters and logs.
+1. Decide on the [Spring Boot defaults Peekaboot
+   changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
+   while it is on. `peekaboot.tracing.enabled=false` leaves them in place. Set
    `management.tracing.sampling.probability`,
    `spring.jpa.properties[hibernate.generate_statistics]` and
-   `management.observations.annotations.enabled` yourself where you want Spring Boot's
-   values. See [Configuration, Spring Boot defaults Peekaboot
-   changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
+   `management.observations.annotations.enabled` yourself where you want Spring Boot's values.
 1. Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password, see [Security,
    Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard), or set
    `peekaboot.security.enabled=false` and put the
@@ -86,37 +69,33 @@ line only while the dashboard is served.
 
 ## What it changes while it is on {#what-it-costs-while-it-is-on}
 
-Everything Peekaboot sets sits below your own configuration, so a value you set wins.
-[Configuration, Spring Boot defaults Peekaboot
+Peekaboot changes a few Spring Boot defaults: every request is sampled, Hibernate statistics
+are on, `@Observed`, `@Timed` and `@Counted` record, and with the toolbar on spans are exported
+every 200 ms. A value you set wins. [Configuration, Spring Boot defaults Peekaboot
 changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
-lists the properties it changes and what each one costs.
+lists them and what each costs. `peekaboot.tracing.enabled=false` changes none of them.
 
-In short, every request is sampled, Hibernate statistics are on, `@Observed`, `@Timed` and
-`@Counted` record, and with the toolbar on spans are exported every 200 ms.
-`peekaboot.tracing.enabled=false` changes none of these.
+It also adds these. Unless a row says otherwise, they apply when `peekaboot.enabled` and
+`peekaboot.tracing.enabled` are true:
 
-Peekaboot also adds these:
-
-| Change | Effect | Applied when |
-|---|---|---|
-| Handler and view spans | A span around each controller method and each rendered view, sent to every exporter | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
-| Async task spans | A span around each task a Spring task executor runs inside a trace, sent to every exporter. Turn off with `peekaboot.tracing.async=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
-| Event listener spans | A span around each `@EventListener` call inside a trace, sent to every exporter. Listener beans become proxies. Turn off with `peekaboot.tracing.event-listeners=false`. | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
-| HTML response buffering | `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. | Dev toolbar on |
-| `Server-Timing` header | Every response carries its trace id, except on the [paths Peekaboot never records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
-| Log capture | A Logback appender receives every log event | `peekaboot.enabled`, `peekaboot.tracing.enabled` |
+| Change | Effect |
+|---|---|
+| Handler and view spans | A span around each controller method and each rendered view, sent to every exporter |
+| Async task spans | A span around each task a Spring task executor runs inside a trace, sent to every exporter. Turn off with `peekaboot.tracing.async=false`. |
+| Event listener spans | A span around each `@EventListener` call inside a trace, sent to every exporter. Listener beans become proxies. Turn off with `peekaboot.tracing.event-listeners=false`. |
+| HTML response buffering | With the dev toolbar on, `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. |
+| `Server-Timing` header | Every response carries its trace id, except on the [paths Peekaboot never records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) |
+| Log capture | Every log event is captured |
 
 An Actuator endpoint that keeps failing is logged once at WARN with its stack trace, then at
 DEBUG. Peekaboot adds no `/actuator` exposure. See [Security, Peekaboot leaves `/actuator`
-alone]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do) and [Configuration,
-Spring Boot defaults Peekaboot
-changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
+alone]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
 
 ## Memory {#memory}
 
 {% include facts/trace-memory.md -%}
-[Traces, buckets, limits and memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets)
-describes the buckets and the limits.
+See [Traces, buckets, limits and
+memory]({{ '/docs/traces/' | relative_url }}#the-three-buckets).
 
 The Insights history is sized by `peekaboot.insights.levels` and by how many series the
 enabled panels produce.
@@ -131,27 +110,42 @@ To size either down, see [Configuration, memory-constrained]({{ '/docs/configura
 - **One process, short history.** See [Traces,
   limitations]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing).
 - **Minimal access control.** On a deployment its guard is HTTP Basic with one credential. It
-  challenges every request, whatever else signed the reader in. Switch it off only once your
-  own security requires a login on `/peekaboot/**`. Otherwise the dashboard is open to anyone
-  who reaches it. See [Security, Peekaboot's
-  guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
+  challenges every request, whatever else signed the reader in. Switch it off only once your own
+  security requires a login on `/peekaboot/**`, or the dashboard is open to anyone who reaches
+  it. See [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
 
 ## The starter is on the classpath even when Peekaboot is off {#class-path}
 
-With `peekaboot.enabled=false` the starter still brings:
+Adding the starter pulls in `spring-boot-starter`, `spring-boot-starter-actuator`,
+`spring-boot-starter-opentelemetry`, `datasource-micrometer-spring-boot` and
+`datasource-micrometer-opentelemetry`, which capture your JDBC queries. With
+`peekaboot.enabled=false` that means:
 
-- `spring-boot-starter-actuator`. Spring Boot's default exposure serves `/actuator` and
-  `/actuator/health` over HTTP. An application that had no Actuator gains both.
-- A `MeterRegistry` with Spring Boot's JVM, system and Logback meters.
-- The OpenTelemetry SDK and OTLP exporters. Nothing is sent. Metrics export is off, see
+- Spring Boot's default exposure serves `/actuator` and `/actuator/health` over HTTP. An
+  application that had no Actuator gains both.
+- A `MeterRegistry` exists, with Spring Boot's JVM, system and Logback meters.
+- OpenTelemetry tracing and the OTLP exporters are present. Nothing is sent. Metrics export is
+  off, see
   [Configuration]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application),
   and Spring Boot creates trace and log exporters only once you configure an endpoint.
-- `datasource-micrometer`, with `spring-boot-jdbc`, `spring-jdbc`, `datasource-proxy` and
-  JSqlParser. While Peekaboot is off it sets `jdbc.datasource-proxy.enabled=false`, so none of
-  your DataSources is wrapped. Set it to `true` if you use datasource-micrometer yourself.
-- Peekaboot's own jars, unused.
+- datasource-micrometer comes with `spring-boot-jdbc`, `spring-jdbc`, `datasource-proxy` and
+  JSqlParser. Peekaboot sets `jdbc.datasource-proxy.enabled=false`, so none of your DataSources
+  is wrapped. Set it to `true` if you use datasource-micrometer yourself.
+
+Peekaboot requires the OpenTelemetry bridge the starter brings. Brave is not supported: with the
+Brave bridge the Traces tab stays empty and the toolbar never shows a trace.
 
 If that is not acceptable, keep the starter out of the artifact.
+
+### If you exclude one of them {#graceful-degradation}
+
+Startup never fails because of a missing piece.
+
+| Missing | What happens |
+|---|---|
+| A Micrometer `Tracer` bean | The dev toolbar is absent. The rest of the dashboard works. |
+| The OpenTelemetry SDK | The Traces tab explains that the SDK is missing. |
+| A Micrometer `MeterRegistry` bean | The Meters and Insights tabs, the insights API and the Overview stat tiles are absent. See [Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-appears). |
 
 ## Keeping it out of the artifact entirely {#keeping-it-out-of-the-artifact-entirely}
 
@@ -181,8 +175,8 @@ If that is not acceptable, keep the starter out of the artifact.
 Build the production artifact with `mvn package -Dproduction`. Your IDE and `spring-boot:run`
 keep the starter.
 
-Don't use the Spring Boot Maven plugin's `<excludes>` for this. It removes only the starter
-jar, and Peekaboot's auto-configuration jars still ship in the executable jar.
+Don't use the Spring Boot Maven plugin's `<excludes>`. It leaves Peekaboot jars in the
+executable jar. Use the profile instead.
 
 **Gradle.** Declare the starter `developmentOnly` instead of `implementation`. `bootRun` gets
 it, and the executable jar does not:

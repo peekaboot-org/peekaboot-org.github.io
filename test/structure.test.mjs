@@ -22,7 +22,7 @@ function onPage(urlPath, options, read) {
 const DESKTOP_WIDTH = 1280;
 const SIDEBAR_PAGE = '/docs/configuration/';
 const WIDE_TABLES_PAGE = '/docs/configuration/';
-const NARROW_TABLE_PAGE = '/docs/quick-start/';
+const NARROW_TABLE_PAGE = '/docs/error-page/';
 // The page a section's navbar item links, another page of that section, a page with its own item.
 const NAVBAR_CURRENT_PAGES = ['/docs/dev-toolbar/', '/docs/traces/', '/docs/api/'];
 

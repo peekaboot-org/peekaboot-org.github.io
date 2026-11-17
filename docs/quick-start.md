@@ -1,6 +1,6 @@
 ---
 title: Quick start
-lead: Add the starter, run your app, open the toolbar and the dashboard.
+lead: Add the starter, run your app, open the dashboard.
 permalink: /docs/quick-start/
 redirect_from:
   - /docs/
@@ -8,6 +8,10 @@ redirect_from:
 ---
 
 ## Add the dependency {#add-the-dependency}
+
+Java {{ site.java_version }} or newer, Spring Boot {{ site.spring_boot_version }} (earlier 4.x
+releases are untested) and a servlet web application. On WebFlux or a non-web application the
+dashboard and the toolbar are absent, and startup is unaffected.
 
 **Maven**
 
@@ -25,45 +29,10 @@ redirect_from:
 implementation("{{ site.maven_group }}:{{ site.maven_artifact }}:{{ site.peekaboot_version }}")
 ```
 
-To keep Peekaboot out of the executable jar in Gradle, declare it `developmentOnly` instead.
-Spring Boot's Gradle plugin still puts it on the `bootRun` classpath:
-
-```groovy
-developmentOnly("{{ site.maven_group }}:{{ site.maven_artifact }}:{{ site.peekaboot_version }}")
-```
-
-For Maven, see [Keeping it out of the
-artifact]({{ '/docs/in-production/' | relative_url }}#keeping-it-out-of-the-artifact-entirely).
-
-## What your application needs {#what-your-application-needs}
-
-- Java {{ site.java_version }} or newer.
-- Spring Boot {{ site.spring_boot_version }}. Earlier 4.x releases are untested.
-- A servlet web application.
-
-Peekaboot serves the dashboard and the toolbar on servlet (Spring MVC) applications only. On
-WebFlux or a non-web application they are absent, and startup is unaffected.
-
 ## Run your app {#run-your-app}
 
 Start it from your IDE, with `mvn spring-boot:run` or with `gradle bootRun`. Peekaboot turns
-itself and the [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) on for these launches.
-The toolbar docks to the bottom of every HTML page your app renders.
-
-{% include screenshot.html name="toolbar-collapsed" %}
-
-Click the bar for the request's trace detail, with its request and response, spans, queries and
-logs. See [Dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}).
-
-<div class="pk-callout" markdown="1">
-Set `peekaboot.dev-toolbar.enabled: false` to turn the toolbar off and keep the dashboard.
-</div>
-
-<div class="pk-callout pk-callout--warning" markdown="1">
-A devcontainer counts as a container, so Peekaboot is off there. See [Configuration,
-containers]({{ '/docs/configuration/' | relative_url }}#container-markers) for the properties
-that turn it on.
-</div>
+itself on for these launches.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 {% include facts/local-run-disk.md %}
@@ -86,53 +55,24 @@ tunnel or set `peekaboot.remote-access.enabled=true`.
 
 ## What you get immediately {#what-you-get-immediately}
 
-- The [dev toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) on every HTML page your app
-  renders
-- The [error page]({{ '/docs/error-page/' | relative_url }}) in place of Spring Boot's
-  whitelabel page
-- Overview: build and Git info, Spring Boot and Java versions, system and JVM details, and
-  datasource status
-- Lifecycle: every start and stop of the application, with its build
-- Environment and Config: every property source Spring resolved, and every
-  `@ConfigurationProperties` bean's effective values
-- Flyway and Liquibase migration history, runtime logger levels, and scheduled tasks
-- Every meter in Micrometer's registry on Meters, and the key ones charted over time on
-  [Insights]({{ '/docs/insights/' | relative_url }})
-- Traces with spans and SQL queries for the last 1,000 requests, oldest evicted first
-  (`peekaboot.tracing.max-traces`; see [Traces]({{ '/docs/traces/' | relative_url }}#the-three-buckets))
+The [dashboard]({{ '/docs/dashboard/' | relative_url }}) with its tabs, the [dev
+toolbar]({{ '/docs/dev-toolbar/' | relative_url }}) on every HTML page your app renders and the
+[error page]({{ '/docs/error-page/' | relative_url }}) in place of Spring Boot's whitelabel page.
+
+<div class="pk-callout" markdown="1">
+Set `peekaboot.dev-toolbar.enabled: false` to turn the toolbar off and keep the dashboard.
+</div>
+
+<div class="pk-callout pk-callout--warning" markdown="1">
+A devcontainer counts as a container, so Peekaboot is off there. See [Configuration,
+containers]({{ '/docs/configuration/' | relative_url }}#container-markers) for the properties
+that turn it on.
+</div>
 
 ## Turn it on outside a local run {#turn-it-on-outside-a-local-run}
 
-Peekaboot is off for a deployment or a test until you set `peekaboot.enabled=true`.
-[Configuration, when Peekaboot is on]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on)
-lists every switch the launch decides. Read [Do I want this in
-production?]({{ '/docs/in-production/' | relative_url }}) before you turn it on anywhere shared.
-
-## What the starter brings {#what-the-starter-brings}
-
-Adding `{{ site.maven_artifact }}` pulls in:
-
-- `{{ site.maven_group }}:peekaboot-spring-boot-autoconfigure`
-- `spring-boot-starter`
-- `spring-boot-starter-actuator`
-- `spring-boot-starter-opentelemetry`
-- `datasource-micrometer-spring-boot` and `datasource-micrometer-opentelemetry`, which capture
-  your JDBC queries
-
-Peekaboot requires the OpenTelemetry bridge the starter brings. Brave is not supported: with
-the Brave bridge the Traces tab stays empty and the toolbar never shows a trace.
-
-## If you exclude one of them {#graceful-degradation}
-
-Startup never fails because of a missing piece.
-
-| Missing | What happens |
-|---|---|
-| A Micrometer `Tracer` bean | The dev toolbar is absent. The rest of the dashboard works. |
-| The OpenTelemetry SDK | The Traces tab explains that the SDK is missing. |
-| A Micrometer `MeterRegistry` bean | The Meters and Insights tabs, the insights API and the Overview stat tiles are absent. See [Insights]({{ '/docs/insights/' | relative_url }}#when-the-tab-appears). |
-
-## Next {#next}
-
-- [The dashboard]({{ '/docs/dashboard/' | relative_url }})
-- [Configuration]({{ '/docs/configuration/' | relative_url }})
+Peekaboot is off for a deployment or a test until you set `peekaboot.enabled=true`. See
+[Configuration]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on) and, before you
+do it anywhere shared, [Production use]({{ '/docs/in-production/' | relative_url }}). That page
+also covers keeping the starter out of the production artifact and what it puts on the
+classpath.
