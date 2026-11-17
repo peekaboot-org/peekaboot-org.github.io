@@ -1,5 +1,8 @@
 ---
 layout: page
+redirect_from:
+  - /docs/contributing/
+  - /docs/acknowledgements/
 ---
 
 <section class="hero is-medium">
@@ -23,12 +26,11 @@ layout: page
   <div class="container">
     <div class="pk-callout pk-callout--warning content">
       <p>
-        Peekaboot is beta software and may expose security-relevant settings. Use it at your
-        own risk.
+        Peekaboot is beta software and may expose security-relevant settings. See
+        <a href="{{ '/docs/security/' | relative_url }}">Security</a>.
       </p>
       <p>
-        A local run keeps traces across restarts under <code>~/.peekaboot</code>, with SQL, bind
-        parameters and log lines unmasked. Set
+        A local run writes traces unmasked to <code>~/.peekaboot</code>. Set
         <code>peekaboot.storage.traces.enabled=false</code> to keep them in memory only. See
         <a href="{{ '/docs/security/' | relative_url }}#what-peekaboot-writes-to-disk">Security,
         what goes to disk</a>.
@@ -66,9 +68,8 @@ layout: page
       <div class="column is-5">
         <h2 class="title is-4">Dev toolbar</h2>
         <p class="content">
-          A bar at the bottom of every HTML page your app renders. Click it for request and response
-          detail, the span tree with timings and queries, and the log lines of that request. It
-          also works in Swagger UI.
+          A bar at the bottom of every HTML page your app renders. Click it for the trace, queries
+          and logs of that request.
           <a href="{{ '/docs/dev-toolbar/' | relative_url }}">Dev toolbar</a>
         </p>
       </div>
@@ -81,8 +82,8 @@ layout: page
       <div class="column is-5">
         <h2 class="title is-4">Error page</h2>
         <p class="content">
-          In place of Spring Boot's whitelabel page, errors show the exception, its message and
-          the stack trace with framework frames folded.
+          In place of Spring Boot's whitelabel page, errors show the exception and a stack trace
+          with framework frames folded.
           <a href="{{ '/docs/error-page/' | relative_url }}">Error page</a>
         </p>
       </div>
@@ -95,10 +96,8 @@ layout: page
       <div class="column is-5">
         <h2 class="title is-4">Dashboard</h2>
         <p class="content">
-          Health, build and Git info, environment, configuration properties, Flyway and
-          Liquibase migrations, logger levels and scheduled tasks, at <code>/peekaboot</code>
-          in your running app. Lifecycle lists every run of the app, Meters every meter in its
-          registry.
+          Health, build info, configuration, migrations, loggers, Lifecycle and Meters, at
+          <code>/peekaboot</code> in your running app.
           <a href="{{ '/docs/dashboard/' | relative_url }}">The dashboard</a>
         </p>
       </div>
@@ -111,11 +110,8 @@ layout: page
       <div class="column is-5">
         <h2 class="title is-4">Traces with SQL queries</h2>
         <p class="content">
-          The last 1,000 requests your app served, with no collector to run, each with its span
-          tree, SQL queries and timings. On a local run they survive a restart. With
-          <a href="{{ '/docs/traces/' | relative_url }}#background-work">context
-          propagation</a> on, work your <code>@Async</code> methods run shows up inside the request
-          that started it. Errors and slow requests are kept in buckets of their own.
+          The last 1,000 requests your app served, each with its span tree, SQL queries and
+          timings. No collector to run. On a local run they survive a restart.
           <a href="{{ '/docs/traces/' | relative_url }}">Traces</a>
         </p>
       </div>
@@ -128,8 +124,7 @@ layout: page
       <div class="column is-5">
         <h2 class="title is-4">Insights</h2>
         <p class="content">
-          Charts of CPU, memory, HTTP, connection pool and JDBC query metrics over time, from the
-          meters your app already publishes.
+          Charts over time of the meters your app already publishes.
           <a href="{{ '/docs/insights/' | relative_url }}">Insights</a>
         </p>
       </div>
@@ -142,14 +137,11 @@ layout: page
       <div class="column is-5">
         <h2 class="title is-4">HTTP API for agents and scripts</h2>
         <p class="content">
-          What the dashboard shows is JSON under <code>/peekaboot/api</code>, with Peekaboot's
-          own verdicts, such as a trace's cause, the routes that fail and the error digest. A
-          log search covers every line the store holds. <code>GET /peekaboot/api</code> lists
-          every endpoint and links the OpenAPI 3.1 document. An agent starts from
-          <a href="{{ '/llms.txt' | relative_url }}">llms.txt</a> or the
-          <a href="https://github.com/peekaboot-org/peekaboot-skills">peekaboot skill</a>.
-          <a href="{{ '/docs/api/' | relative_url }}">HTTP API</a> covers every field,
-          <a href="{{ '/docs/agents/' | relative_url }}">Agents</a> has the recipes.
+          Everything the dashboard shows is JSON under <code>/peekaboot/api</code>, which lists
+          its endpoints and links the OpenAPI 3.1 document. See
+          <a href="{{ '/docs/api/' | relative_url }}">HTTP API</a>,
+          <a href="{{ '/docs/agents/' | relative_url }}">Agents</a> and
+          <a href="{{ '/llms.txt' | relative_url }}">llms.txt</a>.
         </p>
       </div>
       <div class="column is-7">
@@ -168,28 +160,9 @@ curl -s http://localhost:8080/peekaboot/api/errors | jq</code></pre>
       Peekaboot is on when you start your app from the IDE, with <code>spring-boot:run</code>
       or with <code>bootRun</code>, and off for a deployment or a test unless you
       <a href="{{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on">turn it on</a>.
-      <a href="{{ '/docs/in-production/' | relative_url }}">Do I want this in production?</a>
-      covers what it costs while it is on and how to keep it out of the artifact.
-    </p>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <h2 class="title is-3">Why Peekaboot?</h2>
-    <div class="content">
-      <p>
-        Peek, because it lets you look inside a running application. Boot, because that's where
-        it lives. And peek-a-boo, because that's how it behaves. Add one dependency and your
-        app's internals show up on a local run, where only your own machine can read them.
-        Deploy the same jar and Peekaboot stays off.
-        <a href="{{ '/docs/in-production/' | relative_url }}#class-path">What the starter still
-        brings</a> stays on the classpath.
-      </p>
-    </div>
-    <p class="mt-5">
-      Peekaboot builds on ideas from Symfony's profiler, Spring Boot Admin and others. See the
-      <a href="{{ '/docs/acknowledgements/' | relative_url }}">acknowledgements</a>.
+      <a href="{{ '/docs/in-production/' | relative_url }}">Production use</a>
+      covers what it costs while it is on, what stays on the classpath and how to keep it out of
+      the artifact.
     </p>
   </div>
 </section>
