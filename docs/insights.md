@@ -13,42 +13,33 @@ your own.
 
 ## When the tab appears {#when-the-tab-appears}
 
-<span id="when-the-tab-isnt-there"></span>The Insights tab needs all of:
-
-- a servlet web application,
-- `peekaboot.enabled`, on by default for a local run only. See
-  [Configuration]({{ '/docs/configuration/' | relative_url }}#when-peekaboot-is-on),
-- `peekaboot.insights.enabled`, `true` by default,
-- a Micrometer `MeterRegistry` bean. Spring Boot Actuator provides it, and the starter brings
-  Actuator.
-
-If one is missing, the tab is absent. See
-[The dashboard]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs) for the other
-tabs.
+<span id="when-the-tab-isnt-there"></span>The tab appears when the dashboard does,
+`peekaboot.insights.enabled` is on (the default) and a Micrometer `MeterRegistry` bean exists.
+See [The dashboard, which tabs appear]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs).
 
 ## The default panels {#the-default-panels}
 
 These panels are on by default, in display order. A panel whose meters do not exist (no Hikari
 pool, no Hibernate, no `datasource-micrometer`) shows "No data".
 
-| Panel | id | Series | Meters |
-|---|---|---|---|
-| CPU usage | `cpu` | Process, System, GC overhead | `process.cpu.usage`, `system.cpu.usage`, `jvm.gc.overhead` |
-| System load | `load` | Load 1m, CPU cores | `system.load.average.1m`, `system.cpu.count` |
-| Heap memory | `heap` | Used, Committed, Max | `jvm.memory.*{area=heap}` |
-| Non-heap memory | `nonheap` | Used, Committed | `jvm.memory.*{area=nonheap}` |
-| Garbage collection | `gc` | Pauses, Max pause | `jvm.gc.pause` |
-| Threads | `threads` | Live, Daemon, Peak | `jvm.threads.*` |
-| HTTP throughput | `http-throughput` | Requests, 4xx, 5xx | `http.server.requests` |
-| HTTP latency | `http-latency` | Avg, Max | `http.server.requests` |
-| HTTP in flight | `http-active` | Active requests | `http.server.requests.active` |
-| DB pool | `db-pool` | Total, Active, Idle, Pending, Max | `hikaricp.connections*` |
-| DB pool timing | `db-pool-timing` | Acquire avg, Usage avg | `hikaricp.connections.acquire`, `.usage` |
-| JDBC queries | `jdbc-queries` | Queries, Avg time | `jdbc.query` |
-| Repositories | `repositories` | Invocations, Avg time | `spring.data.repository.invocations` |
-| Transactions | `transactions` | Success, Failure | `hibernate.transactions` |
-| Disk space | `disk` | Free, Used, Total | `disk.free`, `disk.total` |
-| Log events | `log-events` | Errors, Warnings | `logback.events` |
+| Panel | id | Meters |
+|---|---|---|
+| CPU usage | `cpu` | `process.cpu.usage`, `system.cpu.usage`, `jvm.gc.overhead` |
+| System load | `load` | `system.load.average.1m`, `system.cpu.count` |
+| Heap memory | `heap` | `jvm.memory.*{area=heap}` |
+| Non-heap memory | `nonheap` | `jvm.memory.*{area=nonheap}` |
+| Garbage collection | `gc` | `jvm.gc.pause` |
+| Threads | `threads` | `jvm.threads.*` |
+| HTTP throughput | `http-throughput` | `http.server.requests` |
+| HTTP latency | `http-latency` | `http.server.requests` |
+| HTTP in flight | `http-active` | `http.server.requests.active` |
+| DB pool | `db-pool` | `hikaricp.connections*` |
+| DB pool timing | `db-pool-timing` | `hikaricp.connections.acquire`, `.usage` |
+| JDBC queries | `jdbc-queries` | `jdbc.query` |
+| Repositories | `repositories` | `spring.data.repository.invocations` |
+| Transactions | `transactions` | `hibernate.transactions` |
+| Disk space | `disk` | `disk.free`, `disk.total` |
+| Log events | `log-events` | `logback.events` |
 
 The HTTP panels show only your application's own traffic. Peekaboot keeps its own requests
 out of `http.server.requests` and `http.server.requests.active`.
@@ -60,16 +51,12 @@ These ship switched off. Enable them by id, as shown under
 
 A meter no panel names is not collected.
 
-A JPA application gets the meters behind Transactions and the opt-in Hibernate activity panel
-with no extra dependency. While `peekaboot.insights.enabled` is on, Peekaboot binds the
-`hibernate.*` meters they read from Hibernate's statistics. With
-`org.hibernate.orm:hibernate-micrometer` on the classpath, Spring Boot's binder provides the same
-meters instead.
+JPA applications get the Transactions and Hibernate activity panels with no extra dependency.
 
 <div class="pk-callout pk-callout--warning" markdown="1">
-Peekaboot sets `spring.jpa.properties[hibernate.generate_statistics]=true` so the Transactions
-and Hibernate activity panels have data. Hibernate statistics add overhead to every session.
-Set it to `false` in your own configuration to turn it off; those panels then show "No data".
+Peekaboot sets `spring.jpa.properties[hibernate.generate_statistics]=true`, which adds overhead
+to every session. Set it to `false` in your own configuration to turn it off; Transactions and
+Hibernate activity then show "No data".
 </div>
 
 ## Levels and memory cost {#levels}
@@ -97,8 +84,7 @@ Peekaboot insights: <series> series across <panels> panels, levels [10s x90, 1m 
 
 With [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
 on, the default for a local run, the history is saved to disk and loaded at the next start.
-The charts continue where they left off. The downtime shows as a gap, and every start and stop
-appears as a restart marker. The markers come from the same history as the
+The downtime shows as a gap, and every start and stop appears as a restart marker, as on the
 [Lifecycle tab]({{ '/docs/dashboard/' | relative_url }}#lifecycle). Loading the history never
 delays your application's startup.
 
@@ -123,17 +109,15 @@ panels still load underneath. A missing `peekaboot-insights.yml` is not an error
 
 Your file is merged with the bundled panels by panel `id`:
 
-- An entry with no `title` and an existing id patches the shipped panel. Only `order`,
-  `enabled` and `level` are taken from your file. Use it to switch a panel on or off, move it,
-  or pin it to a level.
-- An entry with a `title` and an existing id replaces the shipped panel completely. Series you
-  do not repeat are gone.
-- An entry with a new id is added and placed by its `order`. The defaults use 10, 20, 30 and
-  so on.
+| Entry in your file | Effect |
+|---|---|
+| Existing id, no `title` | Patches the shipped panel. Only `order`, `enabled` and `level` are taken. Use it to switch a panel on or off, move it, or pin it to a level |
+| Existing id, with a `title` | Replaces the shipped panel completely. Series you do not repeat are gone |
+| New id | Added and placed by its `order`. The defaults use 10, 20, 30 and so on |
+| Unknown id, no `title` | Fails validation |
+| Tile | Merges by id, by replacement only |
 
-An entry with no `title` and an unknown id fails validation. Tiles also merge by id, but only
-by replacement. Two panels whose `<panel id>.<series id>` are equal make the file invalid. Panel
-`a` with series `b.c` and panel `a.b` with series `c` are such a pair.
+Duplicate ids make the file invalid, see [below](#invalid-panel-file).
 
 ```yaml
 panels:
@@ -193,20 +177,18 @@ do. Peekaboot charts and serves it from 0 to 100.
 | `stat` | Plots |
 |---|---|
 | `value` | The meter's current value: a gauge, a counter's total, or a long task timer's active tasks. A timer or distribution summary gives a gap |
-| `rate` | The count's increase per second since the previous sample. The first sample after a start is a gap. A counter or timer that appears later counts from 0, so the first 5xx shows in its own tick. A function counter or function timer that appears later starts from its first reading |
+| `rate` | The count's increase per second since the previous sample. The first sample after a start is a gap. A counter or timer that appears later counts from 0, so the first 5xx shows at once. A function counter or function timer that appears later starts from its first reading |
 | `avg` | The average duration of the calls since the previous sample. No calls gives a gap |
 | `max` | Micrometer's MAX for a timer or summary, which covers the last few minutes. See [Limitations](#percentiles-of-aggregates) |
 
-`subtract-meter` is how the Disk space panel draws Used as `disk.total` minus `disk.free`. The
-series' `tags` apply to both meters. If either meter is missing, the line shows a gap.
+`subtract-meter` subtracts a second meter, as Disk space does for Used (`disk.total` minus
+`disk.free`). The series' `tags` apply to both. If either meter is missing, the line shows a gap.
 
 #### A series with no `tags` sums every meter of that name {#series-without-tags}
 
-Micrometer registers one `http.server.requests` meter per method, URI, status and outcome. A
-series naming it with no `tags` adds them all up, so HTTP throughput is the whole
-application's request rate. Peekaboot's own requests are not among them.
-`tags: {outcome: SERVER_ERROR}` narrows the sum to server errors.
-A series cannot pick out a single endpoint. Use [Traces]({{ '/docs/traces/' | relative_url }})
+`http.server.requests` has one meter per method, URI, status and outcome. A series naming it with
+no `tags` adds them all up, so HTTP throughput is the whole application's request rate, without
+Peekaboot's own requests. `tags: {outcome: SERVER_ERROR}` narrows the sum to server errors. A series cannot pick out a single endpoint. Use [Traces]({{ '/docs/traces/' | relative_url }})
 for per-endpoint questions.
 
 ### Stat tiles {#stat-tiles-live-on-overview}
@@ -224,22 +206,22 @@ The `tiles` section of the same file defines the
 | `format` | `duration`, `datetime`, `bytes`, `count` | raw number |
 | `live` | `true` re-reads the value on every refresh; `false` keeps the first value | `false` |
 
-A tile always shows the meter's current value. A time gauge, which every default tile reads, is
-read in milliseconds, which `duration` and `datetime` expect. A tile over a plain gauge that holds
-seconds shows a value a thousand times too small.
+`duration` and `datetime` expect milliseconds, which a time gauge reports, as every default tile
+reads. A plain gauge that holds seconds shows a value a thousand times too small.
 
 ### An invalid file is ignored {#invalid-panel-file}
 
-Peekaboot validates your file at startup. Every panel needs a unique id. Every series needs a
-`meter` and an id unique within its panel. `chart`, `unit`, `stat` and `format` must be one of
-the values above, and `subtract-meter` needs `stat: value`. Meter names are not checked, so an
-unknown meter shows a permanent gap. A series of yours whose `meter` or `subtract-meter` stays
-unresolved for three sampling ticks logs a `WARN` naming it. If the meter resolves and later
-disappears again, the warning repeats. Shipped series log the same case at `DEBUG`, since an
-application may lack one of their meters.
+Peekaboot validates your file at startup. It is invalid when:
 
-If your file is invalid, Peekaboot ignores the whole file and shows the bundled panels. Your
-application still starts. The startup log has an `ERROR` with the stack trace:
+- two panels share an id, or two series of a panel do,
+- two panels' `<panel id>.<series id>` are equal,
+- a series has no `meter`,
+- `chart`, `unit`, `stat` or `format` is not one of the values above,
+- `subtract-meter` is set without `stat: value`,
+- an entry with no `title` has an unknown id.
+
+An invalid file is ignored as a whole, and the bundled panels show. Your application still
+starts. The startup log has an `ERROR` with the stack trace:
 
 ```
 Insights panel config class path resource [peekaboot-insights.yml] is invalid; discarding it entirely and serving the bundled panels instead of the operator's customisation
@@ -248,30 +230,34 @@ Insights panel config class path resource [peekaboot-insights.yml] is invalid; d
 With `config-location` set, the resource reads like `file [/etc/app/panels.yml]`. Check the
 log first if your panels do not appear.
 
+Meter names are not checked. A series of yours whose `meter` or `subtract-meter` stays unresolved
+for three sampling ticks shows a gap and logs a `WARN` naming it, and logs it again if a meter
+that resolved disappears. Shipped series log the same case at `DEBUG`.
+
 ## Reading the charts {#reading-the-tab}
 
-- The level switch in the tab header sets the resolution for every panel. Each panel has its
-  own switch to pin it to another level, and a reset control to follow the header again.
+- The level switch in the tab header sets the resolution for every panel. Each panel can pin
+  its own level.
 - Levels above the first draw an average line with a min&ndash;max band. The percentiles
   toggle adds p90, p95 and p99 lines.
 - Drag across any chart to zoom all charts to the same time window. The reset control or a
   double-click returns them.
 - The Restarts toggle hides the restart markers. It is on by default.
-- Focus a chart and press Left or Right to step through its restart markers. Escape hides the
-  details.
+- Focus a chart and press Left or Right to step through its restart markers.
 - A gap means no sample. Peekaboot never draws a missed sample as zero. A meter whose function
   throws shows as a gap in its own series and logs one warning.
 
-The charts update live and keep updating while the dashboard's auto-refresh is paused. They
-stop while another dashboard tab is showing and catch up when you return.
+Each dashboard that is showing the Insights tab holds one streaming connection.
+{% include facts/insights-stream-cap.md -%}
+See [HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints).
 
 ## What the API judges {#problems}
 
-The [insights data endpoint]({{ '/docs/api/' | relative_url }}#problems) summarises each series
-over a window you choose and names the problems the window shows: CPU or GC overhead running
-high, a heap near its maximum, live threads growing, connections waiting for the pool, a share of
-5xx answers, ERROR lines and slow HTTP latency. The rules read the default panels' series, so a
-panel you switch off, or replace without those series, skips its rule. The tab does not show them.
+The [insights data endpoint]({{ '/docs/api/' | relative_url }}#problems) names the problems a
+window shows: CPU or GC overhead running high, a heap near its maximum, live threads growing,
+connections waiting for the pool, a share of 5xx answers, ERROR lines and slow HTTP latency. The
+rules read the default panels' series, so a panel you switch off, or replace without those
+series, skips its rule. The tab does not show them.
 The thresholds are
 [`peekaboot.insights.problems.*`]({{ '/docs/configuration/' | relative_url }}#peekabootinsights),
 and slow latency is `peekaboot.tracing.slow-trace-threshold-ms`.
@@ -280,22 +266,15 @@ problems with `curl`.
 
 ## Limitations {#percentiles-of-aggregates}
 
-The percentiles on the aggregated levels are percentiles of samples, not of individual
+The percentiles on the aggregated levels are percentiles of aggregates, not of individual
 requests. Use them to see trends and spot leaks or a saturating pool. Do not use them for SLOs;
 that needs a real metrics backend. See
 [Traces, limitations]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing).
 
-- At `1m`, each entry covers six 10-second samples. p90, p95 and p99 all equal the maximum.
-- At `1h` and above, the median and each percentile are taken over the same statistic of the
-  windows below, weighted by their samples. At the default levels a percentile is never below
-  the true one.
+- At `1m`, p90, p95 and p99 all equal the maximum.
+- At `1h` and above, a percentile is calculated over the windows below it. At the default
+  levels it is never below the true one.
 - The min and max at `1h` are the true min and max of the minutes below, so a spike survives
   in max.
-- `stat: max` plots Micrometer's timer MAX, not the maximum since the previous sample. With
-  Micrometer's default distribution expiry of 2 minutes over 3 buffers, it covers roughly the
-  last four to six minutes.
-
-The live charts use one streaming connection per dashboard that is showing the Insights tab. A
-dashboard on another tab holds none.
-{% include facts/insights-stream-cap.md -%}
-See [HTTP API]({{ '/docs/api/' | relative_url }}#the-insights-endpoints).
+- `stat: max` plots Micrometer's timer MAX, not the maximum since the previous sample. It
+  covers roughly the last four to six minutes.

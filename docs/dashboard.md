@@ -23,7 +23,7 @@ does not hide health components from it.
 <div class="pk-callout pk-callout--warning" markdown="1">
 The dashboard shows your configuration and environment. Read
 [Security]({{ '/docs/security/' | relative_url }}#securing-the-dashboard) and
-[Do I want this in production?]({{ '/docs/in-production/' | relative_url }}) before you turn
+[Production use]({{ '/docs/in-production/' | relative_url }}) before you turn
 it on anywhere but your own machine.
 </div>
 
@@ -34,11 +34,9 @@ The strip above the tabs is the same on every tab.
 - **Updated &lt;time&gt;** shows when the data on screen was fetched. The dashboard refetches
   every 30 seconds. **Refresh now** fetches immediately. **Pause auto-refresh** stops the
   timer until you press it again. The Insights charts keep updating while paused.
-- **Timezone** switches between **Browser** (the default) and **Server**. Every timestamp is
-  shown in the chosen zone.
+- **Timezone** switches between **Browser** (the default) and **Server**.
 - **Language** is EN, DE, FR or ES. It formats dates, times and numbers, and localises the
-  cron descriptions on Scheduled Tasks. It defaults to the browser's language, which is added
-  to the list when it is none of the four.
+  cron descriptions on Scheduled Tasks. It defaults to the browser's language.
 - **Theme** is light or dark. The toolbar and the trace detail follow it.
 
 Timezone, language and theme are remembered per browser.
@@ -74,27 +72,22 @@ timezone are never part of a link.
 
 {% include screenshot.html name="dashboard-overview" %}
 
-Overview shows the application's health and what is running. It holds the health banner with
-its per-component breakdown, build and Git metadata, Spring Boot and Java versions, OS and JVM
-defaults, datasource status, and memory and storage meters. A composite health contributor,
-such as Spring's `db` with two DataSources, shows as one row with its aggregate status,
-followed by its children as `db/<name>`.
+Overview shows the application's health, build and runtime details, datasource status, and
+memory and storage meters. A composite health contributor, such as Spring's `db` with two
+DataSources, shows as one row with its aggregate status, followed by its children as `db/<name>`.
 
-A DataSource gets its card once Peekaboot has read its metadata over a connection, which it
-first tries when the application is ready and never during startup. One that does not answer
-has no card yet; Peekaboot asks again at most every 30 seconds while the dashboard is read.
+A DataSource gets its card once its metadata is readable after startup. Until then it has no
+card, and Peekaboot retries at most every 30 seconds while the dashboard is read.
 
-The Git card shows your application's own `git.properties`, the one the
-[Lifecycle](#lifecycle) tab reads. A `git.properties` a library ships never shows there. Your
-own `/actuator/info` stays as Spring Boot builds it.
-The Git card shows no git info where you turn off Spring Boot's git info contributor:
-`management.info.git.enabled=false`, or `management.info.defaults.enabled=false` without
-`management.info.git.enabled=true`. The Lifecycle tab still shows each run's branch and commit.
+The Git card and the [Lifecycle](#lifecycle) tab read your application's own `git.properties`.
+A `git.properties` a library ships never shows. Your own `/actuator/info` stays as Spring Boot
+builds it. The Git card shows no git info where you turn off Spring Boot's git info
+contributor: `management.info.git.enabled=false`, or `management.info.defaults.enabled=false`
+without `management.info.git.enabled=true`. The Lifecycle tab still shows each run's branch and
+commit.
 
-The Machine card shows the logical CPU count (with the CPU model on Linux), total physical
-memory, the JVM's max heap, the machine's IPv4 and IPv6 addresses with their hostnames where these resolve, and
-the container runtime: `docker`, `podman`, `kubernetes`, `container` or `none`. Inside a
-container, CPU and memory show the container's limits.
+The Machine card names the container runtime: `docker`, `podman`, `kubernetes`, `container` or
+`none`. Inside a container, CPU and memory show the container's limits.
 
 ### Stat tiles {#stat-tiles}
 
@@ -132,16 +125,16 @@ A dash means the value is unknown. A run with no recorded stop has no duration, 
 after an unclean exit has no downtime. A launch that fails before the application is ready
 records nothing.
 
-Branch and commit come from your application's own `git.properties`, the one in its jar or in its
-build's output directories. Without `build-info.properties`, so do the version and build time. A
-`git.properties` a library ships never counts for a new run. Set `spring.info.git.location` to
-name another file.
+Branch and commit come from your application's `git.properties`, the one in its jar or in its
+build's output directories. Without `build-info.properties`, so do the version and build time.
+Set `spring.info.git.location` to name another file.
 
-A run recorded by an earlier Peekaboot may hold a library's build. That is the library's commit,
-and its version and build time where your application has no `build-info.properties`. A run
-without these facts of its own shows the last known ones, so later runs show that build too. Delete
-`lifecycle.jsonl` from the [storage directory]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
-once after upgrading to clear it.
+A `git.properties` a library ships never counts for a new run. A run recorded by an earlier
+Peekaboot may hold a library's build. That is the library's commit, and its version and build
+time where your application has no `build-info.properties`. A run without these facts of its own
+shows the last known ones, so later runs show that build too. Delete `lifecycle.jsonl` from the
+[storage directory]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) once after
+upgrading to clear it.
 
 History across restarts needs
 [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage),
@@ -152,21 +145,17 @@ on by default for a local run. Without it the tab shows the current run only. Wi
 
 {% include screenshot.html name="dashboard-traces" %}
 
-Traces lists recent requests, jobs and messages in three buckets: All, Errors and Slow. You
-can filter by root action type and root operation. When more than 50 rows match, the list
-shows the 50 newest, says so underneath and offers **Load more** for the next 50. A bucket's
-count is in traces, so it can differ from the number of rows.
+Traces lists recent requests, jobs and messages in three buckets: All, Errors and Slow,
+filterable by root action type and root operation. When more than 50 rows match, the list shows
+the 50 newest, with **Load more** for the next 50. A bucket's count is
+in traces, so it can differ from the number of rows.
 
-Click a row to open the trace detail with its spans, queries, logs and the HTTP exchange.
-Background work started from a trace gets its own row. When the trace it ran under is still
-stored, the row has a **View the trace this ran under** link.
-[Traces]({{ '/docs/traces/' | relative_url }}) explains buckets, badges, root action types
-and [background work]({{ '/docs/traces/' | relative_url }}#background-work).
-
-With [`peekaboot.storage.enabled`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
-on, the tab keeps its traces [across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces).
-A trace cut off by a restart shows an INTERRUPTED badge in the header of its detail, and on its
-row where it lists one, see [Traces across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces).
+Click a row to open the trace detail. Background work started from a trace gets its own row,
+with a **View the trace this ran under** link while that trace is stored.
+[Traces]({{ '/docs/traces/' | relative_url }}) covers buckets, badges, root action types,
+[background work]({{ '/docs/traces/' | relative_url }}#background-work) and traces
+[across restarts]({{ '/docs/traces/' | relative_url }}#persisted-traces), where a cut-off trace
+shows an INTERRUPTED badge.
 
 ## Meters {#meters}
 
@@ -183,9 +172,7 @@ Insights.
 {% include screenshot.html name="dashboard-environment" caption=caption %}
 
 Environment lists every property source Spring resolved, in resolution order, with its raw
-keys and values. Command-line arguments, OS environment, system properties,
-`application.yml` and Peekaboot's own defaults all appear here. The active profiles are
-shown above the list. Use it to find which source wins for a key.
+keys and values, including Peekaboot's own defaults. Use it to find which source wins for a key.
 
 {% capture caption %}Revealed, after <code>peekaboot.unmasking.enabled</code> is on <em>and</em> Show secrets is clicked. The value is the sample application's fixture password. See <a href="{{ '/docs/security/' | relative_url }}#masking-opt-ins">Security, two opt-ins before a real value is shown</a>.{% endcapture %}
 {% include screenshot.html name="dashboard-environment-revealed" caption=caption %}
@@ -194,15 +181,14 @@ shown above the list. Use it to find which source wins for a key.
 
 {% include screenshot.html name="dashboard-flyway" %}
 
-Flyway shows one row per migration: version, description, script, type, duration, install
-time and status. A repeatable migration shows Repeatable in place of a version.
+Flyway shows one row per migration with its status. A repeatable migration shows Repeatable in
+place of a version.
 
 ## Liquibase {#liquibase}
 
 {% include screenshot.html name="dashboard-liquibase" %}
 
-Liquibase shows one row per change set in the order they ran, with the order, id, author,
-change log, description, execution date and status. The status is `EXECUTED`, `FAILED`,
+Liquibase shows one row per change set in the order they ran. The status is `EXECUTED`, `FAILED`,
 `SKIPPED`, `RERAN`, `MARK_RAN` or `UNKNOWN`, and a failed change set is highlighted. Change sets
 from every Liquibase bean share one table. Liquibase records no duration.
 
@@ -210,9 +196,8 @@ from every Liquibase bean share one table. Liquibase records no duration.
 
 {% include screenshot.html name="dashboard-loggers" %}
 
-Loggers shows each logger's effective and configured level, grouped by package. You can
-filter by name and show only loggers with an explicit level. The tab is read-only. It cannot
-change a level.
+Loggers shows each logger's effective and configured level, grouped by package. The tab is
+read-only. It cannot change a level.
 
 ## Config {#config}
 
@@ -225,21 +210,19 @@ matches these keys and their values.
 
 ### Environment vs Config {#environment-vs-config}
 
-- **Environment** shows the input: every property source and the raw value each one supplies.
-  It also shows properties nothing reads, which is how you find typos and dead config.
-- **Config** shows what the application uses, after relaxed binding and type conversion. It
-  includes defaults set in Java code, which appear in no property source.
+| Tab | Shows |
+|---|---|
+| Environment | The input: every property source and the raw value each one supplies. It also shows properties nothing reads, which is how you find typos and dead config |
+| Config | What the application uses, after relaxed binding and type conversion. It includes defaults set in Java code, which appear in no property source |
 
 A property in `application.yml` that feeds a `@ConfigurationProperties` bean appears in both.
 `@Value` injections are not in Config. Look them up under Environment.
 
-Both tabs mask sensitive values by key name and by value shape. Your
-`management.endpoint.*.show-values` settings do not affect this. The rules are under
-[what gets masked and how]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how).
-
-The **Show secrets** toggle appears on both tabs only with unmasking enabled. See [Security, two
-opt-ins before a real value is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
-It reveals real values on both tabs at once and resets on reload.
+Both tabs mask sensitive values by key name and by value shape, whatever your
+`management.endpoint.*.show-values` settings say. The **Show secrets** toggle appears only with
+unmasking enabled, reveals real values on both tabs and resets on reload. See [Security, what gets
+masked]({{ '/docs/security/' | relative_url }}#what-gets-masked-and-how) and [two opt-ins before a
+real value is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 
 <div class="pk-callout pk-callout--warning" markdown="1">
 Masking is not exhaustive. See
@@ -252,15 +235,14 @@ what is not.
 {% include screenshot.html name="dashboard-scheduled-tasks" %}
 
 Scheduled Tasks lists `@Scheduled` methods and the tasks a `SchedulingConfigurer` registers,
-grouped by type: cron, fixed delay, fixed rate and custom trigger. Each group expands to its
-tasks. Cron expressions come with a description in the dashboard's language.
+grouped by type: cron, fixed delay, fixed rate and custom trigger. Cron expressions come with a description in the dashboard's language.
 
 ## Which tabs appear {#conditionally-shown-tabs}
 
-Overview and Environment always appear. The others depend on your application:
-
 | Tab | Shown when | Property |
 |---|---|---|
+| Overview | Always | none |
+| Environment | Always | none |
 | Insights | A Micrometer `MeterRegistry` bean exists | `peekaboot.insights.enabled` |
 | Lifecycle | Always, unless switched off | `peekaboot.lifecycle.enabled` |
 | Traces | The trace store exists. Without the OpenTelemetry SDK on the classpath the tab explains what to add instead of listing traces | `peekaboot.tracing.enabled` |
@@ -273,11 +255,3 @@ Overview and Environment always appear. The others depend on your application:
 
 Spring Boot Actuator provides the `MeterRegistry`. See
 [Quick start]({{ '/docs/quick-start/' | relative_url }}) for the dependencies.
-
-## Settings {#settings}
-
-Every property is under [Configuration]({{ '/docs/configuration/' | relative_url }}#properties).
-The table above names the switch behind each tab. The [issue
-thresholds]({{ '/docs/configuration/' | relative_url }}#issue-thresholds) set the SLOW,
-VERY_SLOW, SLOW_QUERY and REPEATED_QUERY issues. The SLOW badge on Traces follows
-`slow-trace-threshold-ms`.

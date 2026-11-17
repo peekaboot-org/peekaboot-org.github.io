@@ -160,7 +160,7 @@ surviving page's front matter (`jekyll-redirect-from` is enabled in `_config.yml
 | The screenshot size | `_includes/screenshot.html`, which declares 1440 by 900 for every shot |
 | A dashboard tab *rename* | also `docs/troubleshooting.md`, `docs/quick-start.md`, and `docs/api.md` (the `/api/features` flag behind Meters is `metrics`) |
 | `peekaboot-insights-defaults.yml`, or the panel-file schema | `docs/insights.md`, which states the field sets and tabulates the shipped panels |
-| An insights level default, or the memory formula | `_includes/facts/insights-memory.md`, which carries the formula and the default figures, `docs/insights.md`, and `docs/configuration.md`, which works an example |
+| An insights level default, or the memory per series | `_includes/facts/insights-memory.md`, which carries the default figures, `docs/insights.md`, and `docs/configuration.md`, which works an example |
 | The startup summary's lines, or how a URL in it is built | `docs/configuration.md` (*The URLs in the summary*) |
 | Anything under `peekaboot.storage`, or what the stores write | `_includes/facts/storage-files.md`, `_includes/facts/local-run-disk.md`, `docs/configuration.md`, `docs/security.md`, `docs/insights.md`, `docs/traces.md` |
 | The runs projection, its columns or its badges | `docs/dashboard.md` (*Lifecycle*) |
