@@ -13,9 +13,6 @@ anywhere else on the bar, or press Enter or Space while it has focus, to open th
 on top of your page. It is the one the dashboard's Traces tab uses, see
 [Traces]({{ '/docs/traces/' | relative_url }}#the-trace-view).
 
-The numbers fill in during the first few seconds, so spans that end after the response are
-counted too.
-
 ## Turn it on or off {#turn-it-on-or-off}
 
 The toolbar needs:
@@ -46,20 +43,15 @@ does not get the bar when:
 
 - The path starts with one of the prefixes Peekaboot never records. See [Traces, what gets
   recorded]({{ '/docs/traces/' | relative_url }}#what-gets-captured).
-- The path ends in `.css`, `.js`, `.ico`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.woff`,
-  `.woff2`, `.ttf` or `.eot`.
-- The request sends `X-Requested-With: XMLHttpRequest`. A plain `fetch()` does not send it,
-  so HTML fetched that way gets the bar.
-- The handler responds asynchronously.
-- The response is partial content (status `206`). It is served unchanged.
+- The path is a static asset, such as `.css`, `.js` or an image.
+- The request sends `X-Requested-With: XMLHttpRequest`.
 - On a local run, the request does not come from the machine the application runs on. See
   [Security, who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
 HTML error pages get the bar too, see [the bar on the error page](#the-bar-on-the-error-page).
 
 HTML responses up to 2 MiB are buffered in memory so the bar can be added; larger pages stream
-through without it. If generating the bar fails, the page is served unchanged. Your page's CSS
-does not affect the bar.
+through without it.
 
 ## Request and response detail {#request-and-response-detail}
 
@@ -71,8 +63,7 @@ no reveal control, so a masked value stays masked. See
 [Security]({{ '/docs/security/' | relative_url }}#masking) for the rules and what they miss.
 Request bodies and uploaded file names are not captured.
 
-Form parameters appear only when your application, or a later filter such as Spring Security's
-CSRF check, read them. A request rejected before anything read its parameters shows none. A name or value over 4,096 characters is cut.
+A parameter name or value over 4,096 characters is cut.
 
 ## Logs for the request {#logs-correlated-to-the-request}
 
@@ -92,18 +83,12 @@ On the Swagger UI page the bar starts idle with "Waiting for request…". Run an
 "Try it out" and the bar shows that call's status, duration and query count. Click it for the
 trace detail.
 
-This works for any traced call, JSON APIs included. Swagger UI's own calls, under its UI path
-(`springdoc.swagger-ui.path`) and under `springdoc.api-docs.path`, are not shown. Peekaboot
-follows both properties when you customise them. Calls to the [paths Peekaboot never
-records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) are not shown either.
+This works for any traced call, JSON APIs included. Swagger UI's own calls are not shown.
 
 ## The bar on the error page {#the-bar-on-the-error-page}
 
 HTML error pages get the bar, including [Peekaboot's error
-page]({{ '/docs/error-page/' | relative_url }}). It reports the request
-that failed. A request that Spring Security
-rejects before it reaches your application, such as a 401 or 403, gets no bar on its error
-page.
+page]({{ '/docs/error-page/' | relative_url }}). It reports the request that failed.
 
 {% include screenshot.html name="error-page" %}
 

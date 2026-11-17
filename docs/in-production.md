@@ -26,9 +26,8 @@ switch.
 | Tracing and Insights | Off | On, in memory only |
 | Startup and shutdown summaries | None | Logged |
 
-A launch that counts as a [local run]({{ '/docs/configuration/' | relative_url }}#local-run)
-answers only the machine it runs on, even on a server. A build-tool launch on a server is not
-readable from the network unless `peekaboot.remote-access.enabled=true` opens it. See
+A [local run]({{ '/docs/configuration/' | relative_url }}#local-run) answers only the machine
+it runs on, even on a server, unless `peekaboot.remote-access.enabled=true` opens it. See
 [Security, who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
 ## Before you turn it on {#before-you-turn-it-on}
@@ -36,9 +35,8 @@ readable from the network unless `peekaboot.remote-access.enabled=true` opens it
 <span id="if-you-run-it-somewhere-shared"></span>Before `peekaboot.enabled=true` reaches a
 deployment or a machine other people use:
 
-1. Verify `peekaboot.enabled` resolves to `false` wherever you do not want the dashboard.
-   With lifecycle summaries on (the default), the startup summary has no `Peekaboot Dashboard:`
-   line when the dashboard is off.
+1. Verify `peekaboot.enabled` resolves to `false` wherever you do not want the dashboard. The
+   startup summary has no `Peekaboot Dashboard:` line when it is off.
 1. Set `peekaboot.enabled=false` explicitly if you deploy with a launch that [counts as
    local]({{ '/docs/configuration/' | relative_url }}#local-run).
 1. If Peekaboot must never ship, keep the starter out of the production artifact. See [Keeping
@@ -47,16 +45,14 @@ deployment or a machine other people use:
    their headers, parameters and logs.
 1. Decide on the [Spring Boot defaults Peekaboot
    changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
-   while it is on. `peekaboot.tracing.enabled=false` leaves them in place. Set
-   `management.tracing.sampling.probability`,
+   while it is on. Set `management.tracing.sampling.probability`,
    `spring.jpa.properties[hibernate.generate_statistics]` and
    `management.observations.annotations.enabled` yourself where you want Spring Boot's values.
 1. Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password, see [Security,
    Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard), or set
-   `peekaboot.security.enabled=false` and put the
+   `peekaboot.security.enabled=false` and put a
    [`SecurityFilterChain`]({{ '/docs/security/' | relative_url }}#securing-the-dashboard) in
-   front first. Use the chain if you need roles. Whoever passes reads everything under
-   [Security, what the dashboard and API
+   front first. Whoever passes reads everything under [Security, what the dashboard and API
    show]({{ '/docs/security/' | relative_url }}#what-the-dashboard-and-api-expose).
 1. Restrict network reach as well, with an internal-only ingress, a VPN, or a proxy that
    forwards `/peekaboot/**` only from trusted sources.
@@ -64,8 +60,7 @@ deployment or a machine other people use:
 1. Leave `peekaboot.unmasking.enabled=false`. With it on, anyone who can reach
    `/peekaboot/**` can add `?unmask=true`.
 1. Don't treat masking as complete. Log messages, SQL and request data are masked only
-   where a rule recognises them. Don't point Peekaboot at traffic whose secrets must not be
-   recorded and displayed.
+   where a rule recognises them.
 
 ## What it changes while it is on {#what-it-costs-while-it-is-on}
 
@@ -75,8 +70,7 @@ every 200 ms. A value you set wins. [Configuration, Spring Boot defaults Peekabo
 changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
 lists them and what each costs. `peekaboot.tracing.enabled=false` changes none of them.
 
-It also adds these. Unless a row says otherwise, they apply when `peekaboot.enabled` and
-`peekaboot.tracing.enabled` are true:
+It also adds these while `peekaboot.enabled` and `peekaboot.tracing.enabled` are true:
 
 | Change | Effect |
 |---|---|
@@ -84,11 +78,10 @@ It also adds these. Unless a row says otherwise, they apply when `peekaboot.enab
 | Async task spans | A span around each task a Spring task executor runs inside a trace, sent to every exporter. Turn off with `peekaboot.tracing.async=false`. |
 | Event listener spans | A span around each `@EventListener` call inside a trace, sent to every exporter. Listener beans become proxies. Turn off with `peekaboot.tracing.event-listeners=false`. |
 | HTML response buffering | With the dev toolbar on, `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. |
-| `Server-Timing` header | Every response carries its trace id, except on the [paths Peekaboot never records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) |
+| `Server-Timing` header | Every response carries its trace id |
 | Log capture | Every log event is captured |
 
-An Actuator endpoint that keeps failing is logged once at WARN with its stack trace, then at
-DEBUG. Peekaboot adds no `/actuator` exposure. See [Security, Peekaboot leaves `/actuator`
+Peekaboot adds no `/actuator` exposure. See [Security, Peekaboot leaves `/actuator`
 alone]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
 
 ## Memory {#memory}
@@ -109,10 +102,8 @@ To size either down, see [Configuration, memory-constrained]({{ '/docs/configura
 
 - **One process, short history.** See [Traces,
   limitations]({{ '/docs/traces/' | relative_url }}#tracing-vs-distributed-tracing).
-- **Minimal access control.** On a deployment its guard is HTTP Basic with one credential. It
-  challenges every request, whatever else signed the reader in. Switch it off only once your own
-  security requires a login on `/peekaboot/**`, or the dashboard is open to anyone who reaches
-  it. See [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
+- **Minimal access control.** On a deployment its guard is HTTP Basic with one credential and
+  no throttle on failed attempts. See [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
 
 ## The starter is on the classpath even when Peekaboot is off {#class-path}
 
@@ -124,13 +115,10 @@ Adding the starter pulls in `spring-boot-starter`, `spring-boot-starter-actuator
 - Spring Boot's default exposure serves `/actuator` and `/actuator/health` over HTTP. An
   application that had no Actuator gains both.
 - A `MeterRegistry` exists, with Spring Boot's JVM, system and Logback meters.
-- OpenTelemetry tracing and the OTLP exporters are present. Nothing is sent. Metrics export is
-  off, see
-  [Configuration]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application),
-  and Spring Boot creates trace and log exporters only once you configure an endpoint.
-- datasource-micrometer comes with `spring-boot-jdbc`, `spring-jdbc`, `datasource-proxy` and
-  JSqlParser. Peekaboot sets `jdbc.datasource-proxy.enabled=false`, so none of your DataSources
-  is wrapped. Set it to `true` if you use datasource-micrometer yourself.
+- OpenTelemetry tracing is present. Nothing is sent until you configure an exporter endpoint.
+- datasource-micrometer is present. Peekaboot sets `jdbc.datasource-proxy.enabled=false`, so
+  none of your DataSources is wrapped. Set it to `true` if you use datasource-micrometer
+  yourself.
 
 Peekaboot requires the OpenTelemetry bridge the starter brings. Brave is not supported: with the
 Brave bridge the Traces tab stays empty and the toolbar never shows a trace.
