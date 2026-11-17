@@ -23,14 +23,9 @@ What that means for access:
 
 - **Local run.** Peekaboot answers only the machine it runs on, without authentication. Every
   other request gets a `403` with a [problem body]({{ '/docs/api/' | relative_url }}#errors)
-  that names `peekaboot.remote-access.enabled`. A request counts as local when its client address
-  and `Host` header are loopback and no `Forwarded`, `X-Forwarded-For`, `Origin` or
-  `Sec-Fetch-Site` header says it came from elsewhere. A link followed from another site still
-  opens the dashboard.
-- **Local run with `server.forward-headers-strategy=native`.** Another machine passes that rule by
-  sending `X-Forwarded-For: 127.0.0.1` and `Host: localhost`, because Tomcat then takes the
-  client address from `X-Forwarded-For` for every client on a private network. Leave that
-  strategy out, bind the application with `server.address=127.0.0.1`, or arm [Peekaboot's
+  that names `peekaboot.remote-access.enabled`.
+- **Local run with `server.forward-headers-strategy=native`.** Another machine can pass that rule
+  with forged forwarding headers. Leave that strategy out, bind the application with `server.address=127.0.0.1`, or arm [Peekaboot's
   guard](#peekaboots-guard).
 - **Local run with `peekaboot.remote-access.enabled=true`.** Anyone who can reach the port reads
   `/peekaboot/**` without signing in, and Peekaboot logs a WARN at startup. To let other machines
@@ -64,23 +59,20 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Micrometer meters: names, tags, measurements | Meters tab | Tag values by key and by value shape |
 | Up to 30 days of CPU, memory, thread, HTTP, connection-pool and log-event history, and the list of collected meters | Insights tab, `/peekaboot/api/insights/**` | No |
 | Request traces: span tree, span names, timings, tags, the exception and stack trace of a failed span, SQL text and bind parameters | Traces tab, toolbar | Tags, exceptions, SQL and bind parameters by value shape only |
-| Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape. A name or value over 4,096 characters is cut at its last whitespace and ends in `... N characters omitted`. |
+| Request and response headers, query and form parameters, resolved controller | Traces tab, toolbar | Headers and parameters by key and by value shape. A value over 4,096 characters is cut. |
 | The message and stack trace of every log event, inside a trace or not, and the names of its logger and thread | Logs tab of a trace, `/peekaboot/api/logs` | Message and stack trace by value shape only. Logger and thread names are shown as is. |
 
 SQL text is shown as your JDBC instrumentation records it, with any literal values, and bind
 parameters are shown too. Masking applies to what Peekaboot shows. An application that also
 exports its traces, over OTLP for example, sends the SQL and the bind parameters unmasked.
-Request and response bodies are never captured. The log search's `q` reads the masked text, so
-it cannot find a masked value.
+Request and response bodies are never captured.
 
 With tracing on, every response carries
 `Server-Timing: trace;desc="00-<traceId>-<spanId>-<flags>"`, JSON API calls included.
 Anyone who reads that header and can reach `/peekaboot/**` can open that request's trace at
-`GET /peekaboot/api/traces/{traceId}`. Responses on the [paths Peekaboot never
-records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) get no header.
+`GET /peekaboot/api/traces/{traceId}`.
 
-No page can frame the dashboard. A security header your application already sets on those
-responses stays as it set it.
+No page can frame the dashboard.
 
 ## What the error page shows {#the-error-page}
 
@@ -100,14 +92,10 @@ on [Error page]({{ '/docs/error-page/' | relative_url }}).
 ## What stays in memory and what goes to disk {#what-peekaboot-writes-to-disk}
 
 Environment values and config values stay in memory. Peekaboot writes files only while
-`peekaboot.storage.enabled` is `true`, which is the default for a local run only. The exception
-is `security.properties` with an explicit `peekaboot.security.credentials-file`. Traces and their
-log lines go to disk while storage and trace storage are on, as the table shows.
+`peekaboot.storage.enabled` is `true`, which is the default for a local run only. Traces and
+their log lines go to disk while storage and trace storage are on, as the table shows.
 
 {% include facts/storage-files.md %}
-
-`lifecycle.jsonl` holds no other build-info or git-info entry, so the git remote URL, the
-building user's name and mail address and anything else your build wrote stay out.
 
 A password in a bind parameter or a log line is on disk in clear until its trace or line leaves
 the store. Keep `peekaboot.storage.dir` readable by you only, or set
@@ -140,9 +128,8 @@ bean that adds a masking rule.
 
 Two rule sets run together.
 
-**By key name.** A key is sensitive when one of these words is a whole token of it, split at any
-character other than a letter or digit or at a camelCase boundary, in any case. A sensitive key
-masks its entire value, and `design` and `signal` are not masked.
+**By key name.** A key is sensitive when one of these words is a whole token of it, split at separators and
+camelCase boundaries, in any case. A sensitive key masks its entire value.
 
 ```
 password              passwords             passwd
@@ -166,13 +153,7 @@ sig                   certificate-password  certificate-private-key
 
 - These key patterns also mask: `vcap_services` and `sun.java.command` anywhere in the key,
   `^vcap\.services.*$`, and `^spring[._]application[._]json$`.
-- `cookie`, `set-cookie`, `http.request.header.cookie`, `http.response.header.set-cookie`,
-  `encrypt.key` and `jwt` mask only as the entire key, so `server.servlet.session.cookie.*`,
-  `encrypt.key-store.*` and `spring.security.oauth2.resourceserver.jwt.*` stay readable.
-- The exact key `PWD` (the shell's working directory), bare `key` and bare `certificate` are not
-  masked, so `server.ssl.key-store` and `server.ssl.certificate` stay readable.
-- A key whose last token is `uri` or `url` skips the word list. `…provider.<x>.token-uri` and
-  `app.password-url` stay readable. `app.token-uri.password` is masked.
+- `cookie`, `set-cookie`, `encrypt.key` and `jwt` mask only as the entire key.
 
 **By value shape.** These patterns mask a credential inside any value, whatever its key. Only
 the matched part is masked, so a JDBC URL keeps its host and database name.
@@ -188,24 +169,19 @@ the matched part is masked, so a JDBC URL keeps its host and database name.
 | Stripe live key | `sk_live_…`, `rk_live_…` |
 | OpenAI key | `sk-proj-…`, legacy `sk-…` |
 | Anthropic key | `sk-ant-…` |
-| Credentials in a URL | `postgres://user:secret@host`, `redis://:secret@host`; the password may hold `:`, `/` or `@` |
+| Credentials in a URL | `postgres://user:secret@host`, `redis://:secret@host` |
 | Oracle thin URL | `jdbc:oracle:thin:user/secret@host` |
 | URL or connection-string parameter with a sensitive name | `?password=…`, `&token=…`, `;pwd=…` |
 | Command-line option with a sensitive name | `-Dspring.datasource.password=…`, `--api-key=…` in `JAVA_TOOL_OPTIONS` |
 | Quoted option with a sensitive name | `password="…"` in `sasl.jaas.config` |
 
-A parameter or option is judged by its name with the key-name rules above, and needs its marker:
-a bare `password=hunter2` without a leading `?`, `&`, `;`, `-D` or `--` and without quotes is not
-masked. A password that holds `@` together with `/`, `?` or `#` is masked only up to an `@`
-inside it, and a quoted value that holds a line break is not masked. The key names and value
-shapes above are the complete set.
-
 <div class="pk-callout pk-callout--warning" markdown="1">
 Masking is not exhaustive and has no entropy detection. A credential with no recognisable shape
-under a key that is not listed is shown as is. Log content is masked by value shape only. Anything not listed here is not masked, and neither
-are the rows marked No in the table above. `INSERT INTO users (password) VALUES ('hunter2')` is
-not masked, because SQL masking goes by value shape only and does not know column names. Assume
-any captured trace can contain plaintext SQL and plaintext request data.
+under a key that is not listed is shown as is. Log content is masked by value shape only.
+Anything not listed here is not masked, and neither are the rows marked No in the table above.
+`INSERT INTO users (password) VALUES ('hunter2')` is not masked, because SQL masking does not
+know column names. Assume any captured trace can contain plaintext SQL and plaintext request
+data.
 </div>
 
 ### Two opt-ins before a real value is shown {#masking-opt-ins}
@@ -283,16 +259,12 @@ If your application sends a `Content-Security-Policy`:
 - `script-src` must allow `/peekaboot/ui/toolbar/toolbar.js`. `'self'` covers it. A nonce-only
   policy cannot work, because Peekaboot's script tag carries no nonce. Without this the bar
   stays on the notice above for every reader.
-- Without `style-src 'unsafe-inline'`, a reader outside the role sees the notice as unstyled
-  text at the foot of the page. Readers inside the role are unaffected.
 
 ### Peekaboot's guard {#peekaboots-guard}
 
 <span id="if-nothing-else-secures-it"></span>On a deployment launch with
 `peekaboot.enabled=true`, Peekaboot arms an HTTP Basic guard (realm `Peekaboot`) on
-`/peekaboot/**`. It challenges every request, whatever else authenticated it. With
-`spring.mvc.servlet.path` set, it guards the dashboard under that prefix, such as
-`/app/peekaboot/**`.
+`/peekaboot/**`. It challenges every request, whatever else authenticated it.
 
 {% include facts/guard-refusal.md %}
 
@@ -318,19 +290,15 @@ Rules to know:
 
 - The guard challenges even a user your own security already signed in. If your security also
   reads the `Authorization` header, as HTTP Basic and bearer tokens do, the two lock each other
-  out, so switch one off. With form login or a session cookie the reader signs in twice.
+  out, so switch one off.
 - A VPN, an nginx basic-auth layer, an IP allowlist or an API gateway in front does not
   satisfy the guard. It still challenges behind them.
 - The guard is one HTTP Basic credential with no throttle on failed attempts. Rate-limit at the
-  proxy in front of the application. At most two password checks run at once, and a sign-in that
-  arrives while two are running gets a `401` unchecked.
-- The generated password is in the application log only, never in the Logs tab, the log API
-  or the trace journal.
-- On a POSIX file system `security.properties` must be accessible to its owner only. Peekaboot
-  ignores a file its group or other users can access, logs a WARN and generates a new password.
-- `peekaboot.security.enabled=false` turns the guard off. On a deployment launch Peekaboot then
-  logs a WARN at startup that your own security must authenticate `/peekaboot/**`, or the
-  dashboard path under `spring.mvc.servlet.path`.
+  proxy in front of the application.
+- `security.properties` must be accessible to its owner only. Peekaboot ignores a file others
+  can access and generates a new password.
+- `peekaboot.security.enabled=false` turns the guard off. Your own security must then
+  authenticate `/peekaboot/**`.
 
 The guard has one flat credential and no roles. For roles, switch it off and use the
 [`SecurityFilterChain`](#securing-the-dashboard) above.

@@ -27,15 +27,11 @@ shared server gives you the dashboard, but no toolbar and no files in that host'
 
 ### What counts as a local run {#local-run}
 
-A local run is an IDE run, `mvn spring-boot:run` or `gradle bootRun` on your own machine.
-Spring Boot DevTools restarts keep counting as local.
-
-A test launch is a JUnit or Cucumber run, or the AOT processing step of a build. Every other
-launch is a deployment: `java -jar`, a war, a native image, a Jib image, Spring Boot's `extract`
-layout, a `java -cp` of jars, and anything in a container.
-
-A `java -cp target/classes:…` launch on a host outside a container counts as local. If you
-deploy that way, set `peekaboot.enabled=false`.
+- **Local run:** an IDE run, `mvn spring-boot:run` or `gradle bootRun` on your own machine,
+  including DevTools restarts.
+- **Test:** a JUnit or Cucumber run, or the AOT processing step of a build.
+- **Deployment:** every other launch, such as `java -jar`, a war or a native image, and anything
+  in a container.
 
 ### Containers, devcontainers and Codespaces {#container-markers}
 
@@ -101,18 +97,12 @@ These switches turn on only with `true`, in any case:
 
 `peekaboot.enabled`, `peekaboot.dev-toolbar.enabled`, `peekaboot.storage.enabled`,
 `peekaboot.storage.traces.enabled`, `peekaboot.error-page.enabled`,
-`peekaboot.error-page.override`, `peekaboot.security.enabled`, `peekaboot.lifecycle.enabled`,
+`peekaboot.security.enabled`, `peekaboot.lifecycle.enabled`,
 `peekaboot.tracing.enabled`, `peekaboot.tracing.async`, `peekaboot.tracing.event-listeners`,
 `peekaboot.insights.enabled`.
 
-`false`, `no`, `off` and `0` turn them off. Any other value, such as `yes`, `on`, `1` or an
-unknown word, stops startup with a report naming the property and its value. In YAML a bare
-`yes` or `on` already reads as `true`. `peekaboot.error-page.override` turns off only with
-`false`, and `no`, `off` and `0` stop startup.
-
-An empty value counts as unset: the next source down wins, then the launch decides as in [When
-Peekaboot is on](#when-peekaboot-is-on), then the default applies. A `yes` beneath an empty
-value still stops startup.
+`false`, `no`, `off` and `0` turn them off. Any other value stops startup with a report naming
+the property and its value.
 
 ## Properties {#properties}
 
@@ -122,7 +112,7 @@ value still stops startup.
 |---|---|---|
 | `peekaboot.enabled` | detected | Master switch for the dashboard, its API and Peekaboot's Spring Boot defaults. |
 | `peekaboot.dev-toolbar.enabled` | detected | The dev toolbar on your HTML pages. |
-| `peekaboot.unmasking.enabled` | `false` | Allows `unmask=true` on `/peekaboot/api/actuator/all/insights` to reveal every value that response masks: environment and config values, build info, health details and datasource connection parameters. |
+| `peekaboot.unmasking.enabled` | `false` | Allows `unmask=true` on `/peekaboot/api/actuator/all/insights` to reveal the values that response masks. |
 
 `unmasking.enabled` changes nothing on its own, see [Security, two opt-ins before a real value
 is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
@@ -134,33 +124,27 @@ is shown]({{ '/docs/security/' | relative_url }}#masking-opt-ins).
 | `peekaboot.storage.enabled` | detected | Whether anything is written. Off, every store lives in memory and never opens a file. |
 | `peekaboot.storage.dir` | `${user.home}/.peekaboot/<groupId>.<artifactId>` | Where the files live. An explicit value is used as is, with no per-application subdirectory. |
 | `peekaboot.storage.traces.enabled` | `true` | Whether traces, their logs and the error digest survive a restart while storage is on. `false` keeps them in memory only. |
-| `peekaboot.storage.traces.flush-interval` | `1s` | How often trace data is written out. A crash usually loses the last interval, and everything since the start while the application is still starting or restoring its traces. |
+| `peekaboot.storage.traces.flush-interval` | `1s` | How often trace data is written out. A crash usually loses the last interval. |
 | `peekaboot.storage.traces.max-journal-size` | `64MB` | The journal size, counted in characters, past which it is compacted. |
 
 Zero or a negative `flush-interval` or `max-journal-size` stops startup.
 
-The default directory sits outside your project, so it survives `mvn clean` and a re-clone.
-`<groupId>.<artifactId>` comes from `build-info.properties`. Generate it with the Spring Boot
-Maven plugin's `build-info` goal or `springBoot { buildInfo() }` in Gradle. Without it Peekaboot
-uses `spring.application.name`, then a folder named `application`.
+The default directory sits outside your project, so it survives `mvn clean`.
+`<groupId>.<artifactId>` comes from `build-info.properties`, which the Spring Boot Maven plugin's
+`build-info` goal or `springBoot { buildInfo() }` in Gradle generates. Without it the directory is
+named after `spring.application.name`.
 
-Two applications with the same name, or with none, share a directory. Set `dir` to give each
-its own. Every character outside `A-Za-z0-9._-` in the name becomes a dash.
-
-A second instance that starts on a directory a running instance holds logs one warning and keeps
-everything in memory, the generated password included, so its password differs from the first
-instance's. Set `dir` to give it its own.
+A second instance on a directory a running instance holds keeps everything in memory. See
+[History is not saved although storage is
+on]({{ '/docs/troubleshooting/' | relative_url }}#second-instance).
 
 {% include facts/storage-files.md %}
 
 On a POSIX file system Peekaboot creates the directory `rwx------` and every file `rw-------`.
 An existing directory keeps its permissions. On Windows the platform defaults apply.
 
-No file can fail your application. An insights snapshot that is unreadable, older than
-`peekaboot.insights.persistence.max-age` or written for different levels is dropped, and the
-history starts empty. Trace files and `errors.jsonl` in another format or with a damaged header
-are deleted, and the trace store or the digest starts empty. A failed write logs one warning per
-store and Peekaboot carries on in memory.
+No file can fail your application. A file Peekaboot cannot use is dropped and the store starts
+empty. A failed write logs one warning and Peekaboot carries on in memory.
 
 ### Peekaboot's guard {#peekabootsecurity}
 
@@ -198,20 +182,14 @@ backs off and what `override` changes.
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.stack-trace.fold` | `true` | Collapses framework frames behind a disclosure on the error page and in the Logs tab. Off, every frame is shown. |
-| `peekaboot.stack-trace.exclude` | unset | Patterns for the frames that fold. A non-empty list replaces the default list. |
+| `peekaboot.stack-trace.exclude` | unset | Patterns for the frames that fold. A non-empty list replaces the built-in list. |
 
 A frame folds when its line contains a pattern as a substring. Your application's own frames
-never fold. The patterns come from the first of these that is set:
-
-1. `peekaboot.stack-trace.exclude`, if it is a non-empty list. It replaces the built-in list.
-2. The patterns in the `%wEx{...}` block of your `logging.exception-conversion-word`. A block
-   with no patterns, such as `%wEx{full}`, folds nothing.
-3. The built-in list: `java.lang.reflect.Method`, `jdk.internal.reflect`, `sun.reflect`,
-   `org.apache.catalina`, `org.apache.coyote`, `org.apache.tomcat`, `org.springframework`,
-   `org.thymeleaf`, `org.attoparser`, `jakarta.servlet`, `net.sf.cglib`, `ByCGLIB` (a CGLIB proxy
-   class name), `org.zalando.logbook`, `net.ttddyy.dsproxy`, `com.mysql` and `org.peekaboot`.
-
-`exclude: []` does not stop folding. It counts as unset. Use `fold: false` instead.
+never fold. The built-in list is `java.lang.reflect.Method`, `jdk.internal.reflect`,
+`sun.reflect`, `org.apache.catalina`, `org.apache.coyote`, `org.apache.tomcat`,
+`org.springframework`, `org.thymeleaf`, `org.attoparser`, `jakarta.servlet`, `net.sf.cglib`,
+`ByCGLIB`, `org.zalando.logbook`, `net.ttddyy.dsproxy`, `com.mysql` and `org.peekaboot`. Use
+`fold: false` to stop folding, since `exclude: []` counts as unset.
 
 ### Lifecycle {#peekabootlifecycle}
 
@@ -230,23 +208,22 @@ The shutdown summary shows the uptime and the start and stop times.
  Peekaboot Dashboard: http://localhost:8080/peekaboot/
 ```
 
-Service URL carries the bound port and `server.servlet.context-path` and is `https` when TLS is
-on. Swagger UI appears with springdoc. The dashboard line appears only where the dashboard is
-served, and both lines sit below `spring.mvc.servlet.path`.
+Swagger UI appears with springdoc. The dashboard line appears only where the dashboard is
+served.
 
 ### Tracing {#peekaboottracing}
 
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.tracing.enabled` | `true` | Whether the in-memory trace store exists, and with it the capture of each request's headers, parameters, resolved controller and log lines. Request and response bodies are not captured. |
-| `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors. The span fails when an `@Async` method, or a task passed to `execute()` or `submit()`, throws. Needs `spring.task.execution.propagate-context`, see [Traces, background work]({{ '/docs/traces/' | relative_url }}#background-work). |
+| `peekaboot.tracing.async` | `true` | Records a span for each task run on one of Spring's task executors. The span fails when the task throws. Needs `spring.task.execution.propagate-context`, see [Traces, background work]({{ '/docs/traces/' | relative_url }}#background-work). |
 | `peekaboot.tracing.event-listeners` | `true` | Records a span for each call of an `@EventListener` method. An `@Async` listener also needs `spring.task.execution.propagate-context`. See [Traces, event listeners]({{ '/docs/traces/' | relative_url }}#event-listeners). |
 | `peekaboot.tracing.max-traces` | `1000` | Traces kept in the All bucket, oldest evicted first. |
-| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, counted after duplicates are merged. Past it the oldest are dropped. The trace counts them in its `droppedSpans`, and the dashboard shows a `TRUNCATED` badge. |
+| `peekaboot.tracing.max-spans-per-trace` | `500` | Spans kept per trace, oldest dropped past it. The trace counts them in `droppedSpans` and shows a `TRUNCATED` badge. |
 | `peekaboot.tracing.max-error-traces` | `100` | Traces kept in the Errors bucket. |
 | `peekaboot.tracing.max-slow-traces` | `100` | Traces kept in the Slow bucket. |
 | `peekaboot.tracing.slow-trace-threshold-ms` | `1000` | Duration in milliseconds, background async work excluded, at or above which a trace enters the Slow bucket and shows a SLOW badge. |
-| `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. An `ERROR` line still fails its trace when none are kept. |
+| `peekaboot.tracing.max-logs-per-trace` | `500` | Log entries kept per trace. |
 | `peekaboot.tracing.max-untraced-logs` | `1000` | Log lines written outside any trace that are kept for the [log search]({{ '/docs/api/' | relative_url }}#log-search), oldest dropped first. |
 
 `max-traces` and `max-spans-per-trace` must be at least `1`. For the other limits `0` keeps none.
@@ -276,10 +253,10 @@ survives a restart is [`peekaboot.storage.enabled`](#peekabootstorage).
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.insights.enabled` | `true` | The collector, the `/peekaboot/api/insights/**` endpoints and the Insights tab. |
-| `peekaboot.insights.levels[n].interval` | `10s`, `1m`, `1h` | The sampling tick (level 0) and each coarser aggregation window. |
-| `peekaboot.insights.levels[n].size` | `90`, `1440`, `720` | Entries kept per series at that level. `interval` &times; `size` is how far back the charts reach. |
-| `peekaboot.insights.config-location` | unset, so `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file. Peekaboot's bundled panels are still merged underneath. A location that names nothing stops startup. |
-| `peekaboot.insights.persistence.interval` | `5m` | How often the history is written to `insights.snapshot`. A crash loses at most this much. A normal shutdown loses nothing. Does nothing while storage is off. |
+| `peekaboot.insights.levels[n].interval` | `10s`, `1m`, `1h` | The sampling tick (level 0) and each coarser aggregation window. At most 16 levels. |
+| `peekaboot.insights.levels[n].size` | `90`, `1440`, `720` | Entries kept per series at that level, at most 1,000,000. `interval` &times; `size` is how far back the charts reach. |
+| `peekaboot.insights.config-location` | unset, so `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file, merged over Peekaboot's bundled panels. A location that names nothing stops startup. |
+| `peekaboot.insights.persistence.interval` | `5m` | How often the history is written to `insights.snapshot`. A crash loses at most this much. No effect while storage is off. |
 | `peekaboot.insights.persistence.max-age` | the coarsest level's span (30 days) | The oldest snapshot that is still loaded at startup. |
 | `peekaboot.insights.problems.cpu-high-percent` | `80` | [`CPU_HIGH`]({{ '/docs/api/' | relative_url }}#problems): the median process CPU, in percent. |
 | `peekaboot.insights.problems.gc-overhead-percent` | `10` | `GC_OVERHEAD`: the median share of CPU time spent collecting garbage, in percent. |
@@ -289,16 +266,8 @@ survives a restart is [`peekaboot.storage.enabled`](#peekabootstorage).
 | `peekaboot.insights.problems.server-errors-percent` | `5` | `SERVER_ERRORS`: the share of HTTP requests answered with a 5xx, in percent. |
 | `peekaboot.insights.problems.error-logs` | `1` | `ERROR_LOGS`: lines logged at ERROR in the window. |
 
-Setting `levels` replaces the whole list, so list every level you want. Startup fails unless
-all of these hold:
-
-- At most 16 levels.
-- Every `interval` and `size` is greater than zero, and every `size` is at most 1,000,000.
-- Each `interval` is a whole multiple of the one before it.
-- Each `interval` fits in the level below it. A `1m` level over a `10s` level spans six entries,
-  so the `10s` level needs a `size` of at least 6.
-- `persistence.interval` is set and greater than zero, and `persistence.max-age`, when set, too.
-- Every `problems.*-percent` is above 0 and at most 100, and every other `problems.*` at least 1.
+Setting `levels` replaces the whole list, so list every level you want. An invalid level set
+stops startup with a message naming the problem.
 
 Memory follows `size`, not `interval`, and Peekaboot logs the total at startup. See [what it
 costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
@@ -343,10 +312,6 @@ peekaboot:
 
 That is about the same memory as the defaults. The startup log reports the actual figure. See
 [what it costs]({{ '/docs/insights/' | relative_url }}#what-it-costs).
-
-Halving level 0's `interval` costs no memory. It halves the window that level covers and
-doubles how often every meter is read. Keeping the window means doubling `size`, which doubles
-the memory.
 
 ### Memory-constrained {#memory-constrained}
 
