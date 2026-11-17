@@ -15,10 +15,8 @@ permalink: /docs/troubleshooting/
 | The application is reactive (WebFlux) or not a web application. | None. Peekaboot's dashboard needs a servlet web application. |
 | Spring Boot Actuator is not on the classpath. | Keep `spring-boot-starter-actuator`, which the Peekaboot starter brings in. |
 
-The startup log helps to tell these apart. Peekaboot logs a startup summary with the
-application name, build, server and datasource details whenever it is on, unless you set
-`peekaboot.lifecycle.enabled=false`. The summary's `Peekaboot Dashboard` line shows the URL,
-and it is missing where no dashboard is served.
+The startup summary's `Peekaboot Dashboard` line shows the URL. It is missing where no
+dashboard is served, and the whole summary is missing with `peekaboot.lifecycle.enabled=false`.
 
 ## Peekaboot is off in `@SpringBootTest` {#disabled-in-springboottest}
 
@@ -33,17 +31,13 @@ what counts as a local run]({{ '/docs/configuration/' | relative_url }}#local-ru
 
 ## The Traces tab is empty {#traces-tab-empty}
 
-**Cause:** nothing feeds the trace store. Check `tracingSpansPossible` in
-`GET /peekaboot/api/features`.
-
-With `tracingSpansPossible` false the tab shows no list. It says that no OpenTelemetry SDK is on
-the classpath and names `org.springframework.boot:spring-boot-starter-opentelemetry` as the
-dependency to add.
+Check `tracingSpansPossible` in `GET /peekaboot/api/features`. With it `false` the tab names
+`org.springframework.boot:spring-boot-starter-opentelemetry` as the dependency to add.
 
 | `tracingSpansPossible` | Cause | Fix |
 |---|---|---|
-| `false` | No OpenTelemetry SDK on the classpath. | Keep `spring-boot-starter-opentelemetry`, which the Peekaboot starter brings in. See [Quick start]({{ '/docs/quick-start/' | relative_url }}#what-the-starter-brings). |
-| `true` | Your configuration sets `management.tracing.sampling.probability` to `0`. Peekaboot's default of `1.0` loses to any value you set, and a value between `0` and `1` records only that share of requests. | Check the effective value on the Environment tab and remove or raise your setting. |
+| `false` | No OpenTelemetry SDK on the classpath. | Keep `spring-boot-starter-opentelemetry`, which the Peekaboot starter brings in. See [Production use]({{ '/docs/in-production/' | relative_url }}#class-path). |
+| `true` | Your configuration sets `management.tracing.sampling.probability` to `0`, which beats Peekaboot's `1.0`. A value between `0` and `1` records only that share of requests. | Check the effective value on the Environment tab and remove or raise your setting. |
 
 A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 
@@ -56,14 +50,13 @@ A Traces tab that is missing altogether means `peekaboot.tracing.enabled=false`.
 | The log said `another running instance writes to <dir>`. | See [History is not saved although storage is on](#second-instance). |
 | The log said `Peekaboot traces: the files in <dir> come from another Peekaboot version or start with a damaged header; starting without them`. | None. Peekaboot deleted them, and this run writes new ones. |
 | The log said `Peekaboot traces: cannot write to <dir> (...); traces from here on will not survive a restart`. | Make the directory writable, or point `peekaboot.storage.dir` at one that is. |
-| The log said `Peekaboot traces: the journal in <dir> stopped (...); traces from here on will not survive a restart`. | The journal's thread ran out of memory or stack. Give the JVM more heap or lower `peekaboot.tracing.max-traces`. The traces stay complete in memory, and the files are read again at the next start. |
-| The log said `Peekaboot traces: the journal could not keep up and dropped N inputs; they will not survive a restart`. | None. The journal fell behind a burst of spans or log lines, or more than 10,000 arrived before the application reported ready. The traces are complete in memory; the dropped inputs are missing after a restart only. |
-| The log said `Peekaboot traces: skipped N unreadable lines in <dir>; restored the rest`. | None. Those lines are missing from the restored traces. |
-| The log said `Peekaboot traces: skipped N unreadable lines and M the store refused (...) in <dir>; restored the rest`. | None. Those lines are missing from the restored traces, and the next fold leaves the refused ones out of the files. |
+| The log said `Peekaboot traces: the journal in <dir> stopped (...); traces from here on will not survive a restart`. | Give the JVM more heap or lower `peekaboot.tracing.max-traces`. The traces stay complete in memory. |
+| The log said `Peekaboot traces: the journal could not keep up and dropped N inputs; they will not survive a restart`. | None. The journal fell behind a burst, or more than 10,000 inputs arrived before the application reported ready. The dropped inputs are missing after a restart only. |
+| The log said `Peekaboot traces: skipped N unreadable lines in <dir>; restored the rest` or `Peekaboot traces: skipped N unreadable lines and M the store refused (...) in <dir>; restored the rest`. | None. Those lines are missing from the restored traces. |
 | The log said `Peekaboot traces: cannot read <dir> (...); restored what was read before it`. | Check that the application can read the files in `<dir>`. What came after the failure was not restored. |
-| The storage directory differs between the two runs. Without `build-info.properties` it comes from `spring.application.name`, so a launch that lacks the file uses another directory. | Set `peekaboot.storage.dir`, or generate `build-info.properties` in every build. See [Configuration, storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage). |
-| The log said `Peekaboot traces: dropped N inputs that arrived while the stored traces were being restored`. | More than 10,000 spans, log lines and requests arrived before the restore finished. The rest reached neither the store nor the files. Repeat the requests you need. |
-| The log said `Peekaboot traces: could not apply N inputs that arrived while the stored traces were being restored (...)`. | A bug in Peekaboot; report it with the exception in the parentheses. Those inputs are missing from their traces in this run. They are in the files, and the next fold or start leaves out each one the store refuses again. |
+| The storage directory differs between the two runs. Without `build-info.properties` it comes from `spring.application.name`. | Set `peekaboot.storage.dir`, or generate `build-info.properties` in every build. See [Configuration, storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage). |
+| The log said `Peekaboot traces: dropped N inputs that arrived while the stored traces were being restored`. | Inputs beyond 10,000 that arrived before the restore finished are lost. Repeat the requests you need. |
+| The log said `Peekaboot traces: could not apply N inputs that arrived while the stored traces were being restored (...)`. | Report it with the exception in the parentheses. Those inputs are missing from their traces in this run. |
 | The log said `Peekaboot traces: could not store span ... of trace ... (...); later failures are not logged`. | That span is missing from its trace. The parentheses name the cause. |
 
 A trace that reads INTERRUPTED after a restart was still running when the application stopped.
@@ -75,7 +68,7 @@ search]({{ '/docs/api/' | relative_url }}#log-search) for example.
 
 **Cause:** the startup log has `another running instance writes to <dir>`. That instance holds
 the storage directory, so this one keeps its insights history, lifecycle log, traces, error
-digest and generated password in memory. It writes no file there and reads none.
+digest and generated password in memory only.
 
 **Fix:** stop the other instance and restart this one, or set `peekaboot.storage.dir` to give
 this one its own directory.
@@ -85,28 +78,26 @@ See [Configuration, storage]({{ '/docs/configuration/' | relative_url }}#peekabo
 ## The error digest is empty after a restart or misses a failure {#error-digest-gone}
 
 The [error digest]({{ '/docs/api/' | relative_url }}#error-digest) survives a restart on the
-same switches as the traces above. These lines in the log say why it lost entries.
+same switches as the traces above.
 
 | Cause | Fix |
 |---|---|
 | The log said `another running instance writes to <dir>`. | See [History is not saved although storage is on](#second-instance). |
-| The log said `Peekaboot errors: <dir>/errors.jsonl comes from another Peekaboot version or starts with a damaged header; starting without it`. | None. Peekaboot deleted it. The digest writes a new one once it records a failure. |
+| The log said `Peekaboot errors: <dir>/errors.jsonl comes from another Peekaboot version or starts with a damaged header; starting without it`. | None. Peekaboot deleted it, and a new file starts with the next recorded failure. |
 | The log said `Peekaboot errors: cannot read <dir>/errors.jsonl (...); starting without it`. | Check that the application can read the file. |
-| The log said `Peekaboot errors: skipped N unreadable lines in <dir>/errors.jsonl; restored the rest`. | None. Those entries are missing, and the next write leaves them out of the file. |
+| The log said `Peekaboot errors: skipped N unreadable lines in <dir>/errors.jsonl; restored the rest`. | None. Those entries are missing. |
 | The log said `Peekaboot errors: cannot write <dir>/errors.jsonl (...); the error digest from here on will not survive a restart`. | Make the directory writable, or point `peekaboot.storage.dir` at one that is. |
-| The log said `Peekaboot errors: cannot record trace <traceId> in the error digest (...); the digest misses it`. | A bug in Peekaboot; report it with the exception in the parentheses. The line is logged once per run, so later misses go unlogged. A missed failure's trace stays in the store as usual. |
+| The log said `Peekaboot errors: cannot record trace <traceId> in the error digest (...); the digest misses it`. | Report it with the exception in the parentheses. The digest misses that failure. Its trace stays in the store. |
 
 ## Traces arrive late in tests {#traces-late-or-empty-in-tests}
 
-**Cause:** spans are exported in batches. Tests do not turn the dev toolbar on, so they keep
-Spring Boot's longer [export
-delay]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application). A test that reads
-`/peekaboot/api/traces/**` right after its request runs before the spans are there. Until the
-trace's root span arrives, `/peekaboot/api/traces/{traceId}` answers `200` with
-`summary.complete` set to `false`.
+**Cause:** spans arrive after a short delay. A test that reads `/peekaboot/api/traces/**` right
+after its request sees none. Until the trace's root span arrives,
+`/peekaboot/api/traces/{traceId}` answers `200` with `summary.complete` set to `false`.
 
-**Fix:** shorten the export delay in the test profile, or poll until `summary.complete` is
-`true`.
+**Fix:** shorten the [export
+delay]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application) in
+the test profile, or poll until `summary.complete` is `true`.
 
 ```yaml
 management:
@@ -131,15 +122,13 @@ application]({{ '/docs/configuration/' | relative_url }}#query-heavy-application
 |---|---|
 | Tracing is off. Logs are captured only while `peekaboot.tracing.enabled` is on. | Remove `peekaboot.tracing.enabled: false`. |
 | The application does not log through Logback. | None. Log capture works with Logback only. |
-| The log line was written on a thread without the trace context, so it carries no trace id. It is kept with the lines written outside any trace, the newest [`peekaboot.tracing.max-untraced-logs`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) of them. | Find it with `GET /peekaboot/api/logs?q=<text>`. For `@Async` and other executor work, see [the next entry](#async-work-missing). |
+| The log line was written on a thread without the trace context. It is kept with the lines written outside any trace, the newest [`peekaboot.tracing.max-untraced-logs`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing) of them. | Find it with `GET /peekaboot/api/logs?q=<text>`. For `@Async` and other executor work, see [the next entry](#async-work-missing). |
 
 See [Traces, what gets recorded]({{ '/docs/traces/' | relative_url }}#what-gets-captured).
 
 ## `@Async` work is missing or shows up as separate traces {#async-work-missing}
 
-**Cause:** the trace context does not reach the executor thread.
-
-**Fix:** {% include facts/propagate-context.md %}
+{% include facts/propagate-context.md %}
 
 Also check that `peekaboot.tracing.async` and `peekaboot.tracing.enabled` are not set to
 `false`. An application that declares its own `Executor` bean also needs
@@ -152,8 +141,7 @@ work]({{ '/docs/traces/' | relative_url }}#background-work).
 |---|---|
 | `peekaboot.dev-toolbar.enabled` is off. It is on only for a local run, and `peekaboot.enabled=true` does not switch it on. | Set `peekaboot.dev-toolbar.enabled: true` where you want the toolbar. |
 | The response is not HTML with a `</body>` tag. JSON responses and redirects never get a bar. | Open the request's trace on the Traces tab. Calls made from Swagger UI show in its bar. |
-| The HTML response is larger than 2 MiB. | Open the request's trace on the Traces tab. |
-| The request matches an injection exclusion: an excluded path prefix, a blocked file extension, an `X-Requested-With` header or an async dispatch. | Open the request's trace on the Traces tab, if it is traced. See [Dev toolbar, pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears). |
+| The HTML response is larger than 2 MiB, or the request matches an injection exclusion: an excluded path prefix, a blocked file extension, an `X-Requested-With` header or an async dispatch. | Open the request's trace on the Traces tab, if it is traced. See [Dev toolbar, pages that get the bar]({{ '/docs/dev-toolbar/' | relative_url }}#where-the-bar-appears). |
 | On a local run, the page was opened from another machine, or through a tunnel or a proxy. | See [The dashboard returns 403 on a local run](#dashboard-403). |
 
 ## The toolbar says "could not start" {#toolbar-could-not-start}
@@ -184,7 +172,7 @@ appear]({{ '/docs/dashboard/' | relative_url }}#conditionally-shown-tabs).
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Insights tab missing | `peekaboot.insights.enabled=false`, or there is no `MeterRegistry` (Meters is missing too). | Remove the setting, or see [the Meters tab is missing](#meters-tab-missing). |
+| Insights tab missing | `peekaboot.insights.enabled=false`, or there is no `MeterRegistry`. | Remove the setting, or see [the Meters tab is missing](#meters-tab-missing). |
 | Your panels are replaced by the default ones | Your `peekaboot-insights.yml` is invalid. The startup log has an `ERROR` containing `is invalid; discarding it entirely`. | Fix the file as the log message says. |
 | A panel says "No data" | The panel's meters are not registered, for example there is no HikariCP, Hibernate or `datasource-micrometer`. | Look the meter up on the Meters tab. A meter that is not there cannot be charted. |
 
@@ -193,9 +181,8 @@ appears]({{ '/docs/insights/' | relative_url }}#when-the-tab-appears).
 
 ## Liquibase dates are hours off on MySQL {#liquibase-dates-off-on-mysql}
 
-**Cause:** MySQL stores `DATEEXECUTED` as a `DATETIME`, which has no zone, in the server's time
-zone. Liquibase reads it back in the JVM's zone, so every date on the Liquibase tab is off by
-the difference between the two.
+**Cause:** MySQL stores `DATEEXECUTED` without a zone, so every date on the Liquibase tab is
+off by the difference between the server's and the JVM's time zone.
 
 **Fix:** have MySQL Connector/J read `DATETIME` as a timestamp in the server's zone, on that
 DataSource:
@@ -227,7 +214,7 @@ every `/peekaboot/**` request, including one your own Spring Security chain sign
 a proxy with basic auth, an IP allowlist or an API gateway in front does not satisfy it.
 
 This also hits smoke tests that start the packaged jar with Testcontainers or docker-compose.
-That process counts as a deployment, not a test.
+That process counts as a deployment.
 
 **Fix:** one of these.
 
@@ -236,10 +223,9 @@ That process counts as a deployment, not a test.
   `Password: unchanged since <date>`. If nobody kept it, delete the credentials file named on
   that line and restart for a new one.
 - Set your own password with `peekaboot.security.password`.
-- Set `peekaboot.security.enabled=false` where your own security protects the dashboard. If
-  that security also uses the `Authorization` header, as HTTP Basic and bearer tokens do, the
-  two lock each other out.
-- For the smoke-test container, set `peekaboot.security.enabled=false`.
+- Set `peekaboot.security.enabled=false` where your own security protects the dashboard, and
+  for a smoke-test container. If that security also uses the `Authorization` header, as HTTP
+  Basic and bearer tokens do, the two lock each other out.
 
 See [Security, securing the dashboard]({{ '/docs/security/' | relative_url }}#securing-the-dashboard).
 
@@ -279,8 +265,7 @@ for credentials on whatever page is open.
 - `peekaboot.storage.enabled` is `false`, the default on a deployment. The generated password
   is not saved.
 - The log says the credentials file `is accessible to its group or to others` on every start.
-  Peekaboot ignores such a file and writes the new one `rw-------`, so the file system it is
-  on does not keep that mode.
+  The file must be readable by its owner only, or Peekaboot ignores it.
 - The log says `another running instance writes to <dir>`. See
   [History is not saved although storage is on](#second-instance).
 
@@ -298,15 +283,13 @@ See [Configuration, `peekaboot.security`]({{ '/docs/configuration/' | relative_u
 **Cause:** one of these.
 
 - `peekaboot.error-page.enabled` is off. It is on only for a local run.
-- The application has its own error page: an `error` view bean, an `error` template or a static
-  `error/*.html`. Or it sets `spring.web.error.whitelabel.enabled=false`.
+- The application has its own error page, or sets `spring.web.error.whitelabel.enabled=false`.
+  See [Error page]({{ '/docs/error-page/' | relative_url }}#own-error-page).
 - {% include facts/error-page-accept.md %}
 
 **Fix:** set `peekaboot.error-page.enabled: true` on a deployment. To show Peekaboot's page
 in place of your own, set `peekaboot.error-page.override: true`, typically in your local
-profile. The override does not work when the application excludes `ErrorMvcAutoConfiguration`
-or maps its own `ErrorController` to `/error`. See [Error
-page]({{ '/docs/error-page/' | relative_url }}#override).
+profile. See [Error page]({{ '/docs/error-page/' | relative_url }}#override).
 
 ## Peekaboot's error page replaces your own {#error-page-replaces-own}
 

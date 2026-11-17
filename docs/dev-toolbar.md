@@ -9,11 +9,12 @@ permalink: /docs/dev-toolbar/
 The bar shows the response status, method and path, controller method, duration, span count,
 query count and total query time, log count, error and warning log counts when there are any,
 and the trace id, which copies on click. The logo opens the dashboard in a new tab. Click
-anywhere else on the bar, or press Enter or Space while it has focus, to open the
-[trace detail](#the-trace-view).
+anywhere else on the bar, or press Enter or Space while it has focus, to open the trace detail
+on top of your page. It is the one the dashboard's Traces tab uses, see
+[Traces]({{ '/docs/traces/' | relative_url }}#the-trace-view).
 
 The numbers fill in during the first few seconds, so spans that end after the response are
-counted too. Numbers are formatted in the language chosen on the dashboard.
+counted too.
 
 ## Turn it on or off {#turn-it-on-or-off}
 
@@ -24,8 +25,8 @@ The toolbar needs:
 - `peekaboot.tracing.enabled`, `true` by default, for the trace, request details and logs the
   bar shows.
 - A servlet web application.
-- A Micrometer `Tracer` bean, which the starter provides. See [Quick
-  start]({{ '/docs/quick-start/' | relative_url }}) for what happens without one.
+- A Micrometer `Tracer` bean, which the starter provides. Without one the toolbar is absent, see
+  [Production use]({{ '/docs/in-production/' | relative_url }}#graceful-degradation).
 
 ```yaml
 peekaboot:
@@ -34,8 +35,8 @@ peekaboot:
 ```
 
 `peekaboot.dev-toolbar.enabled` is under [Configuration]({{ '/docs/configuration/' | relative_url }}#peekaboot).
-While the bar is on, Peekaboot shortens the span export delay so a finished span reaches the bar
-quickly. See [Spring Boot defaults Peekaboot
+While the bar is on, Peekaboot sets the span export delay to 200 ms (Spring Boot's default is
+5 s). See [Spring Boot defaults Peekaboot
 changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application).
 
 ## Pages that get the bar {#where-the-bar-appears}
@@ -50,16 +51,15 @@ does not get the bar when:
 - The request sends `X-Requested-With: XMLHttpRequest`. A plain `fetch()` does not send it,
   so HTML fetched that way gets the bar.
 - The handler responds asynchronously.
-- The HTML body is larger than 2 MiB. It is served unchanged.
 - The response is partial content (status `206`). It is served unchanged.
 - On a local run, the request does not come from the machine the application runs on. See
   [Security, who can reach Peekaboot]({{ '/docs/security/' | relative_url }}#who-can-reach-peekaboot).
 
-HTML error pages get the bar too. See [the bar on the error
-page](#the-bar-on-the-error-page).
+HTML error pages get the bar too, see [the bar on the error page](#the-bar-on-the-error-page).
 
-To inject the bar, Peekaboot holds each HTML response in memory. If generating the bar fails,
-the page is served unchanged. Your page's CSS does not affect the bar.
+HTML responses up to 2 MiB are buffered in memory so the bar can be added; larger pages stream
+through without it. If generating the bar fails, the page is served unchanged. Your page's CSS
+does not affect the bar.
 
 ## Request and response detail {#request-and-response-detail}
 
@@ -71,16 +71,8 @@ no reveal control, so a masked value stays masked. See
 [Security]({{ '/docs/security/' | relative_url }}#masking) for the rules and what they miss.
 Request bodies and uploaded file names are not captured.
 
-Form parameters are listed when your application read them, or a filter that runs after
-Peekaboot's did, such as Spring Security's CSRF check when the token is not in a header.
-Peekaboot never parses a body itself, so a request rejected before anything read its
-parameters shows none. A name or value over 4,096 characters is cut.
-
-## The trace detail {#the-trace-view}
-
-Clicking the bar opens the same trace detail the dashboard's Traces tab uses, on top of your
-page. [Traces]({{ '/docs/traces/' | relative_url }}#the-trace-view) describes its Spans,
-Queries, Logs and Request tabs.
+Form parameters appear only when your application, or a later filter such as Spring Security's
+CSRF check, read them. A request rejected before anything read its parameters shows none. A name or value over 4,096 characters is cut.
 
 ## Logs for the request {#logs-correlated-to-the-request}
 
@@ -109,7 +101,7 @@ records]({{ '/docs/traces/' | relative_url }}#what-gets-captured) are not shown 
 
 HTML error pages get the bar, including [Peekaboot's error
 page]({{ '/docs/error-page/' | relative_url }}). It reports the request
-that failed, not the `/error` dispatch that rendered the page. A request that Spring Security
+that failed. A request that Spring Security
 rejects before it reaches your application, such as a 401 or 403, gets no bar on its error
 page.
 
@@ -118,6 +110,5 @@ page.
 ## With Spring Security {#with-spring-security}
 
 The bar loads its data from `/peekaboot/**`. A reader who is not allowed there, or a
-Content-Security-Policy that blocks the bar's script, leaves the bar on a "could not start"
-notice. See [Security, the dev toolbar asks the reader to sign
-in]({{ '/docs/security/' | relative_url }}#toolbar-requires-sign-in).
+Content-Security-Policy that blocks the bar's script, sees a "could not start" notice. See
+[Security]({{ '/docs/security/' | relative_url }}#toolbar-requires-sign-in).
