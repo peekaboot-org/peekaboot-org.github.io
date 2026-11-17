@@ -5,9 +5,8 @@ permalink: /docs/agents/
 ---
 
 An agent that debugs your application through Peekaboot needs HTTP and nothing else. Everything
-the dashboard shows is JSON under `/peekaboot/api`, and the answers carry Peekaboot's own
-judgement, such as a trace's cause, its issues and the routes that fail. The agent does not have
-to work any of it out again.
+the dashboard shows is JSON under `/peekaboot/api`, with Peekaboot's own verdicts such as a
+trace's cause, its issues and the routes that fail.
 
 ## Install the skill {#install-the-skill}
 
@@ -52,23 +51,12 @@ mkdir -p .claude/skills && cp -r ../peekaboot-skills/skills/peekaboot .claude/sk
 
 ## Start here {#start-here}
 
-`GET /peekaboot/api` lists every endpoint with one line on what it is for, and links the
-OpenAPI document:
+`GET /peekaboot/api` lists every endpoint and links the OpenAPI document. See [HTTP
+API]({{ '/docs/api/' | relative_url }}#openapi).
 
 ```bash
 curl -s http://localhost:8080/peekaboot/api | jq
 ```
-
-`/peekaboot/api/openapi.json` is an OpenAPI 3.1 document. It describes every endpoint, parameter,
-response and problem body Peekaboot answers with. An error your application answers instead,
-such as a `405`, appears there in words only.
-
-The document's `servers` entry is the prefix the request came through, so a context path or a
-`spring.mvc.servlet.path` prefix is already in it. See [HTTP
-API]({{ '/docs/api/' | relative_url }}#openapi).
-
-An endpoint refuses a parameter it does not take with a `400` whose `detail` lists the ones it
-does take. A typo never returns the unfiltered list.
 
 ## Authentication {#authentication}
 
@@ -92,27 +80,20 @@ export PEEKABOOT_USER=orders-admin PEEKABOOT_PASSWORD='a-long-random-secret'   #
 curl -s -u "$PEEKABOOT_USER:$PEEKABOOT_PASSWORD" http://localhost:8080/peekaboot/api/features
 ```
 
-A request the guard refuses answers `401` with a problem body, and one a local run refuses
-answers `403`. Where your own Spring Security guards `/peekaboot/**` instead, send the
-credentials it expects.
+Where your own Spring Security guards `/peekaboot/**` instead, send the credentials it expects.
+For refused requests, see [Security]({{ '/docs/security/' | relative_url }}).
 
 ## Masked values {#masked-values}
 
-`******` means Peekaboot masked a value. The value exists, and the API does not show it. It is
-never the real value, so an agent should not use it, retry for it, or report it as empty.
-A masked part can sit inside a longer string, such as `jdbc:postgresql://db/orders?password=******`.
-`/peekaboot/api/features` names the literal in `maskLiteral`.
-
-The log search matches the masked text, so `q=******` finds the lines Peekaboot masked a value in.
-Only `/peekaboot/api/actuator/all/insights?unmask=true` shows real values, and only while
-`peekaboot.unmasking.enabled` is on. See [Security,
+`******` means Peekaboot masked a value. It is never the real value, so do not use it, retry for
+it or report it as empty. `/peekaboot/api/features` names it in `maskLiteral`, and the log search
+finds lines that held one with `q=******`. See [Security,
 masking]({{ '/docs/security/' | relative_url }}#masking).
 
 ## Recipes {#recipes}
 
-Each recipe shows its first call here. The skill's reference files hold the whole recipe, with
-the follow-up calls and what an empty answer means. The calls read the application's scheme,
-host, port and context path from `BASE`. Set it first, and add `-u` where the guard is armed:
+Each recipe shows its first call. `BASE` is the application's scheme, host, port and context
+path. Add `-u` where the guard is armed:
 
 ```bash
 BASE=http://localhost:8080
@@ -129,9 +110,9 @@ if [ -z "$T" ]; then echo 'No Server-Timing header, so Peekaboot did not trace t
 else curl -s "$BASE/peekaboot/api/traces/$T" | jq '.summary | {complete, outcome, cause, reasons}'; fi
 ```
 
-While `complete` is `false` the spans are still arriving; ask again. The [full
-recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/debug-a-500.md)
-adds the stack trace and the error digest.
+While `complete` is `false` the spans are still arriving; ask again.
+
+[Full recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/debug-a-500.md)
 
 ### Find slow or failing routes {#slow-or-failing-routes}
 
@@ -140,9 +121,7 @@ curl -s "$BASE/peekaboot/api/routes" \
   | jq '.routes | sort_by(-.p95Ms) | .[:5] | map({method, route, count, errorCount, p95Ms, latestSlowTraceId, latestErrorTraceId})'
 ```
 
-The [full
-recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/slow-or-failing-routes.md)
-reads the slowest route's trace, its hotspots and its issues.
+[Full recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/slow-or-failing-routes.md)
 
 ### Read health over time {#health-over-time}
 
@@ -150,9 +129,9 @@ reads the slowest route's trace, its hotspots and its issues.
 curl -s -G "$BASE/peekaboot/api/insights/data" --data-urlencode 'level=1' | jq '{level, count, problems}'
 ```
 
-An empty `problems` list means no rule reached its threshold. The [full
-recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/health-over-time.md)
-adds the levels and the run history.
+An empty `problems` list means no rule reached its threshold.
+
+[Full recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/health-over-time.md)
 
 ### Search the logs {#log-search}
 
@@ -161,6 +140,4 @@ curl -s -G "$BASE/peekaboot/api/logs" --data-urlencode 'level=WARN' --data-urlen
   | jq '.logs[] | {timestamp, level, logger, message, traceId}'
 ```
 
-The [full
-recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/log-search.md)
-pages through the results.
+[Full recipe](https://github.com/peekaboot-org/peekaboot-skills/blob/HEAD/skills/peekaboot/references/log-search.md)

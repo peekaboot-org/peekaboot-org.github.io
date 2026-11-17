@@ -13,16 +13,14 @@ them anywhere else.
 ## Conventions {#conventions}
 
 - Optional fields are always present. A missing value is `null`, never an absent key.
-- Every endpoint below answers with `Cache-Control: no-store` and
-  `X-Content-Type-Options: nosniff`. That includes the event stream and the errors under
-  [Errors](#errors), the guard's `401` among them.
-- Peekaboot serialises its responses with its own JSON converter. Your `spring.jackson.*`
-  settings do not change them, and Peekaboot does not change your application's JSON.
+- Every response carries `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`, the
+  event stream and the errors included.
+- `spring.jackson.*` does not affect these responses, and Peekaboot does not change your
+  application's JSON.
 - All endpoints are `GET`.
 - An endpoint refuses a query parameter it does not take, and any parameter sent more than once,
   with a `400`. [Endpoints](#endpoints) lists what each one takes. Spring Security's `continue`,
   which its login adds to the URL it sends a browser back to, is accepted everywhere.
-- The errors under [Errors](#errors) answer with a problem body.
 - A point in time Peekaboot records is an ISO-8601 string in UTC, such as
   `2026-10-23T10:15:30.123456Z`, with as many fractional digits as the clock gave.
   `server.currentTime` keeps the JVM's own offset.
@@ -51,7 +49,7 @@ them anywhere else.
 | [`/peekaboot/api/lifecycle/runs`](#restart-history) | none | `200`, `400`, `404` when lifecycle is off |
 
 The dashboard and the toolbar do not read the index, the OpenAPI document, the log search, the
-routes or the error digest. Those five exist for agents and scripts.
+routes or the error digest. Those five are for agents and scripts.
 
 Where Peekaboot's guard is armed, every endpoint can also answer `401`. See
 [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
@@ -72,16 +70,14 @@ names where the OpenAPI document is:
 {openapi, endpoints: [{path, purpose}]}
 ```
 
-`GET /peekaboot/api/openapi.json` is a hand-written OpenAPI 3.1 document. It describes every
-endpoint, parameter, response and problem body on this page, with each field's type and whether
-it can be `null`. Peekaboot's build validates the real answers of every endpoint against it.
+`GET /peekaboot/api/openapi.json` is an OpenAPI 3.1 document. It describes every endpoint,
+parameter, response and problem body on this page, with each field's type and whether it can be
+`null`.
 
-Both work behind a prefix. Behind a `server.servlet.context-path` or a
-`spring.mvc.servlet.path`, the index's paths carry that prefix, such as
-`/app/peekaboot/api/traces`, and the document's `servers` entry is that prefix. The `404` of a
+Behind a `server.servlet.context-path` or a `spring.mvc.servlet.path`, the index's paths and the
+document's `servers` entry carry that prefix, such as `/app/peekaboot/api/traces`. The `404` of a
 feature that is off, a `405`, a `406` and an unexpected `500` come from your application, so the
-document describes them in words only. See [Agents]({{ '/docs/agents/' | relative_url }}) for
-what an agent reads first.
+document describes them in words only.
 
 ## Errors {#errors}
 
@@ -104,12 +100,9 @@ no single parameter is.
 | Status | When | `parameter` |
 |---|---|---|
 | `400` | An unknown `bucket`, `rootActionType`, `view` or `outcome` value, an unknown log search `level`, or an unknown insights `series` id. `detail` lists the accepted values. | The parameter |
-| `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`, or a number outside its range, such as `limit=0`, or `limit=101` with `view=full`. `detail` gives the range. | The parameter |
-| `400` | A `since` or `until` that is no ISO-8601 instant, or an `until` not later than `since`. | The parameter |
-| `400` | A `route` that does not start with `/`, or a `locale` that is no well-formed language tag. | The parameter |
+| `400` | A value that is not a number or boolean where one is expected, such as `limit=abc` or `unmask=maybe`, or a number outside its range, such as `limit=0`, or `limit=101` with `view=full`. `detail` gives the range. A `since` or `until` that is no ISO-8601 instant, or an `until` not later than `since`. A `route` that does not start with `/`. A `locale` that is no well-formed language tag. | The parameter |
 | `400` | A `cursor` the endpoint did not hand out, the other listing's `next` among them, or one handed out before the application restarted. | `cursor` |
-| `400` | A parameter the endpoint does not take, such as a misspelled `buckett` or a different case, `Limit`. `detail` lists the parameters it takes, or `none`. | The parameter |
-| `400` | A parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
+| `400` | A parameter the endpoint does not take, such as a misspelled `buckett` or a different case, `Limit`, and then `detail` lists the parameters it takes, or `none`. A parameter sent more than once, such as `limit=1&limit=2`. | The parameter |
 | `400` | A missing `level`, or one that is no integer or outside the configured levels. `detail` gives the accepted range. An empty id in `series`, such as `series=a,,b`. | `level`, `series` |
 | `404` | The store does not hold the [trace](#single-trace). | `null` |
 | `401` | [Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard) refused the request. | `null` |
@@ -200,7 +193,7 @@ reads `null`. Without a `MeterRegistry` the response is `{metrics: []}`.
 | `limit` | 1 to 10000, at most 100 with `view=full` | `100` | `400`, see [Errors](#errors). |
 | `cursor` | The `next` of an earlier response | none, the first page | `400` |
 | `bucket` | `all`, `errors`, `slow`, any case | `all` | `400`, see [Errors](#errors). |
-| `rootActionType` | Comma-separated [root action types]({{ '/docs/traces/' | relative_url }}#root-action-type), any case, or `*` alone | Every type except `MAINTENANCE` | An unknown name, an empty entry or `*` among names: `400`. |
+| `rootActionType` | Comma-separated [root action types]({{ '/docs/traces/' | relative_url }}#root-action-type) with their API values, any case, or `*` alone | Every type except `MAINTENANCE` | An unknown name, an empty entry or `*` among names: `400`. |
 | `rootOperation` | Part of the name of the row's root span, any case | none | none |
 | `route` | The request's route as `summary.request.route` shows it, such as `/persons/{id}`, exactly | none | `400` when it does not start with `/` |
 | `path` | The start of the request path as `summary.request.path` shows it, after masking | none | none |
@@ -217,16 +210,15 @@ Under `rootOperation`, a scheduled job also matches on part of its fully qualifi
 
 Filters combine. A row lists when it matches every one. A parameter sent empty counts as not
 sent. `since` and `until` bound the row's `summary.startTime`, `since` in and `until` out. A
-trace with no start time yet is outside any window. Send the `+` of an offset as `%2B`. A bare
-`+` in a query string arrives as a space, and the instant is refused.
+trace with no start time yet is outside any window. Send the `+` of an offset as `%2B`.
 
 A row for an [async task]({{ '/docs/traces/' | relative_url }}#async-rows) answers no request,
 so `route`, `path` and `statusCode` never list it. Its `outcome` and `durationMs` are the task's
 own, and those are what `outcome` and `minDurationMs` judge.
 
-A trace still in flight can change between the filter and the response. A row can list under
-`outcome=OK` and read `ERROR`, or under `outcome=IN_PROGRESS` and read complete. A failure never
-clears, so `outcome=ERROR` never lists a row that reads `OK`.
+A trace still in flight can change between the filter and the response, so a row can list under
+`outcome=OK` and read `ERROR`, or under `IN_PROGRESS` and read complete. `outcome=ERROR` never lists
+a row that reads `OK`.
 
 ```bash
 curl -G 'http://localhost:8080/peekaboot/api/traces' \
@@ -235,15 +227,11 @@ curl -G 'http://localhost:8080/peekaboot/api/traces' \
   --data-urlencode 'since=2026-11-01T10:00:00+01:00'
 ```
 
-`-G` with `--data-urlencode` encodes the braces and the `+`. In the URL itself, curl would read
-`{id}` as one of its own patterns.
+`-G` with `--data-urlencode` encodes the braces and the `+`. A bare `+` in a query string
+arrives as a space, and the instant is refused. In the URL itself, curl would read `{id}` as one
+of its own patterns.
 
 With tracing off, the response has no traces and zero counts.
-
-### Root action types {#root-action-types}
-
-The API values and what each means are under [Traces, trace
-types]({{ '/docs/traces/' | relative_url }}#root-action-type).
 
 ### Response {#trace-list-response}
 
@@ -264,34 +252,23 @@ A trace with [background work]({{ '/docs/traces/' | relative_url }}#background-w
 for itself and once more for each async task it started. Those extra rows count towards
 `limit`. The bucket counts count each trace once.
 
-The list leaves out a trace's own row while some of its spans have arrived and its root has not.
-Before any of its spans arrive, the trace lists with `summary.complete` set to `false`. Fetch the
-[single trace](#single-trace) to follow a trace still in flight.
-
-An `INTERRUPTED` trace follows the same rule. One that holds any span never lists its own row,
-so `outcome=INTERRUPTED` lists only the interrupted traces that hold no span. Fetch the others
-as a [single trace](#single-trace).
+The list leaves out the own row of a trace, `INTERRUPTED` ones included, while some of its spans
+have arrived and its root has not. Before any span arrives, the trace lists with
+`summary.complete` set to `false`. So `outcome=INTERRUPTED` lists only interrupted traces that
+hold no span. Fetch the [single trace](#single-trace) to follow the others.
 
 ### Paging {#trace-list-paging}
 
-The list is newest first. `next` is the `cursor` for the page after this one, and `null` on the
-last page. Send it back as it is, with the same filters, to read on.
+`next` is the `cursor` for the page after this one, and `null` on the last page. Send it back
+unchanged, with the same filters. A cursor carries no filters, so sent with others it pages
+through what those match below the same position.
 
-A cursor names the position of the page's last row. The next page lists what sorts below it as
-the store stands then, so no older row is listed twice or skipped. A trace that leaves the store
-shifts no other row. A cursor carries no filters. Sent with others, it pages through what those
-match below the same position.
-
-A trace that enters a bucket after the cursor was handed out lists above it, and so does an
-async task that ends. A trace that enters a bucket again, All after Errors or Slow kept it,
-moves to the top. A trace's own row keeps the position it took when it entered the bucket. In
-All, that is when the store first received anything for it.
-
-So a request still running while you page can show up below the cursor once it finishes, or
-above the cursor, among rows you have already read. Read the first page again to catch it.
-
-A restart numbers every row anew, restored ones included, so a cursor handed out before it is
-refused with a `400` on `cursor`. Read the first page again.
+- A trace that leaves the store shifts no other row, so no older row is listed twice or skipped.
+- A trace that enters a bucket after the cursor was handed out lists above it. So does an async
+  task that ends and a trace that enters All again after Errors or Slow kept it. A request still
+  running while you page can therefore appear among rows you have already read, or below the
+  cursor once it finishes. Read the first page again to be sure.
+- A restart numbers every row anew, so an earlier cursor is refused with a `400` on `cursor`.
 
 ### The trace resource {#trace-fields}
 
@@ -303,8 +280,6 @@ List rows and the [single trace](#single-trace) share one shape, `{summary, data
  data: {rootSpan, orphans, logs, queries, httpExchange}}
 ```
 
-`summary` says how the trace went. `data` holds the spans, logs and queries behind it.
-
 #### Summary fields {#summary-fields}
 
 | Field | Meaning |
@@ -315,8 +290,8 @@ List rows and the [single trace](#single-trace) share one shape, `{summary, data
 | `run` | When the run of the application that produced the trace started, the `startedAt` of its row in [`/peekaboot/api/lifecycle/runs`](#restart-history). `null` until that run finished starting, and for good if it stopped before then. A trace restored after a restart keeps the run it came from. |
 | `rootActionType` | What started the trace, see [Traces, trace types]({{ '/docs/traces/' | relative_url }}#root-action-type). `UNKNOWN` while the root is missing. |
 | `rootOperation` | The name of the row's root span. `null` while the root is missing. |
-| `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `path` is masked by value shape. `route` is the route tag as recorded, such as `/persons/{id}`, and `null` when the request recorded none, or only a placeholder such as `NOT_FOUND`. Under Spring Boot's default static-resource mapping, a request no controller matched carries `/**`. `request` is `null` when the root is missing or is no HTTP request. |
-| `outcome` | `IN_PROGRESS` while `complete` is `false`, or `INTERRUPTED` for a trace [restored](#single-trace) from an earlier run that stopped before its root arrived. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure, also where a view rendered an exception for it. |
+| `request` | The root span's HTTP request, `{method, route, path, statusCode}`. `path` is masked by value shape. `route` is the route tag as recorded, such as `/persons/{id}`, and `null` when the request recorded none, or only a placeholder such as `NOT_FOUND`. `request` is `null` when the root is missing or is no HTTP request. |
+| `outcome` | `IN_PROGRESS` while `complete` is `false`, or `INTERRUPTED` for a trace [restored](#single-trace) from an earlier run that stopped before its root arrived. Else `ERROR` when a span failed, a server span answered with a 5xx or a line was logged at `ERROR`. Else `OK`. A 4xx is no failure, also where a view rendered an exception for it, such as [Peekaboot's error page]({{ '/docs/traces/' | relative_url }}#exception-views) with `peekaboot.error-page.override` on. |
 | `buckets` | The buckets that hold the trace now: `ERRORS`, `SLOW`, both in that order, or none. `ALL` is never named. |
 | `reasons` | Why the trace failed or ran slow, `[{kind, spanId, detail}]`. See [reasons](#reasons). |
 | `cause` | Where to start reading a failed trace, `{type, message, applicationFrame, spanId}`. See [cause](#cause). |
@@ -327,10 +302,6 @@ List rows and the [single trace](#single-trace) share one shape, `{summary, data
 
 A failure stays on a whole trace. When the caps evict the span or the log line that failed
 it, `outcome` still reads `ERROR`, though no reason or cause names it.
-
-A 4xx reads `OK` also where a view rendered an exception for it, such as Peekaboot's error page
-with `peekaboot.error-page.override` on. See [Traces, outcome and
-issues]({{ '/docs/traces/' | relative_url }}#exception-views).
 
 A row for an async task reports the task's own work. Its `startTime`, `durationMs`, `outcome`,
 `reasons`, `cause`, `issues`, `hotspots`, logs and queries cover the task alone. So do
@@ -348,8 +319,7 @@ its trace is not in Slow.
 
 `spanId` is the span a reason is about. On `SLOW` it is the root span, `null` while the root is
 missing. On `EXCEPTION`, `detail` names the span's exception by its type and message. On
-`ERROR_LOG` it is the line's masked message, and otherwise one plain sentence. The dashboard
-shows the SLOW badge on a trace with a `SLOW` reason.
+`ERROR_LOG` it is the line's masked message, and otherwise one plain sentence.
 
 #### Cause {#cause}
 
@@ -358,15 +328,15 @@ shows the SLOW badge on a trace with a `SLOW` reason.
 1. A failing span with a stack trace.
 2. An `ERROR` log line with a stack trace. `type` and `message` come from the stack trace's
    first line.
-3. A failing span that names its exception's type or message. It is reached only when no
-   failing span has a stack trace, so `applicationFrame` is `null`.
+3. A failing span that names its exception's type or message, reached only when no failing span
+   has a stack trace. `applicationFrame` is `null`.
 4. The first `ERROR` log line without a stack trace. Its message is `message`, and `type` and
    `applicationFrame` are `null`.
 5. The first server span that answered with a 5xx. `message` names the status, and `type` and
    `applicationFrame` are `null`.
 
-Within steps 1 and 3 the deepest failing span wins. Of two at one depth, the one the tree lists
-first wins. Steps 2 and 4 take the first line logged.
+Within steps 1 and 3 the deepest failing span wins, and of two at one depth the one the tree
+lists first. Steps 2 and 4 take the first line logged.
 
 `applicationFrame` is the first stack frame `applicationFrames` marks, without its `at`, such as
 `com.acme.OrderService.place(OrderService.java:42)`. `null` when the stack trace has no frame of
@@ -401,7 +371,7 @@ issues, exception, statement, rowCount, asyncEntry}`.
 
 | Field | Meaning |
 |---|---|
-| `selfMs` | The part of `durationMs` no child span covered, each child cut to the span's own window. |
+| `selfMs` | The part of `durationMs` no child span covered. |
 | `status` | `OK` or `ERROR`. |
 | `issues` | The span's [issues](#issue-fields). |
 | `exception` | Why the span failed, `{type, message, stackTrace, hiddenFrames, applicationFrames}`. `null` on spans that did not fail, also when they recorded an exception they handled. |
@@ -457,7 +427,7 @@ statement}`. A query whose span recorded no statement is listed all the same.
 | `dataSourceName` | The HikariCP pool name, else the DataSource name. A generated pool name such as `HikariPool-1` is skipped. `null` when neither is known. |
 | `durationMs` | How long the query span took. |
 | `rowCount` | Rows returned, where the JDBC instrumentation reported it. |
-| `statement` | The query's [statement](#statement-fields), the same one its span carries. `null` when the span recorded none. |
+| `statement` | The query's [statement](#statement-fields). `null` when the span recorded none. |
 
 ### Statement fields {#statement-fields}
 
@@ -467,9 +437,17 @@ by value shape.
 | Field | Meaning |
 |---|---|
 | `text` | The SQL as captured. A batch is its statements joined by `;` and a newline. |
-| `formatted` | The same SQL laid out by Hibernate's formatter. `null` without Hibernate on the classpath, or when the formatter could not lay it out. |
-| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. A value over 1,000 characters is cut. A statement records at most 100 sets and 16,000 characters of values; a single set cut short ends with a comment counting the parameters left out. |
-| `omittedParameterSets` | How many parameter sets a batch past 100 sets or 16,000 characters left out of `parameters`. `0` for every other statement. |
+| `formatted` | The same SQL formatted for reading. `null` without Hibernate on the classpath, or when formatting failed. |
+| `parameters` | The bind parameters as SQL literals, one list per parameter set. A batch has several sets, a statement without parameters none. |
+| `omittedParameterSets` | How many parameter sets a batch left out of `parameters`. `0` for every other statement. |
+
+`parameters` has these limits:
+
+| Limit | Effect |
+|---|---|
+| A value over 1,000 characters | The value is cut. |
+| More than 100 sets or 16,000 characters of values per statement | The rest is left out and counted in `omittedParameterSets`. |
+| A single set cut short | It ends with a comment counting the parameters left out. |
 
 ### Log fields {#log-fields}
 
@@ -508,12 +486,9 @@ as a [trace resource](#trace-fields).
   [persisted traces]({{ '/docs/traces/' | relative_url }}#persisted-traces).
 
 A trace is complete once a span without a parent arrives. A request that continues a caller's
-trace through a `traceparent` header has its parent elsewhere, so its trace is complete once
-its own server span arrives.
-
-An application that calls itself over HTTP reads complete for a moment, rooted at the inner
-request's server span, until the outgoing call's client span arrives. It reads in progress
-again until the real root arrives.
+trace through a `traceparent` header is complete once its own server span arrives. An application
+that calls itself over HTTP reads complete for a moment, rooted at the inner request's server
+span, and in progress again until the real root arrives.
 
 ## Log search {#log-search}
 
@@ -533,11 +508,9 @@ them, newest first in the order they were captured.
 The response is `{logs, next}`, each entry a [log line](#log-fields). With tracing off, `logs`
 is empty and `next` is `null`.
 
-A line written outside any trace has `traceId` and `spanId` `null`. Such a line was written
-during startup, on a thread without the trace context, or by Tomcat after the request's trace
-ended. Capture starts once Peekaboot attaches its appender while the application context starts,
-so Spring Boot's first startup lines are never captured.
-Peekaboot keeps the newest
+A line written outside any trace has `traceId` and `spanId` `null`. It was written during
+startup, on a thread without the trace context, or after the request's trace ended. Lines logged
+before the application context starts are not captured. Peekaboot keeps the newest
 [`peekaboot.tracing.max-untraced-logs`]({{ '/docs/configuration/' | relative_url }}#peekaboottracing)
 of them (1000). A trace's lines go with the trace, up to `max-logs-per-trace`. With
 [storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) on, they survive a
@@ -548,10 +521,8 @@ A secret the masking rules replace cannot be found, and `q=******` finds the lin
 one. `q` is plain text, so `(` and `*` match themselves. `logger=com.acme.orders` also lists
 `com.acme.ordersarchive`.
 
-`next` works as on the [trace list](#trace-list-paging). A line captured between two pages lists
-above the cursor. Several threads store lines at once, so a line stored while a search runs can
-still show up on a later page, below the cursor. It can also miss that page and every later one,
-and then shows up when a search starts again without a `cursor`.
+`next` works as on the [trace list](#trace-list-paging). Lines arriving while you page can appear
+late or be missed. Start again without a `cursor` to catch them.
 
 One request reads at most 10000 lines. A page can then hold fewer lines than `limit`, or none,
 and still carry a `next`. Follow `next` until it is `null`.
@@ -577,21 +548,26 @@ method and route pattern, busiest first:
 | `method`, `route` | The request method and its route as `summary.request.route` shows it, such as `/persons/{id}`. |
 | `count` | The route's requests. |
 | `errorCount` | Those whose [outcome](#summary-fields) is `ERROR`. A 4xx alone is none. |
-| `p50Ms`, `p95Ms`, `maxMs` | The median, the 95th percentile and the longest of their `durationMs`. The percentiles are nearest rank over every request. |
+| `p50Ms`, `p95Ms`, `maxMs` | The median, the 95th percentile and the longest of their `durationMs`. |
 | `latestErrorTraceId` | The newest request whose outcome is `ERROR`, `null` when none failed. |
 | `latestSlowTraceId` | The newest request that took at least `slow-trace-threshold-ms`, the one a `SLOW` reason names. `null` when none did. |
 | `issueCounts` | For each [issue type](#issue-fields), how many requests carry at least one issue of that type. Every type is named, `0` where no request has one. |
 
 Under Spring Boot's default static-resource mapping, a GET or a POST that no controller matched
-carries the route `/**` and is answered `404`. Those requests share a `/**` row per method. The
-`route: null` row holds the requests recorded without a route tag, or with only a placeholder
-such as `NOT_FOUND`.
+carries the route `/**` and answers `404`. Those requests share one `/**` row per method.
 
-Only complete traces whose root is an HTTP request count. A request's async tasks count with
-it, and their failures fail it. The numbers cover what All holds at the moment of the call, at
-most `max-traces` traces, and nothing is kept between calls. With tracing off, `routes` is
-empty and `traceCount` is `0`. Fetch a `latestErrorTraceId` as a [single trace](#single-trace)
-to read the failure.
+The `route: null` row holds the requests recorded without a route tag, or with only a
+placeholder such as `NOT_FOUND`.
+
+What counts:
+
+- Only complete traces whose root is an HTTP request.
+- A request's async tasks count with it, and their failures fail it.
+- What All holds at the moment of the call, at most `max-traces` traces. Nothing is kept between
+  calls.
+- With tracing off, `routes` is empty and `traceCount` is `0`.
+
+Fetch a `latestErrorTraceId` as a [single trace](#single-trace) to read the failure.
 
 ## Error digest {#error-digest}
 
@@ -617,14 +593,18 @@ exception class, route and application frame, the entry seen latest first:
 | `traceAvailable` | Whether the store still holds `lastTraceId`. Fetch it as a [single trace](#single-trace) while it is `true`. |
 | `runs` | When each run the failure occurred in started, the last ten, oldest first. Each is the `startedAt` of a run in [`/peekaboot/api/lifecycle/runs`](#restart-history). A failure before its run finished starting names no run. |
 
-The digest keeps 500 entries; past that the one seen least recently goes. It outlives the traces.
-One noisy failure can fill the Errors bucket, and the digest still lists every other failure.
-With [storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) and
-`peekaboot.storage.traces.enabled` on, it survives a restart in `errors.jsonl`, and the traces
-restored beside it do not count again. Otherwise it lives in memory only. While the restore runs at
-a start, `errors` is empty, so an empty list then does not mean no failures. The saved entries
-return together after the stored traces. See [persisted
-traces]({{ '/docs/traces/' | relative_url }}#persisted-traces). With tracing off, `errors` is empty.
+The digest:
+
+- Keeps 500 entries. Past that, the one seen least recently goes.
+- Outlives the traces. One noisy failure can fill the Errors bucket, and the digest still lists
+  every other failure.
+- Survives a restart only with [storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
+  and `peekaboot.storage.traces.enabled` on, in `errors.jsonl`, and the traces restored beside it
+  do not count again. Otherwise it lives in memory only.
+- Is empty while the restore runs at a start, so an empty list then does not mean no failures.
+  The saved entries return together after the stored traces. See [persisted
+  traces]({{ '/docs/traces/' | relative_url }}#persisted-traces).
+- Is empty with tracing off.
 
 ## Metric charts {#the-insights-endpoints}
 
@@ -659,10 +639,9 @@ Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the 
   `endEpochMs`, the others one `intervalMs` apart before it. A `since` after the newest sample
   leaves an empty window, `count: 0`.
 - Every series carries a `summary` over the window. `samples` counts the level-0 samples behind
-  it, and the statistics are `null` when it is `0`. Above level 0, `median` and `p95` are taken
-  over the windows' own median and p95, weighted by samples, so both are estimates. At level 1
-  of the default levels `p95` is never below the true one. `min`, `max` and `avg` stay exact.
-  `latest` is the newest sample, or the newest window's average above level 0.
+  it, and the statistics are `null` when it is `0`. Above level 0, `median` and `p95` are estimates:
+  percentiles of the windows' own median and p95. At level 1 of the default levels `p95` is never
+  below the true one. `min`, `max` and `avg` are exact. `latest` is the newest sample, or the newest window's average above level 0.
 - The `summary` view serves no samples: `values`, `stats` and `timestamps` are `null`. `full`
   adds them. Level 0 fills `values`, one number per tick, and higher levels fill `stats` with
   the arrays `min`, `max`, `avg`, `median`, `p90`, `p95` and `p99`. `timestamps` holds each
@@ -679,22 +658,20 @@ Series ids have the form `<panelId>.<seriesId>`. `/data` and the stream use the 
 | `tick` | Every level-0 interval | `{epochMs, values: {seriesId: v}}` |
 | `rollup` | When a higher level's interval closes | `{level, epochMs, entries: {seriesId: {min, max, avg, median, p90, p95, p99}}}` |
 
-- A comment heartbeat goes out once 15 seconds pass without an event. At the default
-  10-second tick none is sent.
+- A comment heartbeat goes out after 15 seconds without an event.
 - {% include facts/insights-stream-cap.md -%}
-- The server closes each stream after 30 minutes. `EventSource` reconnects on its own.
-- A client that stops reading is dropped, and its stream is closed once its pending write
-  returns. `EventSource` reconnects.
+- The server closes each stream after 30 minutes, and drops slow clients. `EventSource`
+  reconnects.
 - Events are not replayed. After a reconnect, fetch `/data` again for the levels you show.
 
 ### Problems {#problems}
 
-The `problems` of `/peekaboot/api/insights/data` list every rule the window reached. Each reads
-like a trace's [issue](#issue-fields), with `rule` and `series` in place of `type` and `spanId`.
-`series` names the series the rule read. `value` is what the window measured and `threshold` the
+The `problems` of `/peekaboot/api/insights/data` list every rule the window reached. A problem
+reads like a trace's [issue](#issue-fields), with `rule` and `series` in place of `type` and
+`spanId`. `series` names the series the rule read. `value` is what the window measured and `threshold` the
 limit it reached, both in `unit`. `message` says it in one sentence. `severity` is `warning` or
-`error`. `unit` is `percent`, `count` or `millis`, the words a panel's `unit` takes, so a
-duration reads `millis` here where an issue says `ms`.
+`error`. `unit` is `percent`, `count` or `millis`, so a duration reads `millis` here where an
+issue says `ms`.
 
 | Rule | Severity | Measures | Reached at |
 |---|---|---|---|
@@ -708,12 +685,12 @@ duration reads `millis` here where an issue says `ms`.
 | `SLOW_HTTP` | `warning` | The p95 of `http-latency.avg` | `peekaboot.tracing.slow-trace-threshold-ms` |
 
 The thresholds without a prefix are `peekaboot.insights.problems.*`, under [Insights
-configuration]({{ '/docs/configuration/' | relative_url }}#peekabootinsights). A rule whose series
-is switched off, has no meter in your application or holds no sample in the window is skipped.
-The list holds only what reached a threshold, so a rule missing from it may have been skipped.
-`HEAP_NEAR_MAX` also skips a heap without a configured maximum, `THREAD_GROWTH` a window of fewer
-than four samples, and `SERVER_ERRORS` a window without requests. The dashboard does not show
-`problems`.
+configuration]({{ '/docs/configuration/' | relative_url }}#peekabootinsights).
+
+A rule is skipped when its series is switched off, has no meter in your application or holds no
+sample in the window, so a rule missing from the list may have been skipped. `HEAP_NEAR_MAX` also
+skips a heap without a configured maximum, `THREAD_GROWTH` a window of fewer than four samples,
+and `SERVER_ERRORS` a window without requests. The dashboard does not show `problems`.
 
 ## Restart history {#restart-history}
 
@@ -729,8 +706,8 @@ off they cover only the current run.
 ```
 
 - `type` is `start` or `stop`. A stop carries only `type` and `timestamp`.
-- A start carries every build field it recorded, whatever the previous start ran. Which of
-  them changed between runs is `changed` in `/peekaboot/api/lifecycle/runs`.
+- A start carries every build field it recorded. Which changed between runs is `changed` in
+  `/peekaboot/api/lifecycle/runs`.
 - `uncleanPrevious` is `true` when the previous run recorded no stop.
 
 `GET /peekaboot/api/lifecycle/runs` returns one entry per run, newest first:
@@ -740,14 +717,12 @@ off they cover only the current run.
          shortCommitId, buildTime, changed, running, uncleanExit}]}
 ```
 
-- Each row carries its full build info.
-- `changed` lists which of `version`, `branch` and `commit` differ from the run before. It is
-  `[]` for the oldest run.
-- `uncleanExit: true` means the run recorded no stop. `stoppedAt` and `ranForMs` are
-  then `null`.
-- The newest run without a stop is `running` only when the answering process recorded it.
-  Otherwise it reads `uncleanExit: true`.
-- On the `running` row, `stoppedAt` is `null` and `ranForMs` is the time so far.
-- `downForMs` is `null` when the gap to the previous run is unknown.
+| Field | Meaning |
+|---|---|
+| `version`, `branch`, `shortCommitId`, `buildTime` | The run's full build info. |
+| `changed` | Which of `version`, `branch` and `commit` differ from the run before. `[]` for the oldest run. |
+| `uncleanExit` | `true` when the run recorded no stop. `stoppedAt` and `ranForMs` are then `null`. |
+| `running` | The newest run without a stop is `running` only when the answering process recorded it. Otherwise it reads `uncleanExit: true`. On the `running` row, `stoppedAt` is `null` and `ranForMs` is the time so far. |
+| `downForMs` | `null` when the gap to the previous run is unknown. |
 
 See [The dashboard, Lifecycle]({{ '/docs/dashboard/' | relative_url }}#lifecycle).
