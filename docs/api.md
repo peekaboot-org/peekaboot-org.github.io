@@ -549,11 +549,15 @@ while the target is down. It is `null` for a component Peekaboot cannot describe
 | Redis | `{hosts: [{hostname, port}], database}`. Lettuce and Jedis both work. `database` is `null` for a cluster. A Lettuce static master/replica setup shows `localhost:6379`. |
 | Mail | `{host, port}` of each `JavaMailSenderImpl` bean behind the mail check, yours or Spring Boot's. `port` is `null` where none is set, and `connection` is `null` for a sender without a host. |
 
-A DataSource has no `connection` where its JDBC URL holds an `@` after the `//`, as a user and
-password before the host do, or a host that is not a plain host name or IP address. Put the
-credentials in `spring.datasource.username` and `spring.datasource.password` instead. A Redis
-connection factory you build yourself is described like one Spring Boot builds. `connection` is
-`null` for a factory of another type and for a Lettuce unix-socket setup.
+A user and password before the first host, as in `jdbc:mysql://user:pw@db/shop`, are left out. A
+DataSource has no `connection` where its JDBC URL holds any other `@` after the `//` (a second one,
+or one in a query parameter or a later host), or a password with an unencoded `/`, `?`, `#`, `;`,
+`,` or `(` in it. It has none either where a host is not a plain host name or IP address, or where
+the database or instance holds a character other than a letter, digit, `.`, `_`, `$`, `-` or `/`
+(H2's `~/test` does). Put the credentials in `spring.datasource.username` and
+`spring.datasource.password` instead. A Redis connection factory you build yourself is described
+like one Spring Boot builds. `connection` is `null` for a factory of another type and for a Lettuce
+unix-socket setup.
 
 Where a component groups several beans, such as two DataSources, the group's own `connection` is
 `null` and each child carries its own.
