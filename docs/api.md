@@ -38,6 +38,7 @@ them anywhere else.
 | [`/peekaboot/api/logs`](#log-search) | `level`, `q`, `logger`, `traceId`, `since`, `until`, `limit`, `cursor` | `200`, `400` |
 | [`/peekaboot/api/routes`](#routes) | none | `200`, `400` |
 | [`/peekaboot/api/errors`](#error-digest) | `since`, `route` | `200`, `400` |
+| [`/peekaboot/api/health`](#health) | none | `200`, `400`, `503` |
 | [`/peekaboot/api/insights/config`](#the-insights-endpoints) | none | `200`, `400`, `404` when Insights is off |
 | [`/peekaboot/api/insights/data`](#the-insights-endpoints) | `level` (required), `view`, `series`, `since` | `200`, `400`, `404` when Insights is off |
 | [`/peekaboot/api/insights/stream`](#the-insights-endpoints) | none | `200` (Server-Sent Events), `400`, `503`, `404` when Insights is off |
@@ -45,7 +46,7 @@ them anywhere else.
 | [`/peekaboot/api/lifecycle/runs`](#restart-history) | none | `200`, `400`, `404` when lifecycle is off |
 
 The dashboard and the toolbar do not read the index, the OpenAPI document, the log search, the
-routes or the error digest. Those five are for agents and scripts.
+routes, the error digest or the health report. Those six are for agents and scripts.
 
 Where Peekaboot's guard is armed, every endpoint can also answer `401`. See
 [Security, Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard).
@@ -524,6 +525,53 @@ The digest:
 - Survives a restart only with [storage]({{ '/docs/configuration/' | relative_url }}#peekabootstorage)
   and `peekaboot.storage.traces.enabled` on. Otherwise it lives in memory only.
 - Is empty with tracing off.
+
+## Health {#health}
+
+`GET /peekaboot/api/health` answers whether the application is healthy, which targets it
+connects to and what Peekaboot has seen go wrong lately:
+
+```
+{status, components: {<name>: {status, details, components, connection}}, problems, windowMs,
+ traces: {errors, slow}, failures: [...]}
+```
+
+`status`, `components` and `details` are what `/actuator/health` reports, nested the same way.
+`status` is the actuator's own string, so a status your application defines comes through
+unchanged. It reads `UNKNOWN` where the health endpoint is off.
+
+`connection` says what a component connects to. It comes from your configuration, so it is there
+while the target is down. It is `null` for a component Peekaboot cannot describe.
+
+| Component | `connection` |
+|---|---|
+| DataSource | `{dataSource, product, hosts: [{hostname, port}], database, instance}`. The bean's name, the product the JDBC URL names (`POSTGRESQL`), and the SQL Server instance where the URL has one. Only Hikari pools are described. |
+| Redis | `{hosts: [{hostname, port}], database}`. Lettuce and Jedis both work. `database` is `null` for a cluster. A Lettuce static master/replica setup shows `localhost:6379`. |
+| Mail | `{host, port}`, for each `JavaMailSender`. |
+
+Hostnames never carry the user or password a URL held. Where you set your own Redis
+configuration bean, the Redis component's `connection` is `null`.
+
+`problems`, `traces` and `failures` cover the last `windowMs` milliseconds, the span of the first
+[Insights]({{ '/docs/insights/' | relative_url }}) level (15 minutes by default). They return to
+empty after an incident. `problems` is empty while Insights is off. `traces` counts the Errors
+and Slow traces that started in the window, and is `null` while tracing is off. `failures` holds
+at most ten entries of the [error digest](#error-digest) last seen in the window, latest first,
+with `type`, `route`, `applicationFrame`, `lastSeen`, `lastMessage` and `lastTraceId`.
+
+The status code follows `status` the way `/actuator/health` maps it, including
+`management.endpoint.health.status.http-mapping`: `503` for `DOWN` and `OUT_OF_SERVICE`, `200`
+otherwise. The body is the same report either way.
+
+With `peekaboot.health.fail-on-problems=true` a current problem of severity `error` also answers
+`503`. `status` keeps the actuator's value, so read `problems` to see why. A non-`2xx` code your mapping
+sets stays as it is.
+
+The endpoint takes the guard's credentials, see [Security, Peekaboot's
+guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard), and the response is
+`no-store`. It adds no timeout of its own: it answers as slowly as the slowest health check. A
+Redis that does not answer can hold a call for its command timeout, about 60 seconds with
+Lettuce's default. Set a monitor's timeout to match.
 
 ## Metric charts {#the-insights-endpoints}
 

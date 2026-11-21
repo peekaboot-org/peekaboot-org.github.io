@@ -211,6 +211,14 @@ The shutdown summary shows the uptime and the start and stop times.
 Swagger UI appears with springdoc. The dashboard line appears only where the dashboard is
 served.
 
+### Health {#peekaboothealth}
+
+| Property | Default | Effect |
+|---|---|---|
+| `peekaboot.health.fail-on-problems` | `false` | Also answer `503` from `/peekaboot/api/health` while a problem of severity error is current. |
+
+See [API, health]({{ '/docs/api/' | relative_url }}#health).
+
 ### Tracing {#peekaboottracing}
 
 | Property | Default | Effect |

@@ -84,6 +84,14 @@ It also adds these while `peekaboot.enabled` and `peekaboot.tracing.enabled` are
 Peekaboot adds no `/actuator` exposure. See [Security, Peekaboot leaves `/actuator`
 alone]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
 
+## Uptime monitors {#uptime-monitors}
+
+Point a monitor at `/peekaboot/api/health` with an `Authorization: Basic ...` header made from
+Peekaboot's credentials. It answers `503` when the application is down, and its body names the
+failing component and its target. A monitor with no credentials keeps using `/actuator/health`.
+Set its timeout above your slowest health check, see [API,
+health]({{ '/docs/api/' | relative_url }}#health).
+
 ## Memory {#memory}
 
 {% include facts/trace-memory.md -%}
