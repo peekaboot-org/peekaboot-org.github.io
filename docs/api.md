@@ -552,12 +552,13 @@ while the target is down. It is `null` for a component Peekaboot cannot describe
 A user and password before the first host, as in `jdbc:mysql://user:pw@db/shop`, are left out. A
 DataSource has no `connection` where its JDBC URL holds any other `@` after the `//` (a second one,
 or one in a query parameter or a later host), or a password with an unencoded `/`, `?`, `#`, `;`,
-`,` or `(` in it. It has none either where a host is not a plain host name or IP address, or where
-the database or instance holds a character other than a letter, digit, `.`, `_`, `$`, `-` or `/`
-(H2's `~/test` does). Put the credentials in `spring.datasource.username` and
-`spring.datasource.password` instead. A Redis connection factory you build yourself is described
-like one Spring Boot builds. `connection` is `null` for a factory of another type and for a Lettuce
-unix-socket setup.
+`,` or `(` in it. It has none either for a braced value such as SQL Server's `password={…}`, where
+a host is not a plain host name or IP address, or where the database or instance holds a character
+other than a letter, digit, `.`, `_`, `$`, `~`, `-` or `/` (an Oracle URL with parameters after the
+service name, such as `@//db:1521/svc?connect_timeout=5`, does). Put the credentials in
+`spring.datasource.username` and `spring.datasource.password` instead. A Redis connection factory
+you build yourself is described like one Spring Boot builds. `connection` is `null` for a factory of
+another type and for a Lettuce unix-socket setup.
 
 Where a component groups several beans, such as two DataSources, the group's own `connection` is
 `null` and each child carries its own.
