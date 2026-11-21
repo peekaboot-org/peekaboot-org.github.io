@@ -547,10 +547,11 @@ while the target is down. It is `null` for a component Peekaboot cannot describe
 |---|---|
 | DataSource | `{dataSource, product, hosts: [{hostname, port}], database, instance}`. The bean's name, the product the JDBC URL names (`POSTGRESQL`), and the SQL Server instance where the URL has one. Only Hikari pools are described. |
 | Redis | `{hosts: [{hostname, port}], database}`. Lettuce and Jedis both work. `database` is `null` for a cluster. A Lettuce static master/replica setup shows `localhost:6379`. |
-| Mail | `{host, port}`, for each `JavaMailSender`. |
+| Mail | `{host, port}`, for each `JavaMailSenderImpl` bean, which Spring Boot's mail auto-configuration creates. `port` is `null` where none is set. |
 
-Hostnames never carry the user or password a URL held. Where you set your own Redis
-configuration bean, the Redis component's `connection` is `null`.
+Hostnames never carry the user or password a URL held. A Redis connection factory you build
+yourself is described like one Spring Boot builds. `connection` is `null` for a factory of
+another type and for a Lettuce unix-socket setup.
 
 `problems`, `traces` and `failures` cover the last `windowMs` milliseconds, the span of the first
 [Insights]({{ '/docs/insights/' | relative_url }}) level (15 minutes by default). They return to
@@ -564,8 +565,8 @@ The status code follows `status` the way `/actuator/health` maps it, including
 otherwise. The body is the same report either way.
 
 With `peekaboot.health.fail-on-problems=true` a current problem of severity `error` also answers
-`503`. `status` keeps the actuator's value, so read `problems` to see why. A non-`2xx` code your mapping
-sets stays as it is.
+`503`. `status` keeps the actuator's value, so read `problems` to see why. A non-`2xx` code your
+mapping sets stays as it is.
 
 The endpoint takes the guard's credentials, see [Security, Peekaboot's
 guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard), and the response is
