@@ -547,7 +547,7 @@ while the target is down. It is `null` for a component Peekaboot cannot describe
 |---|---|
 | DataSource | `{dataSource, product, hosts: [{hostname, port}], database, instance}`. The bean's name, the product the JDBC URL names (`POSTGRESQL`), and the SQL Server instance where the URL has one. Only Hikari pools are described. |
 | Redis | `{hosts: [{hostname, port}], database}`. Lettuce and Jedis both work. `database` is `null` for a cluster. A Lettuce static master/replica setup shows `localhost:6379`. |
-| Mail | `{host, port}`, for each `JavaMailSenderImpl` bean, which Spring Boot's mail auto-configuration creates. `port` is `null` where none is set. |
+| Mail | `{host, port}` for a `JavaMailSenderImpl` bean with a host set, which is what Spring Boot's mail auto-configuration creates. `port` is `null` where none is set. A sender of another type, or with no host, gets `connection: null`. |
 
 Hostnames never carry the user or password a URL held. A Redis connection factory you build
 yourself is described like one Spring Boot builds. `connection` is `null` for a factory of
