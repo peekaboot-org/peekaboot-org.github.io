@@ -547,11 +547,14 @@ while the target is down. It is `null` for a component Peekaboot cannot describe
 |---|---|
 | DataSource | `{dataSource, product, hosts: [{hostname, port}], database, instance}`. The bean's name, the product the JDBC URL names (`POSTGRESQL`), and the SQL Server instance where the URL has one. Only Hikari pools are described. |
 | Redis | `{hosts: [{hostname, port}], database}`. Lettuce and Jedis both work. `database` is `null` for a cluster. A Lettuce static master/replica setup shows `localhost:6379`. |
-| Mail | `{host, port}` of the `JavaMailSenderImpl` behind the mail check, the sender Spring Boot's mail auto-configuration creates. `port` is `null` where none is set, and `connection` is `null` for a sender without a host. |
+| Mail | `{host, port}` of each `JavaMailSenderImpl` bean behind the mail check, yours or Spring Boot's. `port` is `null` where none is set, and `connection` is `null` for a sender without a host. |
 
-Hostnames never carry the user or password a URL held. A Redis connection factory you build
-yourself is described like one Spring Boot builds. `connection` is `null` for a factory of
-another type and for a Lettuce unix-socket setup.
+A DataSource has no `connection` where its JDBC URL holds an `@` after the `//`, as a user and
+password before the host do, or a host that is not a plain host name or IP address. Put the
+credentials in `spring.datasource.username` and `spring.datasource.password` instead. A Redis
+connection factory you build yourself is described like one Spring Boot builds. `connection` is
+`null` for a factory of another type and for a Lettuce unix-socket setup.
+
 Where a component groups several beans, such as two DataSources, the group's own `connection` is
 `null` and each child carries its own.
 
