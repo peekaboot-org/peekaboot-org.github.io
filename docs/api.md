@@ -550,11 +550,14 @@ while the target is down. It is `null` for a component Peekaboot cannot describe
 | Mail | `{host, port}` of each `JavaMailSenderImpl` bean behind the mail check, yours or Spring Boot's. `port` is `null` where none is set, and `connection` is `null` for a sender without a host. |
 
 A user and password before the first host, as in `jdbc:mysql://user:pw@db/shop`, are left out. A
-JDBC URL that carries a user, password or other secret as a property (`?password=…`, `;user=…`)
+JDBC URL that carries a user, password, secret or token as a property (`?password=…`, `;user=…`)
 gets no connection; put them in `spring.datasource.username` and `spring.datasource.password`. A
 DataSource has no `connection` either where its JDBC URL holds:
 
+- a character outside ASCII anywhere;
+- an `&` anywhere, for SQL Server;
 - any other `@` after the `//`: a second one, or one in a query parameter or a later host;
+- an `@` in a first host that also holds a `\`, as in `jdbc:sqlserver://db\inst@x`;
 - a password before the host with an unencoded `/`, `?`, `#`, `;`, `,` or `(` in it;
 - a `{` anywhere, or a `%` after the host;
 - a host that is not a plain host name or IP address;
