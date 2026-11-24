@@ -159,7 +159,9 @@ sig                   certificate-password  certificate-private-key
 - `cookie`, `set-cookie`, `encrypt.key` and `jwt` mask only as the entire key.
 - A database connection parameter also masks when its name holds `pass`, `pwd`, `secret`,
   `token`, `key` or `credential` anywhere, so `sslpassword` and `privatekey` mask. So do
-  harmless names such as `keyStoreLocation`.
+  harmless names such as `keyStoreLocation`. The same holds for a URL or connection-string
+  parameter inside an environment or config value, so the `sslpassword` in
+  `spring.datasource.url` masks on the Environment and Config tabs.
 
 **By value shape.** These patterns mask a credential inside any value, whatever its key. Only
 the matched part is masked, so a JDBC URL keeps its host and database name.
