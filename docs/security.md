@@ -48,7 +48,7 @@ This is the complete list. Anyone who can reach `/peekaboot/**` can read all of 
 | Health status and per-component detail, custom indicators included | Overview | By key and by value shape |
 | Build metadata (`info.build`) | Overview | By key and by value shape |
 | Git branch, commit id and commit time of the application's own `git.properties` | Overview | No. Peekaboot passes on only these three entries, so a remote URL or committer address never shows. |
-| Datasource host, port, database name, user, product and driver version | Overview | Connection parameters only. User, host and database name are shown as is. |
+| Datasource host, port, database name, user, product and driver version | Overview | Connection parameters only. The user is shown as is. Host and database name are hidden where the JDBC URL could carry a credential in them, under the same rules as the [health report]({{ '/docs/api/' | relative_url }}#health). |
 | Process identity: OS user, uid, gid, pid, parent-process chain with command names | Overview | No |
 | Machine: CPU count and model, physical memory, max heap, container runtime, every non-local IP address and its hostname | Overview, `runtime.machine` and `runtime.memory` in the API | No |
 | Logger levels, configured and effective | Loggers tab | Nothing to mask. The API is GET-only, so levels cannot be changed. |

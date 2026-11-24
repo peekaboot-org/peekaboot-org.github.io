@@ -545,14 +545,14 @@ while the target is down. It is `null` for a component Peekaboot cannot describe
 
 | Component | `connection` |
 |---|---|
-| DataSource | `{dataSource, product, hosts: [{hostname, port}], database, instance}`. The bean's name, the product the JDBC URL names (`POSTGRESQL`), and the SQL Server instance where the URL has one. Only Hikari pools are described. |
+| DataSource | `{dataSource, product, hosts: [{hostname, port}], database, instance}`. The bean's name, the product the JDBC URL names (`POSTGRESQL`), and the SQL Server instance where the URL has one. A `port` the URL leaves out is the driver's default, such as `5432` for PostgreSQL. Only Hikari pools are described. |
 | Redis | `{hosts: [{hostname, port}], database}`. Lettuce and Jedis both work. `database` is `null` for a cluster. A Lettuce static master/replica setup shows `localhost:6379`. |
 | Mail | `{host, port}` of each `JavaMailSenderImpl` bean behind the mail check, yours or Spring Boot's. `port` is `null` where none is set, and `connection` is `null` for a sender without a host. |
 
-A user and password before the first host, as in `jdbc:mysql://user:pw@db/shop`, are left out. A
-JDBC URL with a property whose name contains `user`, `uid`, `pwd`, `pass`, `secret` or `token`
-(`?password=…`, `;userName=…`), or that Peekaboot masks as a secret elsewhere (`apiKey`,
-`credentials`), gets no connection; put the credentials in `spring.datasource.username` and
+A user and password before the first host, as in `jdbc:mysql://user:pw@db/shop` or Oracle's
+`user/password@db`, are left out. A JDBC URL with a property whose name contains `user`, `uid`,
+`pwd`, `pass`, `secret` or `token` (`?password=…`, `;userName=…`), or that Peekaboot masks as a
+secret elsewhere (`apiKey`, `credentials`), gets no connection; put the credentials in `spring.datasource.username` and
 `spring.datasource.password`. A DataSource has no `connection` either where its JDBC URL holds:
 
 - a character outside ASCII anywhere;
@@ -562,11 +562,11 @@ JDBC URL with a property whose name contains `user`, `uid`, `pwd`, `pass`, `secr
   `jdbc:sqlserver://db\inst@x`;
 - a user or password before the host with an unencoded `/`, `?`, `#`, `;`, `,`, `(` or `\` in it;
 - a `{` or a `%` after the host;
-- a host that is not a plain host name or IP address;
 - a database or instance with a character other than a letter, digit, `.`, `_`, `$`, `~`, `-` or
   `/`, as an Oracle URL with parameters after the service name (`@//db:1521/svc?connect_timeout=5`)
   has;
-- anything after an Oracle `(DESCRIPTION=…)`.
+- a database, instance or host name not written as such in the URL, such as an Oracle service name
+  with a space in it.
 
 A Redis connection factory you build yourself is described like one Spring Boot builds.
 `connection` is `null` for a factory of another type and for a Lettuce unix-socket setup.
