@@ -129,7 +129,10 @@ bean that adds a masking rule.
 Two rule sets run together.
 
 **By key name.** A key is sensitive when one of these words is a whole token of it, split at separators and
-camelCase boundaries, in any case. A sensitive key masks its entire value.
+camelCase boundaries, in any case. A compatibility form of a letter, such as the long s in
+`paſſword`, counts as that letter. Accents, control characters and invisible joining characters
+in the key are ignored.
+A sensitive key masks its entire value.
 
 ```
 password              passwords             passwd
