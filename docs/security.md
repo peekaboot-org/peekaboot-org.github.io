@@ -157,6 +157,9 @@ sig                   certificate-password  certificate-private-key
 - These key patterns also mask: `vcap_services` and `sun.java.command` anywhere in the key,
   `^vcap\.services.*$`, and `^spring[._]application[._]json$`.
 - `cookie`, `set-cookie`, `encrypt.key` and `jwt` mask only as the entire key.
+- A database connection parameter also masks when its name holds `pass`, `pwd`, `secret`,
+  `token`, `key` or `credential` anywhere, so `sslpassword` and `privatekey` mask. So do
+  harmless names such as `keyStoreLocation`.
 
 **By value shape.** These patterns mask a credential inside any value, whatever its key. Only
 the matched part is masked, so a JDBC URL keeps its host and database name.
