@@ -550,7 +550,8 @@ while the target is down. It is `null` for a component Peekaboot cannot describe
 | Mail | `{host, port}` of each `JavaMailSenderImpl` bean behind the mail check, yours or Spring Boot's. `port` is `null` where none is set, and `connection` is `null` for a sender without a host. |
 
 A user and password before the first host, as in `jdbc:mysql://user:pw@db/shop` or Oracle's
-`user/password@db`, are left out. A JDBC URL with a property whose name contains `user`, `uid`,
+`user/password@db`, are left out. Where the driver refuses a user and password before the host, as
+PostgreSQL's does, the URL gets no connection. A JDBC URL with a property whose name contains `user`, `uid`,
 `pwd`, `pass`, `secret` or `token` (`?password=…`, `;userName=…`), or that Peekaboot masks as a
 secret elsewhere (`apiKey`, `credentials`), gets no connection; put the credentials in `spring.datasource.username` and
 `spring.datasource.password`. A DataSource has no `connection` either where its JDBC URL holds:
@@ -560,8 +561,8 @@ secret elsewhere (`apiKey`, `credentials`), gets no connection; put the credenti
 - any other `@` after the `//`: a second one, or one in a query parameter or a later host;
 - an `@` and a `\` together before the first `/`, `,`, `?`, `;`, `#` or `(` after the `//`, as in
   `jdbc:sqlserver://db\inst@x`;
-- a user or password before the host with an unencoded `/`, `?`, `#`, `;`, `,`, `(` or `\` in it;
-- a `{` or a `%` after the host;
+- a user or password before the host with a `/`, `?`, `#`, `;`, `,`, `(` or `\` in it;
+- a `{` or a `%` anywhere;
 - a database or instance with a character other than a letter, digit, `.`, `_`, `$`, `~`, `-` or
   `/`, as an Oracle URL with parameters after the service name (`@//db:1521/svc?connect_timeout=5`)
   has;
