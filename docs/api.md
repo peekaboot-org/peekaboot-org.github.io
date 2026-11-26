@@ -566,8 +566,8 @@ secret elsewhere (`apiKey`, `credentials`), gets no connection; put the credenti
 - a database or instance with a character other than a letter, digit, `.`, `_`, `$`, `~`, `-` or
   `/`, as an Oracle URL with parameters after the service name (`@//db:1521/svc?connect_timeout=5`)
   has;
-- a database, instance or host name not written as such in the URL, such as an Oracle service name
-  with a space in it.
+- a database, instance or host name not written as such in the URL outside a user and password,
+  such as an Oracle service name with a space in it.
 
 A Redis connection factory you build yourself is described like one Spring Boot builds.
 `connection` is `null` for a factory of another type and for a Lettuce unix-socket setup.

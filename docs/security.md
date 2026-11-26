@@ -179,7 +179,7 @@ the matched part is masked, so a JDBC URL keeps its host and database name.
 | Anthropic key | `sk-ant-…` |
 | Credentials in a URL | `postgres://user:secret@host`, `redis://:secret@host` |
 | Oracle thin URL | `jdbc:oracle:thin:user/secret@host` |
-| URL or connection-string parameter with a sensitive name | `?password=…`, `&token=…`, `;pwd=…` |
+| URL or connection-string parameter with a sensitive name | `?password=…`, `&token=…`, `;pwd=…`, DB2's `:password=…` |
 | Command-line option with a sensitive name | `-Dspring.datasource.password=…`, `--api-key=…` in `JAVA_TOOL_OPTIONS` |
 | Quoted option with a sensitive name | `password="…"` in `sasl.jaas.config` |
 
