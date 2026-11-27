@@ -79,7 +79,7 @@ It also adds these while `peekaboot.enabled` and `peekaboot.tracing.enabled` are
 | Event listener spans | A span around each `@EventListener` call inside a trace, sent to every exporter. Listener beans become proxies. Turn off with `peekaboot.tracing.event-listeners=false`. |
 | HTML response buffering | With the dev toolbar on, `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. |
 | `Server-Timing` header | Every response carries its trace id |
-| Log capture | Every log event is captured |
+| Log capture | Every log event is captured. Peekaboot attaches an appender named `peekaboot` to the Logback root logger. See [Troubleshooting]({{ '/docs/troubleshooting/' | relative_url }}#extra-root-appender). |
 
 Peekaboot adds no `/actuator` exposure. See [Security, Peekaboot leaves `/actuator`
 alone]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
