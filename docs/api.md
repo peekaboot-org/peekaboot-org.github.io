@@ -369,7 +369,7 @@ statement}`.
 | Field | Meaning |
 |---|---|
 | `spanId` | The query's span. |
-| `dbSystem` | The database the span names, such as `postgresql`. `null` when nothing named one. |
+| `dbSystem` | The product the DataSource's JDBC URL names, such as `POSTGRESQL` or `H2`. Where the URL names none Peekaboot knows, the database or DataSource name the span carries. `null` when nothing named one. |
 | `dataSourceName` | The HikariCP pool name, else the DataSource name. `null` when neither is known. |
 | `durationMs` | How long the query span took. |
 | `rowCount` | Rows returned, where the JDBC instrumentation reported it. |
