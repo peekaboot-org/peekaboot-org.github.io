@@ -87,8 +87,8 @@ on, the default for a local run, the history is saved to disk and loaded at the 
 The downtime shows as a gap, and every start and stop appears as a restart marker, as on the
 [Lifecycle tab]({{ '/docs/dashboard/' | relative_url }}#lifecycle).
 
-History is written every five minutes (`persistence.interval`) and at shutdown, so a crash loses
-at most those five minutes. Peekaboot starts empty when the saved file is older than
+History is written every minute (`persistence.interval`) and at shutdown, so a crash loses
+at most that minute. Peekaboot starts empty when the saved file is older than
 `persistence.max-age` or your `levels` changed. See
 [`peekaboot.storage`]({{ '/docs/configuration/' | relative_url }}#peekabootstorage) for where
 the file lives.

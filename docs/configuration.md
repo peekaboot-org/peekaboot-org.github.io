@@ -264,7 +264,7 @@ survives a restart is [`peekaboot.storage.enabled`](#peekabootstorage).
 | `peekaboot.insights.levels[n].interval` | `10s`, `1m`, `1h` | The sampling tick (level 0) and each coarser aggregation window. At most 16 levels. |
 | `peekaboot.insights.levels[n].size` | `90`, `1440`, `720` | Entries kept per series at that level, at most 1,000,000. `interval` &times; `size` is how far back the charts reach. |
 | `peekaboot.insights.config-location` | unset, so `peekaboot-insights.yml` on the classpath root | A Spring resource location for the panel file, merged over Peekaboot's bundled panels. A location that names nothing stops startup. |
-| `peekaboot.insights.persistence.interval` | `5m` | How often the history is written to `insights.snapshot`. A crash loses at most this much. No effect while storage is off. |
+| `peekaboot.insights.persistence.interval` | `1m` | How often the history is written to `insights.snapshot`. A crash loses at most this much. No effect while storage is off. |
 | `peekaboot.insights.persistence.max-age` | the coarsest level's span (30 days) | The oldest snapshot that is still loaded at startup. |
 | `peekaboot.insights.problems.cpu-high-percent` | `80` | [`CPU_HIGH`]({{ '/docs/api/' | relative_url }}#problems): the median process CPU, in percent. |
 | `peekaboot.insights.problems.gc-overhead-percent` | `10` | `GC_OVERHEAD`: the median share of CPU time spent collecting garbage, in percent. |
