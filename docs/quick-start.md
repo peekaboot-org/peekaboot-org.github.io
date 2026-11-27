@@ -9,8 +9,8 @@ redirect_from:
 
 ## Add the dependency {#add-the-dependency}
 
-Java {{ site.java_version }} or newer, Spring Boot {{ site.spring_boot_version }} (earlier 4.x
-releases are untested) and a servlet web application. On WebFlux or a non-web application the
+Java {{ site.java_version }} or newer, Spring Boot {{ site.spring_boot_version }} (4.0 is not
+supported) and a servlet web application. On WebFlux or a non-web application the
 dashboard and the toolbar are absent, and startup is unaffected.
 
 **Maven**
@@ -28,6 +28,10 @@ dashboard and the toolbar are absent, and startup is unaffected.
 ```groovy
 implementation("{{ site.maven_group }}:{{ site.maven_artifact }}:{{ site.peekaboot_version }}")
 ```
+
+On Gradle with Spring Boot 4.1, import Boot's BOM through the `io.spring.dependency-management`
+plugin or `enforcedPlatform(...)`. A plain `platform(...)` lets Peekaboot raise your app to
+Spring Boot 4.2.
 
 ## Run your app {#run-your-app}
 
