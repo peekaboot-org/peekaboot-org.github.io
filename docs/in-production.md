@@ -127,11 +127,74 @@ Adding the starter pulls in `spring-boot-starter`, `spring-boot-starter-actuator
 - datasource-micrometer is present. Peekaboot sets `jdbc.datasource-proxy.enabled=false`, so
   none of your DataSources is wrapped. Set it to `true` if you use datasource-micrometer
   yourself.
+- JSqlParser 5.3 is on your classpath, brought by `datasource-micrometer-opentelemetry`. See
+  [JSqlParser on your classpath](#jsqlparser).
 
 Peekaboot requires the OpenTelemetry bridge the starter brings. Brave is not supported: with the
 Brave bridge the Traces tab stays empty and the toolbar never shows a trace.
 
 If that is not acceptable, keep the starter out of the artifact.
+
+### JSqlParser on your classpath {#jsqlparser}
+
+JSqlParser has two effects, both with `peekaboot.enabled=false`.
+
+**JaCoCo prints a stack trace.** On the first test run the JaCoCo agent prints a
+`MethodTooLargeException` for `CCJSqlParserTokenManager`, about 230 lines long. Exclude
+JSqlParser from instrumentation.
+
+Maven:
+
+```xml
+<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <configuration>
+        <excludes>
+            <exclude>net.sf.jsqlparser.*</exclude>
+        </excludes>
+    </configuration>
+</plugin>
+```
+
+Gradle (Kotlin DSL):
+
+```kotlin
+tasks.withType<Test>().configureEach {
+    extensions.configure(JacocoTaskExtension::class) {
+        excludes = listOf("net.sf.jsqlparser.*")
+    }
+}
+```
+
+**Spring Data JPA uses it.** Spring Data JPA logs `JSqlParser is in classpath; If applicable,
+JSqlParser will be used`. According to its reference documentation, it then uses JSqlParser for
+native queries, including deriving the count query of a paged one. Its built-in parser handles
+only simple queries. The documentation names no property to choose the parser.
+
+**Removing it.** To drop JSqlParser, exclude it from the starter and turn off the SQL analysis of
+datasource-micrometer. The analysis needs JSqlParser, so never exclude one without the other.
+
+```xml
+<dependency>
+    <groupId>org.peekaboot</groupId>
+    <artifactId>peekaboot-spring-boot-starter</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
+```properties
+jdbc.opentelemetry.analysis.enabled=false
+```
+
+Exported JDBC query spans then lose their query summary, operation name and collection name.
+Native queries in Spring Data JPA go through its built-in parser. Declare
+`@Query(countQuery = ...)` on paged native queries that are not simple.
 
 ### If you exclude one of them {#graceful-degradation}
 
