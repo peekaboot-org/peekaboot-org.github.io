@@ -171,9 +171,9 @@ tasks.withType<Test>().configureEach {
 ```
 
 **Spring Data JPA uses it.** Spring Data JPA logs `JSqlParser is in classpath; If applicable,
-JSqlParser will be used`. According to its reference documentation, it then uses JSqlParser for
-native queries, including deriving the count query of a paged one. Its built-in parser handles
-only simple queries. The documentation names no property to choose the parser.
+JSqlParser will be used`. Its reference documentation says it then parses native queries with
+JSqlParser, including to derive the count query of a paged one. It names no property to choose
+the parser. Without JSqlParser it uses a built-in parser that handles only simple queries.
 
 **Removing it.** To drop JSqlParser, exclude it from the starter and turn off the SQL analysis of
 datasource-micrometer. The analysis needs JSqlParser, so never exclude one without the other.

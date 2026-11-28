@@ -99,8 +99,8 @@ management:
 
 **Cause:** while tracing is on, Peekaboot adds an appender named `peekaboot` to the Logback root
 logger. A test that asserts the root logger's appenders, such as a production logging
-configuration test, sees it. Every Spring context that is still open keeps its own appender
-attached, so with cached test contexts the number of extra appenders depends on test order.
+configuration test, sees it. With cached test contexts there can be several, and their number
+depends on test order.
 
 **Fix:** look appenders up by name, or skip the ones named `peekaboot`, instead of asserting
 the count or the full list.
