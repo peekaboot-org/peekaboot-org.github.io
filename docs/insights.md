@@ -49,6 +49,11 @@ These ship switched off. Enable them by id, as shown under
 `hibernate-activity` (Hibernate activity), `executors` (Executors), `open-files` (Open files),
 `tomcat-sessions` (Tomcat sessions) and `allocation` (Memory allocation).
 
+Under `management.observations.conventions=open-telemetry` on Spring Boot 4.2, these panels read
+OpenTelemetry's meters: HTTP throughput, HTTP latency, HTTP in flight, Heap memory, Non-heap
+memory, the Process line of CPU usage, the CPU cores line of System load and, when switched on,
+Thread states.
+
 A meter no panel names is not collected.
 
 JPA applications get the Transactions and Hibernate activity panels with no extra dependency.
@@ -105,7 +110,7 @@ Your file is merged with the bundled panels by panel `id`:
 | Entry in your file | Effect |
 |---|---|
 | Existing id, no `title` | Patches the shipped panel. Only `order`, `enabled` and `level` are taken. Use it to switch a panel on or off, move it, or pin it to a level |
-| Existing id, with a `title` | Replaces the shipped panel completely. Series you do not repeat are gone |
+| Existing id, with a `title` | Replaces the shipped panel completely. Series you do not repeat are gone. A series you repeat keeps only the [`alternatives`](#series-fields) you list, so it stays empty under OpenTelemetry conventions until you copy them from the shipped series |
 | New id | Added and placed by its `order`. The defaults use 10, 20, 30 and so on |
 | Unknown id, no `title` | Fails validation, see [below](#invalid-panel-file) |
 | Tile | Merges by id, by replacement only |
@@ -162,6 +167,12 @@ do. Peekaboot charts and serves it from 0 to 100.
 | `stat` | `value`, `rate`, `avg`, `max` | `value` |
 | `unit` | overrides the panel's unit for this line | the panel's |
 | `subtract-meter` | subtracts another meter's value; only with `stat: value` | none |
+| `alternatives` | meters to read when `meter` does not exist, each a `meter` with optional `tags`, as in `[{ meter: jvm.memory.used, tags: { jvm.memory.type: heap } }]` | none |
+
+A series reads the first of `meter` and its `alternatives` that exists, with that entry's `tags`.
+`stat`, `unit` and `subtract-meter` apply to whichever it reads. The shipped panels use this to
+fill under both Micrometer and OpenTelemetry conventions. If none exists, the line is empty and
+the log gets a WARN naming the series after three ticks.
 
 ### What each `stat` plots {#what-actually-gets-sampled}
 
