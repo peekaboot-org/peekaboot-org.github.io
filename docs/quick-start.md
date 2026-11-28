@@ -9,9 +9,9 @@ redirect_from:
 
 ## Add the dependency {#add-the-dependency}
 
-Java {{ site.java_version }} or newer, Spring Boot {{ site.spring_boot_version }} (4.0 is not
-supported) and a servlet web application. On WebFlux or a non-web application the
-dashboard and the toolbar are absent, and startup is unaffected.
+Java {{ site.java_version }} or newer, Spring Boot {{ site.spring_boot_version }} and a servlet
+web application. On WebFlux or a non-web application the dashboard and the toolbar are absent,
+and startup is unaffected.
 
 **Maven**
 
