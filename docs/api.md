@@ -545,8 +545,8 @@ connects to and what Peekaboot has seen go wrong lately:
 unchanged. It reads `UNKNOWN` where the health endpoint is off.
 
 `durationMs` is how long the component's check took, in milliseconds. A group's is its slowest
-child's. It is `null` where Spring Boot's health registry or group beans are missing; the report
-then reads your `HealthEndpoint` bean as a whole, without the deadline below.
+child's. It is `null` where Spring Boot's health setup is not auto-configured. The deadline below
+does not apply there either.
 
 `connection` says what a component connects to. It comes from your configuration, so it is there
 while the target is down. It is `null` for a component Peekaboot cannot describe.
@@ -608,6 +608,10 @@ call answers `503`. The check is left to finish: Peekaboot logs a WARN when it m
 and another with its answer and duration when it ends. A call that arrives while that check still
 runs waits for it instead of starting another. A check that throws reads `DOWN` with the error in
 `details.error`. Keep the timeout below your monitor's.
+
+The report lists the checks Spring Boot registered. A `HealthEndpoint` bean of your own does not
+change it. Declare a custom check as a `HealthIndicator` bean. Checks run at the same time, each
+on a thread of its own, so an indicator sees neither the request's security context nor its MDC.
 
 ## Metric charts {#the-insights-endpoints}
 
