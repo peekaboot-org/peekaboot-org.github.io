@@ -79,6 +79,7 @@ It also adds these while `peekaboot.enabled` and `peekaboot.tracing.enabled` are
 | Handler and view spans | A span around each controller method and each rendered view, sent to every exporter |
 | Async task spans | A span around each task a Spring task executor runs inside a trace, sent to every exporter. Turn off with `peekaboot.tracing.async=false`. |
 | Event listener spans | A span around each `@EventListener` call inside a trace, sent to every exporter. Listener beans become proxies. Turn off with `peekaboot.tracing.event-listeners=false`. |
+| Database product on query spans | Each query span sent to your exporters carries `peekaboot.db.product`, such as `H2` or `POSTGRESQL`, where the JDBC URL names a product Peekaboot knows. The `jdbc.query` metric does not carry it. |
 | HTML response buffering | With the dev toolbar on, `text/html` responses are buffered up to 2 MiB so the toolbar can be injected. Larger pages stream through without it. |
 | `Server-Timing` header | Every response carries its trace id |
 | Log capture | Every log event is captured. Peekaboot attaches an appender named `peekaboot` to the Logback root logger. See [Troubleshooting]({{ '/docs/troubleshooting/' | relative_url }}#extra-root-appender). |
