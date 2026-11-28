@@ -532,13 +532,17 @@ The digest:
 connects to and what Peekaboot has seen go wrong lately:
 
 ```
-{status, components: {<name>: {status, details, components, connection}}, problems, windowMs,
+{status, components: {<name>: {status, durationMs, details, components, connection}}, problems, windowMs,
  traces: {errors, slow}, failures: [...]}
 ```
 
 `status`, `components` and `details` are what `/actuator/health` reports, nested the same way.
 `status` is the actuator's own string, so a status your application defines comes through
 unchanged. It reads `UNKNOWN` where the health endpoint is off.
+
+`durationMs` is how long the component's check took, in milliseconds. A group's is its slowest
+child's. It is `null` where Spring Boot's health registry or group beans are missing; the report
+then reads your `HealthEndpoint` bean as a whole, without the deadline below.
 
 `connection` says what a component connects to. It comes from your configuration, so it is there
 while the target is down. It is `null` for a component Peekaboot cannot describe.
@@ -592,9 +596,14 @@ mapping sets stays as it is.
 
 The endpoint takes the guard's credentials, see [Security, Peekaboot's
 guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard), and the response is
-`no-store`. It adds no timeout of its own: it answers as slowly as the slowest health check. A
-Redis that does not answer can hold a call for its command timeout, about 60 seconds with
-Lettuce's default. Set a monitor's timeout to match.
+`no-store`.
+
+The report answers within `peekaboot.health.timeout`, `10s` by default. All health checks run at
+once. A check still running then reads `DOWN` with `details.error` `Timed out after 10s`, so the
+call answers `503`. The check is left to finish: Peekaboot logs a WARN when it misses the deadline
+and another with its answer and duration when it ends. A call that arrives while that check still
+runs waits for it instead of starting another. A check that throws reads `DOWN` with the error in
+`details.error`. Keep the timeout below your monitor's.
 
 ## Metric charts {#the-insights-endpoints}
 

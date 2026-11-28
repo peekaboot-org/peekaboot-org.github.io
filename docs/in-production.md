@@ -89,7 +89,7 @@ alone]({{ '/docs/security/' | relative_url }}#what-peekaboot-does-not-do).
 Point a monitor at `/peekaboot/api/health` with an `Authorization: Basic ...` header made from
 Peekaboot's credentials. It answers `503` when the application is down, and its body names the
 failing component and its target. A monitor with no credentials keeps using `/actuator/health`.
-Set its timeout above your slowest health check, see [API,
+Set its timeout above `peekaboot.health.timeout` (`10s` by default), see [API,
 health]({{ '/docs/api/' | relative_url }}#health).
 
 ## Memory {#memory}

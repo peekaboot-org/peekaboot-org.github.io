@@ -216,6 +216,7 @@ served.
 | Property | Default | Effect |
 |---|---|---|
 | `peekaboot.health.fail-on-problems` | `false` | Also answer `503` from `/peekaboot/api/health` while a problem of severity error is current. |
+| `peekaboot.health.timeout` | `10s` | How long `/peekaboot/api/health` waits for the health checks. A check still running then reads `DOWN`, so the call answers `503`. Must be positive; startup fails otherwise. |
 
 See [API, health]({{ '/docs/api/' | relative_url }}#health).
 
