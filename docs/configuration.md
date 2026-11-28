@@ -292,6 +292,7 @@ Anything you set yourself wins. Peekaboot sets no `spring.task.execution.*` prop
 | `management.tracing.sampling.probability` | `0.1` | `1.0` | `peekaboot.enabled`, servlet web application | Every request reaches the Traces tab, and every exporter you configured. |
 | `spring.jpa.properties[hibernate.generate_statistics]` | `false` (Hibernate's own) | `true` | `peekaboot.enabled`, servlet web application | The `hibernate.*` panels on Insights get data. Hibernate statistics carry a runtime cost. |
 | `management.observations.annotations.enabled` | `false` | `true` | `peekaboot.enabled`, servlet web application | `@Observed`, `@Timed` and `@Counted` work without extra wiring and record for every registry and exporter you configured. |
+| `management.metrics.observations.include-active-long-task-timer` | `false` on Spring Boot 4.2; Spring Boot 4.1 always registers them | `true` | `peekaboot.enabled`, servlet web application | The HTTP in flight panel on Insights gets data. Every observation registers an `<observation>.active` long task timer, such as `http.server.requests.active`, which your metrics exporters send. |
 | `management.opentelemetry.tracing.export.schedule-delay` | `5s` | `200ms` | `peekaboot.enabled`, servlet web application, dev toolbar on | The toolbar shows a request's trace while you are still on the page. Spans reach every exporter about 25 times more often than at Spring's default. |
 
 Traces and logs need no export switch. Spring Boot creates OTLP exporters for them only once

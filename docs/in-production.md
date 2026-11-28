@@ -46,8 +46,10 @@ deployment or a machine other people use:
 1. Decide on the [Spring Boot defaults Peekaboot
    changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
    while it is on. Set `management.tracing.sampling.probability`,
-   `spring.jpa.properties[hibernate.generate_statistics]` and
-   `management.observations.annotations.enabled` yourself where you want Spring Boot's values.
+   `spring.jpa.properties[hibernate.generate_statistics]`,
+   `management.observations.annotations.enabled` and
+   `management.metrics.observations.include-active-long-task-timer` yourself where you want Spring
+   Boot's values.
 1. Protect `/peekaboot/**`. Keep Peekaboot's guard with a stable password, see [Security,
    Peekaboot's guard]({{ '/docs/security/' | relative_url }}#peekaboots-guard), or set
    `peekaboot.security.enabled=false` and put a
@@ -65,8 +67,8 @@ deployment or a machine other people use:
 ## What it changes while it is on {#what-it-costs-while-it-is-on}
 
 Peekaboot changes a few Spring Boot defaults: every request is sampled, Hibernate statistics
-are on, `@Observed`, `@Timed` and `@Counted` record, and with the toolbar on spans are exported
-every 200 ms. A value you set wins. [Configuration, Spring Boot defaults Peekaboot
+are on, `@Observed`, `@Timed` and `@Counted` record, every observation registers an `.active` long
+task timer, and with the toolbar on spans are exported every 200 ms. A value you set wins. [Configuration, Spring Boot defaults Peekaboot
 changes]({{ '/docs/configuration/' | relative_url }}#what-peekaboot-sets-in-your-application)
 lists them and what each costs. `peekaboot.tracing.enabled=false` changes none of them.
 
