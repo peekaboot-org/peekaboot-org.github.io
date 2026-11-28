@@ -74,6 +74,10 @@ parameter, response and problem body on this page, with each field's type and wh
 Behind a `server.servlet.context-path` or a `spring.mvc.servlet.path`, the index's paths and the
 document's `servers` entry carry that prefix.
 
+With springdoc in your application, Peekaboot's endpoints and the schemas only they use are not in
+its `/v3/api-docs`, nor in a client generated from it. They are in this document. Your own
+controllers stay in springdoc's.
+
 ## Errors {#errors}
 
 The errors below answer with an RFC 9457 problem body, served as `application/problem+json`:
